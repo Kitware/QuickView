@@ -4,71 +4,54 @@ from trame.app import get_server
 from trame.widgets import vuetify, paraview
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
-from paraview import simple
-from paraview.simple import OutputPort
-from paraview.simple import Show
-from paraview.simple import Render 
-from paraview.simple import LoadPlugin 
-from paraview.simple import ColorBy 
-from paraview.simple import GetColorTransferFunction 
+from vissource.vissource import EAMVisSource
 
-from paraview import servermanager
-
-import numpy as np
 # -----------------------------------------------------------------------------
 # trame setup
 # -----------------------------------------------------------------------------
 
 server = get_server()
+server.client_type = "vue2" # instead of 'vue2'
 state, ctrl = server.state, server.controller
 
 # -----------------------------------------------------------------------------
 # ParaView code
 # -----------------------------------------------------------------------------
 
-DEFAULT_RESOLUTION = 6
-
-LoadPlugin("/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/eam_reader.py", ns=globals())
-LoadPlugin("/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/eam_filters.py", ns=globals())
-
 # create a new 'EAM Data Reader'
-eamdata = EAMDataReader(registrationName='eamdata', 
-        ConnectivityFile='/home/local/KHQ/abhi.yenpure/repositories/eam/scripts/TEMPEST_ne30pg2.scrip.renamed.nc',
-        DataFile='/home/local/KHQ/abhi.yenpure/repositories/eam/scripts/aerosol_F2010.eam.h0.2014-12.nc')
-vars2D  = list(np.asarray(eamdata.GetProperty('a2DVariablesInfo'))[::2])
-vars3Dm = list(np.asarray(eamdata.GetProperty('a3DMiddleLayerVariablesInfo'))[::2])
-vars3Di = list(np.asarray(eamdata.GetProperty('a3DInterfaceLayerVariablesInfo'))[::2])
-eamdata.a3DMiddleLayerVariables = vars3Dm
+source = EAMVisSource()
+ConnFile='/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data/TEMPEST_ne30pg2.scrip.renamed.nc'
+DataFile='/data/eam/202311/v2_F2010_nc00_inst_macmic01.eam.h0.2010-12-25-00000.nc'
+source.Update(datafile=DataFile, connfile=ConnFile)
+vars2D   = source.vars2D
+vars3Di  = source.vars3Di
+vars3Dm  = source.vars3Dm
+pviews   = source.views
+hviews   = []
 
-print(dir(eamdata))
-print(dir(eamdata.SMProxy))
+def update_views(**kwargs):
+    try:
+        for v in hviews:
+            v.update()
+    except Exception as e:
+        print("Error occured : ", e)
 
-timestamps = eamdata.GetProperty('TimestepValues')
-print('Timesteps : ', timestamps)
-
-representation  = Show(OutputPort(eamdata, 1))
-ColorBy(representation, ("CELLS", "AREL"))
-
-# get color transfer function/color map for 'AREI'
-aREILUT = GetColorTransferFunction('AREI')
-# Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
-aREILUT.ApplyPreset('Viridis (matplotlib)', True)
-
-view            = Render()
-eamdata.UpdatePipeline()
-
-def update_reset_resolution():
-    state.resolution = DEFAULT_RESOLUTION
+ctrl.on_server_ready.add(ctrl.view_update)
+ctrl.view_update = update_views
 
 # -----------------------------------------------------------------------------
 # GUI
 # -----------------------------------------------------------------------------
 state.trame__title = "ParaView eamdata"
 
+DEFAULT_RESOLUTION = 6
+def update_reset_resolution():
+    state.resolution = DEFAULT_RESOLUTION
+
 @state.change("mesh_color_array_idx")                         
 def update_mesh_color_by_name(mesh_color_array_idx, **kwargs):
     print(mesh_color_array_idx)
-    ColorBy(representation, ("CELLS", mesh_color_array_idx))
+    #ColorBy(representation, ("CELLS", mesh_color_array_idx))
     ctrl.view_update()                                        
 
 @state.change("variable3Dm")                         
@@ -116,7 +99,7 @@ with SinglePageWithDrawerLayout(server) as layout:
             # Color By                           
             style="max-height: 400px",
             label="Color by",                    
-            v_model=("mesh_color_array_idx", vars3Dm[0]), 
+            v_model=("mesh_color_array_idx", 'XXX'), 
             items=("array_list", vars3Dm),
             hide_details=True,                   
             dense=True,                          
@@ -132,9 +115,16 @@ with SinglePageWithDrawerLayout(server) as layout:
             fluid=True,
             classes="pa-0 fill-height",
         ):
-            html_view = paraview.VtkRemoteView(view)
-            ctrl.view_update = html_view.update
-            ctrl.view_reset_camera = html_view.reset_camera
+            with vuetify.VRow(dense=True, style="height: 50%;"):
+                with vuetify.VCol():
+                    hviews.append(paraview.VtkRemoteView(pviews[0], ref="view1"))
+                with vuetify.VCol():
+                    hviews.append(paraview.VtkRemoteView(pviews[1], ref="view2"))
+            with vuetify.VRow(dense=True, style="height: 50%;"):
+                with vuetify.VCol():
+                    hviews.append(paraview.VtkRemoteView(pviews[2], ref="view3"))
+                with vuetify.VCol():
+                    hviews.append(paraview.VtkRemoteView(pviews[3], ref="view4"))
 
 # -----------------------------------------------------------------------------
 # Main
