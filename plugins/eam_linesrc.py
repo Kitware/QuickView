@@ -1,6 +1,6 @@
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.vtkCommonCore import vtkPoints, vtkIdTypeArray
-from vtkmodules.vtkCommonDataModel import vtkPolyData, vtkCellArray
+from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkPolyData, vtkCellArray
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from vtkmodules.util import vtkConstants, numpy_support
@@ -47,7 +47,6 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
-        '''
         x = self.longitude
         y = list(range(-90, 91, 1))
         points = vtkPoints()
@@ -65,7 +64,7 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         polyData.SetPoints(points)
         polyData.SetLines(line)
         '''
-        outdata = dsa.WrapDataObject(vtkPolyData.GetData(outInfo, 0))
+        outdata = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
 
         x = self.longitude
         y = np.array(list(range(-90, 91, 1)))
@@ -89,6 +88,7 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         cellArray.SetData(offsets, cells)
 
         outdata.SetPoints(coords)
+        print(dir(outdata.VTKObject))
         outdata.VTKObject.SetCells(cellTypes, cellArray)
-
+        '''
         return 1
