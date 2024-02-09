@@ -5,7 +5,7 @@ from trame.widgets import vuetify, paraview
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from vissource.vissource import EAMVisSource
-from appui import *
+from appui import properties3Dm, properties2D
 
 import numpy as np
 
@@ -30,15 +30,17 @@ try:
 except Exception as e:
     print("Problem : ", e)
 
-state.vars2D        = source.vars2D 
-state.vars2Dstate   = [False] * len(source.vars2D) 
-state.vars3Di       = source.vars3Di 
-state.vars3Distate  = [False] * len(source.vars3Di) 
-state.vars3Dm       = source.vars3Dm 
-state.vars3Dmstate  = [False] * len(source.vars3Dm) 
+state.vars2D        = source.vars2D
+state.vars2Dstate   = [False] * len(source.vars2D)
+state.vars3Di       = source.vars3Di
+state.vars3Distate  = [False] * len(source.vars3Di)
+state.vars3Dm       = source.vars3Dm
+state.vars3Dmstate  = [False] * len(source.vars3Dm)
+
+# State use to track active UI card
+state.setdefault("active_ui", None) # prevent resetting value if already present
 
 pviews   = source.views
-print(len(pviews))
 hviews   = []
 
 def update_views(**kwargs):
@@ -64,11 +66,21 @@ ctrl.on_server_ready.add(ctrl.view_update)
 # -----------------------------------------------------------------------------
 state.trame__title = "ParaView eamdata"
 
-@state.change("colorby3Dm")
-def update_mesh_color_by_name(colorby3Dm, **kwargs):
-    print("Coloring by : ", colorby3Dm)
-    source.UpdateViews(colorby3Dm)
-    ctrl.view_update()                               
+@state.change("colorby2D")
+def update2Dview(colorby2D, **kwargs):
+    print("Coloring by : ", colorby2D)
+    colorvar = state.colorby2D
+    colormap = state.colormap2D
+    source.UpdateViews2D(colorvar, colormap)
+    ctrl.view_update()
+
+@state.change("colorby3D")
+def update3Dview(colorby3D, **kwargs):
+    print("Coloring by : ", colorby3D)
+    colorvar = state.colorby3D
+    colormap = state.colormap3D
+    source.UpdateViews3D(colorvar, colormap)
+    ctrl.view_update()
 
 def update2DVars(index, visibility):
     state.vars2Dstate[index] = visibility
@@ -76,19 +88,29 @@ def update2DVars(index, visibility):
 def update3DmVars(index, visibility):
     state.vars3Dmstate[index] = visibility
 
-@state.change("time_stamp")                         
+@state.change("time_stamp")
 def FetchTimeStamp(time_stamp, **kwargs):
     source.UpdateTimeStep(time_stamp)
+    pass
 
-@state.change('spherical')
-def Spherical(spherical, **kwargs):
-    print(spherical)
+@state.change('linkviews')
+def Spherical(linkviews, **kwargs):
+    print(linkviews)
+    source.AddCameraLink(linkviews)
+
+@state.change('manageview')
+def ManageView(manageview, **kwargs):
+    print(manageview)
+    if manageview == '2D':
+        state.active_ui = "prop2D"
+    elif manageview == '3D':
+        state.active_ui = "prop3D"
+    pass
 
 def Apply():
     s2d     = []
     s3dm    = []
     s3di    = []
-    print('Request to Update')
     if len(state.vars2D) > 0 :
         v2d     = np.array(state.vars2D)
         f2d     = np.array(state.vars2Dstate)
@@ -102,7 +124,8 @@ def Apply():
         f3di    = np.array(state.vars3Distate)
         s3di    = v3di[f3di].tolist()
     source.LoadVariables(s2d, s3dm, s3di)
-    state.array_list = s3dm 
+    state.color2D = s2d
+    state.color3D = s3dm
 
 layout = SinglePageWithDrawerLayout(server)
 with layout:
@@ -121,7 +144,7 @@ with layout:
             vuetify.VIcon("mdi-restore")
 
     items = []
-    with layout.drawer as drawer: 
+    with layout.drawer as drawer:
         drawer.width = 325
         vuetify.VDivider(classes="mb-2")
         with vuetify.VContainer(fluid=True, style="max-height: 400px", classes="overflow-y-auto"):
@@ -144,18 +167,11 @@ with layout:
                     style="max-height: 20px",
                     dense=True
                 )
-        vuetify.VSelect(                         
-            style="max-height: 400px",
-            label="Color",                    
-            v_model=("colorby3Dm", None), 
-            items=("array_list", []),
-            hide_details=True,                   
-            dense=True,                          
-            outlined=True,                       
-            classes="pt-1",                      
+        vuetify.VSelect(
+
         )
         vuetify.VSlider(
-            label='Time',   
+            label='Time',
             v_model=("time_stamp", 0),
         )
         vuetify.VBtn(
@@ -163,10 +179,22 @@ with layout:
             click=Apply
         )
         vuetify.VCheckbox(
-            label='spherical',
-            v_model=('spherical', False)
+            label='Link Views',
+            v_model=('linkviews', False)
         )
-            
+        vuetify.VSelect(
+            style="max-height: 400px",
+            label="Manage Views",
+            v_model=("manageview", None),
+            items=("view_list", ['2D', '3D']),
+            hide_details=True,
+            dense=True,
+            outlined=True,
+            classes="pt-1",
+        )
+        properties2D()
+        properties3Dm()
+
     with layout.content:
         with vuetify.VContainer(
             fluid=True,
@@ -190,7 +218,5 @@ with layout:
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
-print(layout)
-print(dir(layout)) 
 if __name__ == "__main__":
     server.start()
