@@ -181,6 +181,7 @@ class EAMSource(VTKPythonAlgorithmBase):
         return super().RequestUpdateExtent(request, inInfo, outInfo)
 
     def GetTimeIndex(self, time):
+        print(self.__timeSteps, time)
         if self.__timeSteps is not None and len(self.__timeSteps) > 0:
             timeInd = 0
             for t in self.__timeSteps:
