@@ -23,18 +23,6 @@ def properties2D():
         with vuetify.VRow(classes="pt-2", dense=True):
             with vuetify.VCol(cols="6"):
                 vuetify.VSelect(
-                    # Color By
-                    style="max-height: 400px",
-                    label="Color By",
-                    v_model=("colorby2D", None),
-                    items=("color2D", []),
-                    hide_details=True,
-                    dense=True,
-                    outlined=True,
-                    classes="pt-1",
-                )
-            with vuetify.VCol(cols="6"):
-                vuetify.VSelect(
                     v_model=("colormap2D", "Rainbow"),
                     items=(
                         "colormaps",
@@ -46,18 +34,6 @@ def properties2D():
 def properties3Dm():
     with ui_card(title="3D Vars", ui_name="prop3D"):
         with vuetify.VRow(classes="pt-2", dense=True):
-            with vuetify.VCol(cols="6"):
-                vuetify.VSelect(
-                    # Color By
-                    style="max-height: 400px",
-                    label="Color By",
-                    v_model=("colorby3D", None),
-                    items=("color3D", []),
-                    hide_details=True,
-                    dense=True,
-                    outlined=True,
-                    classes="pt-1",
-                )
             with vuetify.VCol(cols="6"):
                 vuetify.VSelect(
                     # Color Map

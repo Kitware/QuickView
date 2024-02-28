@@ -1,23 +1,114 @@
+from trame.widgets import (
+    grid,
+    vuetify, 
+    paraview as pvWidgets
+)
+
+import math
+
 from paraview.simple import (
     Show,
+    Text,
+    CreateRenderView,
+    FindViewOrCreate,
     ColorBy,
     GetColorTransferFunction
 )
 
+def GetRenderView(geom, var, num, colormap, globe):
+    rview = FindViewOrCreate(f'rv{num}', 'RenderView')
+    rep   = Show(geom, rview)
+    ColorBy(rep, ("CELLS", var))
+    coltrfunc = GetColorTransferFunction(var)
+    coltrfunc.ApplyPreset(colormap, True)
+
+    repG = Show(globe, rview)
+    repG.SetRepresentationType('Wireframe')
+    repG.RenderLinesAsTubes = 1
+    repG.LineWidth = 2.0
+    ColorBy(repG, None)
+    '''
+    text = Text(registrationName=f'Text{num}')
+    text.Text = var
+    textrep = Show(text, rview, 'TextSourceRepresentation')
+    '''
+    return rview
+
 class ViewManager():
-    def __init__(self, rep, view):
-        self.rep  = rep
-        self.view = view
+    def __init__(self, source, server, state):
+        self.rows       = 1
+        self.columns    = 1
+        self.server     = server
+        self.source     = source
+        self.state      = state
+        self.widgets    = []
 
-    def __str__(self):
-        return f"View {self.view}, Rep {self.rep}"
+    def SetCols(self, cols):
+        if cols == self.columns:
+             return
+        self.columns = cols
+            
+    def ResetCamera(self, **kwargs):
+         for widget in self.widgets:
+              widget.reset_camera()
 
-    def ApplyColorMap(self, variable, colormap):
-        ColorBy(self.rep, ("CELLS", variable))
-        coltrfunc = GetColorTransferFunction(variable)
-        # Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
-        coltrfunc.ApplyPreset(colormap, True)
-        pass
+    def UpdateCamera(self, **kwargs):
+         for widget in self.widgets:
+              widget.update()
 
     def GetView(self):
-        return self.view
+        self.widgets.clear()
+        print("View")
+        print(self.source.views)
+        print(self.source.slice3Dm)
+
+        view2D   = self.source.views['2D']
+        view3Dm  = self.source.views['3Dm']
+        viewG    = self.source.views['globe']
+
+        vars2D  = self.source.vars.get('2D', None)
+        vars3Dm = self.source.vars.get('3Dm', None)
+
+        numViews = len(vars2D) + len(vars3Dm)
+        if numViews == 0:
+            return
+        self.rows = math.ceil(numViews / self.columns)
+        print(f"Arranging variables in {self.rows, self.columns}")
+
+        counter = 0
+        self.rViews = []
+        colormap = "Rainbow"
+        for var in vars2D:
+                rview = GetRenderView(view2D, var, counter, colormap, viewG) 
+                self.rViews.append(rview)
+                counter += 1
+        for var in vars3Dm:
+                rview = GetRenderView(view3Dm, var, counter, colormap, viewG) 
+                self.rViews.append(rview)
+                counter += 1
+
+        self.state.view_layout = []
+        with self.server.ui.grid_layout.clear():
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    current = i * self.columns + j
+                    if current >= numViews:
+                         continue
+                    item = {"x" : j * 4, "y" : i * 3, "i" : current, "w" : 4, "h" : 3}
+                    with grid.GridItem(
+                        v_bind=repr(item),
+                        classes="pa-2",
+                        style="border: solid 1px #333; background: #ccc;",
+                        drag_ignore_from=".drag_ignore",
+                    ):
+                        self.widgets.append(
+                            pvWidgets.VtkLocalView(
+                                self.rViews[current],
+                                ref=f"view{item['i']}",
+                                interactive_quality=100,
+                                LeftButtonPress=f"on_view_click({item['i']})",
+                                classes="pa-0 drag_ignore",
+                                style="width: 100%; height: 100%;"
+                            )
+                        )
+                self.state.view_layout.append(item)

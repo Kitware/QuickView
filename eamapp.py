@@ -1,10 +1,17 @@
 import paraview.web.venv  # Available in PV 5.10
 
 from trame.app import get_server
-from trame.widgets import vuetify, paraview
+
+from trame.widgets import (
+    vuetify, 
+    paraview as pvWidgets, 
+    grid
+)
+
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
-from vissource.vissource import EAMVisSource
+from vissource.vissource  import  EAMVisSource
+from vissource.viewmanager import ViewManager
 from appui import properties3Dm, properties2D
 
 import numpy as np
@@ -16,19 +23,26 @@ import numpy as np
 server = get_server()
 server.client_type = "vue2" # instead of 'vue2'
 state, ctrl = server.state, server.controller
+pvWidgets.initialize(server)
 
 # -----------------------------------------------------------------------------
 # ParaView code
 # -----------------------------------------------------------------------------
-
+state.vlev = 0
 # create a new 'EAM Data Reader'
 try:
     source = EAMVisSource()
     ConnFile='/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data/TEMPEST_ne30pg2.scrip.renamed.nc'
     DataFile='/data/eam/202311/v2_F2010_nc00_inst_macmic01.eam.h0.2010-12-25-00000.nc'
-    source.Update(datafile=DataFile, connfile=ConnFile)
+    GlobeFile='/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data/cstar0.vtr'
+    source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
 except Exception as e:
     print("Problem : ", e)
+
+print("Before initialize Manager")
+print(source.views)
+
+viewmanager = ViewManager(source, server, state) 
 
 state.vars2D        = source.vars2D
 state.vars2Dstate   = [False] * len(source.vars2D)
@@ -37,34 +51,19 @@ state.vars3Distate  = [False] * len(source.vars3Di)
 state.vars3Dm       = source.vars3Dm
 state.vars3Dmstate  = [False] * len(source.vars3Dm)
 
+state.view_layout   = []
 # State use to track active UI card
 state.setdefault("active_ui", None) # prevent resetting value if already present
 
-pviews   = source.views
-hviews   = []
-
-def update_views(**kwargs):
-    try:
-        for v in hviews:
-            v.update()
-    except Exception as e:
-        print("Error occured : ", e)
-
-def reset_camera(**kwargs):
-    try:
-        for v in hviews:
-            v.reset_camera()
-    except Exception as e:
-        print("Error occured : ", e)
-
-ctrl.view_update = update_views
-ctrl.view_reset_camera = reset_camera
+ctrl.view_update = viewmanager.UpdateCamera
+ctrl.view_reset_camera = viewmanager.ResetCamera
 ctrl.on_server_ready.add(ctrl.view_update)
 
 # -----------------------------------------------------------------------------
 # GUI
 # -----------------------------------------------------------------------------
 state.trame__title = "ParaView eamdata"
+layout = SinglePageWithDrawerLayout(server)
 
 @state.change("colorby2D")
 def update2Dview(colorby2D, **kwargs):
@@ -93,19 +92,13 @@ def FetchTimeStamp(time_stamp, **kwargs):
     source.UpdateTimeStep(time_stamp)
     pass
 
-@state.change('linkviews')
-def Spherical(linkviews, **kwargs):
-    print(linkviews)
-    source.AddCameraLink(linkviews)
+@state.change('vcols')
+def Columns(vcols, **kwargs):
+    viewmanager.SetCols(vcols)
 
-@state.change('manageview')
-def ManageView(manageview, **kwargs):
-    print(manageview)
-    if manageview == '2D':
-        state.active_ui = "prop2D"
-    elif manageview == '3D':
-        state.active_ui = "prop3D"
-    pass
+@state.change('vlev')
+def Lev(vlev, **kwargs):
+    source.UpdateLev(vlev)
 
 def Apply():
     s2d     = []
@@ -127,7 +120,8 @@ def Apply():
     state.color2D = s2d
     state.color3D = s3dm
 
-layout = SinglePageWithDrawerLayout(server)
+    viewmanager.GetView()
+
 with layout:
     layout.icon.click = ctrl.view_reset_camera
     layout.title.set_text("EAM/E3SM Viz")
@@ -182,39 +176,28 @@ with layout:
             label='Link Views',
             v_model=('linkviews', False)
         )
-        vuetify.VSelect(
-            style="max-height: 400px",
-            label="Manage Views",
-            v_model=("manageview", None),
-            items=("view_list", ['2D', '3D']),
-            hide_details=True,
-            dense=True,
-            outlined=True,
-            classes="pt-1",
+        vuetify.VSlider(
+            label='Lev',
+            v_model=("vlev", 0),
+            min=0,
+            max=72
         )
-        properties2D()
-        properties3Dm()
+        vuetify.VSlider(
+            label='Columns',
+            v_model=("vcols", 1),
+            min=1,
+            max=3
+        )
+        with layout.content:
+            with grid.GridLayout(
+                layout=("view_layout",),
+                #row_height=30,
+                classes="full-height ma-3"
+            ):
+                server.ui.grid_layout(layout)
 
-    with layout.content:
-        with vuetify.VContainer(
-            fluid=True,
-            classes="pa-0 fill-height",
-        ):
-            #html_view = paraview.VtkLocalView(pviews[1])
-            #ctrl.view_update = html_view.update
-            #ctrl.view_reset_camera = html_view.reset_camera
-            with vuetify.VRow(dense=True, style="height: 50%;"):
-                with vuetify.VCol():
-                    hviews.append(paraview.VtkLocalView(pviews[0].GetView()))
-                with vuetify.VCol():
-                    hviews.append(paraview.VtkLocalView(pviews[1].GetView()))
-            '''
-            with vuetify.VRow(dense=True, style="height: 50%;"):
-                with vuetify.VCol():
-                    hviews.append(paraview.VtkLocalView(pviews[0]))
-                with vuetify.VCol():
-                    hviews.append(paraview.VtkLocalView(pviews[0]))
-            '''
+        #viewmanager.GetView()
+
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------

@@ -70,6 +70,7 @@ class EAMSource(VTKPythonAlgorithmBase):
             outputType='vtkUnstructuredGrid')
         self.__DataFileName = None
         self.__ConnFileName = None
+        self.__dirty        = False
         # Variables for dimension sliders
         self.__time         = 0
         self.__lev          = 0
@@ -133,6 +134,7 @@ class EAMSource(VTKPythonAlgorithmBase):
         if fname is not None and fname != "None":
             if fname != self.__DataFileName:
                 self.__DataFileName = fname
+                self.__dirty = True
                 self.__clear()
                 self.__populate_variable_metadata()
                 self.Modified()
@@ -140,6 +142,7 @@ class EAMSource(VTKPythonAlgorithmBase):
     def SetConnFileName(self, fname):
         if fname != self.__ConnFileName:
             self.__ConnFileName = fname
+            self.__dirty = True
             self.Modified()
 
     @smproperty.doublevector(name="TimestepValues", information_only="1", si_class="vtkSITimeStepsProperty")
@@ -213,72 +216,105 @@ class EAMSource(VTKPythonAlgorithmBase):
             timeInd = self.GetTimeIndex(time)
             print("Getting ", time, " at index ", timeInd)
 
-        output2D    = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
-
         meshdata    = netCDF4.Dataset(self.__ConnFileName, "r")
         vardata     = netCDF4.Dataset(self.__DataFileName, "r")
 
         lat = meshdata['cell_corner_lat'][:].data.flatten()
         lon = meshdata['cell_corner_lon'][:].data.flatten()
 
-        coords = np.empty((len(lat), 3), dtype=np.float64)
-        coords[:, 0] = lon
-        coords[:, 1] = lat
-        coords[:, 2] = 0.0
-        _coords = dsa.numpyTovtkDataArray(coords)
-        vtk_coords = vtkPoints()
-        vtk_coords.SetData(_coords)
-        output2D.SetPoints(vtk_coords)
+        output2D    = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
+        output3Dm   = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 1))
+        output3Di   = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 2))
+        lev         = vardata['lev'][:].flatten()
+        ilev        = vardata['ilev'][:].flatten()
 
-        ncells2D    = meshdata['cell_corner_lat'][:].data.shape[0]
-        cellTypes   = np.empty(ncells2D,                  dtype=np.uint8)
-        offsets     = np.arange(0, (4 * ncells2D) + 1, 4, dtype=np.int64)
-        cells       = np.arange(ncells2D*4,               dtype=np.int64)
-        cellTypes.fill(vtkConstants.VTK_QUAD)
-        cellTypes   = numpy_support.numpy_to_vtk(num_array=cellTypes.ravel(), \
+        if(self.__dirty):
+            coords = np.empty((len(lat), 3), dtype=np.float64)
+            coords[:, 0] = lon
+            coords[:, 1] = lat
+            coords[:, 2] = 0.0
+            _coords = dsa.numpyTovtkDataArray(coords)
+            vtk_coords = vtkPoints()
+            vtk_coords.SetData(_coords)
+            output2D.SetPoints(vtk_coords)
+
+            ncells2D    = meshdata['cell_corner_lat'][:].data.shape[0]
+            cellTypes   = np.empty(ncells2D,                  dtype=np.uint8)
+            offsets     = np.arange(0, (4 * ncells2D) + 1, 4, dtype=np.int64)
+            cells       = np.arange(ncells2D*4,               dtype=np.int64)
+            cellTypes.fill(vtkConstants.VTK_QUAD)
+            cellTypes   = numpy_support.numpy_to_vtk(num_array=cellTypes.ravel(), \
                                                  deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
-        offsets     = numpy_support.numpy_to_vtk(num_array=offsets.ravel(),   \
+            offsets     = numpy_support.numpy_to_vtk(num_array=offsets.ravel(),   \
                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cells       = numpy_support.numpy_to_vtk(num_array=cells.ravel(),     \
+            cells       = numpy_support.numpy_to_vtk(num_array=cells.ravel(),     \
                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cellArray = vtkCellArray()
-        cellArray.SetData(offsets, cells)
-        output2D.VTKObject.SetCells(cellTypes, cellArray)
+            cellArray = vtkCellArray()
+            cellArray.SetData(offsets, cells)
+            output2D.VTKObject.SetCells(cellTypes, cellArray)
+
+            coords3Dm   = np.empty((levDim, len(lat), 3), dtype=np.float64)
+            levInd      = 0
+            for z in lev:
+                coords = np.empty((len(lat), 3), dtype=np.float64)
+                coords[:, 0] = lon
+                coords[:, 1] = lat
+                coords[:, 2] = z
+                coords3Dm[levInd] = coords
+                levInd = levInd + 1
+            coords3Dm = coords3Dm.flatten().reshape(levDim*len(lat), 3)
+            _coords = dsa.numpyTovtkDataArray(coords3Dm)
+            vtk_coords = vtkPoints()
+            vtk_coords.SetData(_coords)
+            output3Dm.SetPoints(vtk_coords)
+            cellTypesm   = np.empty(ncells2D*levDim,                  dtype=np.uint8)
+            offsetsm     = np.arange(0, (4 * ncells2D*levDim) + 1, 4, dtype=np.int64)
+            cellsm       = np.arange(ncells2D*levDim*4,               dtype=np.int64)
+            cellTypesm.fill(vtkConstants.VTK_QUAD)
+            cellTypesm   = numpy_support.numpy_to_vtk(num_array=cellTypesm.ravel(), \
+                                                      deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
+            offsetsm     = numpy_support.numpy_to_vtk(num_array=offsetsm.ravel(),   \
+                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+            cellsm       = numpy_support.numpy_to_vtk(num_array=cellsm.ravel(),     \
+                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+            cellArraym = vtkCellArray()
+            cellArraym.SetData(offsetsm, cellsm)
+            output3Dm.VTKObject.SetCells(cellTypesm, cellArraym)
+ 
+            coords3Di   = np.empty((ilevDim, len(lat), 3), dtype=np.float64)
+            ilevInd     = 0
+            for z in ilev:
+                coords = np.empty((len(lat), 3), dtype=np.float64)
+                coords[:, 0] = lon
+                coords[:, 1] = lat
+                coords[:, 2] = z
+                coords3Di[ilevInd] = coords
+                ilevInd = ilevInd + 1
+            coords3Di = coords3Di.flatten().reshape(ilevDim*len(lat), 3)
+            _coords = dsa.numpyTovtkDataArray(coords3Di)
+            vtk_coords = vtkPoints()
+            vtk_coords.SetData(_coords)
+            output3Di.SetPoints(vtk_coords)
+            cellTypesi   = np.empty(ncells2D*ilevDim,                  dtype=np.uint8)
+            offsetsi     = np.arange(0, (4 * ncells2D*ilevDim) + 1, 4, dtype=np.int64)
+            cellsi       = np.arange(ncells2D*ilevDim*4,               dtype=np.int64)
+            cellTypesi.fill(vtkConstants.VTK_QUAD)
+            cellTypesi   = numpy_support.numpy_to_vtk(num_array=cellTypesi.ravel(),     \
+                                                      deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
+            offsetsi     = numpy_support.numpy_to_vtk(num_array=offsetsi.ravel(),       \
+                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+            cellsi       = numpy_support.numpy_to_vtk(num_array=cellsi.ravel(),         \
+                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+            cellArrayi = vtkCellArray()
+            cellArrayi.SetData(offsetsi, cellsi)
+            output3Di.VTKObject.SetCells(cellTypesi, cellArrayi)
+
         gridAdapter2D = dsa.WrapDataObject(output2D)
         for var in self.__vars2D:
             if self.__vars2Darr.ArrayIsEnabled(var):
                 data = vardata[var][:].data[timeInd].flatten()
                 gridAdapter2D.CellData.append(data, var)
 
-        lev         = vardata['lev'][:].flatten()
-        output3Dm   = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 1))
-        coords3Dm   = np.empty((levDim, len(lat), 3), dtype=np.float64)
-        levInd      = 0
-        for z in lev:
-            coords = np.empty((len(lat), 3), dtype=np.float64)
-            coords[:, 0] = lon
-            coords[:, 1] = lat
-            coords[:, 2] = z
-            coords3Dm[levInd] = coords
-            levInd = levInd + 1
-        coords3Dm = coords3Dm.flatten().reshape(levDim*len(lat), 3)
-        _coords = dsa.numpyTovtkDataArray(coords3Dm)
-        vtk_coords = vtkPoints()
-        vtk_coords.SetData(_coords)
-        output3Dm.SetPoints(vtk_coords)
-        cellTypesm   = np.empty(ncells2D*levDim,                  dtype=np.uint8)
-        offsetsm     = np.arange(0, (4 * ncells2D*levDim) + 1, 4, dtype=np.int64)
-        cellsm       = np.arange(ncells2D*levDim*4,               dtype=np.int64)
-        cellTypesm.fill(vtkConstants.VTK_QUAD)
-        cellTypesm   = numpy_support.numpy_to_vtk(num_array=cellTypesm.ravel(), \
-                                                  deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
-        offsetsm     = numpy_support.numpy_to_vtk(num_array=offsetsm.ravel(),   \
-                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cellsm       = numpy_support.numpy_to_vtk(num_array=cellsm.ravel(),     \
-                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cellArraym = vtkCellArray()
-        cellArraym.SetData(offsetsm, cellsm)
-        output3Dm.VTKObject.SetCells(cellTypesm, cellArraym)
         gridAdapter3Dm = dsa.WrapDataObject(output3Dm)
         for var in self.__vars3Dm:
             if self.__vars3Dmarr.ArrayIsEnabled(var):
@@ -286,36 +322,7 @@ class EAMSource(VTKPythonAlgorithmBase):
                 gridAdapter3Dm.CellData.append(data, var)
         gridAdapter3Dm.FieldData.append(levDim, "numlev")
         gridAdapter3Dm.FieldData.append(lev,    "lev"   )
-
-        ilev        = vardata['ilev'][:].flatten()
-        output3Di   = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 2))
-        coords3Di   = np.empty((ilevDim, len(lat), 3), dtype=np.float64)
-        ilevInd     = 0
-        for z in ilev:
-            coords = np.empty((len(lat), 3), dtype=np.float64)
-            coords[:, 0] = lon
-            coords[:, 1] = lat
-            coords[:, 2] = z
-            coords3Di[ilevInd] = coords
-            ilevInd = ilevInd + 1
-        coords3Di = coords3Di.flatten().reshape(ilevDim*len(lat), 3)
-        _coords = dsa.numpyTovtkDataArray(coords3Di)
-        vtk_coords = vtkPoints()
-        vtk_coords.SetData(_coords)
-        output3Di.SetPoints(vtk_coords)
-        cellTypesi   = np.empty(ncells2D*ilevDim,                  dtype=np.uint8)
-        offsetsi     = np.arange(0, (4 * ncells2D*ilevDim) + 1, 4, dtype=np.int64)
-        cellsi       = np.arange(ncells2D*ilevDim*4,               dtype=np.int64)
-        cellTypesi.fill(vtkConstants.VTK_QUAD)
-        cellTypesi   = numpy_support.numpy_to_vtk(num_array=cellTypesi.ravel(),     \
-                                                  deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
-        offsetsi     = numpy_support.numpy_to_vtk(num_array=offsetsi.ravel(),       \
-                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cellsi       = numpy_support.numpy_to_vtk(num_array=cellsi.ravel(),         \
-                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cellArrayi = vtkCellArray()
-        cellArrayi.SetData(offsetsi, cellsi)
-        output3Di.VTKObject.SetCells(cellTypesi, cellArrayi)
+                
         gridAdapter3Di = dsa.WrapDataObject(output3Di)
         for var in self.__vars3Di:
             if self.__vars3Diarr.ArrayIsEnabled(var):
@@ -323,10 +330,5 @@ class EAMSource(VTKPythonAlgorithmBase):
                 gridAdapter3Di.CellData.append(data, var)
         gridAdapter3Di.FieldData.append(ilevDim, "numlev")
         gridAdapter3Di.FieldData.append(ilev,    "lev"   )
-
-        #renderView = servermanager.GetRenderView()
-        #renderView.OrientationAxesXLabelText = 'long'
-        #renderView.OrientationAxesYLabelText = 'lat'
-        #renderView.OrientationAxesZLabelText = 'lev'
 
         return 1

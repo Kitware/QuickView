@@ -2,6 +2,7 @@ from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkCellArray, vtkPolyData, vtkPlane
+from vtkmodules.vtkFiltersCore import vtkAppendFilter
 from vtkmodules.util import vtkConstants, numpy_support
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from paraview import print_error
@@ -269,5 +270,72 @@ class EAMAverage(VTKPythonAlgorithmBase):
             newdata     = newdata.mean(axis=0, keepdims=True)
             newdata     = newdata.flatten()
             output.PointData.append(newdata, varname)
+
+        return 1
+
+import pyproj
+
+def PointProj(point, robinson, translate):
+    x, y = robinson(point[0] - 180. if translate else point[0], point[1])
+    return [x, y, point[2]]
+
+@smproxy.filter()
+@smproperty.input(name="Input")
+@smdomain.datatype(dataTypes=["vtkPolyData","vtkUnstructuredGrid"], composite_data_supported=False)
+@smproperty.xml("""                                                                       
+                <IntVectorProperty name="Translate"                                       
+                      command="SetTranslation"                                            
+                      number_of_elements="1"                                              
+                      default_values="0">                                                 
+                    <BooleanDomain name="bool"/>                                          
+                 </IntVectorProperty>                                                     
+                """)                                                                      
+class EAMProject(VTKPythonAlgorithmBase):                                                 
+    def __init__(self):                                                                   
+        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid") 
+        self.__Dims = -1                                                                  
+        self.inproj = None                                                                
+        self.outproj = None                                                               
+        self.translate = False                                                            
+                                                                                          
+    def SetTranslation(self, translate):                                                  
+        if self.translate != translate:                                                   
+            self.translate = translate                                                    
+            self.Modified()                                                               
+
+    def SetInputProjection(self, inproj):
+        self.inproj = inproj
+
+    def SetOutputProjection(self, outproj):
+        self.outproj = outproj
+
+    def RequestData(self, request, inInfo, outInfo):
+        global _has_deps
+        if not _has_deps:
+            print_error("Required Python module 'netCDF4' or 'numpy' missing!")
+            return 0
+
+        inData = self.GetInputData(inInfo, 0, 0)
+        outData = self.GetOutputData(outInfo, 0)
+        if inData.IsA('vtkPolyData'):
+            afilter = vtkAppendFilter()
+            afilter.AddInputData(inData)
+            afilter.Update() 
+            out = afilter.GetOutput()
+            print(type(out))
+            outData.DeepCopy(afilter.GetOutput())
+        else:
+            outData.DeepCopy(inData)
+
+        inWrap     = dsa.WrapDataObject(inData)
+        outWrap     = dsa.WrapDataObject(outData)
+        inPoints    = np.array(inWrap.Points)
+
+        robinson = pyproj.Proj(proj='robin', lon_0=0, x_0=0, y_0=0, ellps='WGS84', units='m')
+        outPoints   = np.array(list(map(lambda x: PointProj(x, robinson, self.translate), inPoints)))
+        _coords = numpy_support.numpy_to_vtk(outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT)
+        vtk_coords = vtkPoints()
+        vtk_coords.SetData(_coords)
+        outWrap.SetPoints(vtk_coords)
 
         return 1
