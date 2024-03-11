@@ -58,10 +58,7 @@ class EAMVolumize(VTKPythonAlgorithmBase):
         zCoords = gridAdapterIn.FieldData.GetArray("lev")
         numLevs = len(zCoords)
         numpoints2D     = np.int64 (numpoints  / numLevs)
-        print("2D number of points : ", numpoints2D)
         numcells2D      = np.int64 (numcells_i / numLevs)
-        print("2D number of cells : ", numcells2D)
-        print("num Levs : ", numLevs)
         hexstacksize    = numLevs - 1
         numhexes    = np.int64(numcells2D * hexstacksize)
         hexconn     = np.empty((hexstacksize, numcells2D * 8), dtype=np.int64)

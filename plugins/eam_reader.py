@@ -184,7 +184,6 @@ class EAMSource(VTKPythonAlgorithmBase):
         return super().RequestUpdateExtent(request, inInfo, outInfo)
 
     def GetTimeIndex(self, time):
-        print(self.__timeSteps, time)
         if self.__timeSteps is not None and len(self.__timeSteps) > 0:
             timeInd = 0
             for t in self.__timeSteps:
@@ -214,7 +213,6 @@ class EAMSource(VTKPythonAlgorithmBase):
         if timeInfo.Has(executive.UPDATE_TIME_STEP()) and len(self.__timeSteps) > 0:
             time = timeInfo.Get(executive.UPDATE_TIME_STEP())
             timeInd = self.GetTimeIndex(time)
-            print("Getting ", time, " at index ", timeInd)
 
         meshdata    = netCDF4.Dataset(self.__ConnFileName, "r")
         vardata     = netCDF4.Dataset(self.__DataFileName, "r")

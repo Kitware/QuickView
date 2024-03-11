@@ -3,8 +3,8 @@ import paraview.web.venv  # Available in PV 5.10
 from trame.app import get_server
 
 from trame.widgets import (
-    vuetify, 
-    paraview as pvWidgets, 
+    vuetify,
+    paraview as pvWidgets,
     client
 )
 
@@ -42,14 +42,15 @@ except Exception as e:
     print("Problem : ", e)
     traceback.print_exc()
 
-viewmanager = ViewManager(source, server, state) 
+viewmanager = ViewManager(source, server, state)
 
 state.vars2D        = source.vars2D
-state.vars2Dstate   = [False] * len(source.vars2D)
 state.vars3Di       = source.vars3Di
-state.vars3Distate  = [False] * len(source.vars3Di)
 state.vars3Dm       = source.vars3Dm
+state.vars2Dstate   = [False] * len(source.vars2D)
+state.vars3Distate  = [False] * len(source.vars3Di)
 state.vars3Dmstate  = [False] * len(source.vars3Dm)
+state.visibilityList = [True, False, True, False]
 
 state.views         = []
 state.view_layout   = []
@@ -69,7 +70,6 @@ layout = SinglePageWithDrawerLayout(server)
 
 @state.change("colorby2D")
 def update2Dview(colorby2D, **kwargs):
-    print("Coloring by : ", colorby2D)
     colorvar = state.colorby2D
     colormap = state.colormap2D
     source.UpdateViews2D(colorvar, colormap)
@@ -77,7 +77,6 @@ def update2Dview(colorby2D, **kwargs):
 
 @state.change("colorby3D")
 def update3Dview(colorby3D, **kwargs):
-    print("Coloring by : ", colorby3D)
     colorvar = state.colorby3D
     colormap = state.colormap3D
     source.UpdateViews3D(colorvar, colormap)
@@ -85,9 +84,11 @@ def update3Dview(colorby3D, **kwargs):
 
 def update2DVars(index, visibility):
     state.vars2Dstate[index] = visibility
+    state.dirty("vars2Dstate")
 
 def update3DmVars(index, visibility):
     state.vars3Dmstate[index] = visibility
+    state.dirty("vars3Dmstate")
 
 @state.change('vcols')
 def Columns(vcols, **kwargs):
@@ -130,7 +131,8 @@ def Apply():
     viewmanager.UpdateView()
 
 with layout:
-    client.Style("html { overflow: hidden; }")
+    # uncomment following line to disable scrolling on views
+    # client.Style("html { overflow: hidden; }")
     layout.icon.click = ctrl.view_reset_camera
     layout.title.set_text("EAM/E3SM Viz")
     with layout.toolbar:
@@ -149,26 +151,6 @@ with layout:
     with layout.drawer as drawer:
         drawer.width = 325
         vuetify.VDivider(classes="mb-2")
-        with vuetify.VContainer(fluid=True, style="max-height: 400px", classes="overflow-y-auto"):
-            with vuetify.VListItemGroup(dense=True):
-                vuetify.VCheckbox(
-                    v_for="v, i in vars2D",
-                    key="i",
-                    label=("vars2D[i]",),
-                    change=(update2DVars, "[i, $event]"),
-                    style="max-height: 20px",
-                    dense=True
-                )
-        with vuetify.VContainer(fluid=True, style="max-height: 400px", classes="overflow-y-auto"):
-            with vuetify.VListItemGroup(dense=True):
-                vuetify.VCheckbox(
-                    v_for="v, i in vars3Dm",
-                    key="i",
-                    label=("vars3Dm[i]",),
-                    change=(update3DmVars, "[i, $event]"),
-                    style="max-height: 20px",
-                    dense=True
-                )
         vuetify.VSlider(
             label='Lev',
             v_model=("vlev", 0),
@@ -179,6 +161,28 @@ with layout:
             label='Time',
             v_model=("time_stamp", 0),
         )
+        with vuetify.VContainer(fluid=True, style="max-height: 400px", classes="overflow-y-auto"):
+            with vuetify.VListItemGroup(dense=True):
+                vuetify.VCheckbox(
+                    v_for="v, i in vars2D",
+                    key="i",
+                    label=("vars2D[i]",),
+                    v_model=("vars2Dstate[i]",),
+                    change=(update2DVars, "[i, $event]"),
+                    style="max-height: 20px",
+                    dense=True
+                )
+        with vuetify.VContainer(fluid=True, style="max-height: 400px", classes="overflow-y-auto"):
+            with vuetify.VListItemGroup(dense=True):
+                vuetify.VCheckbox(
+                    v_for="v, i in vars3Dm",
+                    key="i",
+                    label=("vars3Dm[i]",),
+                    v_model=("vars3Dmstate[i]",),
+                    change=(update3DmVars, "[i, $event]"),
+                    style="max-height: 20px",
+                    dense=True
+                )
         vuetify.VSelect(
             label="Projection",
             items=("options", ["Robinson", "Mollweide"]),
@@ -203,17 +207,9 @@ with layout:
                     v_for="vref, idx in views",
                     key="vref",
                     cols=("12 / vcols",),
-                    style=("{ height: `calc((100vh - 64px) / ${Math.floor(views.length / vcols)} `}",),
+                    style="height: 400px",
+                    #style=("{ height: `calc((100vh - 64px) / ${Math.floor(views.length / vcols)} `}",),
                 )
-            """
-            with grid.GridLayout(
-                layout=("view_layout",),
-                #row_height=30,
-                classes="full-height ma-3"
-            ):
-                server.ui.grid_layout(layout)
-            """
-        #viewmanager.GetView()
 
 # -----------------------------------------------------------------------------
 # Main

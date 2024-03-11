@@ -17,6 +17,7 @@ from paraview.simple import (
 def GetRenderView(geom, var, num, colormap, globe):
     rview = CreateRenderView(f'rv{num}')
     rep   = Show(geom, rview)
+    rview.ResetCamera(True)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
     coltrfunc.ApplyPreset(colormap, True)
@@ -48,8 +49,9 @@ class ViewManager():
         self.columns = cols
             
     def ResetCamera(self, **kwargs):
-         for widget in self.widgets:
-              widget.reset_camera()
+         #for widget in self.widgets:
+         #     widget.reset_camera()
+         pass
 
     def UpdateCamera(self, **kwargs):
          for widget in self.widgets:
@@ -71,7 +73,6 @@ class ViewManager():
         if numViews == 0:
             return
         self.rows = math.ceil(numViews / self.columns)
-        print(f"Arranging variables in {self.rows, self.columns}")
 
         counter = 0
         self.rViews = []
@@ -93,36 +94,6 @@ class ViewManager():
                                 style="width: 100%; height: 100%;",
                                 trame_server=self.server,
                                 )
-            print(widget)
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
         self.state.views = sWidgets
-        print(sWidgets)
-        """
-        self.state.view_layout = []
-        with self.server.ui.grid_layout.clear():
-            for i in range(self.rows):
-                for j in range(self.columns):
-                    current = i * self.columns + j
-                    if current >= numViews:
-                         continue
-                    item = {"x" : j * 4, "y" : i * 3, "i" : current, "w" : 4, "h" : 3}
-                    with grid.GridItem(
-                        v_bind=repr(item),
-                        classes="pa-2",
-                        style="border: solid 1px #333; background: #ccc;",
-                        drag_ignore_from=".drag_ignore",
-                    ):
-                        self.widgets.append(
-                            print(pvWidgets.VtkLocalView(
-                                self.rViews[current],
-                                ref=f"view{item['i']}",
-                                interactive_quality=100,
-                                LeftButtonPress=f"on_view_click({item['i']})",
-                                classes="pa-0 drag_ignore",
-                                style="width: 100%; height: 100%;"
-                            ))
-                        )
-                self.state.view_layout.append(item)
-        """
-        
