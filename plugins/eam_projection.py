@@ -9,12 +9,17 @@ from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from paraview import print_error
 
 import math
-import time
 
 try:
     import numpy as np
-except:
-    print("The numpy library is not installed. Install the numpy library to be able to put the data set on a sphere.")
+    import pandas as pd
+    from pyproj import Proj, Transformer
+    _has_deps = True
+except ImportError as ie:
+    print_error(
+        "Missing required Python modules/packages. Algorithms in this module may "
+        "not work as expected! \n {0}".format(ie))
+    _has_deps = False
 
 def ProcessPoint(point, radius):
     #theta = math.radians(point[0] - 180.)
@@ -58,8 +63,16 @@ class EAMSphere(VTKPythonAlgorithmBase):
 
     def RequestData(self, request, inInfo, outInfo):
         inData = self.GetInputData(inInfo, 0, 0)
-        outData = self.GetOutputData(outInfo, 0)
-        outData.DeepCopy(inData)
+        outData = self.GetOutputData(outInfo, 0)        
+        
+        if inData.IsA('vtkPolyData'):
+            afilter = vtkAppendFilter()
+            afilter.AddInputData(inData)
+            afilter.Update() 
+            out = afilter.GetOutput()
+            outData.DeepCopy(afilter.GetOutput())
+        else:
+            outData.DeepCopy(inData)
 
         inWrap     = dsa.WrapDataObject(inData)
         outWrap    = dsa.WrapDataObject(outData)
@@ -166,4 +179,81 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         polyData = vtkPolyData.GetData(outInfo, 0)
         polyData.SetPoints(points)
         polyData.SetLines(line)
+        return 1
+
+@smproxy.filter()
+@smproperty.input(name="Input")
+@smdomain.datatype(dataTypes=["vtkPolyData","vtkUnstructuredGrid"], composite_data_supported=False)
+@smproperty.xml("""
+                <IntVectorProperty name="Translate"
+                      command="SetTranslation"
+                      number_of_elements="1"
+                      default_values="0">
+                    <BooleanDomain name="bool"/>
+                 </IntVectorProperty>
+                 <IntVectorProperty
+                    name="Projection"
+                    command="SetProjection"
+                    number_of_elements="1"
+                    default_values="0">
+                    <EnumerationDomain name="enum">
+                        <Entry value="0" text="Robinson"/>
+                        <Entry value="1" text="Mollweide"/>
+                    </EnumerationDomain>
+                </IntVectorProperty>
+                """)
+class EAMProject(VTKPythonAlgorithmBase):
+    def __init__(self):
+        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid")
+        self.__Dims = -1
+        self.project = 0
+        self.translate = False
+
+    def SetTranslation(self, translate):
+        if self.translate != translate:
+            self.translate = translate
+            self.Modified()
+
+    def SetProjection(self, project):
+        if self.project != int(project):
+            self.project = int(project)
+            self.Modified()
+
+    def RequestData(self, request, inInfo, outInfo):
+        inData = self.GetInputData(inInfo, 0, 0)
+        outData = self.GetOutputData(outInfo, 0)
+        if inData.IsA('vtkPolyData'):
+            afilter = vtkAppendFilter()
+            afilter.AddInputData(inData)
+            afilter.Update()
+            out = afilter.GetOutput()
+            outData.DeepCopy(afilter.GetOutput())
+        else:
+            outData.DeepCopy(inData)
+
+        inWrap     = dsa.WrapDataObject(inData)
+        outWrap     = dsa.WrapDataObject(outData)
+        inPoints    = np.array(inWrap.Points)
+
+        flat = inPoints.flatten()
+        x = flat[0::3] - 180. if self.translate else flat[0::3]
+        y = flat[1::3]
+
+        latlon  = Proj(init="epsg:4326")
+        if self.project == 0:
+            proj = Proj(proj="robin")
+        elif self.project == 1:
+            proj = Proj(proj="moll")
+
+        xformer = Transformer.from_proj(latlon, proj)
+        res = xformer.transform(x, y)
+        flat[0::3] = np.array(res[0])
+        flat[1::3] = np.array(res[1])
+
+        outPoints = flat.reshape(inPoints.shape)
+        _coords = numpy_support.numpy_to_vtk(outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT)
+        vtk_coords = vtkPoints()
+        vtk_coords.SetData(_coords)
+        outWrap.SetPoints(vtk_coords)
+
         return 1
