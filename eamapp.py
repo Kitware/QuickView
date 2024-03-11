@@ -5,7 +5,7 @@ from trame.app import get_server
 from trame.widgets import (
     vuetify, 
     paraview as pvWidgets, 
-    grid
+    client
 )
 
 from trame.ui.vuetify import SinglePageWithDrawerLayout
@@ -15,6 +15,7 @@ from vissource.viewmanager import ViewManager
 from appui import properties3Dm, properties2D
 
 import numpy as np
+import traceback
 
 # -----------------------------------------------------------------------------
 # trame setup
@@ -24,6 +25,7 @@ server = get_server()
 server.client_type = "vue2" # instead of 'vue2'
 state, ctrl = server.state, server.controller
 pvWidgets.initialize(server)
+
 
 # -----------------------------------------------------------------------------
 # ParaView code
@@ -38,9 +40,7 @@ try:
     source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
 except Exception as e:
     print("Problem : ", e)
-
-print("Before initialize Manager")
-print(source.views)
+    traceback.print_exc()
 
 viewmanager = ViewManager(source, server, state) 
 
@@ -51,6 +51,7 @@ state.vars3Distate  = [False] * len(source.vars3Di)
 state.vars3Dm       = source.vars3Dm
 state.vars3Dmstate  = [False] * len(source.vars3Dm)
 
+state.views         = []
 state.view_layout   = []
 # State use to track active UI card
 state.setdefault("active_ui", None) # prevent resetting value if already present
@@ -58,6 +59,7 @@ state.setdefault("active_ui", None) # prevent resetting value if already present
 ctrl.view_update = viewmanager.UpdateCamera
 ctrl.view_reset_camera = viewmanager.ResetCamera
 ctrl.on_server_ready.add(ctrl.view_update)
+server.trigger_name(ctrl.view_reset_camera)
 
 # -----------------------------------------------------------------------------
 # GUI
@@ -87,18 +89,24 @@ def update2DVars(index, visibility):
 def update3DmVars(index, visibility):
     state.vars3Dmstate[index] = visibility
 
-@state.change("time_stamp")
-def FetchTimeStamp(time_stamp, **kwargs):
-    source.UpdateTimeStep(time_stamp)
-    pass
-
 @state.change('vcols')
 def Columns(vcols, **kwargs):
     viewmanager.SetCols(vcols)
 
+'''
+@state.change("time_stamp")
+def FetchTimeStamp(time_stamp, **kwargs):
+    source.UpdateTimeStep(time_stamp)
+
+
 @state.change('vlev')
 def Lev(vlev, **kwargs):
     source.UpdateLev(vlev)
+
+@state.change('projection')
+def Projection(projection, **kwargs):
+    source.SetProjection(projection)
+'''
 
 def Apply():
     s2d     = []
@@ -119,10 +127,10 @@ def Apply():
     source.LoadVariables(s2d, s3dm, s3di)
     state.color2D = s2d
     state.color3D = s3dm
-
-    viewmanager.GetView()
+    viewmanager.UpdateView()
 
 with layout:
+    client.Style("html { overflow: hidden; }")
     layout.icon.click = ctrl.view_reset_camera
     layout.title.set_text("EAM/E3SM Viz")
     with layout.toolbar:
@@ -161,21 +169,6 @@ with layout:
                     style="max-height: 20px",
                     dense=True
                 )
-        vuetify.VSelect(
-
-        )
-        vuetify.VSlider(
-            label='Time',
-            v_model=("time_stamp", 0),
-        )
-        vuetify.VBtn(
-            "Apply",
-            click=Apply
-        )
-        vuetify.VCheckbox(
-            label='Link Views',
-            v_model=('linkviews', False)
-        )
         vuetify.VSlider(
             label='Lev',
             v_model=("vlev", 0),
@@ -183,19 +176,43 @@ with layout:
             max=72
         )
         vuetify.VSlider(
+            label='Time',
+            v_model=("time_stamp", 0),
+        )
+        vuetify.VSelect(
+            label="Projection",
+            items=("options", ["Robinson", "Mollweide"]),
+            v_model=("projection", 'Robinson')
+        )
+        vuetify.VBtn(
+            "Apply",
+            click=Apply
+        )
+        vuetify.VSlider(
             label='Columns',
             v_model=("vcols", 1),
             min=1,
             max=3
         )
+        temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
+            with vuetify.VRow(
+            ):
+                vuetify.VCol(
+                    '<vtk-local-view :ref="(el) => ($refs[vref] = el)" :viewState="get(`scene_${vref}`)" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" @onReady="trigger(\''+ temp + '\')"></vtk-local-view>',
+                    v_for="vref, idx in views",
+                    key="vref",
+                    cols=("12 / vcols",),
+                    style=("{ height: `calc((100vh - 64px) / ${Math.floor(views.length / vcols)} `}",),
+                )
+            """
             with grid.GridLayout(
                 layout=("view_layout",),
                 #row_height=30,
                 classes="full-height ma-3"
             ):
                 server.ui.grid_layout(layout)
-
+            """
         #viewmanager.GetView()
 
 # -----------------------------------------------------------------------------
