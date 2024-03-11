@@ -5,6 +5,7 @@ import numpy as np
 from vissource.viewmanager import ViewManager
 
 from paraview.simple import (
+    FindSource,
     GetTimeKeeper,
     LoadPlugin,
     OutputPort,
@@ -31,9 +32,9 @@ class EAMVisSource:
 
         self.data       = None
         self.globe      = None
-        self.slice3Dm   = None
+        self.projection = 'Robinson'
         self.timestamps = []
-        self.lev      = -1
+        self.lev        = 0
 
         file       = os.path.abspath(__file__)
         currdir    = os.path.dirname(file)
@@ -48,18 +49,46 @@ class EAMVisSource:
         except Exception as e:
             print("Error loading plugin :", e)
 
+    def UpdateProjection(self, proj):
+        print("Updating projections")
+        eamproj2D  = FindSource('2DProj')
+        eamproj3Dm = FindSource('3DmProj')
+        eamprojG   = FindSource('GProj')
+
+        print(f"2D : {eamproj2D}, 3Dm : {eamproj3Dm}, glo : {eamprojG}")
+
+        if self.projection != proj:
+            self.projection = proj
+            eamproj2D.Projection  = proj
+            eamproj3Dm.Projection = proj
+            eamprojG.Projection   = proj
+
+        eamproj2D.UpdatePipeline()
+        eamproj3Dm.UpdatePipeline()
+        eamprojG.UpdatePipeline()
+        self.views["2DProj"]  = OutputPort(eamproj2D,  0)
+        self.views["3DmProj"] = OutputPort(eamproj3Dm, 0)
+        self.views["GProj"]   = OutputPort(eamprojG, 0)                  
+
     def UpdateLev(self, lev):
         if self.data == None:
             return
-        src1 = OutputPort(self.data, 1)
-        slice = EAMExtractSlices(registrationName='eamslice3Dm', Input=src1)                
-        slice.PlanesMinMax = [lev, lev] 
+        if self.lev != lev:
+            self.lev = lev
+            slice = FindSource('3DmSlc')
+            if slice == None:
+                return 
+            slice.PlanesMinMax = [lev, lev]
+            self.UpdateProjection(self.projection)         
+        '''
         eamproj3Dm = EAMProject(registrationName='3DmProj', Input=OutputPort(slice, 0))
         eamproj3Dm.Translate = 1
         eamproj3Dm.UpdatePipeline()
         self.views["3Dm"] = OutputPort(eamproj3Dm, 0)
+        '''
 
     def Update(self, datafile, connfile, globefile, lev):
+        print("Running update method for source")
         if self.data == None:
             self.data = EAMDataReader(registrationName='eamdata',
                                         ConnectivityFile=connfile,
@@ -76,11 +105,7 @@ class EAMVisSource:
             cgdata.Isosurfaces = [0.5]
             cgdata.PointMergeMethod = 'Uniform Binning'
             self.globe = cgdata
-            eamprojG  = EAMProject(registrationName='Gproj', Input=OutputPort(cgdata, 0))
-            eamprojG.Translate = 1
-            eamprojG.UpdatePipeline()
-            self.views["globe"] = OutputPort(eamprojG, 0)                  
-
+                             
         self.vars2D  = list(np.asarray(self.data.GetProperty('a2DVariablesInfo'))[::2])
         self.vars3Dm = list(np.asarray(self.data.GetProperty('a3DMiddleLayerVariablesInfo'))[::2])
         self.vars3Di = list(np.asarray(self.data.GetProperty('a3DInterfaceLayerVariablesInfo'))[::2])
@@ -89,19 +114,27 @@ class EAMVisSource:
         self.timestamps = tk.TimestepValues
         tk.Time = tk.TimestepValues[0]
 
-        slice = EAMExtractSlices(registrationName='eamslice3Dm', Input=OutputPort(self.data, 1))                
+        slice = EAMExtractSlices(registrationName='3DmSlc', Input=OutputPort(self.data, 1))                
         slice.PlanesMinMax = [lev, lev]
         slice.UpdatePipeline()
 
-        eamproj2D  = EAMProject(registrationName='2DProj', Input=OutputPort(self.data, 0))
-        eamproj2D.Translate = 1
+        eamproj2D            = EAMProject(registrationName='2DProj', Input=OutputPort(self.data, 0))
+        eamproj2D.Projection = self.projection
+        eamproj2D.Translate  = 1
         eamproj2D.UpdatePipeline()
-        eamproj3Dm = EAMProject(registrationName='3DmProj', Input=OutputPort(slice, 0))
-        eamproj3Dm.Translate = 1
+        eamproj3Dm              = EAMProject(registrationName='3DmProj', Input=OutputPort(slice, 0))
+        eamproj2D.Projection    = self.projection
+        eamproj3Dm.Translate    = 1
         eamproj3Dm.UpdatePipeline()
+        eamprojG            = EAMProject(registrationName='GProj', Input=OutputPort(cgdata, 0))
+        eamprojG.Projection = self.projection
+        eamprojG.Translate  = 1
+        eamprojG.UpdatePipeline()
+        self.views["2DProj"]    = OutputPort(eamproj2D,  0)
+        self.views["3DmProj"]   = OutputPort(eamproj3Dm, 0)
+        self.views["GProj"]     = OutputPort(eamprojG, 0) 
 
-        self.views["2D"]  = OutputPort(eamproj2D,  0)
-        self.views["3Dm"] = OutputPort(eamproj3Dm, 0)
+        print(self.views)
 
     def UpdateTimeStep(self, timeprop):
         time = self.timestamps[0] + (self.timestamps[-1:][0] - self.timestamps[0]) * (timeprop / 100.)

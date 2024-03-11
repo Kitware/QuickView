@@ -8,7 +8,6 @@ import math
 
 from paraview.simple import (
     Show,
-    Text,
     CreateRenderView,
     FindViewOrCreate,
     ColorBy,
@@ -16,7 +15,7 @@ from paraview.simple import (
 )
 
 def GetRenderView(geom, var, num, colormap, globe):
-    rview = FindViewOrCreate(f'rv{num}', 'RenderView')
+    rview = CreateRenderView(f'rv{num}')
     rep   = Show(geom, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
@@ -56,18 +55,17 @@ class ViewManager():
          for widget in self.widgets:
               widget.update()
 
-    def GetView(self):
+    def UpdateView(self):
         self.widgets.clear()
-        print("View")
-        print(self.source.views)
-        print(self.source.slice3Dm)
 
-        view2D   = self.source.views['2D']
-        view3Dm  = self.source.views['3Dm']
-        viewG    = self.source.views['globe']
+        self.source.UpdateLev(self.state.vlev)
+        self.source.UpdateProjection(self.state.projection)
 
-        vars2D  = self.source.vars.get('2D', None)
-        vars3Dm = self.source.vars.get('3Dm', None)
+        view2D   = self.source.views['2DProj']
+        view3Dm  = self.source.views['3DmProj']
+        viewG    = self.source.views['GProj']
+        vars2D   = self.source.vars.get('2D', None)
+        vars3Dm  = self.source.vars.get('3Dm', None)
 
         numViews = len(vars2D) + len(vars3Dm)
         if numViews == 0:
@@ -87,6 +85,20 @@ class ViewManager():
                 self.rViews.append(rview)
                 counter += 1
 
+        sWidgets = []
+        for view in self.rViews:
+            widget = pvWidgets.VtkLocalView(view,
+                                interactive_quality=100,
+                                classes="pa-0 drag_ignore",
+                                style="width: 100%; height: 100%;",
+                                trame_server=self.server,
+                                )
+            print(widget)
+            self.widgets.append(widget)
+            sWidgets.append(widget.ref_name)
+        self.state.views = sWidgets
+        print(sWidgets)
+        """
         self.state.view_layout = []
         with self.server.ui.grid_layout.clear():
             for i in range(self.rows):
@@ -102,13 +114,15 @@ class ViewManager():
                         drag_ignore_from=".drag_ignore",
                     ):
                         self.widgets.append(
-                            pvWidgets.VtkLocalView(
+                            print(pvWidgets.VtkLocalView(
                                 self.rViews[current],
                                 ref=f"view{item['i']}",
                                 interactive_quality=100,
                                 LeftButtonPress=f"on_view_click({item['i']})",
                                 classes="pa-0 drag_ignore",
                                 style="width: 100%; height: 100%;"
-                            )
+                            ))
                         )
                 self.state.view_layout.append(item)
+        """
+        
