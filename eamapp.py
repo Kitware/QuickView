@@ -16,6 +16,7 @@ from appui import properties3Dm, properties2D
 
 import numpy as np
 import traceback
+import asyncio
 
 # -----------------------------------------------------------------------------
 # trame setup
@@ -44,6 +45,9 @@ except Exception as e:
 
 viewmanager = ViewManager(source, server, state)
 
+state.colors        = viewmanager.colors
+print(state.colors)
+
 state.vars2D        = source.vars2D
 state.vars3Di       = source.vars3Di
 state.vars3Dm       = source.vars3Dm
@@ -53,6 +57,7 @@ state.vars3Dmstate  = [False] * len(source.vars3Dm)
 state.visibilityList = [True, False, True, False]
 
 state.views         = []
+state.colors        = []
 state.view_layout   = []
 # State use to track active UI card
 state.setdefault("active_ui", None) # prevent resetting value if already present
@@ -109,6 +114,7 @@ def Projection(projection, **kwargs):
     source.SetProjection(projection)
 '''
 
+
 def Apply():
     s2d     = []
     s3dm    = []
@@ -128,7 +134,10 @@ def Apply():
     source.LoadVariables(s2d, s3dm, s3di)
     state.color2D = s2d
     state.color3D = s3dm
-    viewmanager.UpdateView()
+
+    with state:  
+        viewmanager.UpdateView()
+    #viewmanager.ResetCamera()    
 
 with layout:
     # uncomment following line to disable scrolling on views
@@ -198,17 +207,22 @@ with layout:
             min=1,
             max=3
         )
+        vuetify.VSelect(
+            label="Color by",
+            items=("colors",),
+            v_model=("color", None)
+        )
         temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
             with vuetify.VRow(
             ):
                 vuetify.VCol(
-                    '<vtk-local-view :ref="(el) => ($refs[vref] = el)" :viewState="get(`scene_${vref}`)" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" @onReady="trigger(\''+ temp + '\')"></vtk-local-view>',
+                    #<vtk-remote-view ref="trame__remote_view_1" :viewId="trame__remote_view_1Id" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" />
+                    '<vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" interactiveRatio="1" ></vtk-remote-view>',
                     v_for="vref, idx in views",
                     key="vref",
                     cols=("12 / vcols",),
                     style="height: 400px",
-                    #style=("{ height: `calc((100vh - 64px) / ${Math.floor(views.length / vcols)} `}",),
                 )
 
 # -----------------------------------------------------------------------------

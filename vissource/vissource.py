@@ -52,47 +52,39 @@ class EAMVisSource:
     def UpdateProjection(self, proj):
         print("Updating projections")
         eamproj2D  = FindSource('2DProj')
-        eamproj3Dm = FindSource('3DmProj')
         eamprojG   = FindSource('GProj')
-
-        print(f"2D : {eamproj2D}, 3Dm : {eamproj3Dm}, glo : {eamprojG}")
 
         if self.projection != proj:
             self.projection = proj
             eamproj2D.Projection  = proj
-            eamproj3Dm.Projection = proj
             eamprojG.Projection   = proj
 
         eamproj2D.UpdatePipeline()
-        eamproj3Dm.UpdatePipeline()
         eamprojG.UpdatePipeline()
         self.views["2DProj"]  = OutputPort(eamproj2D,  0)
-        self.views["3DmProj"] = OutputPort(eamproj3Dm, 0)
         self.views["GProj"]   = OutputPort(eamprojG, 0)                  
 
     def UpdateLev(self, lev):
+        eamproj2D  = FindSource('2DProj')
         if self.data == None:
             return
         if self.lev != lev:
             self.lev = lev
-            slice = FindSource('3DmSlc')
-            if slice == None:
-                return 
-            slice.PlanesMinMax = [lev, lev]
-            self.UpdateProjection(self.projection)         
-        '''
-        eamproj3Dm = EAMProject(registrationName='3DmProj', Input=OutputPort(slice, 0))
-        eamproj3Dm.Translate = 1
-        eamproj3Dm.UpdatePipeline()
-        self.views["3Dm"] = OutputPort(eamproj3Dm, 0)
-        '''
+            self.data.MiddleLayer = lev
+            eamproj2D.UpdatePipeline()
+            self.views["2DProj"]  = OutputPort(eamproj2D,  0)
+        #    self.UpdateProjection(self.projection)         
 
     def Update(self, datafile, connfile, globefile, lev):
         print("Running update method for source")
         if self.data == None:
-            self.data = EAMDataReader(registrationName='eamdata',
+            data = EAMSliceDataReader(registrationName='eamdata',
                                         ConnectivityFile=connfile,
                                         DataFile=datafile)
+            data.MiddleLayer = lev
+            data.InterfaceLayer = 0
+            data.UpdatePipeline()
+            self.data = data
         else:
             self.data.SetDataFileName(datafile)
             self.data.SetConnFileName(connfile)
@@ -114,24 +106,17 @@ class EAMVisSource:
         self.timestamps = tk.TimestepValues
         tk.Time = tk.TimestepValues[0]
 
-        slice = EAMExtractSlices(registrationName='3DmSlc', Input=OutputPort(self.data, 1))                
-        slice.PlanesMinMax = [lev, lev]
-        slice.UpdatePipeline()
-
         eamproj2D            = EAMProject(registrationName='2DProj', Input=OutputPort(self.data, 0))
         eamproj2D.Projection = self.projection
         eamproj2D.Translate  = 1
         eamproj2D.UpdatePipeline()
-        eamproj3Dm              = EAMProject(registrationName='3DmProj', Input=OutputPort(slice, 0))
-        eamproj2D.Projection    = self.projection
-        eamproj3Dm.Translate    = 1
-        eamproj3Dm.UpdatePipeline()
+
         eamprojG            = EAMProject(registrationName='GProj', Input=OutputPort(cgdata, 0))
         eamprojG.Projection = self.projection
         eamprojG.Translate  = 1
         eamprojG.UpdatePipeline()
+
         self.views["2DProj"]    = OutputPort(eamproj2D,  0)
-        self.views["3DmProj"]   = OutputPort(eamproj3Dm, 0)
         self.views["GProj"]     = OutputPort(eamprojG, 0) 
 
         print(self.views)
