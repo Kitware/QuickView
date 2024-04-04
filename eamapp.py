@@ -1,12 +1,10 @@
-import paraview.web.venv  # Available in PV 5.10
+#import paraview.web.venv  # Available in PV 5.10
 
 from trame.app import get_server
 
-from trame.widgets import (
-    vuetify,
-    paraview as pvWidgets,
-    client
-)
+from trame.widgets import vuetify
+from trame.widgets import paraview as pvWidgets
+from trame.widgets import client
 
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
@@ -35,9 +33,9 @@ state.vlev = 0
 # create a new 'EAM Data Reader'
 try:
     source = EAMVisSource()
-    ConnFile='/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data/TEMPEST_ne30pg2.scrip.renamed.nc'
-    DataFile='/data/eam/202311/v2_F2010_nc00_inst_macmic01.eam.h0.2010-12-25-00000.nc'
-    GlobeFile='/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data/cstar0.vtr'
+    ConnFile='/Users/ayenpure/repositories/eam/eamapp/data/TEMPEST_ne30pg2.scrip.renamed.nc'
+    DataFile='/Users/ayenpure/repositories/eam/eamapp/data/aerosol_F2010.eam.h0.2014-12.nc'
+    GlobeFile='/Users/ayenpure/repositories/eam/eamapp/data/cstar0.vtr'
     source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
 except Exception as e:
     print("Problem : ", e)
@@ -46,7 +44,6 @@ except Exception as e:
 viewmanager = ViewManager(source, server, state)
 
 state.colors        = viewmanager.colors
-print(state.colors)
 
 state.vars2D        = source.vars2D
 state.vars3Di       = source.vars3Di
@@ -54,13 +51,13 @@ state.vars3Dm       = source.vars3Dm
 state.vars2Dstate   = [False] * len(source.vars2D)
 state.vars3Distate  = [False] * len(source.vars3Di)
 state.vars3Dmstate  = [False] * len(source.vars3Dm)
-state.visibilityList = [True, False, True, False]
 
 state.views         = []
 state.colors        = []
 state.view_layout   = []
-# State use to track active UI card
-state.setdefault("active_ui", None) # prevent resetting value if already present
+
+state.ccardsentry   = []
+state.ccardscolor   = [None] * len(source.vars2D + source.vars3Di + source.vars3Dm)
 
 ctrl.view_update = viewmanager.UpdateCamera
 ctrl.view_reset_camera = viewmanager.ResetCamera
@@ -72,20 +69,6 @@ server.trigger_name(ctrl.view_reset_camera)
 # -----------------------------------------------------------------------------
 state.trame__title = "ParaView eamdata"
 layout = SinglePageWithDrawerLayout(server)
-
-@state.change("colorby2D")
-def update2Dview(colorby2D, **kwargs):
-    colorvar = state.colorby2D
-    colormap = state.colormap2D
-    source.UpdateViews2D(colorvar, colormap)
-    ctrl.view_update()
-
-@state.change("colorby3D")
-def update3Dview(colorby3D, **kwargs):
-    colorvar = state.colorby3D
-    colormap = state.colormap3D
-    source.UpdateViews3D(colorvar, colormap)
-    ctrl.view_update()
 
 def update2DVars(index, visibility):
     state.vars2Dstate[index] = visibility
@@ -114,7 +97,6 @@ def Projection(projection, **kwargs):
     source.SetProjection(projection)
 '''
 
-
 def Apply():
     s2d     = []
     s3dm    = []
@@ -134,10 +116,15 @@ def Apply():
     source.LoadVariables(s2d, s3dm, s3di)
     state.color2D = s2d
     state.color3D = s3dm
-
+    vars = s2d + s3dm
+    state.ccardsentry = vars
+    #state.ccardscolor = ["Varidis"] * len(vars)
+    state.ccardsvars  = [{"text" : var, "value" : var} for var in vars] 
     with state:  
         viewmanager.UpdateView()
-    #viewmanager.ResetCamera()    
+
+def ApplyColor(color, index):
+    viewmanager.UpdateColor(color, index)
 
 with layout:
     # uncomment following line to disable scrolling on views
@@ -206,12 +193,43 @@ with layout:
             v_model=("vcols", 1),
             min=1,
             max=3
-        )
+        ) 
         vuetify.VSelect(
-            label="Color by",
-            items=("colors",),
-            v_model=("color", None)
+            v_model=("ccardselect", None),
+            items=("ccardsvars", []),
+            dense=True,
+            hide_details=True,
         )
+        colors = [
+            {"text" : 'Viridis',    "value"  : 'Viridis (matplotlib)', },
+            {"text" : 'Inferno',    "value"  : 'Inferno (matplotlib)', }, 
+            {"text" : 'Cool to Warm',   "value"  : 'Cool to Warm',}, 
+            {"text" : 'Turbo',      "value"  : 'Turbo',   }
+        ]
+        with vuetify.VCard(
+            v_for="v, i in ccardsentry",
+            key="i",
+            v_show="ccardsentry[i] == ccardselect"
+        ):
+            vuetify.VCardTitle(
+                title=("ccardsentry[i]",), 
+                classes="grey lighten-1 py-1 grey--text text--darken-3",
+                dense=True,
+                style="max-height: 20px",
+            )
+            with vuetify.VCardText(classes="py-2"):
+                with vuetify.VRow(classes="pt-2", dense=True):
+                    with vuetify.VCol(cols=6):
+                        vuetify.VSelect(
+                            v_model=("varcolor", "Viridis"),
+                            items=("colormaps", colors),
+                            dense=True,
+                            hide_details=True,
+                        )
+                        vuetify.VBtn(
+                            "Update",
+                            click=(ApplyColor,"[varcolor, i]")                           
+                        )
         temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
             with vuetify.VRow(

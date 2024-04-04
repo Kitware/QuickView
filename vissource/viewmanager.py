@@ -1,5 +1,4 @@
 from trame.widgets import (
-    grid,
     vuetify, 
     paraview as pvWidgets
 )
@@ -12,15 +11,15 @@ from paraview.simple import (
     Show,
     ImportPresets,
     CreateRenderView,
-    FindViewOrCreate,
     GetScalarBar,
     ColorBy,
-    GetColorTransferFunction
+    GetColorTransferFunction,
+    SetActiveView
 )
 
 def GetRenderView(geom, var, num, colormap, globe):
     #rview = FindViewOrCreate(f'rv{num}', 'RenderView')
-    rview  = CreateRenderView(f'rv{num}')#, 'RenderView')
+    rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
     rep    = Show(geom, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
@@ -106,6 +105,9 @@ class ViewManager():
         counter = 0
         self.rViews = []
         colormap = "Rainbow"
+        print("Entries", self.state.ccardsentry)
+        print("Colors", self.state.ccardscolor)
+        print(self.state)
         for var in vars2D:
                 rview = GetRenderView(view2D, var, counter, colormap, viewG) 
                 self.rViews.append(rview)
@@ -126,3 +128,12 @@ class ViewManager():
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
         self.state.views = sWidgets
+
+    def UpdateColor(self, color, index):
+        var     = self.state.ccardsentry[index]
+        rview   = self.rViews[index]
+        print(f"Updating {rview} with color {color}")
+        SetActiveView(rview)
+        coltrfunc = GetColorTransferFunction(var)
+        coltrfunc.ApplyPreset(color, True)
+        self.ResetCamera()
