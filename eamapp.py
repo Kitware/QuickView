@@ -14,7 +14,17 @@ from appui import properties3Dm, properties2D
 
 import numpy as np
 import traceback
-import asyncio
+
+import argparse
+
+parser = argparse.ArgumentParser(prog='eamapp.py',
+                                 description='Trame based app for visualizing EAM data')
+parser.add_argument('-cf', '--conn', help='the nc file with connnectivity information')
+parser.add_argument('-df', '--data', help='the nc file with data/variables')
+parser.add_argument('-sf', '--state', nargs='+', help='state file to be loaded')
+parser.add_argument('-wd', '--workdir', help='working directory (to store session data)')
+args, xargs = parser.parse_known_args()
+
 
 # -----------------------------------------------------------------------------
 # trame setup
@@ -25,6 +35,15 @@ server.client_type = "vue2" # instead of 'vue2'
 state, ctrl = server.state, server.controller
 pvWidgets.initialize(server)
 
+ConnFile = args.conn 
+DataFile = args.data
+StateFile = args.state
+WorkDir = args.workdir
+from utilities import ValidateArguments
+ValidateArguments(ConnFile, DataFile, StateFile, WorkDir)
+
+state.connfile = ConnFile
+state.datafile = DataFile
 
 # -----------------------------------------------------------------------------
 # ParaView code
@@ -33,8 +52,6 @@ state.vlev = 0
 # create a new 'EAM Data Reader'
 try:
     source = EAMVisSource()
-    ConnFile='/Users/ayenpure/repositories/eam/eamapp/data/TEMPEST_ne30pg2.scrip.renamed.nc'
-    DataFile='/Users/ayenpure/repositories/eam/eamapp/data/aerosol_F2010.eam.h0.2014-12.nc'
     GlobeFile='/Users/ayenpure/repositories/eam/eamapp/data/cstar0.vtr'
     source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
 except Exception as e:
@@ -64,6 +81,12 @@ ctrl.view_reset_camera = viewmanager.ResetCamera
 ctrl.on_server_ready.add(ctrl.view_update)
 server.trigger_name(ctrl.view_reset_camera)
 
+colors = [
+    {"text" : 'Viridis',    "value"  : 'Viridis (matplotlib)', },
+    {"text" : 'Inferno',    "value"  : 'Inferno (matplotlib)', }, 
+    {"text" : 'Cool to Warm',   "value"  : 'Cool to Warm',}, 
+    {"text" : 'Turbo',      "value"  : 'Turbo',   }
+]
 # -----------------------------------------------------------------------------
 # GUI
 # -----------------------------------------------------------------------------
@@ -123,8 +146,8 @@ def Apply():
     with state:  
         viewmanager.UpdateView()
 
-def ApplyColor(color, index):
-    viewmanager.UpdateColor(color, index)
+def ApplyColor(color, logclut, index):
+    viewmanager.UpdateColor(color, logclut,index)
 
 with layout:
     # uncomment following line to disable scrolling on views
@@ -133,12 +156,16 @@ with layout:
     layout.title.set_text("EAM/E3SM Viz")
     with layout.toolbar:
         vuetify.VSpacer()
-        vuetify.VFileInput(
-            label='Data File'
+        vuetify.VDivider(vertical=True, classes="mx-2")
+        vuetify.VCard(
+                    title="Connectivity File",
+                    subtitle="Connectivity File",
+                    text="Hello World!",
         )
-        vuetify.VFileInput(
-            label='Connectivity File'
-        )
+        vuetify.VCard(
+                    title="Data File",
+                    #text=("datafile", ),
+                )
         vuetify.VDivider(vertical=True, classes="mx-2")
         with vuetify.VBtn(icon=True, click=ctrl.view_reset_camera):
             vuetify.VIcon("mdi-restore")
@@ -157,8 +184,8 @@ with layout:
             label='Time',
             v_model=("time_stamp", 0),
         )
-        with vuetify.VContainer(fluid=True, style="max-height: 400px", classes="overflow-y-auto"):
-            with vuetify.VListItemGroup(dense=True):
+        with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
+            with vuetify.VListItemGroup(dense=True, label="2D Variables"):
                 vuetify.VCheckbox(
                     v_for="v, i in vars2D",
                     key="i",
@@ -168,8 +195,8 @@ with layout:
                     style="max-height: 20px",
                     dense=True
                 )
-        with vuetify.VContainer(fluid=True, style="max-height: 400px", classes="overflow-y-auto"):
-            with vuetify.VListItemGroup(dense=True):
+        with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
+            with vuetify.VListItemGroup(dense=True, label="3D Variables"):
                 vuetify.VCheckbox(
                     v_for="v, i in vars3Dm",
                     key="i",
@@ -194,22 +221,18 @@ with layout:
             min=1,
             max=3
         ) 
+        "View Configuration"
         vuetify.VSelect(
-            v_model=("ccardselect", None),
+            v_model=("ccardselect", "Variable"),
             items=("ccardsvars", []),
             dense=True,
             hide_details=True,
         )
-        colors = [
-            {"text" : 'Viridis',    "value"  : 'Viridis (matplotlib)', },
-            {"text" : 'Inferno',    "value"  : 'Inferno (matplotlib)', }, 
-            {"text" : 'Cool to Warm',   "value"  : 'Cool to Warm',}, 
-            {"text" : 'Turbo',      "value"  : 'Turbo',   }
-        ]
         with vuetify.VCard(
             v_for="v, i in ccardsentry",
             key="i",
-            v_show="ccardsentry[i] == ccardselect"
+            v_show="ccardsentry[i] == ccardselect",
+            variant="outlined"
         ):
             vuetify.VCardTitle(
                 title=("ccardsentry[i]",), 
@@ -226,10 +249,15 @@ with layout:
                             dense=True,
                             hide_details=True,
                         )
+                        vuetify.VCheckbox(
+                            label="Log color scale",
+                            v_model=("logclut", False)
+                        )
+                    with vuetify.VCol(cols=6):
                         vuetify.VBtn(
                             "Update",
-                            click=(ApplyColor,"[varcolor, i]")                           
-                        )
+                            click=(ApplyColor,"[varcolor, logclut, i]")                           
+                        )                    
         temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
             with vuetify.VRow(

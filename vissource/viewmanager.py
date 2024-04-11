@@ -105,9 +105,6 @@ class ViewManager():
         counter = 0
         self.rViews = []
         colormap = "Rainbow"
-        print("Entries", self.state.ccardsentry)
-        print("Colors", self.state.ccardscolor)
-        print(self.state)
         for var in vars2D:
                 rview = GetRenderView(view2D, var, counter, colormap, viewG) 
                 self.rViews.append(rview)
@@ -129,11 +126,14 @@ class ViewManager():
             sWidgets.append(widget.ref_name)
         self.state.views = sWidgets
 
-    def UpdateColor(self, color, index):
+    def UpdateColor(self, color, logclut, index):
         var     = self.state.ccardsentry[index]
         rview   = self.rViews[index]
-        print(f"Updating {rview} with color {color}")
-        SetActiveView(rview)
+        #SetActiveView(rview)
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.ApplyPreset(color, True)
+        if logclut:
+            coltrfunc.MapControlPointsToLogSpace()
+        else:
+            coltrfunc.MapControlPointsToLinearSpace()
         self.ResetCamera()
