@@ -26,6 +26,8 @@ class EAMVisSource:
         self.views    = {}
         self.vars     = {}
 
+        self.lev = []
+        self.ilev = []
         self.vars2D_sel     = []
         self.vars3Di_sel    = []
         self.vars3Dm_sel    = []
@@ -50,7 +52,6 @@ class EAMVisSource:
             print("Error loading plugin :", e)
 
     def UpdateProjection(self, proj):
-        print("Updating projections")
         eamproj2D  = FindSource('2DProj')
         eamprojG   = FindSource('GProj')
 
@@ -76,7 +77,6 @@ class EAMVisSource:
         #    self.UpdateProjection(self.projection)         
 
     def Update(self, datafile, connfile, globefile, lev):
-        print("Running update method for source")
         if self.data == None:
             data = EAMSliceDataReader(registrationName='eamdata',
                                         ConnectivityFile=connfile,
@@ -103,7 +103,7 @@ class EAMVisSource:
         self.vars3Di = list(np.asarray(self.data.GetProperty('a3DInterfaceLayerVariablesInfo'))[::2])
 
         tk = GetTimeKeeper()
-        self.timestamps = tk.TimestepValues
+        self.timestamps = np.array(tk.TimestepValues).tolist()
         tk.Time = tk.TimestepValues[0]
 
         eamproj2D            = EAMProject(registrationName='2DProj', Input=OutputPort(self.data, 0))
@@ -119,17 +119,20 @@ class EAMVisSource:
         self.views["2DProj"]    = OutputPort(eamproj2D,  0)
         self.views["GProj"]     = OutputPort(eamprojG, 0) 
 
-        print(self.views)
+        from paraview import servermanager as sm
+        from paraview.vtk.numpy_interface import dataset_adapter as dsa
+        data1 = sm.Fetch(data)
+        data1 = dsa.WrapDataObject(data1)
+        self.lev    = data1.FieldData['lev'].tolist()
+        self.ilev   = data1.FieldData['ilev'].tolist()
+
 
     def UpdateTimeStep(self, timeprop):
         time = self.timestamps[0] + (self.timestamps[-1:][0] - self.timestamps[0]) * (timeprop / 100.)
-        print(f"Updating to time {time}")
         tk = GetTimeKeeper()
         tk.Time = time
 
     def LoadVariables(self, v2d, v3dm, v3di):
-        print(v2d, v3dm, v3di)
-
         self.data.a2DVariables = v2d
         self.data.a3DMiddleLayerVariables = v3dm
         self.data.a3DInterfaceLayerVariables = v3di

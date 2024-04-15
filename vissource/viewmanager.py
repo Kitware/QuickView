@@ -45,7 +45,8 @@ def GetRenderView(geom, var, num, colormap, globe):
     textrep.Bold = 1      
     textrep.FontSize = 22 
     textrep.Italic = 1    
-    textrep.Shadow = 1    
+    textrep.Shadow = 1 
+
     return rview
 
 class ViewManager():

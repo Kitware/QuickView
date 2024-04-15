@@ -2,7 +2,7 @@
 
 from trame.app import get_server
 
-from trame.widgets import vuetify
+from trame.widgets import vuetify, html
 from trame.widgets import paraview as pvWidgets
 from trame.widgets import client
 
@@ -61,7 +61,9 @@ except Exception as e:
 viewmanager = ViewManager(source, server, state)
 
 state.colors        = viewmanager.colors
-
+state.timesteps     = source.timestamps
+state.lev           = source.lev
+state.ilev          = source.ilev
 state.vars2D        = source.vars2D
 state.vars3Di       = source.vars3Di
 state.vars3Dm       = source.vars3Dm
@@ -157,15 +159,10 @@ with layout:
     with layout.toolbar:
         vuetify.VSpacer()
         vuetify.VDivider(vertical=True, classes="mx-2")
-        vuetify.VCard(
-                    title="Connectivity File",
-                    subtitle="Connectivity File",
-                    text="Hello World!",
+        html.Div(
+            f"Connectivity File :  \"{ConnFile}\" <br> Data File :  \"{DataFile}\"",
+            style="padding: 10px;",
         )
-        vuetify.VCard(
-                    title="Data File",
-                    #text=("datafile", ),
-                )
         vuetify.VDivider(vertical=True, classes="mx-2")
         with vuetify.VBtn(icon=True, click=ctrl.view_reset_camera):
             vuetify.VIcon("mdi-restore")
@@ -174,15 +171,38 @@ with layout:
     with layout.drawer as drawer:
         drawer.width = 325
         vuetify.VDivider(classes="mb-2")
-        vuetify.VSlider(
-            label='Lev',
-            v_model=("vlev", 0),
-            min=0,
-            max=72
+        html.A(
+            "Slice Parameters",
+            style="padding: 10px;",
         )
-        vuetify.VSlider(
-            label='Time',
-            v_model=("time_stamp", 0),
+        with vuetify.VRow():
+            with vuetify.VCol(cols=6):
+                vuetify.VSlider(
+                    label='Lev',
+                    v_model=("vlev", 0),
+                    min=0,
+                    max=("lev.length - 1", )
+                )
+            with vuetify.VCol(cols=4):
+                vuetify.VTextField(
+                    v_model=("lev[vlev]", 0)
+                )
+        with vuetify.VRow():
+            with vuetify.VCol(cols=6):
+                vuetify.VSlider(
+                    label='Time',
+                    v_model=("tstamp", 0),
+                    min=0,
+                    max=("timesteps.length - 1", )
+                )
+            with vuetify.VCol(cols=4):
+                vuetify.VTextField(
+                    v_model=("timesteps[tstamp]", 0)
+                )
+        vuetify.VDivider(classes="mx-2")
+        html.A(
+            "2D Variables",
+            style="padding: 10px;",
         )
         with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
             with vuetify.VListItemGroup(dense=True, label="2D Variables"):
@@ -195,6 +215,11 @@ with layout:
                     style="max-height: 20px",
                     dense=True
                 )
+        vuetify.VDivider(classes="mx-2")
+        html.A(
+            "3D Middle Layer Variables",
+            style="padding: 10px;",
+        )
         with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
             with vuetify.VListItemGroup(dense=True, label="3D Variables"):
                 vuetify.VCheckbox(
@@ -206,6 +231,7 @@ with layout:
                     style="max-height: 20px",
                     dense=True
                 )
+        vuetify.VDivider(classes="mx-2")
         vuetify.VSelect(
             label="Projection",
             items=("options", ["Robinson", "Mollweide"]),
@@ -215,15 +241,20 @@ with layout:
             "Apply",
             click=Apply
         )
+        vuetify.VDivider(classes="mx-2")
+        html.A(
+            "View Configuration",
+            style="padding: 10px;",
+        )
         vuetify.VSlider(
             label='Columns',
             v_model=("vcols", 1),
             min=1,
             max=3
-        ) 
-        "View Configuration"
+        )
         vuetify.VSelect(
-            v_model=("ccardselect", "Variable"),
+            label="Select Variable",
+            v_model=("ccardselect", None),
             items=("ccardsvars", []),
             dense=True,
             hide_details=True,

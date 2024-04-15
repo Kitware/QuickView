@@ -574,5 +574,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             if self.__vars3Diarr.ArrayIsEnabled(var):
                 data = vardata[var][:].data[timeInd].flatten()[ilstart:ilend]
                 gridAdapter2D.CellData.append(data, var)
+        gridAdapter2D.FieldData.append(lev,    "lev"   )
+        gridAdapter2D.FieldData.append(ilev,   "ilev"   )
 
         return 1
