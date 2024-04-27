@@ -4,7 +4,7 @@ from trame.app import get_server
 
 from trame.widgets import vuetify, html
 from trame.widgets import paraview as pvWidgets
-from trame.widgets import client
+from trame.widgets import client, grid
 
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
@@ -73,7 +73,7 @@ state.vars3Dmstate  = [False] * len(source.vars3Dm)
 
 state.views         = []
 state.colors        = []
-state.view_layout   = []
+state.layout        = []
 
 state.ccardsentry   = []
 state.ccardscolor   = [None] * len(source.vars2D + source.vars3Di + source.vars3Dm)
@@ -291,6 +291,7 @@ with layout:
                         )                    
         temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
+            """
             with vuetify.VRow(
             ):
                 vuetify.VCol(
@@ -300,6 +301,20 @@ with layout:
                     key="vref",
                     cols=("12 / vcols",),
                     style="height: 400px",
+                )
+            """
+            with grid.GridLayout(
+                layout=("layout", []),
+                #row_height=20,
+            ):
+                grid.GridItem(
+                    '<vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" interactiveRatio="1" ></vtk-remote-view>',
+                    v_for="vref, idx in views",
+                    #v_for="item in layout",
+                    key="idx",
+                    v_bind=("layout[idx]", ),
+                    classes="pa-4",
+                    style="border: solid 1px #333; background: rgba(128, 128, 128, 0.5);",
                 )
 
 # -----------------------------------------------------------------------------

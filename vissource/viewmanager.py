@@ -115,17 +115,27 @@ class ViewManager():
                 self.rViews.append(rview)
                 counter += 1
 
+        wdt = 4
+        hgt = 3
+
         sWidgets = []
-        for view in self.rViews:
+        layout   = []
+        for idx, view in enumerate(self.rViews):
+            x = int(idx % 3) * wdt
+            y = int(idx / 3) * hgt
             widget = pvWidgets.VtkRemoteView(view,
                                 interactive_ratio=1,
                                 classes="pa-0 drag_ignore",
                                 style="width: 100%; height: 100%;",
                                 trame_server=self.server,
                                 )
+            print(widget)
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
+            layout.append({"x" : x, "y" : y, "w" : wdt, "h" : hgt, "i" : idx})
         self.state.views = sWidgets
+        self.state.layout = layout
+        print(layout)
 
     def UpdateColor(self, color, logclut, index):
         var     = self.state.ccardsentry[index]
