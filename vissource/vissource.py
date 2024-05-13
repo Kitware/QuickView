@@ -12,6 +12,7 @@ from paraview.simple import (
     SetActiveSource,
     XMLRectilinearGridReader,
     Contour,
+    Clip,
 )
 
 # -----------------------------------------------------------------------------
@@ -53,17 +54,16 @@ class EAMVisSource:
 
     def UpdateProjection(self, proj):
         eamproj2D  = FindSource('2DProj')
-        eamprojG   = FindSource('GProj')
-
+        #eamprojG   = FindSource('GProj')
         if self.projection != proj:
             self.projection = proj
             eamproj2D.Projection  = proj
-            eamprojG.Projection   = proj
+            #eamprojG.Projection   = proj
 
         eamproj2D.UpdatePipeline()
-        eamprojG.UpdatePipeline()
-        self.views["2DProj"]  = OutputPort(eamproj2D,  0)
-        self.views["GProj"]   = OutputPort(eamprojG, 0)                  
+        #eamprojG.UpdatePipeline()
+        #self.views["2DProj"]  = OutputPort(eamproj2D,  0)
+        #self.views["GProj"]   = OutputPort(eamprojG, 0)                  
 
     def UpdateLev(self, lev):
         eamproj2D  = FindSource('2DProj')
@@ -76,6 +76,16 @@ class EAMVisSource:
             self.views["2DProj"]  = OutputPort(eamproj2D,  0)
         #    self.UpdateProjection(self.projection)         
 
+    def ApplyClipping(self, cliplong, cliplat):
+        pos = [cliplong[0], cliplat[0], -5.0]
+        len = [cliplong[1] - cliplong[0], cliplat[1] - cliplat[0], 10.0]
+        print(f"Applying clip with pos {pos} and length {len}")
+        clip  = FindSource('Clip')
+        clip.ClipType = 'Box'
+        clip.ClipType.Position = pos 
+        clip.ClipType.Length   = len 
+        clip.UpdatePipeline()
+
     def Update(self, datafile, connfile, globefile, lev):
         if self.data == None:
             data = EAMSliceDataReader(registrationName='eamdata',
@@ -85,6 +95,7 @@ class EAMVisSource:
             data.InterfaceLayer = 0
             data.UpdatePipeline()
             self.data = data
+            self.extents = data.GetDataInformation().GetBounds()
         else:
             self.data.SetDataFileName(datafile)
             self.data.SetConnFileName(connfile)
@@ -106,18 +117,24 @@ class EAMVisSource:
         self.timestamps = np.array(tk.TimestepValues).tolist()
         tk.Time = tk.TimestepValues[0]
 
-        eamproj2D            = EAMProject(registrationName='2DProj', Input=OutputPort(self.data, 0))
+        clip = Clip(registrationName='Clip', Input=OutputPort(self.data, 0))
+        clip.ClipType = 'Box'
+        clip.ClipType.Position = [self.extents[0], self.extents[2], -5] 
+        clip.ClipType.Length   = [self.extents[1] - self.extents[0], self.extents[3] - self.extents[2], 10]
+        clip.UpdatePipeline()
+
+        eamproj2D            = EAMProject(registrationName='2DProj', Input=OutputPort(clip, 0))
         eamproj2D.Projection = self.projection
         eamproj2D.Translate  = 1
         eamproj2D.UpdatePipeline()
 
-        eamprojG            = EAMProject(registrationName='GProj', Input=OutputPort(cgdata, 0))
-        eamprojG.Projection = self.projection
-        eamprojG.Translate  = 1
-        eamprojG.UpdatePipeline()
+        #eamprojG            = EAMProject(registrationName='GProj', Input=OutputPort(cgdata, 0))
+        #eamprojG.Projection = self.projection
+        #eamprojG.Translate  = 1
+        #eamprojG.UpdatePipeline()
 
         self.views["2DProj"]    = OutputPort(eamproj2D,  0)
-        self.views["GProj"]     = OutputPort(eamprojG, 0) 
+        #self.views["GProj"]     = OutputPort(eamprojG, 0) 
 
         from paraview import servermanager as sm
         from paraview.vtk.numpy_interface import dataset_adapter as dsa

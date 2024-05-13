@@ -54,6 +54,7 @@ try:
     source = EAMVisSource()
     GlobeFile='/Users/ayenpure/repositories/eam/eamapp/data/cstar0.vtr'
     source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
+    print(source.extents)
 except Exception as e:
     print("Problem : ", e)
     traceback.print_exc()
@@ -64,6 +65,7 @@ state.colors        = viewmanager.colors
 state.timesteps     = source.timestamps
 state.lev           = source.lev
 state.ilev          = source.ilev
+state.extents       = list(source.extents)
 state.vars2D        = source.vars2D
 state.vars3Di       = source.vars3Di
 state.vars3Dm       = source.vars3Dm
@@ -234,9 +236,58 @@ with layout:
         vuetify.VDivider(classes="mx-2")
         vuetify.VSelect(
             label="Projection",
-            items=("options", ["Robinson", "Mollweide"]),
-            v_model=("projection", 'Robinson')
+            items=("options", ["None","Robinson", "Mollweide"]),
+            v_model=("projection", "None")
         )
+        vuetify.VCheckbox(
+            label="Lat/Long Clipping",
+            v_model=("clipping", False),
+            style="max-height: 20px",
+            dense=True
+        )
+        with vuetify.VCard(
+            v_show="clipping == true",
+            variant="outlined"
+        ):
+            vuetify.VCardTitle(
+                title="Clip View",
+                classes="grey lighten-1 py-1 grey--text text--darken-3",
+                dense=True,
+                style="max-height: 20px",
+            )
+            with vuetify.VCardText(classes="py-2"):
+                with vuetify.VRow():
+                    vuetify.VRangeSlider(
+                        label='Longitude',
+                        v_model=("cliplong", [source.extents[0], source.extents[1]]),
+                        min=("extents[0]", ),
+                        max=("extents[1]", ),
+                        )
+                with vuetify.VRow():
+                    with vuetify.VCol(cols=4):
+                        vuetify.VTextField(
+                            v_model=("cliplong[0]",)
+                        )
+                    with vuetify.VCol(cols=4):
+                        vuetify.VTextField(
+                            v_model=("cliplong[1]",)
+                        )
+                with vuetify.VRow():
+                    vuetify.VRangeSlider(
+                        label='Latitude',
+                        v_model=("cliplat", [source.extents[2], source.extents[3]]),
+                        min=("extents[2]", ),
+                        max=("extents[3]", ),
+                    )
+                with vuetify.VRow():
+                    with vuetify.VCol(cols=4):
+                        vuetify.VTextField(
+                            v_model=("cliplat[0]",)
+                        )
+                    with vuetify.VCol(cols=4):
+                        vuetify.VTextField(
+                            v_model=("cliplat[1]",)
+                        )
         vuetify.VBtn(
             "Apply",
             click=Apply
@@ -314,7 +365,7 @@ with layout:
                     key="idx",
                     v_bind=("layout[idx]", ),
                     classes="pa-4",
-                    style="border: solid 1px #333; background: rgba(128, 128, 128, 0.5);",
+                    style="border: solid 1px #333; background: rgba(0, 69, 96, 0.5);",
                 )
 
 # -----------------------------------------------------------------------------

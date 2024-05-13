@@ -197,8 +197,9 @@ class EAMLineSource(VTKPythonAlgorithmBase):
                     number_of_elements="1"
                     default_values="0">
                     <EnumerationDomain name="enum">
-                        <Entry value="0" text="Robinson"/>
-                        <Entry value="1" text="Mollweide"/>
+                        <Entry value="0" text="None"/>
+                        <Entry value="1" text="Robinson"/>
+                        <Entry value="2" text="Mollweide"/>
                     </EnumerationDomain>
                 </IntVectorProperty>
                 """)
@@ -241,8 +242,10 @@ class EAMProject(VTKPythonAlgorithmBase):
 
         latlon  = Proj(init="epsg:4326")
         if self.project == 0:
-            proj = Proj(proj="robin")
+            return 1
         elif self.project == 1:
+            proj = Proj(proj="robin")
+        elif self.project == 2:
             proj = Proj(proj="moll")
 
         xformer = Transformer.from_proj(latlon, proj)

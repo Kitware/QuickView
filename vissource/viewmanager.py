@@ -91,10 +91,17 @@ class ViewManager():
         self.widgets.clear()
 
         self.source.UpdateLev(self.state.vlev)
+        if self.state.clipping:
+            self.source.ApplyClipping(self.state.cliplong, self.state.cliplat)
+        else:
+            long = [self.state.extents[0], self.state.extents[1]]
+            lat  = [self.state.extents[2], self.state.extents[3]]
+            self.source.ApplyClipping(long, lat)
+
         self.source.UpdateProjection(self.state.projection)
 
         view2D   = self.source.views['2DProj']
-        viewG    = self.source.views['GProj']
+        viewG    = None #= self.source.views['GProj']
         vars2D   = self.source.vars.get('2D', None)
         vars3Dm  = self.source.vars.get('3Dm', None)
 
@@ -135,7 +142,6 @@ class ViewManager():
             layout.append({"x" : x, "y" : y, "w" : wdt, "h" : hgt, "i" : idx})
         self.state.views = sWidgets
         self.state.layout = layout
-        print(layout)
 
     def UpdateColor(self, color, logclut, index):
         var     = self.state.ccardsentry[index]
