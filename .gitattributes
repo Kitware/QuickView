@@ -1,4 +1,4 @@
 data/ filter=lfs diff=lfs merge=lfs -text
 data/aerosol_F2010.eam.h0.2014-12.nc filter=lfs diff=lfs merge=lfs -text
-data/globe.vtr filter=lfs diff=lfs merge=lfs -text
 data/connectivity.nc filter=lfs diff=lfs merge=lfs -text
+data/globe.vtk filter=lfs diff=lfs merge=lfs -text
