@@ -14,16 +14,17 @@ from paraview.simple import (
     GetScalarBar,
     ColorBy,
     GetColorTransferFunction,
-    SetActiveView
+    SetActiveView,
 )
 
-def GetRenderView(geom, var, num, colormap, globe):
+def GetRenderView(geom, var, num, colormap):
+    data = geom['2DProj']
     #rview = FindViewOrCreate(f'rv{num}', 'RenderView')
     rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
-    rep    = Show(geom, rview)
+    rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
-    coltrfunc.ApplyPreset('oslo', True)
+    coltrfunc.ApplyPreset('osloasdadad', True)
     rep.SetScalarBarVisibility(rview, True)
     rview.CameraParallelProjection = 1
     rview.ResetCamera(True)
@@ -33,11 +34,17 @@ def GetRenderView(geom, var, num, colormap, globe):
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
 
-    #repG = Show(globe, rview)
-    #repG.SetRepresentationType('Wireframe')
-    #repG.RenderLinesAsTubes = 1
-    #repG.LineWidth = 2.0
-    #ColorBy(repG, None)
+    globe = geom['GProj']
+    repG = Show(globe, rview)
+    repG.SetRepresentationType('Wireframe')
+    repG.RenderLinesAsTubes = 1
+    repG.LineWidth = 2.0
+    ColorBy(repG, None)
+
+    annot = geom['GLines']
+    repAn = Show(annot, rview)
+    repAn.SetRepresentationType('Wireframe')
+    repAn.RenderLinesAsTubes = 1
 
     text = Text(registrationName=f'Text{num}')
     text.Text = var
@@ -90,18 +97,16 @@ class ViewManager():
     def UpdateView(self):
         self.widgets.clear()
 
+        long = [self.state.extents[0], self.state.extents[1]]
+        lat  = [self.state.extents[2], self.state.extents[3]]
         self.source.UpdateLev(self.state.vlev)
         if self.state.clipping:
-            self.source.ApplyClipping(self.state.cliplong, self.state.cliplat)
-        else:
-            long = [self.state.extents[0], self.state.extents[1]]
-            lat  = [self.state.extents[2], self.state.extents[3]]
-            self.source.ApplyClipping(long, lat)
+            long = self.state.cliplong 
+            lat  = self.state.cliplat
+        self.source.ApplyClipping(long, lat)
 
         self.source.UpdateProjection(self.state.projection)
 
-        view2D   = self.source.views['2DProj']
-        viewG    = None #= self.source.views['GProj']
         vars2D   = self.source.vars.get('2D', None)
         vars3Dm  = self.source.vars.get('3Dm', None)
 
@@ -113,12 +118,9 @@ class ViewManager():
         counter = 0
         self.rViews = []
         colormap = "Rainbow"
-        for var in vars2D:
-                rview = GetRenderView(view2D, var, counter, colormap, viewG) 
-                self.rViews.append(rview)
-                counter += 1
-        for var in vars3Dm:
-                rview = GetRenderView(view2D, var, counter, colormap, viewG) 
+
+        for var in vars2D + vars3Dm:
+                rview = GetRenderView(self.source.views, var, counter, colormap) 
                 self.rViews.append(rview)
                 counter += 1
 

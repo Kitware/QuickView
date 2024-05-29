@@ -52,7 +52,7 @@ state.vlev = 0
 # create a new 'EAM Data Reader'
 try:
     source = EAMVisSource()
-    GlobeFile='/Users/ayenpure/repositories/eam/eamapp/data/cstar0.vtr'
+    GlobeFile='/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data'
     source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
     print(source.extents)
 except Exception as e:
@@ -108,21 +108,6 @@ def update3DmVars(index, visibility):
 @state.change('vcols')
 def Columns(vcols, **kwargs):
     viewmanager.SetCols(vcols)
-
-'''
-@state.change("time_stamp")
-def FetchTimeStamp(time_stamp, **kwargs):
-    source.UpdateTimeStep(time_stamp)
-
-
-@state.change('vlev')
-def Lev(vlev, **kwargs):
-    source.UpdateLev(vlev)
-
-@state.change('projection')
-def Projection(projection, **kwargs):
-    source.SetProjection(projection)
-'''
 
 def Apply():
     s2d     = []
@@ -288,6 +273,34 @@ with layout:
                         vuetify.VTextField(
                             v_model=("cliplat[1]",)
                         )
+        vuetify.VCheckbox(
+            label="Grid Lines",
+            v_model=("gannot", False),
+            style="max-height: 20px",
+            dense=True
+        )
+        with vuetify.VCard(
+            v_show="false",
+            variant="outlined"
+        ):
+            vuetify.VCardTitle(
+                title="GridLines config",
+                classes="grey lighten-1 py-1 grey--text text--darken-3",
+                dense=True,
+                style="max-height: 20px",
+            )
+            """
+            with vuetify.VCardText(classes="py-2"):
+                with vuetify.VRow():
+                    with vuetify.VCol(cols=4):
+                        vuetify.VTextField(
+                            v_model=("splong",)
+                        )
+                    with vuetify.VCol(cols=4):
+                        vuetify.VTextField(
+                            v_model=("splat",)
+                        )
+            """
         vuetify.VBtn(
             "Apply",
             click=Apply
