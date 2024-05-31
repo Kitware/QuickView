@@ -35,7 +35,7 @@ class EAMVisSource:
 
         self.data       = None
         self.globe      = None
-        self.projection = 'Robinson'
+        self.projection = 'None'
         self.timestamps = []
         self.lev        = 0
 
@@ -61,9 +61,11 @@ class EAMVisSource:
             eamproj2D.Projection  = proj
             eamprojG.Projection   = proj
             projA.Projection      = proj
-
+        print("Applying Projection 1")
         eamproj2D.UpdatePipeline()
+        print("Applying Projection 2")
         eamprojG.UpdatePipeline()
+        print("Applying Projection 3")
         projA.UpdatePipeline()
         self.views["2DProj"]  = OutputPort(eamproj2D,  0)
         self.views["GProj"]   = OutputPort(eamprojG, 0)                  
@@ -95,6 +97,7 @@ class EAMVisSource:
         clip.ClipType.Length   = len 
         clip.UpdatePipeline()
         grid = FindSource("OGLines")
+        print(dir(grid))
         grid.LatitudeRange = cliplat
         grid.LongitudeRange = cliplong
         grid.UpdatePipeline()

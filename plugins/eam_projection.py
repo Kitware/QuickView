@@ -227,10 +227,12 @@ class EAMProject(VTKPythonAlgorithmBase):
             afilter = vtkAppendFilter()
             afilter.AddInputData(inData)
             afilter.Update()
-            out = afilter.GetOutput()
             outData.DeepCopy(afilter.GetOutput())
         else:
             outData.DeepCopy(inData)
+
+        if self.project == 0:
+            return 1
 
         inWrap     = dsa.WrapDataObject(inData)
         outWrap     = dsa.WrapDataObject(outData)
@@ -241,9 +243,7 @@ class EAMProject(VTKPythonAlgorithmBase):
         y = flat[1::3]
 
         latlon  = Proj(init="epsg:4326")
-        if self.project == 0:
-            return 1
-        elif self.project == 1:
+        if self.project == 1:
             proj = Proj(proj="robin")
         elif self.project == 2:
             proj = Proj(proj="moll")

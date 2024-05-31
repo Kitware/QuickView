@@ -5,22 +5,64 @@ from trame.widgets import (
 
 import math
 import os
+import numpy as np
 
 from paraview.simple import (
     Text,
     Show,
     ImportPresets,
     CreateRenderView,
+    FindViewOrCreate,
     GetScalarBar,
     ColorBy,
     GetColorTransferFunction,
-    SetActiveView,
 )
 
-def GetRenderView(geom, var, num, colormap):
-    data = geom['2DProj']
-    #rview = FindViewOrCreate(f'rv{num}', 'RenderView')
-    rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
+def GenerateAnnotations(long, lat):
+    texts = []
+    interval = 30
+    llon     = long[0]
+    hlon     = long[1]
+    llat     = lat[0]
+    hlat     = lat[1]
+
+    llon = math.floor(llon  / interval) * interval
+    hlon = math.ceil(hlon / interval) * interval
+
+    llat = math.floor(llat  / interval) * interval
+    hlat = math.ceil(hlat / interval) * interval
+   
+    lonx = np.arange(llon, hlon + interval, interval)
+    laty = np.arange(llat, hlat + interval, interval)
+
+    for x in lonx:
+        text       = Text(registrationName=f"text{x}")
+        text.Text  = str(x)
+        pos = [x, hlat, 1.]
+        texts.append((text, pos))
+    for y in laty:
+        text       = Text(registrationName=f"text{y}")
+        text.Text  = str(y)
+        pos = [hlon, y, 1.]
+        texts.append((text, pos))
+
+    return texts
+
+def AddAnnotations(rview, annotations):
+    for (text, pos) in annotations:
+        display = Show(text, rview, 'TextSourceRepresentation')
+        display.TextPropMode = 'Billboard 3D Text'
+        display.BillboardPosition = pos
+        display.Bold = 1
+        display.FontSize = 12
+        display.Italic = 1
+        display.Shadow = 1
+    pass
+
+def GetRenderView(index, views, var, num, colormap):
+    data = views['2DProj']
+    rview = FindViewOrCreate(f'rv{index}', 'RenderView')
+    #rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
@@ -34,14 +76,14 @@ def GetRenderView(geom, var, num, colormap):
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
 
-    globe = geom['GProj']
+    globe = views['GProj']
     repG = Show(globe, rview)
     repG.SetRepresentationType('Wireframe')
     repG.RenderLinesAsTubes = 1
     repG.LineWidth = 2.0
     ColorBy(repG, None)
 
-    annot = geom['GLines']
+    annot = views['GLines']
     repAn = Show(annot, rview)
     repAn.SetRepresentationType('Wireframe')
     repAn.RenderLinesAsTubes = 1
@@ -118,9 +160,11 @@ class ViewManager():
         counter = 0
         self.rViews = []
         colormap = "Rainbow"
+        annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat)
 
-        for var in vars2D + vars3Dm:
-                rview = GetRenderView(self.source.views, var, counter, colormap) 
+        for index, var in enumerate(vars2D + vars3Dm):
+                rview = GetRenderView(index, self.source.views, var, counter, colormap) 
+                AddAnnotations(rview, annotations)
                 self.rViews.append(rview)
                 counter += 1
 
@@ -138,7 +182,6 @@ class ViewManager():
                                 style="width: 100%; height: 100%;",
                                 trame_server=self.server,
                                 )
-            print(widget)
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
             layout.append({"x" : x, "y" : y, "w" : wdt, "h" : hgt, "i" : idx})
