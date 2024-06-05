@@ -12,7 +12,6 @@ import math
 
 try:
     import numpy as np
-    import pandas as pd
     from pyproj import Proj, Transformer
     _has_deps = True
 except ImportError as ie:

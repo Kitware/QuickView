@@ -6,6 +6,7 @@ from trame.widgets import (
 import math
 import os
 import numpy as np
+from pyproj import Proj, Transformer
 
 from paraview.simple import (
     Text,
@@ -18,7 +19,14 @@ from paraview.simple import (
     GetColorTransferFunction,
 )
 
-def GenerateAnnotations(long, lat):
+def ApplyProj(projection, point):
+    if projection is None:
+        return point
+    else:
+        new = projection.transform(point[0] - 180, point[1])
+        return [new[0], new[1], 1.]
+
+def GenerateAnnotations(long, lat, projection):
     texts = []
     interval = 30
     llon     = long[0]
@@ -35,15 +43,28 @@ def GenerateAnnotations(long, lat):
     lonx = np.arange(llon, hlon + interval, interval)
     laty = np.arange(llat, hlat + interval, interval)
 
+    from functools import partial
+
+    proj = partial(ApplyProj, None)
+    if projection != 'None':
+        latlon  = Proj(init="epsg:4326")
+        if projection == 'Robinson':
+            proj = Proj(proj="robin")
+        elif projection == 'Mollweide':
+            proj = Proj(proj="moll")
+        xformer = Transformer.from_proj(latlon, proj)
+        proj = partial(ApplyProj, xformer)
+
     for x in lonx:
         text       = Text(registrationName=f"text{x}")
         text.Text  = str(x)
-        pos = [x, hlat, 1.]
+        pos = proj([x, hlat, 1.])
         texts.append((text, pos))
     for y in laty:
         text       = Text(registrationName=f"text{y}")
         text.Text  = str(y)
-        pos = [hlon, y, 1.]
+        pos = proj([hlon, y, 1.])
+        pos[0] += pos[0] * 0.075
         texts.append((text, pos))
 
     return texts
@@ -160,7 +181,7 @@ class ViewManager():
         counter = 0
         self.rViews = []
         colormap = "Rainbow"
-        annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat)
+        annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         for index, var in enumerate(vars2D + vars3Dm):
                 rview = GetRenderView(index, self.source.views, var, counter, colormap) 

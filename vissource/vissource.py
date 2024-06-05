@@ -61,11 +61,8 @@ class EAMVisSource:
             eamproj2D.Projection  = proj
             eamprojG.Projection   = proj
             projA.Projection      = proj
-        print("Applying Projection 1")
         eamproj2D.UpdatePipeline()
-        print("Applying Projection 2")
         eamprojG.UpdatePipeline()
-        print("Applying Projection 3")
         projA.UpdatePipeline()
         self.views["2DProj"]  = OutputPort(eamproj2D,  0)
         self.views["GProj"]   = OutputPort(eamprojG, 0)                  
@@ -85,7 +82,6 @@ class EAMVisSource:
     def ApplyClipping(self, cliplong, cliplat):
         pos = [cliplong[0], cliplat[0], -5.0]
         len = [cliplong[1] - cliplong[0], cliplat[1] - cliplat[0], 10.0]
-        print(f"Applying clip with pos {pos} and length {len}")
         clip  = FindSource('Clip')
         clip.ClipType = 'Box'
         clip.ClipType.Position = pos 
@@ -97,7 +93,6 @@ class EAMVisSource:
         clip.ClipType.Length   = len 
         clip.UpdatePipeline()
         grid = FindSource("OGLines")
-        print(dir(grid))
         grid.LatitudeRange = cliplat
         grid.LongitudeRange = cliplong
         grid.UpdatePipeline()
