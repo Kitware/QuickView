@@ -19,7 +19,7 @@ import argparse
 
 parser = argparse.ArgumentParser(prog='eamapp.py',
                                  description='Trame based app for visualizing EAM data')
-parser.add_argument('-cf', '--conn', help='the nc file with connnectivity information')
+parser.add_argument('-cf', '--conn', nargs="?", help='the nc file with connnectivity information')
 parser.add_argument('-df', '--data', help='the nc file with data/variables')
 parser.add_argument('-sf', '--state', nargs='+', help='state file to be loaded')
 parser.add_argument('-wd', '--workdir', help='working directory (to store session data)')
@@ -34,8 +34,10 @@ server = get_server()
 server.client_type = "vue2" # instead of 'vue2'
 state, ctrl = server.state, server.controller
 pvWidgets.initialize(server)
-
+import os
 ConnFile = args.conn 
+if args.conn is None:
+    ConnFile = os.path.join(os.path.dirname(__file__), "data", "connectivity.nc")
 DataFile = args.data
 StateFile = args.state
 WorkDir = args.workdir
