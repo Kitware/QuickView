@@ -27,3 +27,5 @@ pvpython --force-offscreen-rendering eamapp.py --server  --data data/aerosol_F20
 In the above execution the data file is provided as the sample data out of the repository.
 The repository also contains the connectivity file that it uses by default.
 If another connectivity and data files are to be used please specify the paths using the `--conn` and `--data` options.
+The above command will start the Trame app server.
+On the browser proceed to `http://localhost:8080` to use the app
