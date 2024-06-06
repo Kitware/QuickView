@@ -112,7 +112,7 @@ class EAMVisSource:
             self.data.SetConnFileName(connfile)
 
         if self.globe == None:
-            gdata = LegacyVTKReader(registrationName='globe', FileNames=['/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data/globe.vtk'])
+            gdata = LegacyVTKReader(registrationName='globe', FileNames=[globefile])
             gdata.UpdatePipeline()
             cgdata = Contour(registrationName='gcontour', Input=gdata)
             cgdata.ContourBy = ['POINTS', 'cstar']

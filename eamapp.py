@@ -54,7 +54,7 @@ state.vlev = 0
 # create a new 'EAM Data Reader'
 try:
     source = EAMVisSource()
-    GlobeFile='/home/local/KHQ/abhi.yenpure/repositories/eam/EAMApp/data'
+    GlobeFile = os.path.join(os.path.dirname(__file__), "data", "globe.vtk")
     source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
     print(source.extents)
 except Exception as e:
