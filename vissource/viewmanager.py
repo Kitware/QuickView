@@ -46,7 +46,7 @@ def GenerateAnnotations(long, lat, projection):
     from functools import partial
 
     proj = partial(ApplyProj, None)
-    if projection != 'None':
+    if projection != 'Cyl. Equidistant':
         latlon  = Proj(init="epsg:4326")
         if projection == 'Robinson':
             proj = Proj(proj="robin")
@@ -83,6 +83,9 @@ def AddAnnotations(rview, annotations):
 def GetRenderView(index, views, var, num, colormap):
     data = views['2DProj']
     rview = FindViewOrCreate(f'rv{index}', 'RenderView')
+    rview.UseColorPaletteForBackground = 0
+    rview.BackgroundColorMode = 'Gradient'
+
     #rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
@@ -99,15 +102,19 @@ def GetRenderView(index, views, var, num, colormap):
 
     globe = views['GProj']
     repG = Show(globe, rview)
+    ColorBy(repG, None)
     repG.SetRepresentationType('Wireframe')
     repG.RenderLinesAsTubes = 1
-    repG.LineWidth = 2.0
-    ColorBy(repG, None)
+    repG.LineWidth = 1.0
+    repG.AmbientColor = [0.67, 0.67, 0.67]
+    repG.DiffuseColor = [0.67, 0.67, 0.67]
 
     annot = views['GLines']
     repAn = Show(annot, rview)
     repAn.SetRepresentationType('Wireframe')
     repAn.RenderLinesAsTubes = 1
+    repAn.AmbientColor = [0.67, 0.67, 0.67]
+    repAn.DiffuseColor = [0.67, 0.67, 0.67]
 
     text = Text(registrationName=f'Text{num}')
     text.Text = var

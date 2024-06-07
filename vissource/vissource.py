@@ -35,7 +35,7 @@ class EAMVisSource:
 
         self.data       = None
         self.globe      = None
-        self.projection = 'None'
+        self.projection = 'Cyl. Equidistant'
         self.timestamps = []
         self.lev        = 0
 

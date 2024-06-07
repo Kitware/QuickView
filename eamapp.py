@@ -140,6 +140,18 @@ def Apply():
 def ApplyColor(color, logclut, index):
     viewmanager.UpdateColor(color, logclut,index)
 
+def ui_card(title, varname):
+    with vuetify.VCard(v_show=f"{varname} == true"):
+        vuetify.VCardTitle(
+            title,
+            classes="grey lighten-1 py-1 grey--text text--darken-3",
+            style="user-select: none; cursor: pointer",
+            hide_details=True,
+            dense=True,
+        )
+        content = vuetify.VCardText(classes="py-2")
+    return content
+
 with layout:
     # uncomment following line to disable scrolling on views
     # client.Style("html { overflow: hidden; }")
@@ -160,201 +172,162 @@ with layout:
     with layout.drawer as drawer:
         drawer.width = 325
         vuetify.VDivider(classes="mb-2")
-        html.A(
-            "Slice Parameters",
-            style="padding: 10px;",
-        )
-        with vuetify.VRow():
-            with vuetify.VCol(cols=6):
-                vuetify.VSlider(
-                    label='Lev',
-                    v_model=("vlev", 0),
-                    min=0,
-                    max=("lev.length - 1", )
-                )
-            with vuetify.VCol(cols=4):
-                vuetify.VTextField(
-                    v_model=("lev[vlev]", 0)
-                )
-        with vuetify.VRow():
-            with vuetify.VCol(cols=6):
-                vuetify.VSlider(
-                    label='Time',
-                    v_model=("tstamp", 0),
-                    min=0,
-                    max=("timesteps.length - 1", )
-                )
-            with vuetify.VCol(cols=4):
-                vuetify.VTextField(
-                    v_model=("timesteps[tstamp]", 0)
-                )
-        vuetify.VDivider(classes="mx-2")
-        html.A(
-            "2D Variables",
-            style="padding: 10px;",
-        )
-        with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
-            with vuetify.VListItemGroup(dense=True, label="2D Variables"):
-                vuetify.VCheckbox(
-                    v_for="v, i in vars2D",
-                    key="i",
-                    label=("vars2D[i]",),
-                    v_model=("vars2Dstate[i]",),
-                    change=(update2DVars, "[i, $event]"),
-                    style="max-height: 20px",
-                    dense=True
-                )
-        vuetify.VDivider(classes="mx-2")
-        html.A(
-            "3D Middle Layer Variables",
-            style="padding: 10px;",
-        )
-        with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
-            with vuetify.VListItemGroup(dense=True, label="3D Variables"):
-                vuetify.VCheckbox(
-                    v_for="v, i in vars3Dm",
-                    key="i",
-                    label=("vars3Dm[i]",),
-                    v_model=("vars3Dmstate[i]",),
-                    change=(update3DmVars, "[i, $event]"),
-                    style="max-height: 20px",
-                    dense=True
-                )
-        vuetify.VDivider(classes="mx-2")
-        vuetify.VSelect(
-            label="Projection",
-            items=("options", ["None","Robinson", "Mollweide"]),
-            v_model=("projection", "None")
-        )
-        vuetify.VCheckbox(
-            label="Lat/Long Clipping",
-            v_model=("clipping", False),
-            style="max-height: 20px",
-            dense=True
-        )
-        with vuetify.VCard(
-            v_show="clipping == true",
-            variant="outlined"
-        ):
-            vuetify.VCardTitle(
-                title="Clip View",
-                classes="grey lighten-1 py-1 grey--text text--darken-3",
-                dense=True,
-                style="max-height: 20px",
-            )
-            with vuetify.VCardText(classes="py-2"):
+        with vuetify.VContainer(fluid=True):
+            with ui_card(title="Select Data Slice", varname="true"):
                 with vuetify.VRow():
-                    vuetify.VRangeSlider(
-                        label='Longitude',
-                        v_model=("cliplong", [source.extents[0], source.extents[1]]),
-                        min=("extents[0]", ),
-                        max=("extents[1]", ),
-                        )
-                with vuetify.VRow():
-                    with vuetify.VCol(cols=4):
-                        vuetify.VTextField(
-                            v_model=("cliplong[0]",)
+                    with vuetify.VCol(cols=6):
+                        vuetify.VSlider(
+                            label='Lev',
+                            v_model=("vlev", 0),
+                            min=0,
+                            max=("lev.length - 1", )
                         )
                     with vuetify.VCol(cols=4):
                         vuetify.VTextField(
-                            v_model=("cliplong[1]",)
+                            v_model=("lev[vlev]", 0)
                         )
                 with vuetify.VRow():
-                    vuetify.VRangeSlider(
-                        label='Latitude',
-                        v_model=("cliplat", [source.extents[2], source.extents[3]]),
-                        min=("extents[2]", ),
-                        max=("extents[3]", ),
+                    with vuetify.VCol(cols=6):
+                        vuetify.VSlider(
+                            label='Time',
+                            v_model=("tstamp", 0),
+                            min=0,
+                            max=("timesteps.length - 1", )
+                        )
+                    with vuetify.VCol(cols=4):
+                        vuetify.VTextField(
+                            v_model=("timesteps[tstamp]", 0)
                     )
-                with vuetify.VRow():
-                    with vuetify.VCol(cols=4):
-                        vuetify.VTextField(
-                            v_model=("cliplat[0]",)
-                        )
-                    with vuetify.VCol(cols=4):
-                        vuetify.VTextField(
-                            v_model=("cliplat[1]",)
-                        )
-        vuetify.VCheckbox(
-            label="Grid Lines",
-            v_model=("gannot", False),
-            style="max-height: 20px",
-            dense=True
-        )
-        with vuetify.VCard(
-            v_show="false",
-            variant="outlined"
-        ):
-            vuetify.VCardTitle(
-                title="GridLines config",
-                classes="grey lighten-1 py-1 grey--text text--darken-3",
-                dense=True,
-                style="max-height: 20px",
-            )
-            """
-            with vuetify.VCardText(classes="py-2"):
-                with vuetify.VRow():
-                    with vuetify.VCol(cols=4):
-                        vuetify.VTextField(
-                            v_model=("splong",)
-                        )
-                    with vuetify.VCol(cols=4):
-                        vuetify.VTextField(
-                            v_model=("splat",)
-                        )
-            """
-        vuetify.VBtn(
-            "Apply",
-            click=Apply
-        )
         vuetify.VDivider(classes="mx-2")
-        html.A(
-            "View Configuration",
-            style="padding: 10px;",
-        )
-        vuetify.VSlider(
-            label='Columns',
-            v_model=("vcols", 1),
-            min=1,
-            max=3
-        )
-        vuetify.VSelect(
-            label="Select Variable",
-            v_model=("ccardselect", None),
-            items=("ccardsvars", []),
-            dense=True,
-            hide_details=True,
-        )
-        with vuetify.VCard(
-            v_for="v, i in ccardsentry",
-            key="i",
-            v_show="ccardsentry[i] == ccardselect",
-            variant="outlined"
-        ):
-            vuetify.VCardTitle(
-                title=("ccardsentry[i]",), 
-                classes="grey lighten-1 py-1 grey--text text--darken-3",
-                dense=True,
-                style="max-height: 20px",
-            )
-            with vuetify.VCardText(classes="py-2"):
-                with vuetify.VRow(classes="pt-2", dense=True):
-                    with vuetify.VCol(cols=6):
-                        vuetify.VSelect(
-                            v_model=("varcolor", "Viridis"),
-                            items=("colormaps", colors),
-                            dense=True,
-                            hide_details=True,
-                        )
+        with vuetify.VContainer(fluid=True):
+            with ui_card(title="Map Projection Selection", varname="true"):
+                html.A(
+                    "Projection",
+                    style="padding: 10px;",
+                )
+                vuetify.VSelect(
+                    items=("options", ["Cyl. Equidistant","Robinson", "Mollweide"]),
+                    v_model=("projection", "Cyl. Equidistant")
+                )
+        vuetify.VDivider(classes="mx-2")
+        with vuetify.VContainer(fluid=True):
+            with ui_card(title="Variable Selection", varname="true"):
+                html.A(
+                    "2D Variables",
+                    style="padding: 10px;",
+                )
+                with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
+                    with vuetify.VListItemGroup(dense=True, label="2D Variables"):
                         vuetify.VCheckbox(
-                            label="Log color scale",
-                            v_model=("logclut", False)
+                            v_for="v, i in vars2D",
+                            key="i",
+                            label=("vars2D[i]",),
+                            v_model=("vars2Dstate[i]",),
+                            change=(update2DVars, "[i, $event]"),
+                            style="max-height: 20px",
+                            dense=True
                         )
-                    with vuetify.VCol(cols=6):
-                        vuetify.VBtn(
-                            "Update",
-                            click=(ApplyColor,"[varcolor, logclut, i]")                           
-                        )                    
+                vuetify.VDivider(classes="mx-2")
+                html.A(
+                    "3D Middle Layer Variables",
+                    style="padding: 10px;",
+                )
+                with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
+                    with vuetify.VListItemGroup(dense=True, label="3D Variables"):
+                        vuetify.VCheckbox(
+                            v_for="v, i in vars3Dm",
+                            key="i",
+                            label=("vars3Dm[i]",),
+                            v_model=("vars3Dmstate[i]",),
+                            change=(update3DmVars, "[i, $event]"),
+                            style="max-height: 20px",
+                            dense=True
+                        )
+        vuetify.VDivider(classes="mx-2")
+        with vuetify.VContainer(fluid=True):
+            with ui_card(title="Clipping", varname="true"):
+                vuetify.VCheckbox(
+                    label="Lat/Long Clipping",
+                    v_model=("clipping", False),
+                    dense=True
+                )
+                with vuetify.VContainer(fluid=True):
+                    with ui_card(title=None, varname="clipping"):
+                        with vuetify.VRow():
+                            vuetify.VRangeSlider(
+                                label='Longitude',
+                                v_model=("cliplong", [source.extents[0], source.extents[1]]),
+                                min=("extents[0]", ),
+                                max=("extents[1]", ),
+                            )
+                        with vuetify.VRow():
+                            with vuetify.VCol(cols=4):
+                                vuetify.VTextField(
+                                    v_model=("cliplong[0]",)
+                                )
+                            with vuetify.VCol(cols=4):
+                                vuetify.VTextField(
+                                    v_model=("cliplong[1]",)
+                                )
+                        with vuetify.VRow():
+                            vuetify.VRangeSlider(
+                                label='Latitude',
+                                v_model=("cliplat", [source.extents[2], source.extents[3]]),
+                                min=("extents[2]", ),
+                                max=("extents[3]", ),
+                            )
+                        with vuetify.VRow():
+                            with vuetify.VCol(cols=4):
+                                vuetify.VTextField(
+                                    v_model=("cliplat[0]",)
+                                )
+                            with vuetify.VCol(cols=4):
+                                vuetify.VTextField(
+                                    v_model=("cliplat[1]",)
+                                )
+        vuetify.VDivider(classes="mx-2") 
+        with vuetify.VContainer(fluid=True, classes="d-flex justify-center align-center"):
+                vuetify.VBtn("Apply", click=Apply, variant="tonal", style="color: blue")
+        vuetify.VDivider(classes="mx-2") 
+        with vuetify.VContainer(fluid=True):
+            with ui_card(title="Display Window Config.", varname="true"):
+                vuetify.VSlider(
+                    label='# Plot Panels / Row',
+                    v_model=("vcols", 1),
+                    min=1,
+                    max=3
+                )
+                vuetify.VSelect(
+                    label="Select Variable",
+                    v_model=("ccardselect", None),
+                    items=("ccardsvars", []),
+                    dense=True,
+                    hide_details=True,
+                )
+                with vuetify.VCard(
+                    v_for="v, i in ccardsentry",
+                    key="i",
+                    v_show="ccardsentry[i] == ccardselect",
+                    variant="outlined"
+                ): 
+                    with vuetify.VCardText(classes="py-2"):
+                        with vuetify.VRow(classes="pt-2", dense=True):
+                            with vuetify.VCol(cols=6):
+                                vuetify.VSelect(
+                                    v_model=("varcolor", "Viridis"),
+                                    items=("colormaps", colors),
+                                    dense=True,
+                                    hide_details=True,
+                                )
+                                vuetify.VCheckbox(
+                                    label="Log color scale",
+                                    v_model=("logclut", False)
+                                )
+                            with vuetify.VCol(cols=6):
+                                vuetify.VBtn(
+                                    "Update",
+                                    click=(ApplyColor,"[varcolor, logclut, i]")                           
+                                )                    
         temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
             """
@@ -379,8 +352,8 @@ with layout:
                     #v_for="item in layout",
                     key="idx",
                     v_bind=("layout[idx]", ),
-                    classes="pa-4",
-                    style="border: solid 1px #333; background: rgba(0, 69, 96, 0.5);",
+                    #classes="pa-4",
+                    #style="border: solid 1px #333; background: rgba(0, 69, 96, 0.5);",
                 )
 
 # -----------------------------------------------------------------------------
