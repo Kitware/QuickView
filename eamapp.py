@@ -287,7 +287,7 @@ with layout:
                                 )
         vuetify.VDivider(classes="mx-2") 
         with vuetify.VContainer(fluid=True, classes="d-flex justify-center align-center"):
-                vuetify.VBtn("Apply", click=Apply, variant="tonal", style="color: blue")
+                vuetify.VBtn("Apply", click=Apply, style="color: blue; width: 200px; height: 50px;", classes="text-h5")
         vuetify.VDivider(classes="mx-2") 
         with vuetify.VContainer(fluid=True):
             with ui_card(title="Display Window Config.", varname="true"):

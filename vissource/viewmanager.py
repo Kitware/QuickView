@@ -112,7 +112,8 @@ def GetRenderView(index, views, var, num, colormap):
     annot = views['GLines']
     repAn = Show(annot, rview)
     repAn.SetRepresentationType('Wireframe')
-    repAn.RenderLinesAsTubes = 1
+    #repAn.RenderLinesAsTubes = 1
+    #repG.LineWidth = 0.5
     repAn.AmbientColor = [0.67, 0.67, 0.67]
     repAn.DiffuseColor = [0.67, 0.67, 0.67]
 
