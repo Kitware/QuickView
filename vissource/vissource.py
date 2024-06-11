@@ -9,8 +9,6 @@ from paraview.simple import (
     GetTimeKeeper,
     LoadPlugin,
     OutputPort,
-    SetActiveSource,
-    XMLRectilinearGridReader,
     Contour,
     Clip,
 )

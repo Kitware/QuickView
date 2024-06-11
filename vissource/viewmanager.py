@@ -90,7 +90,7 @@ def GetRenderView(index, views, var, num, colormap):
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
-    coltrfunc.ApplyPreset('osloasdadad', True)
+    coltrfunc.ApplyPreset(colormap, True)
     rep.SetScalarBarVisibility(rview, True)
     rview.CameraParallelProjection = 1
     rview.ResetCamera(True)
@@ -166,6 +166,7 @@ class ViewManager():
               widget.update()
 
     def UpdateView(self):
+        print("Which Color maps ? : ", self.state.cmaps, type(self.state.cmaps))
         self.widgets.clear()
 
         long = [self.state.extents[0], self.state.extents[1]]
@@ -188,10 +189,10 @@ class ViewManager():
 
         counter = 0
         self.rViews = []
-        colormap = "Rainbow"
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         for index, var in enumerate(vars2D + vars3Dm):
+                colormap = self.state.varcolor[index]
                 rview = GetRenderView(index, self.source.views, var, counter, colormap) 
                 AddAnnotations(rview, annotations)
                 self.rViews.append(rview)
@@ -217,13 +218,16 @@ class ViewManager():
         self.state.views = sWidgets
         self.state.layout = layout
 
-    def UpdateColor(self, color, logclut, index):
+    def UpdateColor(self, color, uselog, index):
         var     = self.state.ccardsentry[index]
         rview   = self.rViews[index]
         #SetActiveView(rview)
-        coltrfunc = GetColorTransferFunction(var)
+        coltrfunc   = GetColorTransferFunction(var)
+
+        print(f"At index {index} applying color {color} with log {uselog}")
+
         coltrfunc.ApplyPreset(color, True)
-        if logclut:
+        if uselog:
             coltrfunc.MapControlPointsToLogSpace()
         else:
             coltrfunc.MapControlPointsToLinearSpace()

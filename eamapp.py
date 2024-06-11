@@ -76,7 +76,7 @@ state.vars3Distate  = [False] * len(source.vars3Di)
 state.vars3Dmstate  = [False] * len(source.vars3Dm)
 
 state.views         = []
-state.colors        = []
+state.cmaps         = ["0"]
 state.layout        = []
 
 state.ccardsentry   = []
@@ -87,12 +87,21 @@ ctrl.view_reset_camera = viewmanager.ResetCamera
 ctrl.on_server_ready.add(ctrl.view_update)
 server.trigger_name(ctrl.view_reset_camera)
 
-colors = [
-    {"text" : 'Viridis',    "value"  : 'Viridis (matplotlib)', },
-    {"text" : 'Inferno',    "value"  : 'Inferno (matplotlib)', }, 
-    {"text" : 'Cool to Warm',   "value"  : 'Cool to Warm',}, 
-    {"text" : 'Turbo',      "value"  : 'Turbo',   }
+noncvd = [
+    {"text" : 'Rainbow Desat.',    "value"  : 'Rainbow Desaturated',   },
+    {"text" : 'Cool to Warm',      "value"  : 'Cool to Warm',}, 
+    {"text" : 'Viridis',           "value"  : 'Viridis (matplotlib)', },
+    {"text" : 'Inferno',           "value"  : 'Inferno (matplotlib)', }, 
 ]
+
+cvd = [
+    {"text" : 'Batlow',    "value"  : 'batlow',},
+    {"text" : 'Oslo',      "value"  : 'oslo',}, 
+    {"text" : 'Tokyo',     "value"  : 'tokyo', },
+]
+
+state.colormaps = noncvd
+
 # -----------------------------------------------------------------------------
 # GUI
 # -----------------------------------------------------------------------------
@@ -128,17 +137,28 @@ def Apply():
         f3di    = np.array(state.vars3Distate)
         s3di    = v3di[f3di].tolist()
     source.LoadVariables(s2d, s3dm, s3di)
+
     state.color2D = s2d
     state.color3D = s3dm
     vars = s2d + s3dm
+
     state.ccardsentry = vars
-    #state.ccardscolor = ["Varidis"] * len(vars)
     state.ccardsvars  = [{"text" : var, "value" : var} for var in vars] 
     with state:  
         viewmanager.UpdateView()
 
-def ApplyColor(color, logclut, index):
-    viewmanager.UpdateColor(color, logclut,index)
+def ApplyColor(color, uselog, index):
+    viewmanager.UpdateColor(color, uselog, index)
+
+def updatecolors(event):
+    if len(event) == 0:
+        state.colormaps = noncvd
+    elif len(event) == 2:
+        state.colormaps = noncvd + cvd
+    elif '0' in event:
+        state.colormaps = noncvd
+    elif '1' in event:
+        state.colormaps = cvd
 
 def ui_card(title, varname):
     with vuetify.VCard(v_show=f"{varname} == true"):
@@ -156,9 +176,14 @@ with layout:
     # uncomment following line to disable scrolling on views
     # client.Style("html { overflow: hidden; }")
     layout.icon.click = ctrl.view_reset_camera
-    layout.title.set_text("EAM/E3SM Viz")
+    layout.title.set_text("EAM QuickView")
     with layout.toolbar:
         vuetify.VSpacer()
+        vuetify.VDivider(vertical=True, classes="mx-2")
+        #with vuetify.VContainer(fluid=True, style="max-height; 50px;", hide_details=True, classes="ma-0 pa-0"):
+        with vuetify.VListItemGroup(dense=True):
+                vuetify.VCheckbox(label="Use CVD friendly colormaps", value=0, v_model = ("cmaps",), dense=True, style="min-height : unset", hide_details=True , change=(updatecolors, "[$event]")),
+                vuetify.VCheckbox(label="Use non-CVD friendly colormaps", value=1, v_model = ("cmaps",), dense=True, style="min-height : unset", hide_details=True, change=(updatecolors, "[$event]"))
         vuetify.VDivider(vertical=True, classes="mx-2")
         html.Div(
             f"Connectivity File :  \"{ConnFile}\" <br> Data File :  \"{DataFile}\"",
@@ -314,20 +339,21 @@ with layout:
                         with vuetify.VRow(classes="pt-2", dense=True):
                             with vuetify.VCol(cols=6):
                                 vuetify.VSelect(
-                                    v_model=("varcolor", "Viridis"),
-                                    items=("colormaps", colors),
+                                    v_model=("varcolor", noncvd[0]['value']),
+                                    items=("colormaps", ),
                                     dense=True,
                                     hide_details=True,
-                                )
-                                vuetify.VCheckbox(
-                                    label="Log color scale",
-                                    v_model=("logclut", False)
                                 )
                             with vuetify.VCol(cols=6):
                                 vuetify.VBtn(
                                     "Update",
-                                    click=(ApplyColor,"[varcolor, logclut, i]")                           
+                                    click=(ApplyColor,"[varcolor, logclut, i]")
                                 )                    
+                        with vuetify.VRow(classes="pt-2", dense=True):
+                                vuetify.VCheckbox(
+                                    label="use log scale",
+                                    v_model=("logclut", False)
+                                )
         temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
             """
