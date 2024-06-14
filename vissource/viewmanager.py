@@ -80,7 +80,15 @@ def AddAnnotations(rview, annotations):
         display.Shadow = 1
     pass
 
-def GetRenderView(index, views, var, num, colormap):
+class ViewData():
+    def __init__(self, color, uselog = False):
+        self.color  = color
+        self.uselog = uselog
+        self.rep    = None
+        self.min    = None
+        self.max    = None 
+
+def GetRenderView(index, views, var, num, colordata):
     data = views['2DProj']
     rview = FindViewOrCreate(f'rv{index}', 'RenderView')
     rview.UseColorPaletteForBackground = 0
@@ -90,9 +98,10 @@ def GetRenderView(index, views, var, num, colormap):
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
-    coltrfunc.ApplyPreset(colormap, True)
+    coltrfunc.ApplyPreset(colordata.color, True)
     rep.SetScalarBarVisibility(rview, True)
     rview.CameraParallelProjection = 1
+    rview.CameraParallelScale = 125
     rview.ResetCamera(True)
     LUTColorBar = GetScalarBar(coltrfunc, rview)
     LUTColorBar.AutoOrient = 0
@@ -136,6 +145,7 @@ class ViewManager():
         self.state      = state
         self.widgets    = []
         self.colors     = []
+        self.cache      = {}
         file       = os.path.abspath(__file__)
         currdir    = os.path.dirname(file)
         root       = os.path.dirname(currdir)
@@ -166,7 +176,6 @@ class ViewManager():
               widget.update()
 
     def UpdateView(self):
-        print("Which Color maps ? : ", self.state.cmaps, type(self.state.cmaps))
         self.widgets.clear()
 
         long = [self.state.extents[0], self.state.extents[1]]
@@ -192,10 +201,11 @@ class ViewManager():
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         for index, var in enumerate(vars2D + vars3Dm):
-                colormap = self.state.varcolor[index]
-                rview = GetRenderView(index, self.source.views, var, counter, colormap) 
+                colordata = self.cache.get(var, ViewData(self.state.varcolor[index]))
+                rview = GetRenderView(index, self.source.views, var, counter, colordata) 
                 AddAnnotations(rview, annotations)
                 self.rViews.append(rview)
+                self.cache[var] = colordata
                 counter += 1
 
         wdt = 4
@@ -218,17 +228,37 @@ class ViewManager():
         self.state.views = sWidgets
         self.state.layout = layout
 
-    def UpdateColor(self, color, uselog, index):
+    def UpdateColor(self, index, type, value):
         var     = self.state.ccardsentry[index]
         rview   = self.rViews[index]
         #SetActiveView(rview)
         coltrfunc   = GetColorTransferFunction(var)
 
-        print(f"At index {index} applying color {color} with log {uselog}")
+        colordata : ViewData = self.cache[var]
+        if type.lower() == 'color':
+            colordata.color = value
+        elif type.lower() == 'log':
+            colordata.uselog = value
 
-        coltrfunc.ApplyPreset(color, True)
-        if uselog:
+        coltrfunc.ApplyPreset(colordata.color, True)
+        if colordata.uselog:
             coltrfunc.MapControlPointsToLogSpace()
+            coltrfunc.UseLogScale = 1
         else:
             coltrfunc.MapControlPointsToLinearSpace()
-        self.ResetCamera()
+            coltrfunc.UseLogScale = 0
+        self.UpdateCamera()
+
+    def ZoomIn(self, index):
+        rview   = self.rViews[index]
+        rview.CameraParallelScale *= 0.95
+        print(rview.CameraParallelScale) 
+        self.UpdateCamera()
+        pass
+
+    def ZoomOut(self, index):
+        rview   = self.rViews[index]
+        rview.CameraParallelScale *= 1.05 
+        print(rview.CameraParallelScale)
+        self.UpdateCamera()
+        pass

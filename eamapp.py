@@ -144,12 +144,18 @@ def Apply():
     vars = s2d + s3dm
 
     state.ccardsentry = vars
-    state.ccardsvars  = [{"text" : var, "value" : var} for var in vars] 
+    state.ccardsvars  = [{"text" : var, "value" : var} for var in vars]
+    state.varcolor    = [state.colormaps[0]['value']] * len(vars) 
+    state.uselogscale = [False] * len(vars)
     
     with state:  
         viewmanager.UpdateView()
 
 def ApplyColor(index, type, value):
+    if type.lower() == "color":
+        state.varcolor[index] = value
+    elif type.lower() == "log":
+        state.uselogscale[index]
     viewmanager.UpdateColor(index, type, value)
 
 def updatecolors(event):
@@ -161,6 +167,13 @@ def updatecolors(event):
         state.colormaps = noncvd
     elif '1' in event:
         state.colormaps = noncvd
+
+def Zoom(type, index):
+    if type.lower() == 'in':
+        viewmanager.ZoomIn(index)
+    elif type.lower() == 'out':
+        viewmanager.ZoomOut(index) 
+    pass
 
 def ui_card(title, varname):
     with vuetify.VCard(v_show=f"{varname} == true"):
@@ -321,67 +334,50 @@ with layout:
         vuetify.VDivider(classes="mx-2") 
         temp = server.trigger_name(ctrl.view_reset_camera)
         with layout.content:
-            """
-            with vuetify.VRow(
-            ):
-                vuetify.VCol(
-                    #<vtk-remote-view ref="trame__remote_view_1" :viewId="trame__remote_view_1Id" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" />
-                    '<vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" interactiveRatio="1" ></vtk-remote-view>',
-                    v_for="vref, idx in views",
-                    key="vref",
-                    cols=("12 / vcols",),
-                    style="height: 400px",
-                )
-            """
             with grid.GridLayout(
                 layout=("layout", []),
-                #row_height=20,
             ):
                 with grid.GridItem(
                     v_for="vref, idx in views",
-                    #v_for="item in layout",
                     key="idx",
                     v_bind=("layout[idx]", ),
-                    #classes="pa-4",
-                    #style="border: solid 1px #333; background: rgba(0, 69, 96, 0.5);",
-                ):
-                    html.Div(
-                        '<vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag_ignore" style="width: 100%; height: 100%;" interactiveRatio="1" ></vtk-remote-view>',
-                        style="height: 200px, width: 400px"
-                    )
-                    with vuetify.VRow(classes="pt-2", dense=True):
-                            with vuetify.VCol(cols=3):
+                ) as griditem:
+                    with vuetify.VCard(classes="fill-height", style="overflow: hidden;"):
+                        with vuetify.VCardText(style="height: calc(100% - 4.75rem); position: relative;", classes="pa-0") as cardcontent:
+                            cardcontent.add_child(
+                                '<vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag-ignore" style="width: 100%; height: 100%;" interactiveRatio="1" ></vtk-remote-view>',
+                            )
+                            html.Div(style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;")
+                        with vuetify.VCardActions():
+                            with vuetify.VCol(cols=3, classes="pa-0",style="height=50px",):
                                 vuetify.VSelect(
-                                    v_model=("varcolor[idx]", state.colormaps[0]),
+                                    v_model=("varcolor[idx]",),
                                     items=("colormaps",),
                                     dense=True,
                                     hide_details=True,
                                     change=(ApplyColor, "[idx, 'color', $event]")
                                 )
-                            with vuetify.VCol(cols=3):
+                            with vuetify.VCol(cols=2, classes="pa-0", style="height=50px",):
                                 vuetify.VCheckbox(
-                                    label="use log scale",
-                                    v_model=("uselogscale[idx]", False),
+                                    label="log scale",
+                                    v_model=("uselogscale[idx]",),
                                     change=(ApplyColor, "[idx, 'log', $event]")
                                 )
-                            with vuetify.VCol(cols=2):
+                            with vuetify.VCol(cols=2, classes="pa-0", style="height=50px",):
                                 html.Div("Color<br>Range")
-                            with vuetify.VCol(cols=1):
-                                html.Div("min")
-                                vuetify.VTextField(
-                                )
-                            with vuetify.VCol(cols=1):
-                                html.Div("max")
-                                vuetify.VTextField(
-                                )
-                            with vuetify.VCol(cols=1):
-                                with vuetify.VBtn(icon=True):
+                            with vuetify.VCol(cols=1, classes="pa-0", style="height=50px",):
+                                vuetify.VTextField(v_model=("varmin", "min"))
+                            with vuetify.VCol(cols=1, classes="pa-0", style="height=50px",):
+                                vuetify.VTextField(v_model=("varmax", "max"))
+                            with vuetify.VCol(cols=1, classes="pa-0", style="height=50px",):
+                                html.Div()
+                            with vuetify.VCol(cols=1, classes="pa-0", style="height=50px",):
+                                with vuetify.VBtn(icon=True, variant="outlined", style="background-color: gray;", click=(Zoom, "['in', idx]")):
                                     vuetify.VIcon("mdi-plus")
-                            with vuetify.VCol(cols=1):
-                                with vuetify.VBtn(icon=True):
+                            with vuetify.VCol(cols=1, classes="pa-0", style="height=50px",):
+                                with vuetify.VBtn(icon=True, variant="outlined", style="background-color: gray;", click=(Zoom, "['out', idx]")):
                                     vuetify.VIcon("mdi-minus")
                             
-
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
