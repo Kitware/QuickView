@@ -252,13 +252,19 @@ class ViewManager():
     def ZoomIn(self, index):
         rview   = self.rViews[index]
         rview.CameraParallelScale *= 0.95
-        print(rview.CameraParallelScale) 
         self.UpdateCamera()
-        pass
 
     def ZoomOut(self, index):
         rview   = self.rViews[index]
         rview.CameraParallelScale *= 1.05 
-        print(rview.CameraParallelScale)
         self.UpdateCamera()
-        pass
+
+    def Move(self, vindex, dir, factor):
+        rview   = self.rViews[vindex]
+        pos = rview.CameraPosition
+        foc = rview.CameraFocalPoint
+        pos[dir] += 10 if factor > 0 else -10
+        foc[dir] += 10 if factor > 0 else -10
+        rview.CameraPosition = pos
+        rview.CameraFocalPoint = foc
+        self.UpdateCamera()
