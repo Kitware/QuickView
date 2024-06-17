@@ -13,6 +13,8 @@ from paraview.simple import (
     Clip,
 )
 
+from paraview.simple import servermanager as sm
+
 # -----------------------------------------------------------------------------
 # ParaView code
 # -----------------------------------------------------------------------------

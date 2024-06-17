@@ -88,8 +88,13 @@ class ViewData():
         self.min    = None
         self.max    = None 
 
-def GetRenderView(index, views, var, num, colordata):
+def GetRenderView(index, views, var, num, colordata : ViewData):
     data = views['2DProj']
+
+    from paraview.simple import servermanager as sm
+    vtkdata = sm.Fetch(data)
+    range = vtkdata.GetCellData().GetArray(var).GetRange() 
+
     rview = FindViewOrCreate(f'rv{index}', 'RenderView')
     rview.UseColorPaletteForBackground = 0
     rview.BackgroundColorMode = 'Gradient'
@@ -108,6 +113,11 @@ def GetRenderView(index, views, var, num, colordata):
     LUTColorBar.Orientation = 'Horizontal'
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
+    rep.RescaleTransferFunctionToDataRange(False, True)
+
+    colordata.rep = rep
+    colordata.min = range[0]
+    colordata.max = range[1]
 
     globe = views['GProj']
     repG = Show(globe, rview)
@@ -201,11 +211,13 @@ class ViewManager():
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         for index, var in enumerate(vars2D + vars3Dm):
-                colordata = self.cache.get(var, ViewData(self.state.varcolor[index]))
+                colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
                 rview = GetRenderView(index, self.source.views, var, counter, colordata) 
                 AddAnnotations(rview, annotations)
                 self.rViews.append(rview)
                 self.cache[var] = colordata
+                self.state.varmin[index] = colordata.min
+                self.state.varmax[index] = colordata.max
                 counter += 1
 
         wdt = 4
@@ -230,24 +242,36 @@ class ViewManager():
 
     def UpdateColor(self, index, type, value):
         var     = self.state.ccardsentry[index]
-        rview   = self.rViews[index]
-        #SetActiveView(rview)
         coltrfunc   = GetColorTransferFunction(var)
 
         colordata : ViewData = self.cache[var]
         if type.lower() == 'color':
             colordata.color = value
+            coltrfunc.ApplyPreset(colordata.color, True)
         elif type.lower() == 'log':
             colordata.uselog = value
-
-        coltrfunc.ApplyPreset(colordata.color, True)
-        if colordata.uselog:
-            coltrfunc.MapControlPointsToLogSpace()
-            coltrfunc.UseLogScale = 1
-        else:
-            coltrfunc.MapControlPointsToLinearSpace()
-            coltrfunc.UseLogScale = 0
+            if colordata.uselog:
+                coltrfunc.MapControlPointsToLogSpace()
+                coltrfunc.UseLogScale = 1
+            else:
+                coltrfunc.MapControlPointsToLinearSpace()
+                coltrfunc.UseLogScale = 0
         self.UpdateCamera()
+    
+    def UpdateColorProps(self, index, min, max):
+        var     = self.state.ccardsentry[index]
+        coltrfunc   = GetColorTransferFunction(var)
+        coltrfunc.RescaleTransferFunction(float(min), float(max))
+        self.UpdateCamera()
+
+    def ResetColorProps(self, index):
+        var     = self.state.ccardsentry[index]
+        colordata : ViewData = self.cache[var]
+        self.state.varmin[index] = colordata.min
+        self.state.varmax[index] = colordata.max
+        colordata.rep.RescaleTransferFunctionToDataRange(False, True)
+        self.UpdateCamera()
+        
 
     def ZoomIn(self, index):
         rview   = self.rViews[index]
