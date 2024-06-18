@@ -21,7 +21,90 @@ dims2   = ('time', 'ncol')
 dims3i  = ('time', 'ilev', 'ncol')
 dims3m  = ('time', 'lev' , 'ncol')
 
+class EAMConstants():
+    LEV     = 'lev'
+    HYAM    = 'hyam'
+    HYBM    = 'hybm'
+    ILEV    = 'ilev'
+    HYAI    = 'hyai'
+    HYBI    = 'hybi'
+    P0      = float(1e5)
+    PS0     = float(1e5)
 
+from enum import Enum
+class VarType(Enum):
+    _1D = 1
+    _2D = 2
+    _3Dm = 3
+    _3Di = 4
+
+class VarMeta():
+    def __init__(self, name, info):
+        self.name       = name
+        self.type       = None
+        self.transpose  = False
+
+        dims = info.dimensions
+
+        if len(dims) == 1:
+            self.type = VarType._1D
+        elif len(dims) == 2:
+            self.type = VarType._2D
+        elif len(dims) == 3: 
+            if 'lev' in dims:
+                self.type = VarType._3Dm
+            elif 'ilev' in dims:
+                self.type = VarType._3Di
+            
+            if 'ncol' in dims[1]:
+                self.transpose = True
+
+def compare(data, arrays, dim):
+    ref = data[arrays[0]][:].flatten()
+    if len(ref) != dim:
+        raise Exception("Length of hya_/hyb_ variable does not match the corresponding dimension")
+    for i, array in enumerate(arrays[1:], start=1):
+        comp = data[array][:].flatten()
+        if not np.array_equal(ref, comp):
+            return None
+    return ref
+
+def FindSpecialVariable(data, lev, hya, hyb):
+    dim = data.dimensions.get(lev, None)
+    if dim is None:
+        raise Exception(f'{lev} not found in dimensions')
+    dim = dim.size
+    var  = np.array(list(data.variables.keys())) 
+
+    if lev in var:
+        lev = data[lev][:].flatten()
+        return lev
+
+    from numpy.core.defchararray import find
+    _hyai = var[find(var, hya) != -1]
+    _hybi = var[find(var, hyb) != -1]
+    if len(_hyai) != len(_hybi):
+        raise Exception(f'Unmatched pair of hya and hyb variables found')
+
+    p0  = EAMConstants.P0
+    ps0 = EAMConstants.PS0
+
+    if len(_hyai) == 1:
+        hyai = data[_hyai[0]][:].flatten()
+        hybi = data[_hyai[1]][:].flatten()
+        if not (len(hyai) == dim and len(hybi) == dim):
+            raise Exception(f'Lengths of arrays for hya_ and hyb_ variables do not match')
+        ldata = (hyai * p0) + (hybi * ps0)
+        return ldata
+    else:
+        hyai = compare(data, _hyai, dim)
+        hybi = compare(data, _hybi, dim)
+        if hyai is None or hybi is None:
+            raise Exception(f'Values within hya_ and hyb_ arrays do not match')
+        else:
+            ldata = (hyai * p0) + (hybi * ps0) 
+            return ldata
+        
 #------------------------------------------------------------------------------
 # A reader example.
 #------------------------------------------------------------------------------
@@ -104,23 +187,23 @@ class EAMSource(VTKPythonAlgorithmBase):
             return
         vardata     = netCDF4.Dataset(self.__DataFileName, "r")
         for name, info in vardata.variables.items():
-            if info.dimensions == dims2:
-                self.__vars2D.append(name)
+            varmeta = VarMeta(name, info)
+            if varmeta.type == VarType._1D:
+                self.__vars1D.append(varmeta)
+            elif varmeta.type == VarType._2D:
+                self.__vars2D.append(varmeta)
                 self.__vars2Darr.AddArray(name)
-            elif info.dimensions == dims3i:
-                self.__vars3Di.append(name)
+            elif varmeta.type == VarType._3Di:
+                self.__vars3Di.append(varmeta)
                 self.__vars3Diarr.AddArray(name)
-            elif info.dimensions == dims3m:
-                self.__vars3Dm.append(name)
+            elif varmeta.type == VarType._3Dm:
+                self.__vars3Dm.append(varmeta)
                 self.__vars3Dmarr.AddArray(name)
-            elif len(info.dimensions) == 1:
-                self.__vars1D.append(name)
         self.__vars2Darr.DisableAllArrays()
         self.__vars3Diarr.DisableAllArrays()
         self.__vars3Dmarr.DisableAllArrays()
         timesteps = vardata['time'][:].data.flatten()
         self.__timeSteps.extend(timesteps)
-
         self.timeDim  = vardata.dimensions["time"].size
         self.ilevDim  = vardata.dimensions["ilev"].size
         self.levDim   = vardata.dimensions["lev"].size
@@ -242,94 +325,104 @@ class EAMSource(VTKPythonAlgorithmBase):
         output2D.VTKObject.SetCells(cellTypes, cellArray)
 
         gridAdapter2D = dsa.WrapDataObject(output2D)
-        for var in self.__vars2D:
-            if self.__vars2Darr.ArrayIsEnabled(var):
-                data = vardata[var][:].data[timeInd].flatten()
-                gridAdapter2D.CellData.append(data, var)
+        for varmeta in self.__vars2D:
+            if self.__vars2Darr.ArrayIsEnabled(varmeta.name):
+                data = vardata[varmeta.name][:].data[timeInd].flatten()
+                gridAdapter2D.CellData.append(data, varmeta.name)
 
         lev = None
         try:
-            lev         = vardata['lev'][:].flatten()
-            coords3Dm   = np.empty((self.levDim, len(lat), 3), dtype=np.float64)
-            levInd      = 0
-            for z in lev:
-                coords = np.empty((len(lat), 3), dtype=np.float64)
-                coords[:, 0] = lon
-                coords[:, 1] = lat
-                coords[:, 2] = z
-                coords3Dm[levInd] = coords
-                levInd = levInd + 1
-            coords3Dm = coords3Dm.flatten().reshape(self.levDim*len(lat), 3)
-            _coords = dsa.numpyTovtkDataArray(coords3Dm)
-            vtk_coords = vtkPoints()
-            vtk_coords.SetData(_coords)
-            output3Dm.SetPoints(vtk_coords)
-            cellTypesm   = np.empty(ncells2D*self.levDim,                  dtype=np.uint8)
-            offsetsm     = np.arange(0, (4 * ncells2D*self.levDim) + 1, 4, dtype=np.int64)
-            cellsm       = np.arange(ncells2D*self.levDim*4,               dtype=np.int64)
-            cellTypesm.fill(vtkConstants.VTK_QUAD)
-            cellTypesm   = numpy_support.numpy_to_vtk(num_array=cellTypesm.ravel(), \
-                                                      deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
-            offsetsm     = numpy_support.numpy_to_vtk(num_array=offsetsm.ravel(),   \
-                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-            cellsm       = numpy_support.numpy_to_vtk(num_array=cellsm.ravel(),     \
-                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-            cellArraym = vtkCellArray()
-            cellArraym.SetData(offsetsm, cellsm)
-            output3Dm.VTKObject.SetCells(cellTypesm, cellArraym)
-
-            gridAdapter3Dm = dsa.WrapDataObject(output3Dm)
-            for var in self.__vars3Dm:
-                if self.__vars3Dmarr.ArrayIsEnabled(var):
-                    data = vardata[var][:].data[timeInd].flatten()
-                    gridAdapter3Dm.CellData.append(data, var)
-            gridAdapter3Dm.FieldData.append(self.levDim, "numlev")
-            gridAdapter3Dm.FieldData.append(lev,    "lev"   )
+            lev         = FindSpecialVariable(vardata, EAMConstants.LEV, EAMConstants.HYAM, EAMConstants.HYBM)
+            if not lev is None:  
+                coords3Dm   = np.empty((self.levDim, len(lat), 3), dtype=np.float64)
+                levInd      = 0
+                for z in lev:
+                    coords = np.empty((len(lat), 3), dtype=np.float64)
+                    coords[:, 0] = lon
+                    coords[:, 1] = lat
+                    coords[:, 2] = z
+                    coords3Dm[levInd] = coords
+                    levInd = levInd + 1
+                coords3Dm = coords3Dm.flatten().reshape(self.levDim*len(lat), 3)
+                _coords = dsa.numpyTovtkDataArray(coords3Dm)
+                vtk_coords = vtkPoints()
+                vtk_coords.SetData(_coords)
+                output3Dm.SetPoints(vtk_coords)
+                cellTypesm   = np.empty(ncells2D*self.levDim,                  dtype=np.uint8)
+                offsetsm     = np.arange(0, (4 * ncells2D*self.levDim) + 1, 4, dtype=np.int64)
+                cellsm       = np.arange(ncells2D*self.levDim*4,               dtype=np.int64)
+                cellTypesm.fill(vtkConstants.VTK_QUAD)
+                cellTypesm   = numpy_support.numpy_to_vtk(num_array=cellTypesm.ravel(), \
+                                                          deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
+                offsetsm     = numpy_support.numpy_to_vtk(num_array=offsetsm.ravel(),   \
+                                                          deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+                cellsm       = numpy_support.numpy_to_vtk(num_array=cellsm.ravel(),     \
+                                                          deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+                cellArraym = vtkCellArray()
+                cellArraym.SetData(offsetsm, cellsm)
+                output3Dm.VTKObject.SetCells(cellTypesm, cellArraym)
+         
+                gridAdapter3Dm = dsa.WrapDataObject(output3Dm)
+                for varmeta in self.__vars3Dm:
+                    if self.__vars3Dmarr.ArrayIsEnabled(varmeta.name):
+                        if not varmeta.transpose:
+                            data = vardata[varmeta.name][:].data[timeInd].flatten()
+                        else :
+                            data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()
+                        gridAdapter3Dm.CellData.append(data, varmeta.name)
+                gridAdapter3Dm.FieldData.append(self.levDim, "numlev")
+                gridAdapter3Dm.FieldData.append(lev,    "lev"   )
         except Exception as e:
             print_error("Error occured while processing middle layer variables :", e)
 
         ilev = None
         try:
-            ilev        = vardata['ilev'][:].flatten()
-            coords3Di   = np.empty((self.ilevDim, len(lat), 3), dtype=np.float64)
-            ilevInd     = 0
-            for z in ilev:
-                coords = np.empty((len(lat), 3), dtype=np.float64)
-                coords[:, 0] = lon
-                coords[:, 1] = lat
-                coords[:, 2] = z
-                coords3Di[ilevInd] = coords
-                ilevInd = ilevInd + 1
-            coords3Di = coords3Di.flatten().reshape(self.ilevDim*len(lat), 3)
-            _coords = dsa.numpyTovtkDataArray(coords3Di)
-            vtk_coords = vtkPoints()
-            vtk_coords.SetData(_coords)
-            output3Di.SetPoints(vtk_coords)
-            cellTypesi   = np.empty(ncells2D*self.ilevDim,                  dtype=np.uint8)
-            offsetsi     = np.arange(0, (4 * ncells2D*self.ilevDim) + 1, 4, dtype=np.int64)
-            cellsi       = np.arange(ncells2D*self.ilevDim*4,               dtype=np.int64)
-            cellTypesi.fill(vtkConstants.VTK_QUAD)
-            cellTypesi   = numpy_support.numpy_to_vtk(num_array=cellTypesi.ravel(),     \
-                                                      deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
-            offsetsi     = numpy_support.numpy_to_vtk(num_array=offsetsi.ravel(),       \
-                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-            cellsi       = numpy_support.numpy_to_vtk(num_array=cellsi.ravel(),         \
-                                                      deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-            cellArrayi = vtkCellArray()
-            cellArrayi.SetData(offsetsi, cellsi)
-            output3Di.VTKObject.SetCells(cellTypesi, cellArrayi)
-
-            gridAdapter3Di = dsa.WrapDataObject(output3Di)
-            for var in self.__vars3Di:
-                if self.__vars3Diarr.ArrayIsEnabled(var):
-                    data = vardata[var][:].data[timeInd].flatten()
-                    gridAdapter3Di.CellData.append(data, var)
-            gridAdapter3Di.FieldData.append(self.ilevDim, "numlev")
-            gridAdapter3Di.FieldData.append(ilev,    "lev"   )
+            ilev         = FindSpecialVariable(vardata, EAMConstants.ILEV, EAMConstants.HYAI, EAMConstants.HYBI)
+            if not ilev is None:  
+                coords3Di   = np.empty((self.ilevDim, len(lat), 3), dtype=np.float64)
+                ilevInd     = 0
+                for z in ilev:
+                    coords = np.empty((len(lat), 3), dtype=np.float64)
+                    coords[:, 0] = lon
+                    coords[:, 1] = lat
+                    coords[:, 2] = z
+                    coords3Di[ilevInd] = coords
+                    ilevInd = ilevInd + 1
+                coords3Di = coords3Di.flatten().reshape(self.ilevDim*len(lat), 3)
+                _coords = dsa.numpyTovtkDataArray(coords3Di)
+                vtk_coords = vtkPoints()
+                vtk_coords.SetData(_coords)
+                output3Di.SetPoints(vtk_coords)
+                cellTypesi   = np.empty(ncells2D*self.ilevDim,                  dtype=np.uint8)
+                offsetsi     = np.arange(0, (4 * ncells2D*self.ilevDim) + 1, 4, dtype=np.int64)
+                cellsi       = np.arange(ncells2D*self.ilevDim*4,               dtype=np.int64)
+                cellTypesi.fill(vtkConstants.VTK_QUAD)
+                cellTypesi   = numpy_support.numpy_to_vtk(num_array=cellTypesi.ravel(),     \
+                                                          deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
+                offsetsi     = numpy_support.numpy_to_vtk(num_array=offsetsi.ravel(),       \
+                                                          deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+                cellsi       = numpy_support.numpy_to_vtk(num_array=cellsi.ravel(),         \
+                                                          deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+                cellArrayi = vtkCellArray()
+                cellArrayi.SetData(offsetsi, cellsi)
+                output3Di.VTKObject.SetCells(cellTypesi, cellArrayi)
+         
+                gridAdapter3Di = dsa.WrapDataObject(output3Di)
+                for varmeta in self.__vars3Di:
+                    if self.__vars3Diarr.ArrayIsEnabled(varmeta.name):
+                        if not varmeta.transpose:
+                            data = vardata[varmeta.name][:].data[timeInd].flatten()
+                        else :
+                            data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()
+                        gridAdapter3Di.CellData.append(data, varmeta.name)
+                gridAdapter3Di.FieldData.append(self.ilevDim, "numilev")
+                gridAdapter3Di.FieldData.append(ilev,    "ilev"   )
         except Exception as e:
             print_error("Error occured while processing interface layer variables :", e)
 
         return 1
+
+import traceback
 
 @smproxy.reader(name="EAMSliceSource", label="EAM Slice Data Reader",
                 extensions="nc", file_description="NETCDF files for EAM")
@@ -413,20 +506,22 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             return
         vardata     = netCDF4.Dataset(self.__DataFileName, "r")
         for name, info in vardata.variables.items():
-            if info.dimensions == dims2:
-                self.__vars2D.append(name)
+            varmeta = VarMeta(name, info)
+            if varmeta.type == VarType._1D:
+                self.__vars1D.append(varmeta)
+            elif varmeta.type == VarType._2D:
+                self.__vars2D.append(varmeta)
                 self.__vars2Darr.AddArray(name)
-            elif info.dimensions == dims3i:
-                self.__vars3Di.append(name)
-                self.__vars3Diarr.AddArray(name)
-            elif info.dimensions == dims3m:
-                self.__vars3Dm.append(name)
+            elif varmeta.type == VarType._3Dm:
+                self.__vars3Dm.append(varmeta)
                 self.__vars3Dmarr.AddArray(name)
-            elif len(info.dimensions) == 1:
-                self.__vars1D.append(name)
+            elif varmeta.type == VarType._3Di:
+                self.__vars3Di.append(varmeta)
+                self.__vars3Diarr.AddArray(name)
         self.__vars2Darr.DisableAllArrays()
         self.__vars3Diarr.DisableAllArrays()
         self.__vars3Dmarr.DisableAllArrays()
+
         timesteps = vardata['time'][:].data.flatten()
         self.__timeSteps.extend(timesteps)
 
@@ -556,37 +651,48 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         output2D.VTKObject.SetCells(cellTypes, cellArray)
 
         gridAdapter2D = dsa.WrapDataObject(output2D)
-        for var in self.__vars2D:
-            if self.__vars2Darr.ArrayIsEnabled(var):
-                data = vardata[var][:].data[timeInd].flatten()
-                gridAdapter2D.CellData.append(data, var)
+        for varmeta in self.__vars2D:
+            if self.__vars2Darr.ArrayIsEnabled(varmeta.name):
+                data = vardata[varmeta.name][:].data[timeInd].flatten()
+                gridAdapter2D.CellData.append(data, varmeta.name)
 
         try:
-            lev         = vardata['lev'][:].flatten()
-            if self.__lev >= len(lev) - 1:
-                print_error(f'User provided input for middle layer {self.__lev} larger than actual data {len(lev) - 1}')
-            lstart  = self.__lev * ncells2D
-            lend    = lstart + ncells2D
-            for var in self.__vars3Dm:
-                if self.__vars3Dmarr.ArrayIsEnabled(var):
-                    data = vardata[var][:].data[timeInd].flatten()[lstart:lend]
-                    gridAdapter2D.CellData.append(data, var)
-            gridAdapter2D.FieldData.append(lev,    "lev"   )
+            lev = FindSpecialVariable(vardata, EAMConstants.LEV, EAMConstants.HYAM, EAMConstants.HYBM) 
+            if not lev is None:
+                if self.__lev >= vardata.dimensions['lev'].size:
+                    print_error(f'User provided input for middle layer {self.__lev} larger than actual data {len(lev) - 1}')
+                lstart  = self.__lev * ncells2D
+                lend    = lstart + ncells2D
+                for varmeta in self.__vars3Dm:
+                    if self.__vars3Dmarr.ArrayIsEnabled(varmeta.name):
+                        if not varmeta.transpose:
+                            data = vardata[varmeta.name][:].data[timeInd].flatten()[lstart:lend]
+                        else :
+                            data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()[lstart:lend]
+                        gridAdapter2D.CellData.append(data, varmeta.name)
+                gridAdapter2D.FieldData.append(lev,    "lev"   )
         except Exception as e:
             print_error("Error occured while processing middle layer variables :", e)
+            traceback.print_exc()
 
         try:
-            ilev        = vardata['ilev'][:].flatten()
-            if self.__ilev >= len(ilev) - 1:
-                print_error(f'User provided input for middle layer {self.__ilev} larger than actual data {len(ilev) - 1}')
-            ilstart = self.__ilev * ncells2D
-            ilend   = ilstart + ncells2D
-            for var in self.__vars3Di:
-                if self.__vars3Diarr.ArrayIsEnabled(var):
-                    data = vardata[var][:].data[timeInd].flatten()[ilstart:ilend]
-                    gridAdapter2D.CellData.append(data, var)
-            gridAdapter2D.FieldData.append(ilev,   "ilev"   )
+            ilev = FindSpecialVariable(vardata, EAMConstants.ILEV, EAMConstants.HYAI, EAMConstants.HYBI)
+            if not ilev is None:  
+                if self.__ilev >= vardata.dimensions['ilev'].size:
+                    print_error(f'User provided input for middle layer {self.__ilev} larger than actual data {len(ilev) - 1}')
+                ilstart = self.__ilev * ncells2D
+                ilend   = ilstart + ncells2D
+                for varmeta in self.__vars3Di:
+                    if self.__vars3Diarr.ArrayIsEnabled(varmeta.name):
+                        if not varmeta.transpose:
+                            data = vardata[varmeta.name][:].data[timeInd].flatten()[ilstart:ilend]
+                        else :
+                            data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()[ilstart:ilend]
+                        gridAdapter2D.CellData.append(data, varmeta.name)
+                gridAdapter2D.FieldData.append(ilev,   "ilev"   )
         except Exception as e:
             print_error("Error occured while processing interface layer variables :", e)
+            traceback.print_exc()
 
         return 1
+    

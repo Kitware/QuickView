@@ -27,8 +27,8 @@ class EAMVisSource:
         self.views    = {}
         self.vars     = {}
 
-        self.lev = []
-        self.ilev = []
+        self.lev      = 0
+        self.ilev     = 0
         self.vars2D_sel     = []
         self.vars3Di_sel    = []
         self.vars3Dm_sel    = []
@@ -68,13 +68,15 @@ class EAMVisSource:
         self.views["GProj"]   = OutputPort(eamprojG, 0)                  
         self.views["GLines"]   = OutputPort(projA, 0)                  
 
-    def UpdateLev(self, lev):
+    def UpdateLev(self, lev, ilev):
         eamproj2D  = FindSource('2DProj')
         if self.data == None:
             return
-        if self.lev != lev:
+        if self.lev != lev or self.ilev != ilev:
             self.lev = lev
+            self.ilev = ilev
             self.data.MiddleLayer = lev
+            self.data.InterfaceLayer = ilev
             eamproj2D.UpdatePipeline()
             self.views["2DProj"]  = OutputPort(eamproj2D,  0)
             self.UpdateProjection(self.projection)         

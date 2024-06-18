@@ -119,6 +119,10 @@ def update3DmVars(index, visibility):
     state.vars3Dmstate[index] = visibility
     state.dirty("vars3Dmstate")
 
+def update3DiVars(index, visibility):
+    state.vars3Distate[index] = visibility
+    state.dirty("vars3Distate")
+
 @state.change('vcols')
 def Columns(vcols, **kwargs):
     viewmanager.SetCols(vcols)
@@ -141,9 +145,7 @@ def Apply():
         s3di    = v3di[f3di].tolist()
     source.LoadVariables(s2d, s3dm, s3di)
 
-    state.color2D = s2d
-    state.color3D = s3dm
-    vars = s2d + s3dm
+    vars = s2d + s3dm + s3di
 
     state.ccardsentry = vars
     state.ccardsvars  = [{"text" : var, "value" : var} for var in vars]
@@ -257,6 +259,18 @@ with layout:
                 with vuetify.VRow():
                     with vuetify.VCol(cols=6):
                         vuetify.VSlider(
+                            label='iLev',
+                            v_model=("vilev", 0),
+                            min=0,
+                            max=("ilev.length - 1", )
+                        )
+                    with vuetify.VCol(cols=2):
+                        html.Div("{{'(' + String(vilev) + ')'}}")
+                    with vuetify.VCol(cols=3):
+                        html.Div("{{parseFloat(ilev[vilev]).toFixed(2)}}")
+                with vuetify.VRow():
+                    with vuetify.VCol(cols=6):
+                        vuetify.VSlider(
                             label='Time',
                             v_model=("tstamp", 0),
                             min=0,
@@ -354,6 +368,22 @@ with layout:
                             label=("vars3Dm[i]",),
                             v_model=("vars3Dmstate[i]",),
                             change=(update3DmVars, "[i, $event]"),
+                            style="max-height: 20px",
+                            dense=True
+                        )
+                vuetify.VDivider(classes="mx-2")
+                html.A(
+                    "3D Interface Layer Variables",
+                    style="padding: 10px;",
+                )
+                with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
+                    with vuetify.VListItemGroup(dense=True, label="3D Variables"):
+                        vuetify.VCheckbox(
+                            v_for="v, i in vars3Di",
+                            key="i",
+                            label=("vars3Di[i]",),
+                            v_model=("vars3Distate[i]",),
+                            change=(update3DiVars, "[i, $event]"),
                             style="max-height: 20px",
                             dense=True
                         )

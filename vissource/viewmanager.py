@@ -190,7 +190,7 @@ class ViewManager():
 
         long = [self.state.extents[0], self.state.extents[1]]
         lat  = [self.state.extents[2], self.state.extents[3]]
-        self.source.UpdateLev(self.state.vlev)
+        self.source.UpdateLev(self.state.vlev, self.state.vilev)
         if self.state.clipping:
             long = self.state.cliplong 
             lat  = self.state.cliplat
@@ -200,8 +200,9 @@ class ViewManager():
 
         vars2D   = self.source.vars.get('2D', None)
         vars3Dm  = self.source.vars.get('3Dm', None)
+        vars3Di  = self.source.vars.get('3Di', None)
 
-        numViews = len(vars2D) + len(vars3Dm)
+        numViews = len(vars2D) + len(vars3Dm) + len(vars3Di)
         if numViews == 0:
             return
         self.rows = math.ceil(numViews / self.columns)
@@ -210,7 +211,7 @@ class ViewManager():
         self.rViews = []
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
-        for index, var in enumerate(vars2D + vars3Dm):
+        for index, var in enumerate(vars2D + vars3Dm + vars3Di):
                 colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
                 rview = GetRenderView(index, self.source.views, var, counter, colordata) 
                 AddAnnotations(rview, annotations)
