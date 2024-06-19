@@ -94,7 +94,7 @@ def FindSpecialVariable(data, lev, hya, hyb):
         hybi = data[_hyai[1]][:].flatten()
         if not (len(hyai) == dim and len(hybi) == dim):
             raise Exception(f'Lengths of arrays for hya_ and hyb_ variables do not match')
-        ldata = (hyai * p0) + (hybi * ps0)
+        ldata = ((hyai * p0) + (hybi * ps0)) / 100.
         return ldata
     else:
         hyai = compare(data, _hyai, dim)
@@ -102,7 +102,7 @@ def FindSpecialVariable(data, lev, hya, hyb):
         if hyai is None or hybi is None:
             raise Exception(f'Values within hya_ and hyb_ arrays do not match')
         else:
-            ldata = (hyai * p0) + (hybi * ps0) 
+            ldata = ((hyai * p0) + (hybi * ps0)) / 100. 
             return ldata
         
 #------------------------------------------------------------------------------
