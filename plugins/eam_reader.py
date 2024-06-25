@@ -204,6 +204,7 @@ class EAMSource(VTKPythonAlgorithmBase):
                 fillval = info.getncattr('_FillValue')
                 varmeta.fillval = fillval
             except Exception as e:
+                traceback.print_exc()
                 pass
         self.__vars2Darr.DisableAllArrays()
         self.__vars3Diarr.DisableAllArrays()
@@ -334,7 +335,7 @@ class EAMSource(VTKPythonAlgorithmBase):
         for varmeta in self.__vars2D:
             if self.__vars2Darr.ArrayIsEnabled(varmeta.name):
                 data = vardata[varmeta.name][:].data[timeInd].flatten()
-                np.where(data == varmeta.fillval, np.nan, data)
+                data = np.where(data == varmeta.fillval, np.nan, data)
                 gridAdapter2D.CellData.append(data, varmeta.name)
 
         lev = None
@@ -376,7 +377,7 @@ class EAMSource(VTKPythonAlgorithmBase):
                             data = vardata[varmeta.name][:].data[timeInd].flatten()
                         else :
                             data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()
-                        np.where(data == varmeta.fillval, np.nan, data)
+                        data = np.where(data == varmeta.fillval, np.nan, data)
                         gridAdapter3Dm.CellData.append(data, varmeta.name)
                 gridAdapter3Dm.FieldData.append(self.levDim, "numlev")
                 gridAdapter3Dm.FieldData.append(lev,    "lev"   )
@@ -422,7 +423,7 @@ class EAMSource(VTKPythonAlgorithmBase):
                             data = vardata[varmeta.name][:].data[timeInd].flatten()
                         else :
                             data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()
-                        np.where(data == varmeta.fillval, np.nan, data)
+                        data = np.where(data == varmeta.fillval, np.nan, data)
                         gridAdapter3Di.CellData.append(data, varmeta.name)
                 gridAdapter3Di.FieldData.append(self.ilevDim, "numilev")
                 gridAdapter3Di.FieldData.append(ilev,    "ilev"   )
@@ -527,6 +528,12 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             elif varmeta.type == VarType._3Di:
                 self.__vars3Di.append(varmeta)
                 self.__vars3Diarr.AddArray(name)
+            try:
+                fillval = info.getncattr('_FillValue')
+                varmeta.fillval = fillval
+            except Exception as e:
+                print(e)
+                pass
         self.__vars2Darr.DisableAllArrays()
         self.__vars3Diarr.DisableAllArrays()
         self.__vars3Dmarr.DisableAllArrays()
@@ -597,9 +604,9 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         return super().RequestUpdateExtent(request, inInfo, outInfo)
 
     def GetTimeIndex(self, time):
-        if self.__timeSteps is not None and len(self.__timeSteps) > 0:
-            timeInd = 0
-            for t in self.__timeSteps:
+        timeInd = 0
+        if self.__timeSteps != None and len(self.__timeSteps) > 1:
+            for t in self.__timeSteps[1:]:
                 if time == t:
                     break
                 else:
@@ -663,7 +670,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         for varmeta in self.__vars2D:
             if self.__vars2Darr.ArrayIsEnabled(varmeta.name):
                 data = vardata[varmeta.name][:].data[timeInd].flatten()
-                np.where(data == varmeta.fillval, np.nan, data)
+                data = np.where(data == varmeta.fillval, np.nan, data)
                 gridAdapter2D.CellData.append(data, varmeta.name)
 
         try:
@@ -679,7 +686,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                             data = vardata[varmeta.name][:].data[timeInd].flatten()[lstart:lend]
                         else :
                             data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()[lstart:lend]
-                        np.where(data == varmeta.fillval, np.nan, data)
+                        data = np.where(data == varmeta.fillval, np.nan, data)
                         gridAdapter2D.CellData.append(data, varmeta.name)
                 gridAdapter2D.FieldData.append(lev,    "lev"   )
         except Exception as e:
@@ -699,7 +706,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                             data = vardata[varmeta.name][:].data[timeInd].flatten()[ilstart:ilend]
                         else :
                             data = vardata[varmeta.name][:].data[timeInd].transpose().flatten()[ilstart:ilend]
-                        np.where(data == varmeta.fillval, np.nan, data)
+                        data = np.where(data == varmeta.fillval, np.nan, data)
                         gridAdapter2D.CellData.append(data, varmeta.name)
                 gridAdapter2D.FieldData.append(ilev,   "ilev"   )
         except Exception as e:
