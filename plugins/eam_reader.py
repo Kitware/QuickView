@@ -434,6 +434,12 @@ class EAMSource(VTKPythonAlgorithmBase):
 
 import traceback
 
+class Cache:
+    def __init__(self):
+        self.points = None
+        self.cells  = None
+        self.types  = None
+
 @smproxy.reader(name="EAMSliceSource", label="EAM Slice Data Reader",
                 extensions="nc", file_description="NETCDF files for EAM")
 @smproperty.xml("""<OutputPort name="2D"  index="0" />""")
@@ -478,6 +484,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         self.__DataFileName = None
         self.__ConnFileName = None
         self.__dirty        = False
+        self.__cache        = None
         # Variables for dimension sliders
         self.__time         = 0
         self.__lev          = 0
@@ -532,7 +539,6 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                 fillval = info.getncattr('_FillValue')
                 varmeta.fillval = fillval
             except Exception as e:
-                print(e)
                 pass
         self.__vars2Darr.DisableAllArrays()
         self.__vars3Diarr.DisableAllArrays()
@@ -637,34 +643,51 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         meshdata    = netCDF4.Dataset(self.__ConnFileName, "r")
         vardata     = netCDF4.Dataset(self.__DataFileName, "r")
 
-        lat = meshdata['cell_corner_lat'][:].data.flatten()
-        lon = meshdata['cell_corner_lon'][:].data.flatten()
 
-        output2D    = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
+        output2D    = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0)) 
+        dims        = meshdata.dimensions
+        mdims       = np.array(list(meshdata.dimensions.keys()))
+        mvars       = np.array(list(meshdata.variables.keys()))
+        ncells2D    = dims[mdims[np.where((np.char.find(mdims, 'grid_size') > -1) | (np.char.find(mdims, 'ncol') > -1))[0][0]]].size
+        if self.__dirty:
+            latdim = mvars[np.where(np.char.find(mvars, 'corner_lat') > -1)][0]
+            londim = mvars[np.where(np.char.find(mvars, 'corner_lon') > -1)][0]
 
-        coords = np.empty((len(lat), 3), dtype=np.float64)
-        coords[:, 0] = lon
-        coords[:, 1] = lat
-        coords[:, 2] = 0.0
-        _coords = dsa.numpyTovtkDataArray(coords)
-        vtk_coords = vtkPoints()
-        vtk_coords.SetData(_coords)
-        output2D.SetPoints(vtk_coords)
+            lat = meshdata[latdim][:].data.flatten()
+            lon = meshdata[londim][:].data.flatten()
 
-        ncells2D    = meshdata['cell_corner_lat'][:].data.shape[0]
-        cellTypes   = np.empty(ncells2D,                  dtype=np.uint8)
-        offsets     = np.arange(0, (4 * ncells2D) + 1, 4, dtype=np.int64)
-        cells       = np.arange(ncells2D*4,               dtype=np.int64)
-        cellTypes.fill(vtkConstants.VTK_QUAD)
-        cellTypes   = numpy_support.numpy_to_vtk(num_array=cellTypes.ravel(), \
-                                             deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
-        offsets     = numpy_support.numpy_to_vtk(num_array=offsets.ravel(),   \
-                                             deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cells       = numpy_support.numpy_to_vtk(num_array=cells.ravel(),     \
-                                             deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cellArray = vtkCellArray()
-        cellArray.SetData(offsets, cells)
-        output2D.VTKObject.SetCells(cellTypes, cellArray)
+            coords = np.empty((len(lat), 3), dtype=np.float64)
+            coords[:, 0] = lon
+            coords[:, 1] = lat
+            coords[:, 2] = 0.0
+            _coords = dsa.numpyTovtkDataArray(coords)
+            vtk_coords = vtkPoints()
+            vtk_coords.SetData(_coords)
+            output2D.SetPoints(vtk_coords)
+
+            cellTypes   = np.empty(ncells2D,                  dtype=np.uint8)
+            offsets     = np.arange(0, (4 * ncells2D) + 1, 4, dtype=np.int64)
+            cells       = np.arange(ncells2D*4,               dtype=np.int64)
+            cellTypes.fill(vtkConstants.VTK_QUAD)
+            cellTypes   = numpy_support.numpy_to_vtk(num_array=cellTypes.ravel(), \
+                                                 deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
+            offsets     = numpy_support.numpy_to_vtk(num_array=offsets.ravel(),   \
+                                                 deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+            cells       = numpy_support.numpy_to_vtk(num_array=cells.ravel(),     \
+                                                 deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+            cellArray = vtkCellArray()
+            cellArray.SetData(offsets, cells)
+            output2D.VTKObject.SetCells(cellTypes, cellArray)
+
+            cache = Cache()
+            cache.points = vtk_coords
+            cache.cells  = cellArray
+            cache.types  = cellTypes
+            self.__cache = cache
+            self.__dirty = False 
+        else:
+            output2D.SetPoints(self.__cache.points)
+            output2D.VTKObject.SetCells(self.__cache.types, self.__cache.cells)
 
         gridAdapter2D = dsa.WrapDataObject(output2D)
         for varmeta in self.__vars2D:

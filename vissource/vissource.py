@@ -77,8 +77,8 @@ class EAMVisSource:
             self.ilev = ilev
             self.data.MiddleLayer = lev
             self.data.InterfaceLayer = ilev
-            eamproj2D.UpdatePipeline()
-            self.views["2DProj"]  = OutputPort(eamproj2D,  0)
+            #eamproj2D.UpdatePipeline()
+            #self.views["2DProj"]  = OutputPort(eamproj2D,  0)
             self.UpdateProjection(self.projection)         
 
     def ApplyClipping(self, cliplong, cliplat):
@@ -186,7 +186,7 @@ class EAMVisSource:
         self.vars["3Dm"]   = v3dm
         self.vars["3Di"]   = v3di
 
-        self.data.UpdatePipeline()
+        #self.data.UpdatePipeline()
         pass
 
 if __name__ == "__main__":
