@@ -93,15 +93,10 @@ server.trigger_name(ctrl.view_reset_camera)
 noncvd = [
     {"text" : 'Rainbow Desat.',    "value"  : 'Rainbow Desaturated',   },
     {"text" : 'Cool to Warm',      "value"  : 'Cool to Warm',}, 
-    {"text" : 'Viridis',           "value"  : 'Viridis (matplotlib)', },
-    {"text" : 'Inferno',           "value"  : 'Inferno (matplotlib)', }, 
+    {"text" : 'Yellow-Gray-Blue',  "value"  : 'Yellow - Gray - Blue', },
 ]
 
-cvd = [
-    {"text" : 'Batlow',    "value"  : 'batlow',},
-    {"text" : 'Oslo',      "value"  : 'oslo',}, 
-    {"text" : 'Tokyo',     "value"  : 'tokyo', },
-]
+cvd = [ {"text" : ele.title(), "value" : ele} for ele in viewmanager.colors]
 
 state.colormaps = noncvd
 
@@ -156,6 +151,15 @@ def Apply():
 
     with state:  
         viewmanager.UpdateView()
+
+def SaveState():
+    print(f"Saving state to {state.statefile}")
+    print(state)
+    print(state.to_dict())
+    print(dir(state))
+
+    pass    
+
 
 def ApplyColor(index, type, value):
     if type.lower() == "color":
@@ -214,6 +218,30 @@ def ui_card(title, varname):
         content = vuetify.VCardText(classes="py-2")
     return content
 
+def Search2DVars(search : str):
+    if search == None or len(search) == 0:
+        filtVars = source.vars2D
+    else:
+        filtVars = filter(lambda x: search.lower() in x.lower(), source.vars2D)
+    state.vars2D = list(filtVars)
+    pass
+
+def Search3DmVars(search : str):
+    if search == None or len(search) == 0:
+        filtVars = source.vars3Dm
+    else:
+        filtVars = filter(lambda x: search.lower() in x.lower(), source.vars3Dm)
+    state.vars3Dm = list(filtVars)
+    pass
+
+def Search3DiVars(search : str):
+    if search == None or len(search) == 0:
+        filtVars = source.vars3Di
+    else:
+        filtVars = filter(lambda x: search.lower() in x.lower(), source.vars3Di)
+    state.vars3Di = list(filtVars)
+    pass
+
 with layout:
     # uncomment following line to disable scrolling on views
     # client.Style("html { overflow: hidden; }")
@@ -222,7 +250,6 @@ with layout:
     with layout.toolbar:
         vuetify.VSpacer()
         vuetify.VDivider(vertical=True, classes="mx-2")
-        #with vuetify.VContainer(fluid=True, style="max-height; 50px;", hide_details=True, classes="ma-0 pa-0"):
         with vuetify.VListItemGroup(dense=True):
                 vuetify.VCheckbox(label="Use CVD friendly colormaps", value=0, v_model = ("cmaps",), dense=True, style="min-height : unset", hide_details=True , change=(updatecolors, "[$event]")),
                 vuetify.VCheckbox(label="Use non-CVD friendly colormaps", value=1, v_model = ("cmaps",), dense=True, style="min-height : unset", hide_details=True, change=(updatecolors, "[$event]"))
@@ -231,6 +258,9 @@ with layout:
             f"Connectivity File :  \"{ConnFile}\" <br> Data File :  \"{DataFile}\"",
             style="padding: 10px;",
         )
+        vuetify.VDivider(vertical=True, classes="mx-2")
+        vuetify.VTextField(v_model=("statefile", None))
+        vuetify.VBtn("Save State", click=SaveState)
         vuetify.VDivider(vertical=True, classes="mx-2")
         with vuetify.VBtn(icon=True, click=ctrl.view_reset_camera):
             vuetify.VIcon("mdi-restore")
@@ -280,7 +310,6 @@ with layout:
                         html.Div("{{'(' + String(tstamp) + ')'}}")
                     with vuetify.VCol(cols=3):
                         html.Div("{{parseFloat(timesteps[tstamp]).toFixed(2)}}")
-                #with ui_card(title="Clipping", varname="true"):
                 vuetify.VCheckbox(
                     label="Lat/Long Clipping",
                     v_model=("clipping", False),
@@ -301,7 +330,6 @@ with layout:
                                 ) 
                         with vuetify.VRow():
                             vuetify.VRangeSlider(
-                                #label='Longitude',
                                 v_model=("cliplong", [source.extents[0], source.extents[1]]),
                                 min=("extents[0]", ),
                                 max=("extents[1]", ),
@@ -320,7 +348,6 @@ with layout:
                                 )
                         with vuetify.VRow():
                             vuetify.VRangeSlider(
-                                #label='Latitude',
                                 v_model=("cliplat", [source.extents[2], source.extents[3]]),
                                 min=("extents[2]", ),
                                 max=("extents[3]", ),
@@ -328,10 +355,6 @@ with layout:
         vuetify.VDivider(classes="mx-2")
         with vuetify.VContainer(fluid=True):
             with ui_card(title="Map Projection Selection", varname="true"):
-                #html.A(
-                #    "Projection",
-                #    style="padding: 10px;",
-                #)
                 vuetify.VSelect(
                     outlined=True,
                     items=("options", ["Cyl. Equidistant","Robinson", "Mollweide"]),
@@ -344,6 +367,7 @@ with layout:
                     "2D Variables",
                     style="padding: 10px;",
                 )
+                vuetify.VTextField("var search", change=(Search2DVars, "[$event]"))
                 with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
                     with vuetify.VListItemGroup(dense=True, label="2D Variables"):
                         vuetify.VCheckbox(
@@ -360,8 +384,9 @@ with layout:
                     "3D Middle Layer Variables",
                     style="padding: 10px;",
                 )
+                vuetify.VTextField("var search", change=(Search3DmVars, "[$event]"))
                 with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
-                    with vuetify.VListItemGroup(dense=True, label="3D Variables"):
+                    with vuetify.VListItemGroup(dense=True, label="3D Middle Layer Variables"):
                         vuetify.VCheckbox(
                             v_for="v, i in vars3Dm",
                             key="i",
@@ -373,11 +398,12 @@ with layout:
                         )
                 vuetify.VDivider(classes="mx-2")
                 html.A(
-                    "3D Interface Layer Variables",
-                    style="padding: 10px;",
+                "3D Interface Layer Variables",
+                style="padding: 10px;",
                 )
+                vuetify.VTextField("var search", change=(Search3DiVars, "[$event]"))
                 with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
-                    with vuetify.VListItemGroup(dense=True, label="3D Variables"):
+                    with vuetify.VListItemGroup(dense=True, label="3D Interface Layer Variables"):
                         vuetify.VCheckbox(
                             v_for="v, i in vars3Di",
                             key="i",
@@ -405,45 +431,49 @@ with layout:
                             )
                             html.Div(style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;")
                         with vuetify.VCardActions():
-                            with vuetify.VCol(cols=3, classes="pa-0 align-center justify-center",style="height=50px",):
-                                vuetify.VSelect(
-                                    v_model=("varcolor[idx]",),
-                                    items=("colormaps",),
-                                    outlined=True,
-                                    dense=True,
-                                    hide_details=True,
-                                    change=(ApplyColor, "[idx, 'color', $event]")
-                                )
-                            with vuetify.VCol(cols=2, classes="pa-0 align-center justify-center", style="height=50px",):
-                                vuetify.VCheckbox(
-                                    label="log scale",
-                                    v_model=("uselogscale[idx]",),
-                                    change=(ApplyColor, "[idx, 'log', $event]")
-                                )
-                            with vuetify.VCol(cols=1, classes="pa-0 align-center justify-center", style="height=50px",):
-                                html.Div("Color<br>Range")
-                            with vuetify.VCol(cols=1, classes="pa-0 align-center justify-center", style="height=50px",):
-                                vuetify.VTextField(v_model=("varmin[idx]", ), label="min", outlined=True, change=(UpdateColorProps, "[idx, 'min', $event]"), style="height=50px")
-                            with vuetify.VCol(cols=1, classes="pa-0 align-center justify-center", style="height=50px",):
-                                vuetify.VTextField(v_model=("varmax[idx]", ), label="max", outlined=True, change=(UpdateColorProps, "[idx, 'max', $event]"), style="height=50px")
-                            with vuetify.VCol(cols=1, classes="pa-0 align-center justify-center", style="height=50px",):
-                                    with vuetify.VBtn(icon=True, outlined=True, style="height: 40px; width: 40px", click=(ResetColorProps, "[idx]")):
-                                        vuetify.VIcon("mdi-restore")
-                            with vuetify.VCol(cols=3, classes="pa-0 align-center justify-center", style="height=50px",):
-                                with vuetify.VRow(classes="align-center justify-center", style="height: 25px"):
-                                    with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Zoom, "['in', idx]")):
-                                        vuetify.VIcon("mdi-plus")
-                                    with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Zoom, "['out', idx]")):
-                                        vuetify.VIcon("mdi-minus")
-                                with vuetify.VRow(classes="align-center justify-center", style="height: 25px"):
-                                    with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['up', idx]")):
-                                        vuetify.VIcon("mdi-arrow-up")
-                                    with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['down', idx]")):
-                                        vuetify.VIcon("mdi-arrow-down")
-                                    with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['left', idx]")):
-                                        vuetify.VIcon("mdi-arrow-left")
-                                    with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['right', idx]")):
-                                        vuetify.VIcon("mdi-arrow-right")
+                            with vuetify.VMenu(
+                                transition="slide-y-transition",
+                                close_on_content_click=False,
+                                persistent=True,
+                                no_click_animation=True,
+                            ):                                           
+                                with vuetify.Template(v_slot_activator="{ on, attrs }"):    
+                                    with vuetify.VBtn(icon=True, v_bind="attrs", v_on="on", style="position: absolute; z-index:2",):
+                                        vuetify.VIcon("mdi-dots-vertical")                  
+                                with vuetify.VCard():
+                                    with vuetify.VCardText(): 
+                                            vuetify.VSelect(
+                                                v_model=("varcolor[idx]",),
+                                                items=("colormaps",),
+                                                outlined=True,
+                                                dense=True,
+                                                hide_details=True,
+                                                change=(ApplyColor, "[idx, 'color', $event]")
+                                            )
+                                            vuetify.VCheckbox(
+                                                label="log scale",
+                                                v_model=("uselogscale[idx]",),
+                                                change=(ApplyColor, "[idx, 'log', $event]")
+                                            )
+                                            html.Div("Color Range")
+                                            vuetify.VTextField(v_model=("varmin[idx]", ), label="min", outlined=True, change=(UpdateColorProps, "[idx, 'min', $event]"), style="height=50px")
+                                            vuetify.VTextField(v_model=("varmax[idx]", ), label="max", outlined=True, change=(UpdateColorProps, "[idx, 'max', $event]"), style="height=50px")
+                                            with vuetify.VBtn(icon=True, outlined=True, style="height: 40px; width: 40px", click=(ResetColorProps, "[idx]")):
+                                                vuetify.VIcon("mdi-restore")
+                            vuetify.VSpacer()
+                            vuetify.VDivider(vertical=True, classes="mx-2")
+                            with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Zoom, "['in', idx]")):
+                                vuetify.VIcon("mdi-plus")
+                            with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Zoom, "['out', idx]")):
+                                vuetify.VIcon("mdi-minus")
+                            with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['up', idx]")):
+                                vuetify.VIcon("mdi-arrow-up")
+                            with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['down', idx]")):
+                                vuetify.VIcon("mdi-arrow-down")
+                            with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['left', idx]")):
+                                vuetify.VIcon("mdi-arrow-left")
+                            with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(Move, "['right', idx]")):
+                                vuetify.VIcon("mdi-arrow-right")
                             
 # -----------------------------------------------------------------------------
 # Main
