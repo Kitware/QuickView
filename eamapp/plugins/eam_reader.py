@@ -444,11 +444,10 @@ class Cache:
                 extensions="nc", file_description="NETCDF files for EAM")
 @smproperty.xml("""<OutputPort name="2D"  index="0" />""")
 @smproperty.xml("""
-                <StringVectorProperty command="SetDataFileName"
-                      name="FileName1"
-                      label="Data File"
+                <StringVectorProperty command="SetDataURL"
+                      name="DataURL"
+                      label="Data URL"
                       number_of_elements="1">
-                    <FileListDomain name="files" />
                     <Documentation>Specify the NetCDF data file name.</Documentation>
                 </StringVectorProperty>
                 """)
@@ -457,7 +456,6 @@ class Cache:
                       name="FileName2"
                       label="Connectivity File"
                       number_of_elements="1">
-                    <FileListDomain name="files" />
                     <Documentation>Specify the NetCDF connecticity file name.</Documentation>
                 </StringVectorProperty>
                 """)
@@ -592,6 +590,10 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
     @smproperty.dataarrayselection(name="3D Interface Layer Variables")
     def Get3DiDataArrays(self):
         return self.__vars3Diarr
+
+    def RequestDataObject(self, request, inInfo, outInfo):
+        # Explicitly return the cached object
+        return super().RequestDataObject(request, inInfo, outInfo)
 
     def RequestInformation(self, request, inInfo, outInfo):
         executive = self.GetExecutive()

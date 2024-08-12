@@ -91,14 +91,25 @@ class ViewData():
 def GetRenderView(index, views, var, num, colordata : ViewData):
     data = views['2DProj']
 
+    from timeit import default_timer as timer
+    
     from paraview.simple import servermanager as sm
+    start = timer()
     vtkdata = sm.Fetch(data)
     range = vtkdata.GetCellData().GetArray(var).GetRange() 
+    end = timer()
+    print("Time to get range: ", end - start)
 
+    start = timer()
     rview = FindViewOrCreate(f'rv{index}', 'RenderView')
+    end = timer()
+
+    print("Time to find/create render views : ", end - start)
+
     rview.UseColorPaletteForBackground = 0
     rview.BackgroundColorMode = 'Gradient'
 
+    start = timer()
     #rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
@@ -143,6 +154,8 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     textrep.FontSize = 22 
     textrep.Italic = 1    
     textrep.Shadow = 1 
+    end = timer()
+    print("Time to setup views : ", end - start)
 
     return rview
 
@@ -210,6 +223,8 @@ class ViewManager():
         counter = 0
         self.rViews = []
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
+
+        data = self.source.views['2DPrj']
 
         for index, var in enumerate(vars2D + vars3Dm + vars3Di):
                 colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
