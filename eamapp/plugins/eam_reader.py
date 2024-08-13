@@ -444,10 +444,11 @@ class Cache:
                 extensions="nc", file_description="NETCDF files for EAM")
 @smproperty.xml("""<OutputPort name="2D"  index="0" />""")
 @smproperty.xml("""
-                <StringVectorProperty command="SetDataURL"
-                      name="DataURL"
-                      label="Data URL"
+                <StringVectorProperty command="SetDataFileName"
+                      name="FileName1"
+                      label="Data File"
                       number_of_elements="1">
+                    <FileListDomain name="files" />
                     <Documentation>Specify the NetCDF data file name.</Documentation>
                 </StringVectorProperty>
                 """)

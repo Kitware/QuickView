@@ -13,7 +13,7 @@ def serve():
 
     ConnFile = args.conn 
     if args.conn is None:
-        ConnFile = os.path.join(os.path.dirname(__file__), "data", "connectivity.nc")
+        ConnFile = os.path.join(os.path.dirname(__file__), "eamapp", "data", "connectivity.nc")
     DataFile = args.data
     StateFile = args.state
     WorkDir = args.workdir
@@ -24,7 +24,7 @@ def serve():
 
     source = EAMVisSource()
     try:
-        GlobeFile = os.path.join(os.path.dirname(__file__), "data", "globe.vtk")
+        GlobeFile = os.path.join(os.path.dirname(__file__), "eamapp", "data", "globe.vtk")
         source.Update(datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0)
         print(source.extents)
     except Exception as e:
@@ -34,7 +34,7 @@ def serve():
     from eamapp.eamapp import EAMApp
     app = EAMApp(source)
     
-    app.ui.start()
+    app.start()
 
 if __name__ == "__main__":
     serve()

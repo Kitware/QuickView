@@ -1,4 +1,4 @@
-#import paraview.web.venv  # Available in PV 5.10
+from typing import Union
 
 from trame.app import get_server
 
@@ -9,6 +9,9 @@ from trame.widgets import paraview as pvWidgets
 from trame.widgets import grid
 
 from trame.ui.vuetify import SinglePageWithDrawerLayout
+
+from trame_server.core import Server
+
 from eamapp.vissource.vissource  import  EAMVisSource
 from eamapp.vissource.viewmanager import ViewManager
 
@@ -31,12 +34,16 @@ class EAMApp:
     def __init__(
             self,
             source : EAMVisSource = None,
+            initserver: Union[Server, str] = None,
             initstate : dict = None
     ) -> None:
-        server = get_server()
-        server.client_type = "vue2" # instead of 'vue2'
-        state, ctrl = server.state, server.controller
-        
+        server = get_server(initserver, client_type = "vue2")
+        state  = server.state
+        ctrl   = server.controller
+
+        self._ui = None
+
+        self.server = server
         self.state  = state
         self.ctrl   = ctrl
         pvWidgets.initialize(server)
@@ -217,14 +224,16 @@ class EAMApp:
         state.vars3Di = list(filtVars)
         pass
     """
+    def start(self, **kwargs):
+        """Initialize the UI and start the server for GeoTrame."""
+        self.ui.server.start(**kwargs)
 
     @property
     def ui(self) -> SinglePageWithDrawerLayout:
-
-        if self.ui is None:
+        if self._ui is None:
         # Build UI
-            self.ui = SinglePageWithDrawerLayout(self.server)
-            with self.ui as layout:
+            self._ui = SinglePageWithDrawerLayout(self.server)
+            with self._ui as layout:
             # client.Style("html { overflow: hidden; }")
                 layout.icon.click = self.ctrl.view_reset_camera
                 layout.title.set_text("EAM QuickView")
@@ -455,3 +464,4 @@ class EAMApp:
                                             vuetify.VIcon("mdi-arrow-left")
                                         with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(self.Move, "['right', idx]")):
                                             vuetify.VIcon("mdi-arrow-right")
+        return self._ui

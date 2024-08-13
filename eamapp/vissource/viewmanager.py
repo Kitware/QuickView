@@ -224,7 +224,7 @@ class ViewManager():
         self.rViews = []
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
-        data = self.source.views['2DPrj']
+        data = self.source.views['2DProj']
 
         for index, var in enumerate(vars2D + vars3Dm + vars3Di):
                 colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
