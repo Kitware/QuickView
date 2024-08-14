@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import Union
 
 from trame.app import get_server
@@ -17,17 +19,46 @@ from eamapp.vissource.viewmanager import ViewManager
 
 import numpy as np
 
+from paraview.simple import (
+    ImportPresets
+)
+
 # -----------------------------------------------------------------------------
 # trame setup
 # -----------------------------------------------------------------------------
 
 noncvd = [
             {"text" : 'Rainbow Desat.',    "value"  : 'Rainbow Desaturated',   },
-            {"text" : 'Cool to Warm',      "value"  : 'Cool to Warm',}, 
+            {"text" : 'Cool to Warm',      "value"  : 'Cool to Warm',},
             {"text" : 'Yellow-Gray-Blue',  "value"  : 'Yellow - Gray - Blue', },
         ]
- 
 cvd    = []
+
+save_state_keys = [
+    # Data files
+    "DataFile", "ConnFile", 
+    # Data slice related related variables
+    "vlev", "vilev", "vars2Dstate", "vars3Distate", "vars3Dmstate",
+    # Latitude/Longitude clipping
+    "cliplat", "cliplong",
+    # Projection
+    "projection",
+    # Color map related variables
+    "ccardsentry", "varcolor", "uselogscale", "varmin", "varmax"     
+]
+
+import os
+try:
+    presdir    = os.path.join(os.path.dirname(__file__), 'presets')
+    presets    = os.listdir(path=presdir)
+    for preset in presets:
+        prespath = os.path.abspath(os.path.join(presdir, preset))
+        if os.path.isfile(prespath):
+            name = preset.split('_')[0]
+            ImportPresets(prespath)
+            cvd.append({"text" : name.title(), "value" : name})
+except Exception as e:
+    print("Error loading presets :", e)
 
 @TrameApp()
 class EAMApp:
@@ -35,7 +66,8 @@ class EAMApp:
             self,
             source : EAMVisSource = None,
             initserver: Union[Server, str] = None,
-            initstate : dict = None
+            initstate : dict = None,
+            workdir : Union[str, Path] = None,
     ) -> None:
         server = get_server(initserver, client_type = "vue2")
         state  = server.state
@@ -43,15 +75,19 @@ class EAMApp:
 
         self._ui = None
 
+        self.workdir = workdir
         self.server = server
         self.state  = state
         self.ctrl   = ctrl
         pvWidgets.initialize(server)
-        
+
         self.source = source
         self.viewmanager = ViewManager(source, server, state)
-        
-        state.vlev = 0 
+
+        # Load state variables from the source object
+
+        state.DataFile      = source.DataFile
+        state.ConnFile      = source.ConnFile
         state.timesteps     = source.timestamps
         state.lev           = source.lev
         state.ilev          = source.ilev
@@ -59,35 +95,49 @@ class EAMApp:
         state.vars2D        = source.vars2D
         state.vars3Di       = source.vars3Di
         state.vars3Dm       = source.vars3Dm
-        state.vars2Dstate   = [False] * len(source.vars2D)
-        state.vars3Distate  = [False] * len(source.vars3Di)
-        state.vars3Dmstate  = [False] * len(source.vars3Dm)
- 
+        
         state.views         = []
+        #state.projection    = "Cyl. Equidistant"
+        #state.cliplong      = [self.source.extents[0], self.source.extents[1]],
+        #state.cliplat       = [self.source.extents[2], self.source.extents[3]],
         state.cmaps         = ["1"]
         state.layout        = []
- 
         state.ccardsentry   = []
         state.ccardscolor   = [None] * len(source.vars2D + source.vars3Di + source.vars3Dm)
         state.varcolor      = []
         state.uselogscale   = []
         state.varmin        = []
         state.varmax        = []
- 
+
         ctrl.view_update = self.viewmanager.UpdateCamera
         ctrl.view_reset_camera = self.viewmanager.ResetCamera
         ctrl.on_server_ready.add(ctrl.view_update)
         server.trigger_name(ctrl.view_reset_camera)
- 
-        noncvd = [
-            {"text" : 'Rainbow Desat.',    "value"  : 'Rainbow Desaturated',   },
-            {"text" : 'Cool to Warm',      "value"  : 'Cool to Warm',}, 
-            {"text" : 'Yellow-Gray-Blue',  "value"  : 'Yellow - Gray - Blue', },
-        ]
- 
+
         cvd = [ {"text" : ele.title(), "value" : ele} for ele in self.viewmanager.colors]
- 
+
         state.colormaps = noncvd
+
+        # User controlled state varialbes
+        if initstate == None:
+            state.vlev          = 0
+            state.vilev         = 0
+            state.vars2Dstate   = [False] * len(source.vars2D)
+            state.vars3Distate  = [False] * len(source.vars3Di)
+            state.vars3Dmstate  = [False] * len(source.vars3Dm)
+        else:
+            state.update(initstate)
+            # Build color cache here
+            from eamapp.vissource.viewmanager import BuildColorInformationCache
+            self.viewmanager.cache = BuildColorInformationCache(initstate)
+            self.Apply()
+
+    def SaveState(self):
+        import json, os
+        all = self.state.to_dict()
+        to_export = { k : all[k] for k in save_state_keys}
+        with open(os.path.join(self.workdir, "state.json"), "w") as outfile: 
+            json.dump(to_export, outfile)
 
     @change('vcols')
     def Columns(self, vcols, **kwargs):
@@ -126,20 +176,15 @@ class EAMApp:
         vars = s2d + s3dm + s3di
 
         self.state.ccardsentry = vars
-    
+
         self.state.ccardsvars  = [{"text" : var, "value" : var} for var in vars]
-        self.state.varcolor    = [self.state.colormaps[0]['value']] * len(vars) 
+        self.state.varcolor    = [self.state.colormaps[0]['value']] * len(vars)
         self.state.uselogscale = [False] * len(vars)
         self.state.varmin      = [np.nan] * len(vars)
         self.state.varmax      = [np.nan] * len(vars)
- 
-        with self.state:  
-            self.viewmanager.UpdateView()
 
-    def SaveState(self):
-        print(f"Saving state to {self.state.statefile}")
-        print(self.state)
-        pass    
+        with self.state:
+            self.viewmanager.UpdateView()
 
     def ApplyColor(self, index, type, value):
         if type.lower() == "color":
@@ -164,8 +209,8 @@ class EAMApp:
             self.state.varmin[index] = value
         elif type.lower() == 'max':
             self.state.varmax[index] = value
-        self.viewmanager.UpdateColorProps(index, 
-                                          self.state.varmin[index], 
+        self.viewmanager.UpdateColorProps(index,
+                                          self.state.varmin[index],
                                           self.state.varmax[index])
 
     def ResetColorProps(self, index):
@@ -175,7 +220,7 @@ class EAMApp:
         if type.lower() == 'in':
             self.viewmanager.ZoomIn(index)
         elif type.lower() == 'out':
-            self.viewmanager.ZoomOut(index) 
+            self.viewmanager.ZoomOut(index)
         pass
 
     def Move(self, dir, index):
@@ -187,6 +232,22 @@ class EAMApp:
             self.viewmanager.Move(index, 0, 1)
         elif dir.lower() == "right":
             self.viewmanager.Move(index, 0, 0)
+
+    def export_config(self, config_file: Union[str, Path, None] = None) -> None:
+        """Export the current state to a JSON configuration file.
+
+        Parameters:
+            config_file: Can be a string or Path representing the destination of the JSON configuration file.
+                If None, a dictionary containing the current configuration will be returned.
+                For details, see Configuration Files documentation.
+        """
+        # Populate config as a map
+        config = {
+
+        }
+        if config_file:
+            Path(config_file).write_text(json.dumps(config))
+        return config
 
     def ui_card(self, title, varname):
         with vuetify.VCard(v_show=f"{varname} == true"):
@@ -250,18 +311,18 @@ class EAMApp:
                     )
                     vuetify.VDivider(vertical=True, classes="mx-2")
                     vuetify.VTextField(v_model=("statefile", None))
-                    vuetify.VBtn("Save State", click=self.SaveState)
+                    vuetify.VBtn("Save State", click=self.SaveState,)
                     vuetify.VDivider(vertical=True, classes="mx-2")
                     with vuetify.VBtn(icon=True, click=self.ctrl.view_reset_camera):
                         vuetify.VIcon("mdi-restore")
-   
+
                 items = []
                 with layout.drawer as drawer:
                     drawer.width = 400
                     vuetify.VDivider(classes="mb-2")
                     with vuetify.VContainer(fluid=True, classes="d-flex justify-center align-center"):
                             vuetify.VBtn("Update Views", click=self.Apply, style="background-color: gray; color: white; width: 200px; height: 50px;")
-                    vuetify.VDivider(classes="mx-2") 
+                    vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
                         with self.ui_card(title="Select Data Slice", varname="true"):
                             with vuetify.VRow():
@@ -313,11 +374,11 @@ class EAMApp:
                                                 v_model=("cliplong[0]",)
                                             )
                                         with vuetify.VCol(cols=6):
-                                           html.Div("Longitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue") 
+                                           html.Div("Longitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue")
                                         with vuetify.VCol(cols=3):
                                             vuetify.VTextField(
                                                 v_model=("cliplong[1]",)
-                                            ) 
+                                            )
                                     with vuetify.VRow():
                                         vuetify.VRangeSlider(
                                             v_model=("cliplong", [self.source.extents[0], self.source.extents[1]]),
@@ -331,7 +392,7 @@ class EAMApp:
                                                 v_model=("cliplat[0]",)
                                             )
                                         with vuetify.VCol(cols=6):
-                                           html.Div("Latitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue") 
+                                           html.Div("Latitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue")
                                         with vuetify.VCol(cols=3):
                                             vuetify.VTextField(
                                                 v_model=("cliplat[1]",)
@@ -403,7 +464,7 @@ class EAMApp:
                                         style="max-height: 20px",
                                         dense=True
                                     )
-                    vuetify.VDivider(classes="mx-2") 
+                    vuetify.VDivider(classes="mx-2")
                     #temp = server.trigger_name(ctrl.view_reset_camera)
                     with layout.content:
                         with grid.GridLayout(
@@ -426,12 +487,12 @@ class EAMApp:
                                             close_on_content_click=False,
                                             persistent=True,
                                             no_click_animation=True,
-                                        ):                                           
-                                            with vuetify.Template(v_slot_activator="{ on, attrs }"):    
+                                        ):
+                                            with vuetify.Template(v_slot_activator="{ on, attrs }"):
                                                 with vuetify.VBtn(icon=True, v_bind="attrs", v_on="on", style="position: absolute; z-index:2",):
-                                                    vuetify.VIcon("mdi-dots-vertical")                  
+                                                    vuetify.VIcon("mdi-dots-vertical")
                                             with vuetify.VCard():
-                                                with vuetify.VCardText(): 
+                                                with vuetify.VCardText():
                                                         vuetify.VSelect(
                                                             v_model=("varcolor[idx]",),
                                                             items=("colormaps",),

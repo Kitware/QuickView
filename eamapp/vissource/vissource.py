@@ -94,6 +94,8 @@ class EAMVisSource():
         grid.UpdatePipeline()
 
     def Update(self, datafile, connfile, globefile, lev):
+        self.DataFile = datafile
+        self.ConnFile = connfile
         if self.data == None:
             data = EAMSliceDataReader(registrationName='eamdata',
                                         ConnectivityFile=connfile,

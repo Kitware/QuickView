@@ -11,8 +11,6 @@ from pyproj import Proj, Transformer
 from paraview.simple import (
     Text,
     Show,
-    ImportPresets,
-    CreateRenderView,
     FindViewOrCreate,
     GetScalarBar,
     ColorBy,
@@ -81,12 +79,23 @@ def AddAnnotations(rview, annotations):
     pass
 
 class ViewData():
-    def __init__(self, color, uselog = False):
+    def __init__(self, color, uselog = False, rep = None, min = None, max = None):
         self.color  = color
         self.uselog = uselog
-        self.rep    = None
-        self.min    = None
-        self.max    = None 
+        self.rep    = rep
+        self.min    = min
+        self.max    = max 
+
+def BuildColorInformationCache(state: map):
+    vars    = state["ccardsentry"]
+    colors  = state["varcolor"]
+    logscl  = state["uselogscale"]
+    varmin  = state["varmin"]
+    varmax  = state["varmax"]    
+    cache = {}
+    for index, var in enumerate(vars):
+        cache[var] = ViewData(colors[index], rep=None, uselog=logscl[index], min=varmin[index], max=varmax[index])
+    return cache
 
 def GetRenderView(index, views, var, num, colordata : ViewData):
     data = views['2DProj']
@@ -124,11 +133,14 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     LUTColorBar.Orientation = 'Horizontal'
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
-    rep.RescaleTransferFunctionToDataRange(False, True)
+    if colordata.min != None and colordata.max !=None:
+        coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
+    else:
+        rep.RescaleTransferFunctionToDataRange(False, True)
 
     colordata.rep = rep
-    colordata.min = range[0]
-    colordata.max = range[1]
+    colordata.min = colordata.min if colordata.min != None else range[0]
+    colordata.max = colordata.max if colordata.max != None else range[1]
 
     globe = views['GProj']
     repG = Show(globe, rview)
@@ -169,20 +181,6 @@ class ViewManager():
         self.widgets    = []
         self.colors     = []
         self.cache      = {}
-        file       = os.path.abspath(__file__)
-        currdir    = os.path.dirname(file)
-        root       = os.path.dirname(currdir)
-        try:
-            presdir    = os.path.join(root, 'presets')
-            presets    = os.listdir(path=presdir)
-            for preset in presets:
-                prespath = os.path.abspath(os.path.join(presdir, preset))
-                if os.path.isfile(prespath):
-                    name = preset.split('_')[0]
-                    ImportPresets(prespath)
-                    self.colors.append(name)
-        except Exception as e:
-            print("Error loading presets :", e)
 
     def SetCols(self, cols):
         if cols == self.columns:
@@ -286,8 +284,7 @@ class ViewManager():
         self.state.varmin[index] = colordata.min
         self.state.varmax[index] = colordata.max
         colordata.rep.RescaleTransferFunctionToDataRange(False, True)
-        self.UpdateCamera()
-        
+        self.UpdateCamera() 
 
     def ZoomIn(self, index):
         rview   = self.rViews[index]
