@@ -14,8 +14,8 @@ from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame_server.core import Server
 
-from eamapp.vissource.vissource  import  EAMVisSource
-from eamapp.vissource.viewmanager import ViewManager
+from eamapp.vissource  import  EAMVisSource
+from eamapp.viewmanager import ViewManager
 
 import numpy as np
 
@@ -128,7 +128,7 @@ class EAMApp:
         else:
             state.update(initstate)
             # Build color cache here
-            from eamapp.vissource.viewmanager import BuildColorInformationCache
+            from eamapp.viewmanager import BuildColorInformationCache
             self.viewmanager.cache = BuildColorInformationCache(initstate)
             self.Apply()
 

@@ -25,7 +25,7 @@ def serve():
 
     if WorkDir is None:
         WorkDir = str(os.getcwd())
-    from eamapp.vissource.vissource import EAMVisSource
+    from eamapp.vissource import EAMVisSource
 
     GlobeFile = os.path.join(os.path.dirname(__file__), "eamapp", "data", "globe.vtk")
     

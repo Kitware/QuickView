@@ -31,11 +31,9 @@ class EAMVisSource():
         self.timestamps = []
         self.lev        = 0
 
-        file       = os.path.abspath(__file__)
-        currdir    = os.path.dirname(file)
-        root       = os.path.dirname(currdir)
+        currdir    = os.path.dirname(__file__)
         try:
-            plugdir    = os.path.join(root, 'plugins')
+            plugdir    = os.path.join(currdir, 'plugins')
             import fnmatch
             plugins    = fnmatch.filter(os.listdir(path=plugdir), '*.py')
             for plugin in plugins:

@@ -11,6 +11,7 @@ from pyproj import Proj, Transformer
 from paraview.simple import (
     Text,
     Show,
+    CreateRenderView,
     FindViewOrCreate,
     GetScalarBar,
     ColorBy,
@@ -98,19 +99,11 @@ def BuildColorInformationCache(state: map):
     return cache
 
 def GetRenderView(index, views, var, num, colordata : ViewData):
-    data = views['2DProj']
 
     from timeit import default_timer as timer
-    
-    from paraview.simple import servermanager as sm
-    start = timer()
-    vtkdata = sm.Fetch(data)
-    range = vtkdata.GetCellData().GetArray(var).GetRange() 
-    end = timer()
-    print("Time to get range: ", end - start)
 
     start = timer()
-    rview = FindViewOrCreate(f'rv{index}', 'RenderView')
+    rview = CreateRenderView(f'rv{index}')
     end = timer()
 
     print("Time to find/create render views : ", end - start)
@@ -119,7 +112,7 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     rview.BackgroundColorMode = 'Gradient'
 
     start = timer()
-    #rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
+    data = views['2DProj']
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
@@ -133,14 +126,7 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     LUTColorBar.Orientation = 'Horizontal'
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
-    if colordata.min != None and colordata.max !=None:
-        coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
-    else:
-        rep.RescaleTransferFunctionToDataRange(False, True)
-
-    colordata.rep = rep
-    colordata.min = colordata.min if colordata.min != None else range[0]
-    colordata.max = colordata.max if colordata.max != None else range[1]
+    coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
 
     globe = views['GProj']
     repG = Show(globe, rview)
@@ -154,8 +140,6 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     annot = views['GLines']
     repAn = Show(annot, rview)
     repAn.SetRepresentationType('Wireframe')
-    #repAn.RenderLinesAsTubes = 1
-    #repG.LineWidth = 0.5
     repAn.AmbientColor = [0.67, 0.67, 0.67]
     repAn.DiffuseColor = [0.67, 0.67, 0.67]
 
@@ -196,7 +180,7 @@ class ViewManager():
          for widget in self.widgets:
               widget.update()
 
-    def UpdateView(self):
+    def UpdateView(self, rep_change=False):
         self.widgets.clear()
 
         long = [self.state.extents[0], self.state.extents[1]]
@@ -223,9 +207,14 @@ class ViewManager():
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         data = self.source.views['2DProj']
-
+        import paraview.servermanager as sm
+        vtkdata = sm.Fetch(data)
         for index, var in enumerate(vars2D + vars3Dm + vars3Di):
+                range = vtkdata.GetCellData().GetArray(var).GetRange()
                 colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
+                if colordata.min == None or colordata.max == None:
+                    colordata.min = range[0]
+                    colordata.max = range[1]
                 rview = GetRenderView(index, self.source.views, var, counter, colordata) 
                 AddAnnotations(rview, annotations)
                 self.rViews.append(rview)
