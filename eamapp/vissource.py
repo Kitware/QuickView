@@ -54,6 +54,7 @@ class EAMVisSource():
             eamprojG.Projection   = proj
             projA.Projection      = proj
         eamproj2D.UpdatePipeline()
+        self.moveextents = eamproj2D.GetDataInformation().GetBounds()
         eamprojG.UpdatePipeline()
         projA.UpdatePipeline()
         self.views["2DProj"]  = OutputPort(eamproj2D,  0)
@@ -144,6 +145,7 @@ class EAMVisSource():
         proj2D.Projection = self.projection
         proj2D.Translate  = 1
         proj2D.UpdatePipeline()
+        self.moveextents = proj2D.GetDataInformation().GetBounds()
 
         projG            = EAMProject(registrationName='GProj', Input=OutputPort(gclip, 0))
         projG.Projection = self.projection

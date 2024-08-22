@@ -16,6 +16,9 @@ from trame_server.core import Server
 
 from eamapp.vissource  import  EAMVisSource
 from eamapp.viewmanager import ViewManager
+from eamapp.ui.VariableSelect import VariableSelect
+from eamapp.ui.UICard import UICard
+from eamapp.ui.FileSelect import FileSelect
 
 import numpy as np
 
@@ -109,6 +112,11 @@ class EAMApp:
         state.varmin        = []
         state.varmax        = []
 
+        state.export_config     = False
+        state.exported_state    = None
+        state.export_completed  = False 
+        state.state_save_file   = None
+
         ctrl.view_update = self.viewmanager.UpdateCamera
         ctrl.view_reset_camera = self.viewmanager.ResetCamera
         ctrl.on_server_ready.add(ctrl.view_update)
@@ -132,28 +140,16 @@ class EAMApp:
             self.viewmanager.cache = BuildColorInformationCache(initstate)
             self.Apply()
 
-    def SaveState(self):
+    def GenerateState(self):
         import json, os
         all = self.state.to_dict()
         to_export = { k : all[k] for k in save_state_keys}
-        with open(os.path.join(self.workdir, "state.json"), "w") as outfile: 
-            json.dump(to_export, outfile)
+        #with open(os.path.join(self.workdir, "state.json"), "w") as outfile: 
+        return json.dumps(to_export)
 
     @change('vcols')
     def Columns(self, vcols, **kwargs):
         self.viewmanager.SetCols(vcols)
-
-    def update2DVars(self, index, visibility):
-        self.state.vars2Dstate[index] = visibility
-        self.state.dirty("vars2Dstate")
-
-    def update3DmVars(self, index, visibility):
-        self.state.vars3Dmstate[index] = visibility
-        self.state.dirty("vars3Dmstate")
-
-    def update3DiVars(self, index, visibility):
-        self.state.vars3Distate[index] = visibility
-        self.state.dirty("vars3Distate")
 
     def Apply(self):
         s2d     = []
@@ -232,7 +228,7 @@ class EAMApp:
             self.viewmanager.Move(index, 0, 1)
         elif dir.lower() == "right":
             self.viewmanager.Move(index, 0, 0)
-
+    '''
     def export_config(self, config_file: Union[str, Path, None] = None) -> None:
         """Export the current state to a JSON configuration file.
 
@@ -248,18 +244,7 @@ class EAMApp:
         if config_file:
             Path(config_file).write_text(json.dumps(config))
         return config
-
-    def ui_card(self, title, varname):
-        with vuetify.VCard(v_show=f"{varname} == true"):
-            vuetify.VCardTitle(
-                title,
-                classes="grey lighten-1 py-1 grey--text text--darken-3",
-                style="user-select: none; cursor: pointer",
-                hide_details=True,
-                dense=True,
-            )
-            content = vuetify.VCardText(classes="py-2")
-        return content
+    '''    
     """
     def Search2DVars(self, search : str):
         if search == None or len(search) == 0:
@@ -289,13 +274,23 @@ class EAMApp:
         """Initialize the UI and start the server for GeoTrame."""
         self.ui.server.start(**kwargs)
 
+    def import_config(self):
+        return
+
+    def export_config(self, config_file: Union[str, Path, None] = None) -> None:
+        pass
+
+    @change("export_config")
+    def export(self, export_config, **kwargs):
+        print(f"Exporting config : {export_config}")
+        self.state.export_completed = False
+        self.state.exported_state = self.GenerateState()
+
     @property
     def ui(self) -> SinglePageWithDrawerLayout:
         if self._ui is None:
-        # Build UI
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
-            # client.Style("html { overflow: hidden; }")
                 layout.icon.click = self.ctrl.view_reset_camera
                 layout.title.set_text("EAM QuickView")
                 with layout.toolbar:
@@ -310,13 +305,19 @@ class EAMApp:
                         style="padding: 10px;",
                     )
                     vuetify.VDivider(vertical=True, classes="mx-2")
-                    vuetify.VTextField(v_model=("statefile", None))
-                    vuetify.VBtn("Save State", click=self.SaveState,)
+                    #vuetify.VTextField(v_model=("statefile", None))
+                    #vuetify.VBtn("Save State", click=self.SaveState,)
+                    vuetify.VBtn(
+                        "Export",
+                        click="export_config = true",
+                    )
+                    with vuetify.VDialog(v_model=("export_config",), max_width=800):
+                        with vuetify.VContainer(fluid=True, classes="d-flex justify-center align-center"):
+                            FileSelect()
                     vuetify.VDivider(vertical=True, classes="mx-2")
                     with vuetify.VBtn(icon=True, click=self.ctrl.view_reset_camera):
                         vuetify.VIcon("mdi-restore")
 
-                items = []
                 with layout.drawer as drawer:
                     drawer.width = 400
                     vuetify.VDivider(classes="mb-2")
@@ -324,7 +325,7 @@ class EAMApp:
                             vuetify.VBtn("Update Views", click=self.Apply, style="background-color: gray; color: white; width: 200px; height: 50px;")
                     vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
-                        with self.ui_card(title="Select Data Slice", varname="true"):
+                        with UICard(title="Select Data Slice", varname="true").content:
                             with vuetify.VRow():
                                 with vuetify.VCol(cols=6):
                                     vuetify.VSlider(
@@ -367,7 +368,7 @@ class EAMApp:
                                 dense=True
                             )
                             with vuetify.VContainer(fluid=True):
-                                with self.ui_card(title=None, varname="clipping"):
+                                with UICard(title=None, varname="clipping").content:
                                     with vuetify.VRow():
                                         with vuetify.VCol(cols=3):
                                             vuetify.VTextField(
@@ -405,7 +406,7 @@ class EAMApp:
                                         )
                     vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
-                        with self.ui_card(title="Map Projection Selection", varname="true"):
+                        with UICard(title="Map Projection Selection", varname="true").content:
                             vuetify.VSelect(
                                 outlined=True,
                                 items=("options", ["Cyl. Equidistant","Robinson", "Mollweide"]),
@@ -413,59 +414,27 @@ class EAMApp:
                             )
                     vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
-                        with self.ui_card(title="Variable Selection", varname="true"):
+                        with UICard(title="Variable Selection", varname="true").content:
                             html.A(
                                 "2D Variables",
                                 style="padding: 10px;",
                             )
                             #vuetify.VTextField("var search", change=(Search2DVars, "[$event]"))
-                            with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
-                                with vuetify.VListItemGroup(dense=True, label="2D Variables"):
-                                    vuetify.VCheckbox(
-                                        v_for="v, i in vars2D",
-                                        key="i",
-                                        label=("vars2D[i]",),
-                                        v_model=("vars2Dstate[i]",),
-                                        change=(self.update2DVars, "[i, $event]"),
-                                        style="max-height: 20px",
-                                        dense=True
-                                    )
+                            VariableSelect("vars2D", "vars2Dstate") 
                             vuetify.VDivider(classes="mx-2")
                             html.A(
                                 "3D Middle Layer Variables",
                                 style="padding: 10px;",
                             )
-                            #vuetify.VTextField("var search", change=(Search3DmVars, "[$event]"))
-                            with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
-                                with vuetify.VListItemGroup(dense=True, label="3D Middle Layer Variables"):
-                                    vuetify.VCheckbox(
-                                        v_for="v, i in vars3Dm",
-                                        key="i",
-                                        label=("vars3Dm[i]",),
-                                        v_model=("vars3Dmstate[i]",),
-                                        change=(self.update3DmVars, "[i, $event]"),
-                                        style="max-height: 20px",
-                                        dense=True
-                                    )
+                            VariableSelect("vars3Dm", "vars3Dmstate") 
                             vuetify.VDivider(classes="mx-2")
                             html.A(
                             "3D Interface Layer Variables",
                             style="padding: 10px;",
                             )
                             #vuetify.VTextField("var search", change=(Search3DiVars, "[$event]"))
-                            with vuetify.VContainer(fluid=True, style="max-height: 200px", classes="overflow-y-auto"):
-                                with vuetify.VListItemGroup(dense=True, label="3D Interface Layer Variables"):
-                                    vuetify.VCheckbox(
-                                        v_for="v, i in vars3Di",
-                                        key="i",
-                                        label=("vars3Di[i]",),
-                                        v_model=("vars3Distate[i]",),
-                                        change=(self.update3DiVars, "[i, $event]"),
-                                        style="max-height: 20px",
-                                        dense=True
-                                    )
+                            VariableSelect("vars3Di", "vars3Distate") 
                     vuetify.VDivider(classes="mx-2")
-                    #temp = server.trigger_name(ctrl.view_reset_camera)
                     with layout.content:
                         with grid.GridLayout(
                             layout=("layout", []),

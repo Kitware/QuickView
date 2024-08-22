@@ -155,8 +155,10 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
 
     return rview
 
+from eamapp.vissource import EAMVisSource
+
 class ViewManager():
-    def __init__(self, source, server, state):
+    def __init__(self, source : EAMVisSource, server, state):
         self.rows       = 1
         self.columns    = 1
         self.server     = server
@@ -240,6 +242,8 @@ class ViewManager():
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
             layout.append({"x" : x, "y" : y, "w" : wdt, "h" : hgt, "i" : idx})
+            print(widget.ref_name)
+            print(widget)
         self.state.views = sWidgets
         self.state.layout = layout
 
@@ -286,11 +290,18 @@ class ViewManager():
         self.UpdateCamera()
 
     def Move(self, vindex, dir, factor):
+        extents = self.source.moveextents
+        move = (
+            (extents[1] - extents[0]) * 0.05,
+            (extents[3] - extents[2]) * 0.05,
+            (extents[5] - extents[4]) * 0.05
+        )
+
         rview   = self.rViews[vindex]
         pos = rview.CameraPosition
         foc = rview.CameraFocalPoint
-        pos[dir] += 10 if factor > 0 else -10
-        foc[dir] += 10 if factor > 0 else -10
+        pos[dir] += move[dir] if factor > 0 else -move[dir]
+        foc[dir] += move[dir] if factor > 0 else -move[dir]
         rview.CameraPosition = pos
         rview.CameraFocalPoint = foc
         self.UpdateCamera()
