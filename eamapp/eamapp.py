@@ -335,7 +335,7 @@ class EAMApp:
                                         max=("lev.length - 1", )
                                     )
                                 with vuetify.VCol(cols=2):
-                                    html.Div("{{'(' + String(vlev) + ')'}}")
+                                    html.Div("{{'(k=' + String(vlev) + ')'}}")
                                 with vuetify.VCol(cols=3):
                                     html.Div("{{parseFloat(lev[vlev]).toFixed(2)}}")
                             with vuetify.VRow():
@@ -347,7 +347,7 @@ class EAMApp:
                                         max=("ilev.length - 1", )
                                     )
                                 with vuetify.VCol(cols=2):
-                                    html.Div("{{'(' + String(vilev) + ')'}}")
+                                    html.Div("{{'k=(' + String(vilev) + ')'}}")
                                 with vuetify.VCol(cols=3):
                                     html.Div("{{parseFloat(ilev[vilev]).toFixed(2)}}")
                             with vuetify.VRow():
@@ -359,7 +359,7 @@ class EAMApp:
                                         max=("timesteps.length - 1", )
                                     )
                                 with vuetify.VCol(cols=2):
-                                    html.Div("{{'(' + String(tstamp) + ')'}}")
+                                    html.Div("{{'t=(' + String(tstamp) + ')'}}")
                                 with vuetify.VCol(cols=3):
                                     html.Div("{{parseFloat(timesteps[tstamp]).toFixed(2)}}")
                             vuetify.VCheckbox(
@@ -458,7 +458,13 @@ class EAMApp:
                                             no_click_animation=True,
                                         ):
                                             with vuetify.Template(v_slot_activator="{ on, attrs }"):
-                                                with vuetify.VBtn(icon=True, v_bind="attrs", v_on="on", style="position: absolute; z-index:2",):
+                                                html.Div(
+                                                    "Color Settings"
+                                                )
+                                                with vuetify.VBtn(
+                                                    "View Settings",
+                                                    color="primary",
+                                                    icon=True, v_bind="attrs", v_on="on", style="z-index:2",):
                                                     vuetify.VIcon("mdi-dots-vertical")
                                             with vuetify.VCard():
                                                 with vuetify.VCardText():
