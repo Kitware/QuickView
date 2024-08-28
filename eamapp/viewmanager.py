@@ -103,7 +103,8 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     from timeit import default_timer as timer
 
     start = timer()
-    rview = CreateRenderView(f'rv{index}')
+    #rview = CreateRenderView(f'rv{index}')
+    rview = CreateRenderView()
     end = timer()
 
     print("Time to find/create render views : ", end - start)

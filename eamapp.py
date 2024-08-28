@@ -1,4 +1,5 @@
 import traceback, argparse
+import paraview.web.venv
 
 def serve():
     parser = argparse.ArgumentParser(prog='eamapp.py',
