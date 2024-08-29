@@ -458,9 +458,6 @@ class EAMApp:
                                             no_click_animation=True,
                                         ):
                                             with vuetify.Template(v_slot_activator="{ on, attrs }"):
-                                                html.Div(
-                                                    "Color Settings"
-                                                )
                                                 with vuetify.VBtn(
                                                     "View Settings",
                                                     color="primary",
