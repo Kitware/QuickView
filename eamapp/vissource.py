@@ -2,24 +2,16 @@ import os
 
 import numpy as np
 
-from vissource.viewmanager import ViewManager
-
 from paraview.simple import (
     FindSource,
     GetTimeKeeper,
     LoadPlugin,
     OutputPort,
-    Contour,
     Clip,
+    Contour
 )
 
-from paraview.simple import servermanager as sm
-
-# -----------------------------------------------------------------------------
-# ParaView code
-# -----------------------------------------------------------------------------
-
-class EAMVisSource:
+class EAMVisSource():
     def __init__(self):
         self.DataFile   = None
         self.ConnFile   = None
@@ -39,13 +31,13 @@ class EAMVisSource:
         self.timestamps = []
         self.lev        = 0
 
-        file       = os.path.abspath(__file__)
-        currdir    = os.path.dirname(file)
-        root       = os.path.dirname(currdir)
+        currdir    = os.path.dirname(__file__)
         try:
-            plugdir    = os.path.join(root, 'plugins')
-            plugins         = os.listdir(path=plugdir)
+            plugdir    = os.path.join(currdir, 'plugins')
+            import fnmatch
+            plugins    = fnmatch.filter(os.listdir(path=plugdir), '*.py')
             for plugin in plugins:
+                print("Loading plugin : ", plugin)
                 plugpath = os.path.abspath(os.path.join(plugdir, plugin))
                 if os.path.isfile(plugpath):
                     LoadPlugin(plugpath, ns=globals())
@@ -62,6 +54,7 @@ class EAMVisSource:
             eamprojG.Projection   = proj
             projA.Projection      = proj
         eamproj2D.UpdatePipeline()
+        self.moveextents = eamproj2D.GetDataInformation().GetBounds()
         eamprojG.UpdatePipeline()
         projA.UpdatePipeline()
         self.views["2DProj"]  = OutputPort(eamproj2D,  0)
@@ -100,6 +93,8 @@ class EAMVisSource:
         grid.UpdatePipeline()
 
     def Update(self, datafile, connfile, globefile, lev):
+        self.DataFile = datafile
+        self.ConnFile = connfile
         if self.data == None:
             data = EAMSliceDataReader(registrationName='eamdata',
                                         ConnectivityFile=connfile,
@@ -150,6 +145,7 @@ class EAMVisSource:
         proj2D.Projection = self.projection
         proj2D.Translate  = 1
         proj2D.UpdatePipeline()
+        self.moveextents = proj2D.GetDataInformation().GetBounds()
 
         projG            = EAMProject(registrationName='GProj', Input=OutputPort(gclip, 0))
         projG.Projection = self.projection

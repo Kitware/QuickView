@@ -11,7 +11,6 @@ from pyproj import Proj, Transformer
 from paraview.simple import (
     Text,
     Show,
-    ImportPresets,
     CreateRenderView,
     FindViewOrCreate,
     GetScalarBar,
@@ -81,25 +80,40 @@ def AddAnnotations(rview, annotations):
     pass
 
 class ViewData():
-    def __init__(self, color, uselog = False):
+    def __init__(self, color, uselog = False, rep = None, min = None, max = None):
         self.color  = color
         self.uselog = uselog
-        self.rep    = None
-        self.min    = None
-        self.max    = None 
+        self.rep    = rep
+        self.min    = min
+        self.max    = max 
+
+def BuildColorInformationCache(state: map):
+    vars    = state["ccardsentry"]
+    colors  = state["varcolor"]
+    logscl  = state["uselogscale"]
+    varmin  = state["varmin"]
+    varmax  = state["varmax"]    
+    cache = {}
+    for index, var in enumerate(vars):
+        cache[var] = ViewData(colors[index], rep=None, uselog=logscl[index], min=varmin[index], max=varmax[index])
+    return cache
 
 def GetRenderView(index, views, var, num, colordata : ViewData):
-    data = views['2DProj']
 
-    from paraview.simple import servermanager as sm
-    vtkdata = sm.Fetch(data)
-    range = vtkdata.GetCellData().GetArray(var).GetRange() 
+    from timeit import default_timer as timer
 
-    rview = FindViewOrCreate(f'rv{index}', 'RenderView')
+    start = timer()
+    #rview = CreateRenderView(f'rv{index}')
+    rview = CreateRenderView()
+    end = timer()
+
+    print("Time to find/create render views : ", end - start)
+
     rview.UseColorPaletteForBackground = 0
     rview.BackgroundColorMode = 'Gradient'
 
-    #rview  = CreateRenderView()#f"rv{num}")#, 'RenderView')
+    start = timer()
+    data = views['2DProj']
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
     coltrfunc = GetColorTransferFunction(var)
@@ -113,11 +127,7 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     LUTColorBar.Orientation = 'Horizontal'
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
-    rep.RescaleTransferFunctionToDataRange(False, True)
-
-    colordata.rep = rep
-    colordata.min = range[0]
-    colordata.max = range[1]
+    coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
 
     globe = views['GProj']
     repG = Show(globe, rview)
@@ -131,8 +141,6 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     annot = views['GLines']
     repAn = Show(annot, rview)
     repAn.SetRepresentationType('Wireframe')
-    #repAn.RenderLinesAsTubes = 1
-    #repG.LineWidth = 0.5
     repAn.AmbientColor = [0.67, 0.67, 0.67]
     repAn.DiffuseColor = [0.67, 0.67, 0.67]
 
@@ -143,11 +151,15 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     textrep.FontSize = 22 
     textrep.Italic = 1    
     textrep.Shadow = 1 
+    end = timer()
+    print("Time to setup views : ", end - start)
 
     return rview
 
+from eamapp.vissource import EAMVisSource
+
 class ViewManager():
-    def __init__(self, source, server, state):
+    def __init__(self, source : EAMVisSource, server, state):
         self.rows       = 1
         self.columns    = 1
         self.server     = server
@@ -156,20 +168,6 @@ class ViewManager():
         self.widgets    = []
         self.colors     = []
         self.cache      = {}
-        file       = os.path.abspath(__file__)
-        currdir    = os.path.dirname(file)
-        root       = os.path.dirname(currdir)
-        try:
-            presdir    = os.path.join(root, 'presets')
-            presets    = os.listdir(path=presdir)
-            for preset in presets:
-                prespath = os.path.abspath(os.path.join(presdir, preset))
-                if os.path.isfile(prespath):
-                    name = preset.split('_')[0]
-                    ImportPresets(prespath)
-                    self.colors.append(name)
-        except Exception as e:
-            print("Error loading presets :", e)
 
     def SetCols(self, cols):
         if cols == self.columns:
@@ -185,7 +183,7 @@ class ViewManager():
          for widget in self.widgets:
               widget.update()
 
-    def UpdateView(self):
+    def UpdateView(self, rep_change=False):
         self.widgets.clear()
 
         long = [self.state.extents[0], self.state.extents[1]]
@@ -211,8 +209,15 @@ class ViewManager():
         self.rViews = []
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
+        data = self.source.views['2DProj']
+        import paraview.servermanager as sm
+        vtkdata = sm.Fetch(data)
         for index, var in enumerate(vars2D + vars3Dm + vars3Di):
+                range = vtkdata.GetCellData().GetArray(var).GetRange()
                 colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
+                if colordata.min == None or colordata.max == None:
+                    colordata.min = range[0]
+                    colordata.max = range[1]
                 rview = GetRenderView(index, self.source.views, var, counter, colordata) 
                 AddAnnotations(rview, annotations)
                 self.rViews.append(rview)
@@ -238,6 +243,8 @@ class ViewManager():
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
             layout.append({"x" : x, "y" : y, "w" : wdt, "h" : hgt, "i" : idx})
+            print(widget.ref_name)
+            print(widget)
         self.state.views = sWidgets
         self.state.layout = layout
 
@@ -271,8 +278,7 @@ class ViewManager():
         self.state.varmin[index] = colordata.min
         self.state.varmax[index] = colordata.max
         colordata.rep.RescaleTransferFunctionToDataRange(False, True)
-        self.UpdateCamera()
-        
+        self.UpdateCamera() 
 
     def ZoomIn(self, index):
         rview   = self.rViews[index]
@@ -285,11 +291,18 @@ class ViewManager():
         self.UpdateCamera()
 
     def Move(self, vindex, dir, factor):
+        extents = self.source.moveextents
+        move = (
+            (extents[1] - extents[0]) * 0.05,
+            (extents[3] - extents[2]) * 0.05,
+            (extents[5] - extents[4]) * 0.05
+        )
+
         rview   = self.rViews[vindex]
         pos = rview.CameraPosition
         foc = rview.CameraFocalPoint
-        pos[dir] += 10 if factor > 0 else -10
-        foc[dir] += 10 if factor > 0 else -10
+        pos[dir] += move[dir] if factor > 0 else -move[dir]
+        foc[dir] += move[dir] if factor > 0 else -move[dir]
         rview.CameraPosition = pos
         rview.CameraFocalPoint = foc
         self.UpdateCamera()
