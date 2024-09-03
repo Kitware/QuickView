@@ -176,6 +176,9 @@ class EAMSource(VTKPythonAlgorithmBase):
         self.__vars3Diarr.AddObserver("ModifiedEvent", createModifiedCallback(self))
         self.__vars3Dmarr.AddObserver("ModifiedEvent", createModifiedCallback(self))
 
+        # Storing Area as FieldData if available in file
+        self.__areavar = False
+
     # Method to clear all the variable names
     def __clear(self):
         self.__vars1D.clear()
@@ -191,6 +194,8 @@ class EAMSource(VTKPythonAlgorithmBase):
             varmeta = VarMeta(name, info)
             if varmeta.type == VarType._1D:
                 self.__vars1D.append(varmeta)
+                if name == "area":
+                    self.__areavar = True
             elif varmeta.type == VarType._2D:
                 self.__vars2D.append(varmeta)
                 self.__vars2Darr.AddArray(name)
@@ -457,6 +462,7 @@ class Cache:
                       name="FileName2"
                       label="Connectivity File"
                       number_of_elements="1">
+                    <FileListDomain name="files" />
                     <Documentation>Specify the NetCDF connecticity file name.</Documentation>
                 </StringVectorProperty>
                 """)
@@ -509,6 +515,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         self.__vars2Darr.AddObserver("ModifiedEvent", createModifiedCallback(self))
         self.__vars3Diarr.AddObserver("ModifiedEvent", createModifiedCallback(self))
         self.__vars3Dmarr.AddObserver("ModifiedEvent", createModifiedCallback(self))
+        # Flag for area var to calculate averages
+        self.__areavar = None
 
     # Method to clear all the variable names
     def __clear(self):
@@ -516,7 +524,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         self.__vars2D.clear()
         self.__vars3Di.clear()
         self.__vars3Dm.clear()
-
+    
     def __populate_variable_metadata(self):
         if self.__DataFileName is None:
             return
@@ -525,6 +533,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             varmeta = VarMeta(name, info)
             if varmeta.type == VarType._1D:
                 self.__vars1D.append(varmeta)
+                if "area" in name:
+                    self.__areavar = varmeta
             elif varmeta.type == VarType._2D:
                 self.__vars2D.append(varmeta)
                 self.__vars2Darr.AddArray(name)
@@ -571,6 +581,11 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             self.__ilev = ilev
             self.Modified()
 
+    def SetCalculateAverages(self, calcavg):
+        if self.__cavg != calcavg:
+            self.__avg = calcavg
+            self.Modified()
+
     @smproperty.doublevector(name="TimestepValues", information_only="1", si_class="vtkSITimeStepsProperty")
     def GetTimestepValues(self):
             return self.__timeSteps
@@ -591,10 +606,6 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
     @smproperty.dataarrayselection(name="3D Interface Layer Variables")
     def Get3DiDataArrays(self):
         return self.__vars3Diarr
-
-    def RequestDataObject(self, request, inInfo, outInfo):
-        # Explicitly return the cached object
-        return super().RequestDataObject(request, inInfo, outInfo)
 
     def RequestInformation(self, request, inInfo, outInfo):
         executive = self.GetExecutive()
@@ -738,6 +749,14 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         except Exception as e:
             print_error("Error occured while processing interface layer variables :", e)
             traceback.print_exc()
+
+        if self.__areavar:
+            print("Using area varialbe : ", self.__areavar.name)
+            data = vardata[self.__areavar.name][:].data.flatten()
+            data = np.where(data == self.__areavar.fillval, np.nan, data)
+            gridAdapter2D.CellData.append(data, "area")
+        else:
+            print("Area not available")
 
         return 1
     

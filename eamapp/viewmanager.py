@@ -8,6 +8,7 @@ import os
 import numpy as np
 from pyproj import Proj, Transformer
 
+from vtkmodules.numpy_interface import dataset_adapter as dsa
 from paraview.simple import (
     Text,
     Show,
@@ -98,7 +99,7 @@ def BuildColorInformationCache(state: map):
         cache[var] = ViewData(colors[index], rep=None, uselog=logscl[index], min=varmin[index], max=varmax[index])
     return cache
 
-def GetRenderView(index, views, var, num, colordata : ViewData):
+def GetRenderView(index, views, var, average, num, colordata : ViewData):
 
     from timeit import default_timer as timer
 
@@ -145,7 +146,7 @@ def GetRenderView(index, views, var, num, colordata : ViewData):
     repAn.DiffuseColor = [0.67, 0.67, 0.67]
 
     text = Text(registrationName=f'Text{num}')
-    text.Text = var
+    text.Text = var + f"  Avg: {average}"
     textrep = Show(text, rview, 'TextSourceRepresentation')
     textrep.Bold = 1      
     textrep.FontSize = 22 
@@ -211,14 +212,20 @@ class ViewManager():
 
         data = self.source.views['2DProj']
         import paraview.servermanager as sm
-        vtkdata = sm.Fetch(data)
+        vtkdata     = sm.Fetch(data)
+        area        = np.array(vtkdata.GetCellData().GetArray("area"))
         for index, var in enumerate(vars2D + vars3Dm + vars3Di):
-                range = vtkdata.GetCellData().GetArray(var).GetRange()
+                vtkvar   = vtkdata.GetCellData().GetArray(var)
+                range    = vtkvar.GetRange()
+                vardata  = np.array(vtkvar)
+                average  = np.sum(area * vardata) / np.sum(area)
+
                 colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
                 if colordata.min == None or colordata.max == None:
                     colordata.min = range[0]
                     colordata.max = range[1]
-                rview = GetRenderView(index, self.source.views, var, counter, colordata) 
+                rview = GetRenderView(index, self.source.views, var, average, counter, colordata) 
+                
                 AddAnnotations(rview, annotations)
                 self.rViews.append(rview)
                 self.cache[var] = colordata
@@ -243,8 +250,6 @@ class ViewManager():
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
             layout.append({"x" : x, "y" : y, "w" : wdt, "h" : hgt, "i" : idx})
-            print(widget.ref_name)
-            print(widget)
         self.state.views = sWidgets
         self.state.layout = layout
 
