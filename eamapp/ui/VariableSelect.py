@@ -1,7 +1,7 @@
 from trame.widgets import vuetify
 
 class VariableSelect(vuetify.VContainer):
-    def __init__(self, variables, state):
+    def __init__(self, variables, state, update=None):
         super().__init__(
             fluid=True, 
             style="max-height: 200px",
@@ -14,7 +14,7 @@ class VariableSelect(vuetify.VContainer):
                     key="i",
                     label=(f"{variables}[i]",),
                     v_model=(f"{state}[i]",),
-                    change=f"flushState('{state}')",
+                    change=(update, "[i, $event]"),
                     style="max-height: 20px",
                     dense=True
                 )

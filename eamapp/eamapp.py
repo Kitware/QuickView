@@ -98,7 +98,10 @@ class EAMApp:
         state.vars2D        = source.vars2D
         state.vars3Di       = source.vars3Di
         state.vars3Dm       = source.vars3Dm
-        
+
+        self.ind2d          = None
+        self.ind3dm         = None
+        self.ind3di         = None
         state.views         = []
         #state.projection    = "Cyl. Equidistant"
         #state.cliplong      = [self.source.extents[0], self.source.extents[1]],
@@ -131,8 +134,11 @@ class EAMApp:
             state.vlev          = 0
             state.vilev         = 0
             state.vars2Dstate   = [False] * len(source.vars2D)
-            state.vars3Distate  = [False] * len(source.vars3Di)
             state.vars3Dmstate  = [False] * len(source.vars3Dm)
+            state.vars3Distate  = [False] * len(source.vars3Di)
+            self.vars2Dstate    = np.array([False] * len(source.vars2D))
+            self.vars3Dmstate   = np.array([False] * len(source.vars3Dm))
+            self.vars3Distate   = np.array([False] * len(source.vars3Di))
         else:
             state.update(initstate)
             # Build color cache here
@@ -245,31 +251,84 @@ class EAMApp:
             Path(config_file).write_text(json.dumps(config))
         return config
     '''    
-    """
+    def Update2DVarSelection(self, index, event):
+        self.state.vars2Dstate[index] = event
+        self.state.dirty("vars2Dstate")
+        if not self.ind2d is None:
+            ind = self.ind2d[index]
+            self.vars2Dstate[ind] = event
+        else:
+            self.vars2Dstate[index] = event
+
+    def Update3DmVarSelection(self, index, event):
+        self.state.vars3Dmstate[index] = event
+        self.state.dirty("vars3Dmstate")
+        if not self.ind3dm is None:
+            ind = self.ind3dm[index]
+            self.vars3Dmstate[ind] = event
+        else:
+            self.vars3Dmstate[index] = event
+
+    def Update3DiVarSelection(self, index, event):
+        self.state.vars3Distate[index] = event
+        self.state.dirty("vars3Distate")
+        if not self.ind3Di is None:
+            ind = self.ind3di[index]
+            self.vars3Distate[ind] = event
+        else:
+            self.vars3Distate[index] = event
+
     def Search2DVars(self, search : str):
         if search == None or len(search) == 0:
             filtVars = self.source.vars2D
+            self.ind2d  = None
+            self.state.vars2D       = self.source.vars2D
+            self.state.vars2Dstate  = self.vars2Dstate.tolist()
+            self.state.dirty("vars2Dstate")
         else:
-            filtVars = filter(lambda x: search.lower() in x.lower(), self.source.vars2D)
-        self.state.vars2D = list(filtVars)
-        pass
+            filtered    = [(idx, var) for idx, var in enumerate(self.source.vars2D) if search.lower() in var.lower()]
+            filtVars    = [var for (_, var) in filtered]
+            self.ind2d  = [idx for (idx, _) in filtered]
+        if not self.ind2d is None:
+            print(filtVars, self.ind2d, self.vars2Dstate[self.ind2d]) 
+            self.state.vars2D       = list(filtVars)
+            self.state.vars2Dstate  = self.vars2Dstate[self.ind2d].tolist()
+            self.state.dirty("vars2Dstate")
 
-    def Search3DmVars(search : str):
+    def Search3DmVars(self, search : str):
         if search == None or len(search) == 0:
-            filtVars = source.vars3Dm
+            filtVars = self.source.vars3Dm
+            self.ind3dm  = None
+            self.state.vars3Dm       = self.source.vars3Dm
+            self.state.vars3Dmstate  = self.vars3Dmstate.tolist()
+            self.state.dirty("vars3Dmstate")
         else:
-            filtVars = filter(lambda x: search.lower() in x.lower(), source.vars3Dm)
-        state.vars3Dm = list(filtVars)
-        pass
+            filtered    = [(idx, var) for idx, var in enumerate(self.source.vars3Dm) if search.lower() in var.lower()]
+            filtVars    = [var for (_, var) in filtered]
+            self.ind3dm  = [idx for (idx, _) in filtered]
+        if not self.ind3dm is None:
+            print(filtVars, self.ind3dm, self.vars3Dmstate[self.ind3dm]) 
+            self.state.vars3Dm       = list(filtVars)
+            self.state.vars3Dmstate  = self.vars3Dmstate[self.ind3dm].tolist()
+            self.state.dirty("vars3Dmstate")
 
-    def Search3DiVars(search : str):
+    def Search3DiVars(self, search : str):
         if search == None or len(search) == 0:
-            filtVars = source.vars3Di
+            filtVars = self.source.vars3Di
+            self.ind3di  = None
+            self.state.vars3Di       = self.source.vars3Di
+            self.state.vars3Distate  = self.vars3Distate.tolist()
+            self.state.dirty("vars3Distate")
         else:
-            filtVars = filter(lambda x: search.lower() in x.lower(), source.vars3Di)
-        state.vars3Di = list(filtVars)
-        pass
-    """
+            filtered    = [(idx, var) for idx, var in enumerate(self.source.vars3Di) if search.lower() in var.lower()]
+            filtVars    = [var for (_, var) in filtered]
+            self.ind3di  = [idx for (idx, _) in filtered]
+        if not self.ind3dm is None:
+            print(filtVars, self.ind3di, self.vars3Dmstate[self.ind3di]) 
+            self.state.vars3Di       = list(filtVars)
+            self.state.vars3Distate  = self.vars3Distate[self.ind3di].tolist()
+            self.state.dirty("vars3Distate")
+  
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
         self.ui.server.start(**kwargs)
@@ -415,24 +474,16 @@ class EAMApp:
                     vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
                         with UICard(title="Variable Selection", varname="true").content:
-                            html.A(
-                                "2D Variables",
-                                style="padding: 10px;",
-                            )
-                            #vuetify.VTextField("var search", change=(Search2DVars, "[$event]"))
-                            VariableSelect("vars2D", "vars2Dstate") 
+                            html.A("2D Variables", style="padding: 10px;",)
+                            vuetify.VTextField(label="variable search", change=(self.Search2DVars, "[$event]"))
+                            VariableSelect("vars2D", "vars2Dstate", self.Update2DVarSelection) 
                             vuetify.VDivider(classes="mx-2")
-                            html.A(
-                                "3D Middle Layer Variables",
-                                style="padding: 10px;",
-                            )
+                            html.A("3D Middle Layer Variables", style="padding: 10px;",)
+                            vuetify.VTextField(label="variable search", change=(self.Search3DmVars, "[$event]"))
                             VariableSelect("vars3Dm", "vars3Dmstate") 
                             vuetify.VDivider(classes="mx-2")
-                            html.A(
-                            "3D Interface Layer Variables",
-                            style="padding: 10px;",
-                            )
-                            #vuetify.VTextField("var search", change=(Search3DiVars, "[$event]"))
+                            html.A("3D Interface Layer Variables", style="padding: 10px;",)
+                            vuetify.VTextField(label="variable search", change=(self.Search3DiVars, "[$event]"))
                             VariableSelect("vars3Di", "vars3Distate") 
                     vuetify.VDivider(classes="mx-2")
                     with layout.content:
