@@ -480,11 +480,11 @@ class EAMApp:
                             vuetify.VDivider(classes="mx-2")
                             html.A("3D Middle Layer Variables", style="padding: 10px;",)
                             vuetify.VTextField(label="variable search", change=(self.Search3DmVars, "[$event]"))
-                            VariableSelect("vars3Dm", "vars3Dmstate") 
+                            VariableSelect("vars3Dm", "vars3Dmstate", self.Update3DmVarSelection) 
                             vuetify.VDivider(classes="mx-2")
                             html.A("3D Interface Layer Variables", style="padding: 10px;",)
                             vuetify.VTextField(label="variable search", change=(self.Search3DiVars, "[$event]"))
-                            VariableSelect("vars3Di", "vars3Distate") 
+                            VariableSelect("vars3Di", "vars3Distate", self.Update3DiVarSelection) 
                     vuetify.VDivider(classes="mx-2")
                     with layout.content:
                         with grid.GridLayout(
