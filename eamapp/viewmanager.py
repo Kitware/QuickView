@@ -10,6 +10,7 @@ from pyproj import Proj, Transformer
 
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from paraview.simple import (
+    Delete,
     Text,
     Show,
     CreateRenderView,
@@ -169,6 +170,7 @@ class ViewManager():
         self.widgets    = []
         self.colors     = []
         self.cache      = {}
+        self.rViews = []
 
     def SetCols(self, cols):
         if cols == self.columns:
@@ -207,13 +209,18 @@ class ViewManager():
         self.rows = math.ceil(numViews / self.columns)
 
         counter = 0
-        self.rViews = []
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         data = self.source.views['2DProj']
         import paraview.servermanager as sm
         vtkdata     = sm.Fetch(data)
         area        = np.array(vtkdata.GetCellData().GetArray("area"))
+
+        if len(self.rViews) != 0:
+            for rview in self.rViews:
+                Delete(rview)
+        self.rViews = []
+
         for index, var in enumerate(vars2D + vars3Dm + vars3Di):
                 vtkvar   = vtkdata.GetCellData().GetArray(var)
                 range    = vtkvar.GetRange()
