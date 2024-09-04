@@ -272,7 +272,7 @@ class EAMApp:
     def Update3DiVarSelection(self, index, event):
         self.state.vars3Distate[index] = event
         self.state.dirty("vars3Distate")
-        if not self.ind3Di is None:
+        if not self.ind3di is None:
             ind = self.ind3di[index]
             self.vars3Distate[ind] = event
         else:
