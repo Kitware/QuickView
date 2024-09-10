@@ -209,17 +209,17 @@ class ViewManager():
         self.rows = math.ceil(numViews / self.columns)
 
         counter = 0
+        #if len(self.rViews) != 0:
+        #    for rview in self.rViews:
+        #        Delete(rview)
+        #        del rview
+        self.rViews = []
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         data = self.source.views['2DProj']
         import paraview.servermanager as sm
         vtkdata     = sm.Fetch(data)
         area        = np.array(vtkdata.GetCellData().GetArray("area"))
-
-        if len(self.rViews) != 0:
-            for rview in self.rViews:
-                Delete(rview)
-        self.rViews = []
 
         for index, var in enumerate(vars2D + vars3Dm + vars3Di):
                 vtkvar   = vtkdata.GetCellData().GetArray(var)
