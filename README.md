@@ -17,7 +17,7 @@ conda create --name eamapp python=3.10.0
 conda activate eamapp
 `
 
-1However, this would require activating the conda environment before using the app.
+However, this would require activating the conda environment before using the app.
 
 ### ParaView 5.13 installed on the system
 ParaView can be installed from the binaries found at https://www.paraview.org/download
@@ -40,6 +40,7 @@ Alternatively, the code can also be downloaded as a tarball
 ```
 wget https://gitlab.kitware.com/ayenpure/eamapp/-/archive/master/eamapp-master.tar.gz
 tar -xvzf eamapp-master.tar.gz
+cd eamapp-master
 ```
 
 To run the app, execute
@@ -48,6 +49,7 @@ To run the app, execute
 python3 launch.py --data data/aerosol_F2010.eam.h0.2014-12.nc
 ```
 
+Please ensure that the `python3` is the correct version.
 In the above execution the data file is provided as the sample data out of the repository. The repository also contains the connectivity file that it uses by default.
 If another connectivity and data files are to be used please specify the paths using the `--conn` and `--data` options.
 
