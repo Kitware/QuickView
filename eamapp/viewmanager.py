@@ -130,6 +130,7 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
     coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
+    colordata.rep = rep
 
     globe = views['GProj']
     repG = Show(globe, rview)
@@ -228,9 +229,8 @@ class ViewManager():
                 average  = np.sum(area * vardata) / np.sum(area)
 
                 colordata : ViewData = self.cache.get(var, ViewData(self.state.varcolor[index]))
-                if colordata.min == None or colordata.max == None:
-                    colordata.min = range[0]
-                    colordata.max = range[1]
+                colordata.min = range[0]
+                colordata.max = range[1]
                 rview = GetRenderView(index, self.source.views, var, average, counter, colordata) 
                 
                 AddAnnotations(rview, annotations)
@@ -288,7 +288,9 @@ class ViewManager():
         var     = self.state.ccardsentry[index]
         colordata : ViewData = self.cache[var]
         self.state.varmin[index] = colordata.min
+        self.state.dirty("varmin")
         self.state.varmax[index] = colordata.max
+        self.state.dirty("varmax")
         colordata.rep.RescaleTransferFunctionToDataRange(False, True)
         self.UpdateCamera() 
 

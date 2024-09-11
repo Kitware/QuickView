@@ -209,8 +209,10 @@ class EAMApp:
         print(f"Updating value at {index} : {type, value}")
         if type.lower() == 'min':
             self.state.varmin[index] = value
+            self.state.dirty("varmin")
         elif type.lower() == 'max':
             self.state.varmax[index] = value
+            self.state.dirty("varmax")
         self.viewmanager.UpdateColorProps(index,
                                           self.state.varmin[index],
                                           self.state.varmax[index])
@@ -509,11 +511,12 @@ class EAMApp:
                                             no_click_animation=True,
                                         ):
                                             with vuetify.Template(v_slot_activator="{ on, attrs }"):
-                                                with vuetify.VBtn(
+                                                html.Div("")
+                                                vuetify.VBtn(
                                                     "View Settings",
                                                     color="primary",
-                                                    icon=True, v_bind="attrs", v_on="on", style="z-index:2",):
-                                                    vuetify.VIcon("mdi-dots-vertical")
+                                                    v_bind="attrs", v_on="on", style="z-index:2",)
+                                                    #vuetify.VIcon("mdi-dots-vertical")
                                             with vuetify.VCard():
                                                 with vuetify.VCardText():
                                                         vuetify.VSelect(
@@ -529,11 +532,11 @@ class EAMApp:
                                                             v_model=("uselogscale[idx]",),
                                                             change=(self.ApplyColor, "[idx, 'log', $event]")
                                                         )
-                                                        html.Div("Color Range")
+                                                        html.Div("Scalar Range")
                                                         vuetify.VTextField(v_model=("varmin[idx]", ), label="min", outlined=True, change=(self.UpdateColorProps, "[idx, 'min', $event]"), style="height=50px")
                                                         vuetify.VTextField(v_model=("varmax[idx]", ), label="max", outlined=True, change=(self.UpdateColorProps, "[idx, 'max', $event]"), style="height=50px")
-                                                        with vuetify.VBtn(icon=True, outlined=True, style="height: 40px; width: 40px", click=(self.ResetColorProps, "[idx]")):
-                                                            vuetify.VIcon("mdi-restore")
+                                                        vuetify.VBtn("Reset Range", outlined=True, style="height: 40px", click=(self.ResetColorProps, "[idx]"))
+                                                            #vuetify.VIcon("mdi-restore")
                                         vuetify.VSpacer()
                                         vuetify.VDivider(vertical=True, classes="mx-2")
                                         with vuetify.VBtn(icon=True, outlined=True, style="height: 20px; width: 20px", click=(self.Zoom, "['in', idx]")):
