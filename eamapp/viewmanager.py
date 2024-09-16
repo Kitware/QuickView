@@ -122,22 +122,21 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
     coltrfunc.ApplyPreset(colordata.color, True)
     rep.SetScalarBarVisibility(rview, True)
     rview.CameraParallelProjection = 1
-    rview.CameraParallelScale = 125
     rview.ResetCamera(True)
     LUTColorBar = GetScalarBar(coltrfunc, rview)
-    LUTColorBar.AutoOrient = 0
-    LUTColorBar.Orientation = 'Horizontal'
+    LUTColorBar.AutoOrient = 1
+    #LUTColorBar.Orientation = 'Horizontal'
     LUTColorBar.WindowLocation = 'Lower Right Corner'
     LUTColorBar.Title = ''
+    LUTColorBar.ScalarBarLength = 0.75
     coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
     colordata.rep = rep
-
     globe = views['GProj']
     repG = Show(globe, rview)
     ColorBy(repG, None)
     repG.SetRepresentationType('Wireframe')
     repG.RenderLinesAsTubes = 1
-    repG.LineWidth = 1.0
+    repG.LineWidth = 0.5
     repG.AmbientColor = [0.67, 0.67, 0.67]
     repG.DiffuseColor = [0.67, 0.67, 0.67]
 
@@ -146,14 +145,16 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
     repAn.SetRepresentationType('Wireframe')
     repAn.AmbientColor = [0.67, 0.67, 0.67]
     repAn.DiffuseColor = [0.67, 0.67, 0.67]
+    repAn.Opacity = 0.4
 
     text = Text(registrationName=f'Text{num}')
-    text.Text = var + f"  Avg: {average}"
+    text.Text = var + "  Avg: %.2f" % average
     textrep = Show(text, rview, 'TextSourceRepresentation')
-    textrep.Bold = 1      
+    textrep.Bold = 1    
     textrep.FontSize = 22 
-    textrep.Italic = 1    
-    textrep.Shadow = 1 
+    textrep.Italic = 1 
+    textrep.Shadow = 1
+    textrep.WindowLocation = 'Upper Center'
     end = timer()
     print("Time to setup views : ", end - start)
 
@@ -175,17 +176,16 @@ class ViewManager():
 
     def SetCols(self, cols):
         if cols == self.columns:
-             return
+            return
         self.columns = cols
             
     def ResetCamera(self, **kwargs):
-         for widget in self.widgets:
-              widget.reset_camera()
-         pass
+        for widget in self.widgets:
+            widget.reset_camera()
 
     def UpdateCamera(self, **kwargs):
-         for widget in self.widgets:
-              widget.update()
+        for widget in self.widgets:
+            widget.update()
 
     def UpdateView(self, rep_change=False):
         self.widgets.clear()
@@ -210,11 +210,9 @@ class ViewManager():
         self.rows = math.ceil(numViews / self.columns)
 
         counter = 0
-        #if len(self.rViews) != 0:
-        #    for rview in self.rViews:
-        #        Delete(rview)
-        #        del rview
-        self.rViews = []
+        #for rview in self.rViews:
+        #    Delete(rview)
+        del self.rViews[:]
         annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
 
         data = self.source.views['2DProj']
@@ -242,6 +240,10 @@ class ViewManager():
 
         wdt = 4
         hgt = 3
+
+        del self.state.views[:]
+        del self.state.layout[:]
+        del self.widgets[:]
 
         sWidgets = []
         layout   = []
@@ -276,6 +278,8 @@ class ViewManager():
             else:
                 coltrfunc.MapControlPointsToLinearSpace()
                 coltrfunc.UseLogScale = 0
+        elif type.lower() == 'inv':
+            coltrfunc.InvertTransferFunction()
         self.UpdateCamera()
     
     def UpdateColorProps(self, index, min, max):

@@ -33,6 +33,7 @@ from paraview.simple import (
 noncvd = [
             {"text" : 'Rainbow Desat.',    "value"  : 'Rainbow Desaturated',   },
             {"text" : 'Cool to Warm',      "value"  : 'Cool to Warm',},
+            {"text" : 'Jet',               "value"  : 'Jet',},
             {"text" : 'Yellow-Gray-Blue',  "value"  : 'Yellow - Gray - Blue', },
         ]
 cvd    = []
@@ -112,6 +113,7 @@ class EAMApp:
         state.ccardscolor   = [None] * len(source.vars2D + source.vars3Di + source.vars3Dm)
         state.varcolor      = []
         state.uselogscale   = []
+        state.invert        = []
         state.varmin        = []
         state.varmax        = []
 
@@ -182,6 +184,7 @@ class EAMApp:
         self.state.ccardsvars  = [{"text" : var, "value" : var} for var in vars]
         self.state.varcolor    = [self.state.colormaps[0]['value']] * len(vars)
         self.state.uselogscale = [False] * len(vars)
+        self.state.invert      = [False] * len(vars)
         self.state.varmin      = [np.nan] * len(vars)
         self.state.varmax      = [np.nan] * len(vars)
 
@@ -191,8 +194,13 @@ class EAMApp:
     def ApplyColor(self, index, type, value):
         if type.lower() == "color":
             self.state.varcolor[index] = value
+            self.state.dirty("varcolor")
         elif type.lower() == "log":
-            self.state.uselogscale[index]
+            self.state.uselogscale[index] = value
+            self.state.dirty("uselogscale")
+        elif type.lower() == "inv":
+            self.state.invert[index] = value
+            self.state.dirty("invert")
         self.viewmanager.UpdateColor(index, type, value)
 
     def updatecolors(self, event):
@@ -381,8 +389,6 @@ class EAMApp:
                         style="padding: 10px;",
                     )
                     vuetify.VDivider(vertical=True, classes="mx-2")
-                    #vuetify.VTextField(v_model=("statefile", None))
-                    #vuetify.VBtn("Save State", click=self.SaveState,)
                     vuetify.VBtn(
                         "Export",
                         click="export_config = true",
@@ -400,59 +406,59 @@ class EAMApp:
                     with vuetify.VContainer(fluid=True, classes="d-flex justify-center align-center"):
                             vuetify.VBtn("Update Views", click=self.Apply, style="background-color: gray; color: white; width: 200px; height: 50px;")
                     vuetify.VDivider(classes="mx-2")
-                    with vuetify.VContainer(fluid=True):
+                    with vuetify.VContainer(fluid=True, style="padding: 2px"):
                         with UICard(title="Select Data Slice", varname="true").content:
                             with vuetify.VRow():
-                                with vuetify.VCol(cols=6):
+                                with vuetify.VCol(cols=6, style="padding: 2px;",):
                                     vuetify.VSlider(
                                         label='Lev',
                                         v_model=("vlev", 0),
                                         min=0,
-                                        max=("lev.length - 1", )
+                                        max=("lev.length - 1", ),
                                     )
-                                with vuetify.VCol(cols=2):
-                                    html.Div("{{'(k=' + String(vlev) + ')'}}")
-                                with vuetify.VCol(cols=3):
+                                with vuetify.VCol(cols=3, style="padding: 2px;",):
                                     html.Div("{{parseFloat(lev[vlev]).toFixed(2)}}")
+                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                    html.Div("{{'(k=' + String(vlev) + ')'}}")
                             with vuetify.VRow():
-                                with vuetify.VCol(cols=6):
+                                with vuetify.VCol(cols=6, style="padding: 2px;",):
                                     vuetify.VSlider(
                                         label='iLev',
                                         v_model=("vilev", 0),
                                         min=0,
-                                        max=("ilev.length - 1", )
+                                        max=("ilev.length - 1", ),
                                     )
-                                with vuetify.VCol(cols=2):
-                                    html.Div("{{'k=(' + String(vilev) + ')'}}")
-                                with vuetify.VCol(cols=3):
+                                with vuetify.VCol(cols=3, style="padding: 2px;",):
                                     html.Div("{{parseFloat(ilev[vilev]).toFixed(2)}}")
+                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                    html.Div("{{'(k=' + String(vilev) + ')'}}")
                             with vuetify.VRow():
-                                with vuetify.VCol(cols=6):
+                                with vuetify.VCol(cols=6, style="padding: 2px;",):
                                     vuetify.VSlider(
                                         label='Time',
                                         v_model=("tstamp", 0),
                                         min=0,
-                                        max=("timesteps.length - 1", )
+                                        max=("timesteps.length - 1", ),
                                     )
-                                with vuetify.VCol(cols=2):
-                                    html.Div("{{'t=(' + String(tstamp) + ')'}}")
-                                with vuetify.VCol(cols=3):
+                                with vuetify.VCol(cols=3, style="padding: 2px;",):
                                     html.Div("{{parseFloat(timesteps[tstamp]).toFixed(2)}}")
+                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                    html.Div("{{'(t=' + String(tstamp) + ')'}}")
                             vuetify.VCheckbox(
-                                label="Lat/Long Clipping",
+                                label="Lat/Lon Clipping",
                                 v_model=("clipping", False),
                                 dense=True
                             )
                             with vuetify.VContainer(fluid=True):
                                 with UICard(title=None, varname="clipping").content:
                                     with vuetify.VRow():
-                                        with vuetify.VCol(cols=3):
+                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
                                             vuetify.VTextField(
                                                 v_model=("cliplong[0]",)
                                             )
-                                        with vuetify.VCol(cols=6):
+                                        with vuetify.VCol(cols=6, style="padding: 2px;"):
                                            html.Div("Longitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue")
-                                        with vuetify.VCol(cols=3):
+                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
                                             vuetify.VTextField(
                                                 v_model=("cliplong[1]",)
                                             )
@@ -464,13 +470,13 @@ class EAMApp:
                                         )
                                     vuetify.VDivider(classes="mx-2")
                                     with vuetify.VRow():
-                                        with vuetify.VCol(cols=3):
+                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
                                             vuetify.VTextField(
                                                 v_model=("cliplat[0]",)
                                             )
-                                        with vuetify.VCol(cols=6):
+                                        with vuetify.VCol(cols=6, style="padding: 2px;"):
                                            html.Div("Latitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue")
-                                        with vuetify.VCol(cols=3):
+                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
                                             vuetify.VTextField(
                                                 v_model=("cliplat[1]",)
                                             )
@@ -484,9 +490,8 @@ class EAMApp:
                     with vuetify.VContainer(fluid=True):
                         with UICard(title="Map Projection Selection", varname="true").content:
                             vuetify.VSelect(
-                                outlined=True,
                                 items=("options", ["Cyl. Equidistant","Robinson", "Mollweide"]),
-                                v_model=("projection", "Cyl. Equidistant")
+                                v_model=("projection", "Cyl. Equidistant"),
                             )
                     vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
@@ -554,15 +559,23 @@ class EAMApp:
                                                             hide_details=True,
                                                             change=(self.ApplyColor, "[idx, 'color', $event]")
                                                         )
-                                                        vuetify.VCheckbox(
-                                                            label="log scale",
-                                                            v_model=("uselogscale[idx]",),
-                                                            change=(self.ApplyColor, "[idx, 'log', $event]")
-                                                        )
+                                                        with vuetify.VRow():
+                                                            with vuetify.VCol():
+                                                                vuetify.VCheckbox(
+                                                                    label="Log Scale",
+                                                                    v_model=("uselogscale[idx]",),
+                                                                    change=(self.ApplyColor, "[idx, 'log', $event]")
+                                                                )
+                                                            with vuetify.VCol():
+                                                                vuetify.VCheckbox(
+                                                                    label="Invert Colors",
+                                                                    v_model=("invert[idx]",),
+                                                                    change=(self.ApplyColor, "[idx, 'inv', $event]")
+                                                                )
                                                         html.Div("Scalar Range")
                                                         vuetify.VTextField(v_model=("varmin[idx]", ), label="min", outlined=True, change=(self.UpdateColorProps, "[idx, 'min', $event]"), style="height=50px")
                                                         vuetify.VTextField(v_model=("varmax[idx]", ), label="max", outlined=True, change=(self.UpdateColorProps, "[idx, 'max', $event]"), style="height=50px")
-                                                        vuetify.VBtn("Reset Range", outlined=True, style="height: 40px", click=(self.ResetColorProps, "[idx]"))
+                                                        vuetify.VBtn("Reset Colors to Range", outlined=True, style="height: 40px", click=(self.ResetColorProps, "[idx]"))
                                                             #vuetify.VIcon("mdi-restore")
                                         vuetify.VSpacer()
                                         vuetify.VDivider(vertical=True, classes="mx-2")
