@@ -330,7 +330,22 @@ class EAMApp:
             self.state.vars3Di       = list(filtVars)
             self.state.vars3Distate  = self.vars3Distate[self.ind3di].tolist()
             self.state.dirty("vars3Distate")
+    
+    def Clear2D(self):
+        self.state.vars2Dstate = [False] * len(self.state.vars2Dstate)
+        self.vars2Dstate = [False] * len(self.vars2Dstate)
+        self.state.dirty("vars2Dstate") 
   
+    def Clear3Dm(self):
+        self.state.vars3Dmstate = [False] * len(self.state.vars3Dmstate)
+        self.vars3Dmstate = [False] * len(self.vars3Dmstate)
+        self.state.dirty("vars3Dmstate") 
+    
+    def Clear3Di(self):
+        self.state.vars3Distate = [False] * len(self.state.vars3Distate)
+        self.vars3Distate = [False] * len(self.vars3Distate)
+        self.state.dirty("vars3Distate") 
+    
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
         self.ui.server.start(**kwargs)
@@ -477,15 +492,27 @@ class EAMApp:
                     with vuetify.VContainer(fluid=True):
                         with UICard(title="Variable Selection", varname="true").content:
                             html.A("2D Variables", style="padding: 10px;",)
-                            vuetify.VTextField(label="variable search", change=(self.Search2DVars, "[$event]"))
+                            with vuetify.VRow(style="padding: 0px;",):
+                                with vuetify.VCol(cols=9):
+                                    vuetify.VTextField(label="variable search", change=(self.Search2DVars, "[$event]"))
+                                with vuetify.VCol(cols=3):
+                                    vuetify.VBtn("Clear", click=(self.Clear2D), style="padding: 0px;")
                             VariableSelect("vars2D", "vars2Dstate", self.Update2DVarSelection) 
                             vuetify.VDivider(classes="mx-2")
                             html.A("3D Middle Layer Variables", style="padding: 10px;",)
-                            vuetify.VTextField(label="variable search", change=(self.Search3DmVars, "[$event]"))
+                            with vuetify.VRow(style="padding: 0px;",):
+                                with vuetify.VCol(cols=9):
+                                    vuetify.VTextField(label="variable search", change=(self.Search3DmVars, "[$event]"))
+                                with vuetify.VCol(cols=3):
+                                    vuetify.VBtn("Clear", click=(self.Clear3Dm), style="padding: 0px;")
                             VariableSelect("vars3Dm", "vars3Dmstate", self.Update3DmVarSelection) 
                             vuetify.VDivider(classes="mx-2")
                             html.A("3D Interface Layer Variables", style="padding: 10px;",)
-                            vuetify.VTextField(label="variable search", change=(self.Search3DiVars, "[$event]"))
+                            with vuetify.VRow(style="padding: 0px;",):
+                                with vuetify.VCol(cols=9):
+                                    vuetify.VTextField(label="variable search", change=(self.Search3DiVars, "[$event]"))
+                                with vuetify.VCol(cols=3):
+                                    vuetify.VBtn("Clear", click=(self.Clear3Di), style="padding: 0px;")
                             VariableSelect("vars3Di", "vars3Distate", self.Update3DiVarSelection) 
                     vuetify.VDivider(classes="mx-2")
                     with layout.content:
