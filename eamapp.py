@@ -26,11 +26,11 @@ def serve():
 
     if WorkDir is None:
         WorkDir = str(os.getcwd())
-    from eamapp.vissource import EAMVisSource
+    from eamapp.pipeline import EAMVisSource
 
     GlobeFile = os.path.join(os.path.dirname(__file__), "eamapp", "data", "globe.vtk")
     
-    from eamapp.eamapp import EAMApp
+    from eamapp.interface import EAMApp
     source = EAMVisSource()
     import json
     try:

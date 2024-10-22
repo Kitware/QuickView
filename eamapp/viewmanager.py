@@ -27,7 +27,8 @@ def ApplyProj(projection, point):
         new = projection.transform(point[0] - 180, point[1])
         return [new[0], new[1], 1.]
 
-def GenerateAnnotations(long, lat, projection):
+def GenerateAnnotations(long, lat, projection, center):
+    print(long, lat)
     texts = []
     interval = 30
     llon     = long[0]
@@ -43,6 +44,7 @@ def GenerateAnnotations(long, lat, projection):
    
     lonx = np.arange(llon, hlon + interval, interval)
     laty = np.arange(llat, hlat + interval, interval)
+    print(lonx)
 
     from functools import partial
 
@@ -58,7 +60,9 @@ def GenerateAnnotations(long, lat, projection):
 
     for x in lonx:
         text       = Text(registrationName=f"text{x}")
-        text.Text  = str(x)
+        lon = x + center
+        text.Text  = str(int((-180 + (lon - 180) if lon > 180 else lon)))
+        print(lon, str(-180 + lon -180  if lon > 180 else lon))
         pos = proj([x, hlat, 1.])
         texts.append((text, pos))
     for y in laty:
@@ -131,6 +135,7 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
     LUTColorBar.ScalarBarLength = 0.75
     coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
     colordata.rep = rep
+    """
     globe = views['GProj']
     repG = Show(globe, rview)
     ColorBy(repG, None)
@@ -139,14 +144,14 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
     repG.LineWidth = 0.5
     repG.AmbientColor = [0.67, 0.67, 0.67]
     repG.DiffuseColor = [0.67, 0.67, 0.67]
-
+    """
     annot = views['GLines']
     repAn = Show(annot, rview)
     repAn.SetRepresentationType('Wireframe')
     repAn.AmbientColor = [0.67, 0.67, 0.67]
     repAn.DiffuseColor = [0.67, 0.67, 0.67]
     repAn.Opacity = 0.4
-
+    
     text = Text(registrationName=f'Text{num}')
     text.Text = var + "  Avg: %.2f" % average
     textrep = Show(text, rview, 'TextSourceRepresentation')
@@ -160,7 +165,7 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
 
     return rview
 
-from eamapp.vissource import EAMVisSource
+from eamapp.pipeline import EAMVisSource
 
 class ViewManager():
     def __init__(self, source : EAMVisSource, server, state):
@@ -190,15 +195,19 @@ class ViewManager():
     def UpdateView(self, rep_change=False):
         self.widgets.clear()
 
-        long = [self.state.extents[0], self.state.extents[1]]
-        lat  = [self.state.extents[2], self.state.extents[3]]
-        self.source.UpdateLev(self.state.vlev, self.state.vilev)
-        if self.state.clipping:
-            long = self.state.cliplong 
-            lat  = self.state.cliplat
-        self.source.ApplyClipping(long, lat)
+        long = self.state.cliplong 
+        lat  = self.state.cliplat
+        #long = [self.state.extents[0], self.state.extents[1]]
+        #lat  = [self.state.extents[2], self.state.extents[3]]
 
+        print("Updating clip extents : ", long, lat)
+
+        self.source.UpdateLev(self.state.vlev, self.state.vilev)
+        
+        self.source.UpdateCenter(self.state.center)
+        self.source.ApplyClipping(long, lat)
         self.source.UpdateProjection(self.state.projection)
+        self.source.UpdatePipeline()
 
         vars2D   = self.source.vars.get('2D', None)
         vars3Dm  = self.source.vars.get('3Dm', None)
@@ -213,7 +222,7 @@ class ViewManager():
         #for rview in self.rViews:
         #    Delete(rview)
         del self.rViews[:]
-        annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection)
+        annotations = GenerateAnnotations(self.state.cliplong, self.state.cliplat, self.state.projection, self.source.center)
 
         data = self.source.views['2DProj']
         import paraview.servermanager as sm

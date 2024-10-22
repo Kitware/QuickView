@@ -14,7 +14,7 @@ from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame_server.core import Server
 
-from eamapp.vissource  import  EAMVisSource
+from eamapp.pipeline  import  EAMVisSource
 from eamapp.viewmanager import ViewManager
 from eamapp.ui.VariableSelect import VariableSelect
 from eamapp.ui.UICard import UICard
@@ -406,93 +406,113 @@ class EAMApp:
                     with vuetify.VContainer(fluid=True, classes="d-flex justify-center align-center"):
                             vuetify.VBtn("Update Views", click=self.Apply, style="background-color: gray; color: white; width: 200px; height: 50px;")
                     vuetify.VDivider(classes="mx-2")
+                    style=dict(density="compact", hide_details=True, style="padding: 2px")
                     with vuetify.VContainer(fluid=True, style="padding: 2px"):
                         with UICard(title="Select Data Slice", varname="true").content:
-                            with vuetify.VRow():
-                                with vuetify.VCol(cols=6, style="padding: 2px;",):
+                            with vuetify.VRow(classes="text-center align-center justify-center text-subtitle-1"):
+                                with vuetify.VCol(cols=2, **style, classes="text-right"):
+                                    html.Div("Lev")
+                                with vuetify.VCol(cols=6, **style):
                                     vuetify.VSlider(
-                                        label='Lev',
                                         v_model=("vlev", 0),
                                         min=0,
                                         max=("lev.length - 1", ),
+                                        **style
                                     )
-                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                with vuetify.VCol(cols=2, **style):
                                     html.Div("{{parseFloat(lev[vlev]).toFixed(2)}}")
-                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                with vuetify.VCol(cols=2, **style):
                                     html.Div("{{'(k=' + String(vlev) + ')'}}")
-                            with vuetify.VRow():
-                                with vuetify.VCol(cols=6, style="padding: 2px;",):
+                            
+                            with vuetify.VRow(classes="text-center align-center justify-center text-subtitle-1"):
+                                with vuetify.VCol(cols=2, classes="text-right", **style):
+                                    html.Div("iLev")
+                                with vuetify.VCol(cols=6, **style):
                                     vuetify.VSlider(
-                                        label='iLev',
                                         v_model=("vilev", 0),
                                         min=0,
                                         max=("ilev.length - 1", ),
+                                        **style
                                     )
-                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                with vuetify.VCol(cols=2, style="padding: 2px;",):
                                     html.Div("{{parseFloat(ilev[vilev]).toFixed(2)}}")
-                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                with vuetify.VCol(cols=2, style="padding: 2px;",):
                                     html.Div("{{'(k=' + String(vilev) + ')'}}")
-                            with vuetify.VRow():
+
+                            with vuetify.VRow(classes="text-center align-center justify-center text-sybtitle-1"):
+                                with vuetify.VCol(cols=2, style="padding: 2px;", classes="text-right"):
+                                    html.Div("Time")
                                 with vuetify.VCol(cols=6, style="padding: 2px;",):
                                     vuetify.VSlider(
-                                        label='Time',
                                         v_model=("tstamp", 0),
                                         min=0,
                                         max=("timesteps.length - 1", ),
+                                        **style
                                     )
-                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                with vuetify.VCol(cols=2, style="padding: 2px;",):
                                     html.Div("{{parseFloat(timesteps[tstamp]).toFixed(2)}}")
-                                with vuetify.VCol(cols=3, style="padding: 2px;",):
+                                with vuetify.VCol(cols=2, style="padding: 2px;",):
                                     html.Div("{{'(t=' + String(tstamp) + ')'}}")
-                            vuetify.VCheckbox(
-                                label="Lat/Lon Clipping",
-                                v_model=("clipping", False),
-                                dense=True
-                            )
-                            with vuetify.VContainer(fluid=True):
-                                with UICard(title=None, varname="clipping").content:
-                                    with vuetify.VRow():
-                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
-                                            vuetify.VTextField(
-                                                v_model=("cliplong[0]",)
-                                            )
-                                        with vuetify.VCol(cols=6, style="padding: 2px;"):
-                                           html.Div("Longitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue")
-                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
-                                            vuetify.VTextField(
-                                                v_model=("cliplong[1]",)
-                                            )
-                                    with vuetify.VRow():
-                                        vuetify.VRangeSlider(
-                                            v_model=("cliplong", [self.source.extents[0], self.source.extents[1]]),
-                                            min=("extents[0]", ),
-                                            max=("extents[1]", ),
-                                        )
-                                    vuetify.VDivider(classes="mx-2")
-                                    with vuetify.VRow():
-                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
-                                            vuetify.VTextField(
-                                                v_model=("cliplat[0]",)
-                                            )
-                                        with vuetify.VCol(cols=6, style="padding: 2px;"):
-                                           html.Div("Latitude", classes="text-center align-center justify-center text-subtitle-1", style="color: blue")
-                                        with vuetify.VCol(cols=3, style="padding: 2px;"):
-                                            vuetify.VTextField(
-                                                v_model=("cliplat[1]",)
-                                            )
-                                    with vuetify.VRow():
-                                        vuetify.VRangeSlider(
-                                            v_model=("cliplat", [self.source.extents[2], self.source.extents[3]]),
-                                            min=("extents[2]", ),
-                                            max=("extents[3]", ),
-                                        )
+                            
+                            with vuetify.VRow(classes="text-center text-subtitle-1", **style):
+                                with vuetify.VCol(cols=3, **style):
+                                    vuetify.VTextField(
+                                        v_model=("cliplong[0]",),
+                                        **style
+                                    )
+                                with vuetify.VCol(cols=6, **style):
+                                   html.Div("Longitude", **style,)
+                                with vuetify.VCol(cols=3, **style):
+                                    vuetify.VTextField(
+                                        v_model=("cliplong[1]",),
+                                        **style
+                                    )
+                            with vuetify.VRow(classes="text-center", **style):
+                                vuetify.VRangeSlider(
+                                    v_model=("cliplong", [self.source.extents[0], self.source.extents[1]]),
+                                    min=-180,
+                                    max=180,
+                                    **style
+                                )
+                            
+                            vuetify.VDivider(classes="mx-2")
+                            with vuetify.VRow(classes="text-center align-center text-subtitle-1", **style):
+                                with vuetify.VCol(cols=3, **style):
+                                    vuetify.VTextField(
+                                        v_model=("cliplat[0]",),
+                                        **style
+                                    )
+                                with vuetify.VCol(cols=6, **style):
+                                   html.Div("Latitude", **style)
+                                with vuetify.VCol(cols=3, **style):
+                                    vuetify.VTextField(
+                                        v_model=("cliplat[1]",),
+                                        **style
+                                    )
+                            with vuetify.VRow(classes="text-center align-center", **style):
+                                vuetify.VRangeSlider(
+                                    v_model=("cliplat", [self.source.extents[2], self.source.extents[3]]),
+                                    min=-90,
+                                    max=90,
+                                )
+                    style=dict(density="compact", hide_details=True, style="padding: 2px")
                     vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
-                        with UICard(title="Map Projection Selection", varname="true").content:
-                            vuetify.VSelect(
-                                items=("options", ["Cyl. Equidistant","Robinson", "Mollweide"]),
-                                v_model=("projection", "Cyl. Equidistant"),
-                            )
+                        with UICard(title="Map Properties", varname="true").content:
+                            with vuetify.VRow(classes="text-h6 text-center align-center"):
+                                with vuetify.VCol(**style):
+                                    html.Div("Projection", **style)
+                                with vuetify.VCol(**style):
+                                    vuetify.VSelect(
+                                        items=("options", ["Cyl. Equidistant","Robinson", "Mollweide"]),
+                                        v_model=("projection", "Cyl. Equidistant"),
+                                        **style
+                                )
+                            with vuetify.VRow(classes="text-h6 text-center align-center"):
+                                with vuetify.VCol(**style):
+                                    html.Div("Center at",**style)
+                                with vuetify.VCol(**style):
+                                    vuetify.VTextField(v_model=("center", 0.), **style)
                     vuetify.VDivider(classes="mx-2")
                     with vuetify.VContainer(fluid=True):
                         with UICard(title="Variable Selection", varname="true").content:
