@@ -28,7 +28,6 @@ def ApplyProj(projection, point):
         return [new[0], new[1], 1.]
 
 def GenerateAnnotations(long, lat, projection, center):
-    print(long, lat)
     texts = []
     interval = 30
     llon     = long[0]
@@ -44,8 +43,8 @@ def GenerateAnnotations(long, lat, projection, center):
    
     lonx = np.arange(llon, hlon + interval, interval)
     laty = np.arange(llat, hlat + interval, interval)
-    print(lonx)
 
+    print(lonx)
     from functools import partial
 
     proj = partial(ApplyProj, None)
@@ -59,11 +58,19 @@ def GenerateAnnotations(long, lat, projection, center):
         proj = partial(ApplyProj, xformer)
 
     for x in lonx:
+        lon = x - center
+        pos = lon 
+        if lon > 180:
+            pos = -180 + (lon % 180)
+        elif lon < -180:
+            pos = 180 - (abs(lon) % 180)
+        txt = str(x)
+        print(f" x : {x}, lon : {lon}, pos : {pos}, {lon % 180}")
+        if pos == 180:
+            continue
         text       = Text(registrationName=f"text{x}")
-        lon = x + center
-        text.Text  = str(int((-180 + (lon - 180) if lon > 180 else lon)))
-        print(lon, str(-180 + lon -180  if lon > 180 else lon))
-        pos = proj([x, hlat, 1.])
+        text.Text = txt
+        pos = proj([pos, hlat, 1.])
         texts.append((text, pos))
     for y in laty:
         text       = Text(registrationName=f"text{y}")
@@ -108,17 +115,12 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
 
     from timeit import default_timer as timer
 
-    start = timer()
     #rview = CreateRenderView(f'rv{index}')
     rview = CreateRenderView()
-    end = timer()
-
-    print("Time to find/create render views : ", end - start)
 
     rview.UseColorPaletteForBackground = 0
     rview.BackgroundColorMode = 'Gradient'
 
-    start = timer()
     data = views['2DProj']
     rep    = Show(data, rview)
     ColorBy(rep, ("CELLS", var))
@@ -135,16 +137,18 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
     LUTColorBar.ScalarBarLength = 0.75
     coltrfunc.RescaleTransferFunction(float(colordata.min), float(colordata.max))
     colordata.rep = rep
-    """
+    
     globe = views['GProj']
+    #print("Globe : ", globe)
     repG = Show(globe, rview)
+    #print("Representation : ", repG)
     ColorBy(repG, None)
     repG.SetRepresentationType('Wireframe')
     repG.RenderLinesAsTubes = 1
-    repG.LineWidth = 0.5
+    repG.LineWidth = 1.0
     repG.AmbientColor = [0.67, 0.67, 0.67]
     repG.DiffuseColor = [0.67, 0.67, 0.67]
-    """
+    
     annot = views['GLines']
     repAn = Show(annot, rview)
     repAn.SetRepresentationType('Wireframe')
@@ -160,9 +164,7 @@ def GetRenderView(index, views, var, average, num, colordata : ViewData):
     textrep.Italic = 1 
     textrep.Shadow = 1
     textrep.WindowLocation = 'Upper Center'
-    end = timer()
-    print("Time to setup views : ", end - start)
-
+    
     return rview
 
 from eamapp.pipeline import EAMVisSource
@@ -197,15 +199,12 @@ class ViewManager():
 
         long = self.state.cliplong 
         lat  = self.state.cliplat
-        #long = [self.state.extents[0], self.state.extents[1]]
-        #lat  = [self.state.extents[2], self.state.extents[3]]
-
         print("Updating clip extents : ", long, lat)
 
         self.source.UpdateLev(self.state.vlev, self.state.vilev)
         
-        self.source.UpdateCenter(self.state.center)
         self.source.ApplyClipping(long, lat)
+        self.source.UpdateCenter(self.state.center)
         self.source.UpdateProjection(self.state.projection)
         self.source.UpdatePipeline()
 

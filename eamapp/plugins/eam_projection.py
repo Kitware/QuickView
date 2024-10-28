@@ -2,8 +2,16 @@ from paraview.simple import *
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from vtkmodules.vtkCommonCore import vtkPoints
-from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkPolyData, vtkCellArray
-from vtkmodules.vtkFiltersCore import vtkAppendFilter
+from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkPolyData, vtkCellArray, vtkBox, vtkPlane
+from vtkmodules.vtkCommonTransforms import vtkTransform
+from vtkmodules.vtkFiltersCore import vtkAppendFilter, vtkClipPolyData
+from vtkmodules.vtkFiltersGeneral import vtkTransformFilter, vtkBoxClipDataSet, vtkClipDataSet, vtkTableBasedClipDataSet
+
+try:
+    from paraview.modules.vtkPVVTKExtensionsFiltersGeneral import vtkPVClipDataSet
+    from paraview.modules.vtkPVVTKExtensionsMisc import vtkPVBox
+except Exception as e:
+    print(e)
 from vtkmodules.util import vtkConstants, numpy_support
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from paraview import print_error
@@ -258,4 +266,150 @@ class EAMProject(VTKPythonAlgorithmBase):
         vtk_coords.SetData(_coords)
         outWrap.SetPoints(vtk_coords)
 
+        return 1
+
+@smproxy.filter()
+@smproperty.input(name="Input")
+@smdomain.datatype(dataTypes=["vtkPolyData","vtkUnstructuredGrid"], composite_data_supported=False)
+@smproperty.xml("""
+                <DoubleVectorProperty name="Longitude Range"
+                      command="SetLongitudeRange"
+                      number_of_elements="2"
+                      default_values="-180 180">
+                 </DoubleVectorProperty>
+                <DoubleVectorProperty name="Latitude Range"
+                      command="SetLatitudeRange"
+                      number_of_elements="2"
+                      default_values="-90 90">
+                 </DoubleVectorProperty>
+                """)
+class EAMTransformAndExtract(VTKPythonAlgorithmBase):
+    def __init__(self):
+        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid")
+        self.project = 0
+        self.longrange = [-180., 180.]
+        self.latrange  = [-90., 90.]
+
+    def SetLongitudeRange(self, min, max):
+        if self.longrange[0] != min or self.longrange[1] != max:
+            self.longrange = [min, max]
+            self.Modified()
+
+    def SetLatitudeRange(self, min, max):
+        if self.latrange[0] != min or self.latrange[1] != max:
+            self.latrange = [min, max]
+            self.Modified()
+
+    def RequestData(self, request, inInfo, outInfo):
+        inData = self.GetInputData(inInfo, 0, 0)
+        outData = self.GetOutputData(outInfo, 0)
+
+        planeL = vtkPlane()
+        planeL.SetOrigin([180., 0., 0.])
+        planeL.SetNormal([-1, 0, 0])
+        clipL = vtkTableBasedClipDataSet()
+        clipL.SetClipFunction(planeL)
+        clipL.SetInputData(inData)
+        clipL.Update() 
+ 
+        planeR = vtkPlane()
+        planeR.SetOrigin([180., 0., 0.])
+        planeR.SetNormal([1, 0, 0])
+        clipR = vtkTableBasedClipDataSet()
+        clipR.SetClipFunction(planeR)
+        clipR.SetInputData(inData)
+        clipR.Update() 
+
+        transFunc = vtkTransform()
+        transFunc.Translate(-360, 0, 0)
+        transform = vtkTransformFilter()
+        transform.SetInputData(clipR.GetOutput())
+        transform.SetTransform(transFunc)
+        transform.Update()
+
+        append = vtkAppendFilter()
+        append.AddInputData(clipL.GetOutput())
+        append.AddInputData(transform.GetOutput())
+        append.Update()
+
+        box = vtkPVBox()
+        box.SetReferenceBounds(self.longrange[0], self.longrange[1], self.latrange[0], self.latrange[1], -1. , 1.)
+        box.SetUseReferenceBounds(True)
+        extract = vtkPVClipDataSet()
+        extract.SetClipFunction(box)
+        extract.InsideOutOn()
+        extract.ExactBoxClipOn()
+        extract.SetInputData(append.GetOutput())
+        extract.Update()
+ 
+        outData.ShallowCopy(extract.GetOutput())
+        return 1
+    
+@smproxy.filter()
+@smproperty.input(name="Input")
+@smdomain.datatype(dataTypes=["vtkPolyData","vtkUnstructuredGrid"], composite_data_supported=False)
+@smproperty.xml("""
+                <IntVectorProperty name="Center Meridian"
+                      command="SetCentralMeridian"
+                      number_of_elements="1"
+                      default_values="0">
+                 </IntVectorProperty>
+                """)
+class EAMCenterMeridian(VTKPythonAlgorithmBase):
+    def __init__(self):
+        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid")
+        self.project = 0
+        self.cmeridian  = 0.
+
+    def SetCentralMeridian(self, meridian):
+        if self.cmeridian != meridian:
+            self.cmeridian = meridian
+            self.Modified()
+
+    def RequestData(self, request, inInfo, outInfo):
+        inData = self.GetInputData(inInfo, 0, 0)
+        outData = self.GetOutputData(outInfo, 0)
+
+        if self.cmeridian == 0:
+            outData.ShallowCopy(inData)
+            return 1
+
+        split = (self.cmeridian - 180) if self.cmeridian > 0 else (self.cmeridian + 180)
+
+        planeL = vtkPlane()
+        planeL.SetOrigin([split, 0., 0.])
+        planeL.SetNormal([-1, 0, 0])
+        clipL = vtkTableBasedClipDataSet()
+        clipL.SetClipFunction(planeL)
+        clipL.SetInputData(inData)
+        clipL.Update() 
+
+        planeR = vtkPlane()
+        planeR.SetOrigin([split, 0., 0.])
+        planeR.SetNormal([1, 0, 0])
+        clipR = vtkTableBasedClipDataSet()
+        clipR.SetClipFunction(planeR)
+        clipR.SetInputData(inData)
+        clipR.Update() 
+
+        transFunc = vtkTransform()
+        transFunc.Translate(360, 0, 0)
+        transform = vtkTransformFilter()
+        transform.SetInputData(clipL.GetOutput())
+        transform.SetTransform(transFunc)
+        transform.Update()
+
+        append = vtkAppendFilter()
+        append.AddInputData(clipR.GetOutput())
+        append.AddInputData(transform.GetOutput())
+        append.Update()
+
+        transFunc = vtkTransform()
+        transFunc.Translate(-(180 + split), 0, 0)
+        transform = vtkTransformFilter()
+        transform.SetInputData(append.GetOutput())
+        transform.SetTransform(transFunc)
+        transform.Update()
+
+        outData.ShallowCopy(transform.GetOutput())
         return 1

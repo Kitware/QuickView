@@ -24,14 +24,14 @@ class EAMGridLines(VTKPythonAlgorithmBase):
             outputType='vtkUnstructuredGrid')
         self.llat = -90.
         self.hlat = 90.
-        self.llon = 0.
-        self.hlon = 360.
+        self.llon = -180.
+        self.hlon = 180.
         self.interval = 30
 
     @smproperty.xml("""
         <DoubleVectorProperty name="Longitude Range"
             number_of_elements="2"
-            default_values="0 360"
+            default_values="-180 180"
             command="SetLongRange">
             <DoubleRangeDomain name="Longitude Range" />
             <Documentation>Set the minimum and maximin for the Longitude Lines</Documentation>

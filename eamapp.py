@@ -34,7 +34,6 @@ def serve():
     source = EAMVisSource()
     import json
     try:
-        print(WorkDir)
         if StateFile is not None:
             from pathlib import Path
             path = Path(StateFile)

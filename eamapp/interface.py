@@ -214,7 +214,6 @@ class EAMApp:
             self.state.colormaps = noncvd
 
     def UpdateColorProps(self, index, type, value):
-        print(f"Updating value at {index} : {type, value}")
         if type.lower() == 'min':
             self.state.varmin[index] = value
             self.state.dirty("varmin")
@@ -300,7 +299,6 @@ class EAMApp:
             filtVars    = [var for (_, var) in filtered]
             self.ind2d  = [idx for (idx, _) in filtered]
         if not self.ind2d is None:
-            print(filtVars, self.ind2d, self.vars2Dstate[self.ind2d]) 
             self.state.vars2D       = list(filtVars)
             self.state.vars2Dstate  = self.vars2Dstate[self.ind2d].tolist()
             self.state.dirty("vars2Dstate")
@@ -317,7 +315,6 @@ class EAMApp:
             filtVars    = [var for (_, var) in filtered]
             self.ind3dm  = [idx for (idx, _) in filtered]
         if not self.ind3dm is None:
-            print(filtVars, self.ind3dm, self.vars3Dmstate[self.ind3dm]) 
             self.state.vars3Dm       = list(filtVars)
             self.state.vars3Dmstate  = self.vars3Dmstate[self.ind3dm].tolist()
             self.state.dirty("vars3Dmstate")
@@ -334,7 +331,6 @@ class EAMApp:
             filtVars    = [var for (_, var) in filtered]
             self.ind3di  = [idx for (idx, _) in filtered]
         if not self.ind3dm is None:
-            print(filtVars, self.ind3di, self.vars3Dmstate[self.ind3di]) 
             self.state.vars3Di       = list(filtVars)
             self.state.vars3Distate  = self.vars3Distate[self.ind3di].tolist()
             self.state.dirty("vars3Distate")

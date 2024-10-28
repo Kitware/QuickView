@@ -47,49 +47,6 @@ class EAMVisSource():
         except Exception as e:
             print("Error loading plugin :", e)
 
-    def UpdatePipeline(self):
-        eamproj2D  = FindSource('2DProj')
-        if eamproj2D:
-            eamproj2D.UpdatePipeline()
-        eamprojG   = FindSource('GProj')
-        if eamprojG:
-            eamprojG.UpdatePipeline()
-        projA      = FindSource('GLines')
-        if projA:
-            projA.UpdatePipeline()
-
-    def UpdateCenter(self, center):
-        if self.center != float(center):
-            print("Updating Center")
-            self.center = float(center)
-            clipR = FindSource('ClipLeft')
-            clipR.ClipType.Origin = [self.center, 0.0, 0.0]
-            clipR.HyperTreeGridClipper.Origin = [self.center, 0.0, 0.0]
-            clipL = FindSource('ClipRight')
-            clipL.ClipType.Origin = [self.center, 0.0, 0.0]
-            clipL.HyperTreeGridClipper.Origin = [self.center, 0.0, 0.0]
-            transform   = FindSource('TransformAll')
-            transform.Transform = 'Transform'
-            transform.Transform.Translate = [180. - self.center, 0.0, 0.0]
-            transform.UpdatePipeline()
-
-    def UpdateProjection(self, proj):
-        eamproj2D  = FindSource('2DProj')
-        #eamprojG   = FindSource('GProj')
-        #projA      = FindSource('GLines')
-        if self.projection != proj:
-            self.projection = proj
-            eamproj2D.Projection  = proj
-            #eamprojG.Projection   = proj
-            #projA.Projection      = proj
-        #eamproj2D.UpdatePipeline()
-        self.moveextents = eamproj2D.GetDataInformation().GetBounds()
-        #eamprojG.UpdatePipeline()
-        #projA.UpdatePipeline()
-        self.views["2DProj"]  = OutputPort(eamproj2D,  0)
-        #self.views["GProj"]   = OutputPort(eamprojG, 0)                  
-        #self.views["GLines"]   = OutputPort(projA, 0)                  
-
     def UpdateLev(self, lev, ilev):
         eamproj2D  = FindSource('2DProj')
         if self.data == None:
@@ -104,26 +61,58 @@ class EAMVisSource():
             self.UpdateProjection(self.projection)         
 
     def ApplyClipping(self, cliplong, cliplat):
-        print("Applying clipping : ", cliplong, cliplat)
-        pos = [cliplong[0], cliplat[0], -5.0]
-        len = [cliplong[1] - cliplong[0], cliplat[1] - cliplat[0], 10.0]
-        clip  = FindSource('Clip')
-        clip.ClipType = 'Box'
-        clip.ClipType.Position = pos 
-        clip.ClipType.Length   = len 
-        #clip.UpdatePipeline()
-        """"
-        clip  = FindSource('GClip')
-        clip.ClipType = 'Box'
-        clip.ClipType.Position = pos 
-        clip.ClipType.Length   = len 
-        clip.UpdatePipeline()
-        """
-        grid = FindSource("OGLines")
-        grid.LatitudeRange = cliplat
-        grid.LongitudeRange = cliplong
-        grid.UpdatePipeline()
+        extract = FindSource('DataExtract')
+        extract.LongitudeRange = cliplong
+        extract.LatitudeRange = cliplat
         
+        gextract = FindSource('GExtract')
+        gextract.LongitudeRange = cliplong
+        gextract.LatitudeRange = cliplat
+
+    def UpdateCenter(self, center):
+        if self.center != int(center):
+            self.center = int(center)
+            
+            meridian = FindSource('CenterMeridian')
+            meridian.CenterMeridian = self.center
+
+            gmeridian = FindSource('GCMeridian')
+            gmeridian.CenterMeridian = self.center
+ 
+    def UpdateProjection(self, proj):
+        eamproj2D  = FindSource('2DProj')
+        eamprojG   = FindSource('GProj')
+        projA      = FindSource('GLines')
+        if self.projection != proj:
+            self.projection = proj
+            eamproj2D.Projection  = proj
+            eamprojG.Projection   = proj
+            projA.Projection      = proj
+        self.moveextents = eamproj2D.GetDataInformation().GetBounds()
+
+    def UpdatePipeline(self):
+        eamproj2D  = FindSource('2DProj')
+        if eamproj2D:
+            eamproj2D.UpdatePipeline()
+        eamprojG   = FindSource('GProj')
+        if eamprojG:
+            eamprojG.UpdatePipeline() 
+
+        meridian = FindSource('CenterMeridian')
+        bounds = meridian.GetDataInformation().GetBounds()
+        grid = FindSource('OGLines')
+        if grid:
+            grid.LongitudeRange = [bounds[0], bounds[1]]
+            grid.LatitudeRange = [bounds[2], bounds[3]]
+        projA     = FindSource('GLines')
+        if projA:
+            projA.UpdatePipeline()
+ 
+        self.views["2DProj"]  = OutputPort(eamproj2D,  0)
+        self.views["GProj"]   = OutputPort(eamprojG, 0)                  
+        self.views["GLines"]   = OutputPort(projA, 0)                  
+
+
     def Update(self, datafile, connfile, globefile, lev):
         self.DataFile = datafile
         self.ConnFile = connfile
@@ -158,63 +147,46 @@ class EAMVisSource():
         self.timestamps = np.array(tk.TimestepValues).tolist()
         tk.Time = tk.TimestepValues[0]
 
-        clipR = Clip(registrationName='ClipLeft', Input=OutputPort(self.data, 0))
-        clipR.ClipType = 'Plane'
-        clipR.HyperTreeGridClipper = 'Plane'
-        clipR.ClipType.Origin = [self.center, 0.0, 0.0]
-        clipR.HyperTreeGridClipper.Origin = [self.center, 0.0, 0.0]
-        clipL = Clip(registrationName='ClipRight', Input=OutputPort(self.data, 0))
-        clipL.ClipType = 'Plane'
-        clipL.HyperTreeGridClipper = 'Plane'
-        clipL.ClipType.Origin = [self.center, 0.0, 0.0]
-        clipL.HyperTreeGridClipper.Origin = [self.center, 0.0, 0.0]
-        clipL.ClipType.Normal = [-1.0, 0.0, 0.0]
-        transform1 = Transform(registrationName='TransformClipL', Input=clipL)
-        transform1.Transform = 'Transform'
-        transform1.Transform.Translate = [-360.0, 0.0, 0.0]
-        appendDatasets = AppendDatasets(registrationName='AppendDatasets', Input=[clipR, transform1])
-        transform2 = Transform(registrationName='TransformAll', Input=appendDatasets)
-        transform2.Transform = 'Transform'
-        transform2.Transform.Translate = [180. - self.center, 0.0, 0.0]
-        transform2.UpdatePipeline()
-        self.extents = transform2.GetDataInformation().GetBounds()
-        print(self.extents)
-
-        dclip = Clip(registrationName='Clip', Input=transform2)
-        dclip.ClipType = 'Box'
-        dclip.ClipType.Position = [self.extents[0], self.extents[2], -5] 
-        dclip.ClipType.Length   = [self.extents[1] - self.extents[0], self.extents[3] - self.extents[2], 10]
-        dclip.UpdatePipeline()
-
-        proj2D            = EAMProject(registrationName='2DProj', Input=OutputPort(dclip, 0))
+        extract = EAMTransformAndExtract(registrationName='DataExtract', Input=self.data)
+        extract.LongitudeRange = [-180.0, 180.0]
+        extract.LatitudeRange = [-90.0, 90.0]
+        meridian = EAMCenterMeridian(registrationName='CenterMeridian', Input=OutputPort(extract, 0))
+        meridian.CenterMeridian = 0
+        meridian.UpdatePipeline()
+        self.extents = meridian.GetDataInformation().GetBounds()
+        proj2D            = EAMProject(registrationName='2DProj', Input=OutputPort(meridian, 0))
         proj2D.Projection = self.projection
         proj2D.Translate  = 0
         proj2D.UpdatePipeline()
-
         self.moveextents = proj2D.GetDataInformation().GetBounds()
+
+        gextract = EAMTransformAndExtract(registrationName='GExtract', Input=self.globe)
+        gextract.LongitudeRange = [-180.0, 180.0]
+        gextract.LatitudeRange = [-90.0, 90.0]
+        gmeridian = EAMCenterMeridian(registrationName='GCMeridian', Input=OutputPort(gextract, 0))
+        gmeridian.CenterMeridian = 0
+        gmeridian.UpdatePipeline()
+        projG = EAMProject(registrationName='GProj', Input=OutputPort(gmeridian, 0))
+        projG.Projection = self.projection
+        projG.Translate  = 1
+        projG.UpdatePipeline()
         '''
         gclip = Clip(registrationName='GClip', Input=OutputPort(self.globe, 0))
         gclip.ClipType = 'Box'
         gclip.ClipType.Position = [self.extents[0], self.extents[2], -5] 
         gclip.ClipType.Length   = [self.extents[1] - self.extents[0], self.extents[3] - self.extents[2], 10]
         gclip.UpdatePipeline()
-
-        projG            = EAMProject(registrationName='GProj', Input=OutputPort(gclip, 0))
-        projG.Projection = self.projection
-        projG.Translate  = 1
-        projG.UpdatePipeline()
         '''
         glines = EAMGridLines(registrationName='OGLines')
         glines.UpdatePipeline()
-        self.annot = glines
-        
+        self.annot = glines        
         projA            = EAMProject(registrationName='GLines', Input=OutputPort(glines, 0))
         projA.Projection = self.projection
-        projA.Translate  = 1
+        projA.Translate  = 0
         projA.UpdatePipeline()
         
         self.views["2DProj"]    = OutputPort(proj2D,  0)
-        #self.views["GProj"]     = OutputPort(projG, 0) 
+        self.views["GProj"]     = OutputPort(projG, 0) 
         self.views["GLines"]    = OutputPort(projA, 0) 
 
         from paraview import servermanager as sm

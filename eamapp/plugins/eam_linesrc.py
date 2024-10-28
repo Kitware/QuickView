@@ -88,7 +88,6 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         cellArray.SetData(offsets, cells)
 
         outdata.SetPoints(coords)
-        print(dir(outdata.VTKObject))
         outdata.VTKObject.SetCells(cellTypes, cellArray)
         '''
         return 1
