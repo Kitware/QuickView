@@ -44,7 +44,6 @@ def GenerateAnnotations(long, lat, projection, center):
     lonx = np.arange(llon, hlon + interval, interval)
     laty = np.arange(llat, hlat + interval, interval)
 
-    print(lonx)
     from functools import partial
 
     proj = partial(ApplyProj, None)
@@ -65,7 +64,6 @@ def GenerateAnnotations(long, lat, projection, center):
         elif lon < -180:
             pos = 180 - (abs(lon) % 180)
         txt = str(x)
-        print(f" x : {x}, lon : {lon}, pos : {pos}, {lon % 180}")
         if pos == 180:
             continue
         text       = Text(registrationName=f"text{x}")
@@ -199,7 +197,6 @@ class ViewManager():
 
         long = self.state.cliplong 
         lat  = self.state.cliplat
-        print("Updating clip extents : ", long, lat)
 
         self.source.UpdateLev(self.state.vlev, self.state.vilev)
         

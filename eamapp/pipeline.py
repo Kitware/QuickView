@@ -170,13 +170,7 @@ class EAMVisSource():
         projG.Projection = self.projection
         projG.Translate  = 1
         projG.UpdatePipeline()
-        '''
-        gclip = Clip(registrationName='GClip', Input=OutputPort(self.globe, 0))
-        gclip.ClipType = 'Box'
-        gclip.ClipType.Position = [self.extents[0], self.extents[2], -5] 
-        gclip.ClipType.Length   = [self.extents[1] - self.extents[0], self.extents[3] - self.extents[2], 10]
-        gclip.UpdatePipeline()
-        '''
+
         glines = EAMGridLines(registrationName='OGLines')
         glines.UpdatePipeline()
         self.annot = glines        
