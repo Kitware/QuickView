@@ -2,10 +2,21 @@ from paraview.simple import *
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from vtkmodules.vtkCommonCore import vtkPoints
-from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkPolyData, vtkCellArray, vtkBox, vtkPlane
+from vtkmodules.vtkCommonDataModel import (
+    vtkUnstructuredGrid,
+    vtkPolyData,
+    vtkCellArray,
+    vtkBox,
+    vtkPlane,
+)
 from vtkmodules.vtkCommonTransforms import vtkTransform
 from vtkmodules.vtkFiltersCore import vtkAppendFilter, vtkClipPolyData
-from vtkmodules.vtkFiltersGeneral import vtkTransformFilter, vtkBoxClipDataSet, vtkClipDataSet, vtkTableBasedClipDataSet
+from vtkmodules.vtkFiltersGeneral import (
+    vtkTransformFilter,
+    vtkBoxClipDataSet,
+    vtkClipDataSet,
+    vtkTableBasedClipDataSet,
+)
 
 try:
     from paraview.modules.vtkPVVTKExtensionsFiltersGeneral import vtkPVClipDataSet
@@ -21,41 +32,50 @@ import math
 try:
     import numpy as np
     from pyproj import Proj, Transformer
+
     _has_deps = True
 except ImportError as ie:
     print_error(
         "Missing required Python modules/packages. Algorithms in this module may "
-        "not work as expected! \n {0}".format(ie))
+        "not work as expected! \n {0}".format(ie)
+    )
     _has_deps = False
 
+
 def ProcessPoint(point, radius):
-    #theta = math.radians(point[0] - 180.)
-    #phi   = math.radians(point[1])
-    #rho   = 1.0
-    theta   = point[0]
-    phi     = 90 - point[1]
-    rho     = (1000 - point[2]) + radius if not point[2] == 0 else radius
+    # theta = math.radians(point[0] - 180.)
+    # phi   = math.radians(point[1])
+    # rho   = 1.0
+    theta = point[0]
+    phi = 90 - point[1]
+    rho = (1000 - point[2]) + radius if not point[2] == 0 else radius
     x = rho * math.sin(math.radians(phi)) * math.cos(math.radians(theta))
     y = rho * math.sin(math.radians(phi)) * math.sin(math.radians(theta))
     z = rho * math.cos(math.radians(phi))
     return [x, y, z]
 
+
 @smproxy.filter()
 @smproperty.input(name="Input")
-@smdomain.datatype(dataTypes=["vtkUnstructuredGrid","vtkPolyData"], composite_data_supported=False)
+@smdomain.datatype(
+    dataTypes=["vtkUnstructuredGrid", "vtkPolyData"], composite_data_supported=False
+)
 class EAMSphere(VTKPythonAlgorithmBase):
     def __init__(self):
-        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid")
+        super().__init__(
+            nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid"
+        )
         self.__Dims = -1
         self.isData = False
         self.radius = 2000
 
     @smproperty.intvector(name="Data Layer", default_values=[0])
-    @smdomain.xml(\
+    @smdomain.xml(
         """<BooleanDomain name="bool"/>
-        """)
+        """
+    )
     def SetDataLayer(self, isData_):
-        if not self.isData == isData_: 
+        if not self.isData == isData_:
             self.isData = isData_
             self.Modified()
 
@@ -70,34 +90,39 @@ class EAMSphere(VTKPythonAlgorithmBase):
 
     def RequestData(self, request, inInfo, outInfo):
         inData = self.GetInputData(inInfo, 0, 0)
-        outData = self.GetOutputData(outInfo, 0)        
-        
-        if inData.IsA('vtkPolyData'):
+        outData = self.GetOutputData(outInfo, 0)
+
+        if inData.IsA("vtkPolyData"):
             afilter = vtkAppendFilter()
             afilter.AddInputData(inData)
-            afilter.Update() 
+            afilter.Update()
             out = afilter.GetOutput()
             outData.DeepCopy(afilter.GetOutput())
         else:
             outData.DeepCopy(inData)
 
-        inWrap     = dsa.WrapDataObject(inData)
-        outWrap    = dsa.WrapDataObject(outData)
+        inWrap = dsa.WrapDataObject(inData)
+        outWrap = dsa.WrapDataObject(outData)
 
-        inPoints    = np.array(inWrap.Points)
-        pRadius     = (self.radius + 1) if self.isData else self.radius
-        outPoints   = np.array(list(map(lambda x: ProcessPoint( x , pRadius), inPoints)))
-        
-        _coords = numpy_support.numpy_to_vtk(outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT)
+        inPoints = np.array(inWrap.Points)
+        pRadius = (self.radius + 1) if self.isData else self.radius
+        outPoints = np.array(list(map(lambda x: ProcessPoint(x, pRadius), inPoints)))
+
+        _coords = numpy_support.numpy_to_vtk(
+            outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT
+        )
         vtk_coords = vtkPoints()
         vtk_coords.SetData(_coords)
         outWrap.SetPoints(vtk_coords)
 
         return 1
 
+
 @smproxy.filter()
 @smproperty.input(name="Input")
-@smdomain.datatype(dataTypes=["vtkUnstructuredGrid","vtkPolyData"], composite_data_supported=False)
+@smdomain.datatype(
+    dataTypes=["vtkUnstructuredGrid", "vtkPolyData"], composite_data_supported=False
+)
 class EAMVTSSphere(VTKPythonAlgorithmBase):
     def __init__(self):
         super().__init__(nInputPorts=1, nOutputPorts=1)
@@ -106,11 +131,12 @@ class EAMVTSSphere(VTKPythonAlgorithmBase):
         self.radius = 2000
 
     @smproperty.intvector(name="Data Layer", default_values=[0])
-    @smdomain.xml(\
+    @smdomain.xml(
         """<BooleanDomain name="bool"/>
-        """)
+        """
+    )
     def SetDataLayer(self, isData_):
-        if not self.isData == isData_: 
+        if not self.isData == isData_:
             self.isData = isData_
             self.Modified()
 
@@ -128,40 +154,44 @@ class EAMVTSSphere(VTKPythonAlgorithmBase):
         outData = self.GetOutputData(outInfo, 0)
         outData.DeepCopy(inData)
 
-        inWrap     = dsa.WrapDataObject(inData)
-        outWrap    = dsa.WrapDataObject(outData)
+        inWrap = dsa.WrapDataObject(inData)
+        outWrap = dsa.WrapDataObject(outData)
 
-        inPoints    = np.array(inWrap.Points)
-        pRadius     = (self.radius + 1) if self.isData else self.radius
-        outPoints   = np.array(list(map(lambda x: ProcessPoint( x , pRadius), inPoints)))
-        #outPoints   = np.array(list(map(ProcessPoint,inPoints)))
-        
-        _coords = numpy_support.numpy_to_vtk(outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT)
+        inPoints = np.array(inWrap.Points)
+        pRadius = (self.radius + 1) if self.isData else self.radius
+        outPoints = np.array(list(map(lambda x: ProcessPoint(x, pRadius), inPoints)))
+        # outPoints   = np.array(list(map(ProcessPoint,inPoints)))
+
+        _coords = numpy_support.numpy_to_vtk(
+            outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT
+        )
         vtk_coords = vtkPoints()
         vtk_coords.SetData(_coords)
         outWrap.SetPoints(vtk_coords)
 
         return 1
 
+
 @smproxy.source(name="EAMLineSource")
-@smproperty.xml("""
+@smproperty.xml(
+    """
                 <IntVectorProperty name="longitude"
                     command="SetLongitude"
                     number_of_elements="1"
                     default_values="0">
                 </IntVectorProperty>
-                """)
+                """
+)
 class EAMLineSource(VTKPythonAlgorithmBase):
     def __init__(self):
-        VTKPythonAlgorithmBase.__init__(self,
-            nInputPorts=0,
-            nOutputPorts=1,
-            outputType='vtkPolyData')
+        VTKPythonAlgorithmBase.__init__(
+            self, nInputPorts=0, nOutputPorts=1, outputType="vtkPolyData"
+        )
         self.longitude = 0
 
     def RequestInformation(self, request, inInfo, outInfo):
         return super().RequestInformation(request, inInfo, outInfo)
-        
+
     def RequestUpdateExtent(self, request, inInfo, outInfo):
         return super().RequestUpdateExtent(request, inInfo, outInfo)
 
@@ -188,10 +218,14 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         polyData.SetLines(line)
         return 1
 
+
 @smproxy.filter()
 @smproperty.input(name="Input")
-@smdomain.datatype(dataTypes=["vtkPolyData","vtkUnstructuredGrid"], composite_data_supported=False)
-@smproperty.xml("""
+@smdomain.datatype(
+    dataTypes=["vtkPolyData", "vtkUnstructuredGrid"], composite_data_supported=False
+)
+@smproperty.xml(
+    """
                 <IntVectorProperty name="Translate"
                       command="SetTranslation"
                       number_of_elements="1"
@@ -209,10 +243,13 @@ class EAMLineSource(VTKPythonAlgorithmBase):
                         <Entry value="2" text="Mollweide"/>
                     </EnumerationDomain>
                 </IntVectorProperty>
-                """)
+                """
+)
 class EAMProject(VTKPythonAlgorithmBase):
     def __init__(self):
-        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid")
+        super().__init__(
+            nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid"
+        )
         self.__Dims = -1
         self.project = 0
         self.translate = False
@@ -230,7 +267,7 @@ class EAMProject(VTKPythonAlgorithmBase):
     def RequestData(self, request, inInfo, outInfo):
         inData = self.GetInputData(inInfo, 0, 0)
         outData = self.GetOutputData(outInfo, 0)
-        if inData.IsA('vtkPolyData'):
+        if inData.IsA("vtkPolyData"):
             afilter = vtkAppendFilter()
             afilter.AddInputData(inData)
             afilter.Update()
@@ -241,15 +278,15 @@ class EAMProject(VTKPythonAlgorithmBase):
         if self.project == 0:
             return 1
 
-        inWrap     = dsa.WrapDataObject(inData)
-        outWrap     = dsa.WrapDataObject(outData)
-        inPoints    = np.array(inWrap.Points)
+        inWrap = dsa.WrapDataObject(inData)
+        outWrap = dsa.WrapDataObject(outData)
+        inPoints = np.array(inWrap.Points)
 
         flat = inPoints.flatten()
-        x = flat[0::3] - 180. if self.translate else flat[0::3]
+        x = flat[0::3] - 180.0 if self.translate else flat[0::3]
         y = flat[1::3]
 
-        latlon  = Proj(init="epsg:4326")
+        latlon = Proj(init="epsg:4326")
         if self.project == 1:
             proj = Proj(proj="robin")
         elif self.project == 2:
@@ -261,17 +298,23 @@ class EAMProject(VTKPythonAlgorithmBase):
         flat[1::3] = np.array(res[1])
 
         outPoints = flat.reshape(inPoints.shape)
-        _coords = numpy_support.numpy_to_vtk(outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT)
+        _coords = numpy_support.numpy_to_vtk(
+            outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT
+        )
         vtk_coords = vtkPoints()
         vtk_coords.SetData(_coords)
         outWrap.SetPoints(vtk_coords)
 
         return 1
 
+
 @smproxy.filter()
 @smproperty.input(name="Input")
-@smdomain.datatype(dataTypes=["vtkPolyData","vtkUnstructuredGrid"], composite_data_supported=False)
-@smproperty.xml("""
+@smdomain.datatype(
+    dataTypes=["vtkPolyData", "vtkUnstructuredGrid"], composite_data_supported=False
+)
+@smproperty.xml(
+    """
                 <DoubleVectorProperty name="Longitude Range"
                       command="SetLongitudeRange"
                       number_of_elements="2"
@@ -282,13 +325,16 @@ class EAMProject(VTKPythonAlgorithmBase):
                       number_of_elements="2"
                       default_values="-90 90">
                  </DoubleVectorProperty>
-                """)
+                """
+)
 class EAMTransformAndExtract(VTKPythonAlgorithmBase):
     def __init__(self):
-        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid")
+        super().__init__(
+            nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid"
+        )
         self.project = 0
-        self.longrange = [-180., 180.]
-        self.latrange  = [-90., 90.]
+        self.longrange = [-180.0, 180.0]
+        self.latrange = [-90.0, 90.0]
 
     def SetLongitudeRange(self, min, max):
         if self.longrange[0] != min or self.longrange[1] != max:
@@ -305,20 +351,20 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
         outData = self.GetOutputData(outInfo, 0)
 
         planeL = vtkPlane()
-        planeL.SetOrigin([180., 0., 0.])
+        planeL.SetOrigin([180.0, 0.0, 0.0])
         planeL.SetNormal([-1, 0, 0])
         clipL = vtkTableBasedClipDataSet()
         clipL.SetClipFunction(planeL)
         clipL.SetInputData(inData)
-        clipL.Update() 
- 
+        clipL.Update()
+
         planeR = vtkPlane()
-        planeR.SetOrigin([180., 0., 0.])
+        planeR.SetOrigin([180.0, 0.0, 0.0])
         planeR.SetNormal([1, 0, 0])
         clipR = vtkTableBasedClipDataSet()
         clipR.SetClipFunction(planeR)
         clipR.SetInputData(inData)
-        clipR.Update() 
+        clipR.Update()
 
         transFunc = vtkTransform()
         transFunc.Translate(-360, 0, 0)
@@ -333,7 +379,14 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
         append.Update()
 
         box = vtkPVBox()
-        box.SetReferenceBounds(self.longrange[0], self.longrange[1], self.latrange[0], self.latrange[1], -1. , 1.)
+        box.SetReferenceBounds(
+            self.longrange[0],
+            self.longrange[1],
+            self.latrange[0],
+            self.latrange[1],
+            -1.0,
+            1.0,
+        )
         box.SetUseReferenceBounds(True)
         extract = vtkPVClipDataSet()
         extract.SetClipFunction(box)
@@ -341,25 +394,32 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
         extract.ExactBoxClipOn()
         extract.SetInputData(append.GetOutput())
         extract.Update()
- 
+
         outData.ShallowCopy(extract.GetOutput())
         return 1
-    
+
+
 @smproxy.filter()
 @smproperty.input(name="Input")
-@smdomain.datatype(dataTypes=["vtkPolyData","vtkUnstructuredGrid"], composite_data_supported=False)
-@smproperty.xml("""
+@smdomain.datatype(
+    dataTypes=["vtkPolyData", "vtkUnstructuredGrid"], composite_data_supported=False
+)
+@smproperty.xml(
+    """
                 <IntVectorProperty name="Center Meridian"
                       command="SetCentralMeridian"
                       number_of_elements="1"
                       default_values="0">
                  </IntVectorProperty>
-                """)
+                """
+)
 class EAMCenterMeridian(VTKPythonAlgorithmBase):
     def __init__(self):
-        super().__init__(nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid")
+        super().__init__(
+            nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid"
+        )
         self.project = 0
-        self.cmeridian  = 0.
+        self.cmeridian = 0.0
 
     def SetCentralMeridian(self, meridian):
         if self.cmeridian != meridian:
@@ -377,20 +437,20 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
         split = (self.cmeridian - 180) if self.cmeridian > 0 else (self.cmeridian + 180)
 
         planeL = vtkPlane()
-        planeL.SetOrigin([split, 0., 0.])
+        planeL.SetOrigin([split, 0.0, 0.0])
         planeL.SetNormal([-1, 0, 0])
         clipL = vtkTableBasedClipDataSet()
         clipL.SetClipFunction(planeL)
         clipL.SetInputData(inData)
-        clipL.Update() 
+        clipL.Update()
 
         planeR = vtkPlane()
-        planeR.SetOrigin([split, 0., 0.])
+        planeR.SetOrigin([split, 0.0, 0.0])
         planeR.SetNormal([1, 0, 0])
         clipR = vtkTableBasedClipDataSet()
         clipR.SetClipFunction(planeR)
         clipR.SetInputData(inData)
-        clipR.Update() 
+        clipR.Update()
 
         transFunc = vtkTransform()
         transFunc.Translate(360, 0, 0)

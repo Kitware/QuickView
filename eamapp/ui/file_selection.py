@@ -7,10 +7,10 @@ server = get_server()
 class FileSelect(vuetify.VCard):
     def __init__(
         self,
-        display_var            = "export_config",
-        exported_state_var     = "exported_state",
-        export_completed       = "export_completed",
-        state_save_file_var    = "state_save_file"
+        display_var="export_config",
+        exported_state_var="exported_state",
+        export_completed="export_completed",
+        state_save_file_var="state_save_file",
     ):
         super().__init__()
         with self:
@@ -25,9 +25,7 @@ class FileSelect(vuetify.VCard):
                     vuetify.VCardTitle("Export File Select")
                     vuetify.VTextField(
                         v_model=(f"{state_save_file_var}",),
-                        v_show=(
-                            f"{state_save_file_var} != false",
-                        ),
+                        v_show=(f"{state_save_file_var} != false",),
                         label="Download Location",
                         prepend_icon="mdi-paperclip",
                         # FileSystem API is only available on some browsers:
