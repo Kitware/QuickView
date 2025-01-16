@@ -1,68 +1,78 @@
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from vtkmodules.vtkCommonCore import vtkPoints, vtkIdTypeArray
-from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkCellArray, vtkPolyData 
+from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkCellArray, vtkPolyData
 from vtkmodules.vtkFiltersCore import vtkAppendPolyData
 from vtkmodules.vtkRenderingFreeType import vtkVectorText
 from vtkmodules.vtkRenderingCore import vtkPolyDataMapper, vtkBillboardTextActor3D
 
-from vtkmodules.util import numpy_support, vtkConstants                                             
+from vtkmodules.util import numpy_support, vtkConstants
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
-import numpy as np                                                                                  
-try:                                                                                                
-    from vtkmodules.vtkFiltersGeneral import vtkCleanUnstructuredGrid as uGridFilter                
-except ImportError:                                                                                 
-    from paraview.modules.vtkPVVTKExtensionsFiltersGeneral import vtkCleanUnstructuredGrid as uGridFilter
-    pass                                                                                            
+import numpy as np
+
+try:
+    from vtkmodules.vtkFiltersGeneral import vtkCleanUnstructuredGrid as uGridFilter
+except ImportError:
+    from paraview.modules.vtkPVVTKExtensionsFiltersGeneral import (
+        vtkCleanUnstructuredGrid as uGridFilter,
+    )
+
+    pass
+
 
 @smproxy.source(name="EAMGridLines")
 class EAMGridLines(VTKPythonAlgorithmBase):
     def __init__(self):
-        VTKPythonAlgorithmBase.__init__(self,
-            nInputPorts=0,
-            nOutputPorts=1,
-            outputType='vtkUnstructuredGrid')
-        self.llat = -90.
-        self.hlat = 90.
-        self.llon = -180.
-        self.hlon = 180.
+        VTKPythonAlgorithmBase.__init__(
+            self, nInputPorts=0, nOutputPorts=1, outputType="vtkUnstructuredGrid"
+        )
+        self.llat = -90.0
+        self.hlat = 90.0
+        self.llon = -180.0
+        self.hlon = 180.0
         self.interval = 30
 
-    @smproperty.xml("""
+    @smproperty.xml(
+        """
         <DoubleVectorProperty name="Longitude Range"
             number_of_elements="2"
             default_values="-180 180"
             command="SetLongRange">
             <DoubleRangeDomain name="Longitude Range" />
             <Documentation>Set the minimum and maximin for the Longitude Lines</Documentation>
-        </DoubleVectorProperty>""")
+        </DoubleVectorProperty>"""
+    )
     def SetLongRange(self, llon, hlon):
         if self.llon != llon or self.hlon != hlon:
             self.llon = llon
             self.hlon = hlon
             self.Modified()
 
-    @smproperty.xml("""
+    @smproperty.xml(
+        """
         <DoubleVectorProperty name="Latitude Range"
             number_of_elements="2"
             default_values="-90 90"
             command="SetLatRange">
             <DoubleRangeDomain name="Latitude Range" />
             <Documentation>Set the minimum and maximin for the Latitude Lines</Documentation>
-        </DoubleVectorProperty>""")
+        </DoubleVectorProperty>"""
+    )
     def SetLatRange(self, llat, hlat):
         if self.llat != llat or self.hlat != hlat:
             self.llat = llat
             self.hlat = hlat
             self.Modified()
 
-    @smproperty.xml("""
+    @smproperty.xml(
+        """
                   <IntVectorProperty name="Interval"
                     command="SetInterval"
                     number_of_elements="1"
                     default_values="30">
                 </IntVectorProperty>
-                """)
+                """
+    )
     def SetInterval(self, interval):
         if self.interval != interval:
             self.interval = interval
@@ -82,37 +92,38 @@ class EAMGridLines(VTKPythonAlgorithmBase):
         hlat = self.hlat
 
         import math
-        llon = math.floor(llon  / interval) * interval
+
+        llon = math.floor(llon / interval) * interval
         hlon = math.ceil(hlon / interval) * interval
         xextent = hlon - llon
-        xspc    = xextent / 9.
+        xspc = xextent / 9.0
 
-        llat = math.floor(llat  / interval) * interval
+        llat = math.floor(llat / interval) * interval
         hlat = math.ceil(hlat / interval) * interval
         yextent = hlat - llat
-        yspc    = yextent / 99.
+        yspc = yextent / 99.0
 
-        output    = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
+        output = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
 
         # Getting Longitude lines
         longs = int(xextent / interval) + 1
-        lonpoints   = 100 * longs
+        lonpoints = 100 * longs
 
         lats = int(yextent / interval) + 1
-        latpoints   = 10 * lats
+        latpoints = 10 * lats
 
-        shape       = (lonpoints + latpoints, 3)
+        shape = (lonpoints + latpoints, 3)
         coords = np.empty(shape, dtype=np.float64)
 
         lonx = np.arange(llon, hlon + interval, interval)
-        lonx = np.hstack((lonx, ) * 100).reshape((100, longs)).transpose().flatten()
+        lonx = np.hstack((lonx,) * 100).reshape((100, longs)).transpose().flatten()
         lony = np.arange(llat, hlat + yspc, yspc)
         lony = np.hstack((lony,) * longs)
 
         latx = np.arange(llon, hlon + xspc, xspc)
         latx = np.hstack((latx,) * lats)
         laty = np.arange(llat, hlat + interval, interval)
-        laty = np.hstack((laty, ) * 10).reshape((10, lats)).transpose().flatten()
+        laty = np.hstack((laty,) * 10).reshape((10, lats)).transpose().flatten()
 
         coords[:lonpoints, 0] = lonx
         coords[:lonpoints, 1] = lony
@@ -126,25 +137,30 @@ class EAMGridLines(VTKPythonAlgorithmBase):
         vtk_coords.SetData(_coords)
         output.SetPoints(vtk_coords)
         ncells = longs + lats
-        cellTypes   = np.empty(ncells, dtype=np.uint8)
-        
-        offsets     = np.empty(ncells + 1, dtype=np.int64)
+        cellTypes = np.empty(ncells, dtype=np.uint8)
+
+        offsets = np.empty(ncells + 1, dtype=np.int64)
         off1 = np.arange(0, (100 * longs) + 1, 100, dtype=np.int64)
         off2 = np.arange(lonpoints, lonpoints + (10 * lats) + 1, 10, dtype=np.int64)
 
-        offsets[:longs] = off1[:-1]     
-        offsets[longs:] = off2 
-        
-        cells       = np.arange(lonpoints + latpoints,               dtype=np.int64)
+        offsets[:longs] = off1[:-1]
+        offsets[longs:] = off2
+
+        cells = np.arange(lonpoints + latpoints, dtype=np.int64)
 
         cellTypes.fill(vtkConstants.VTK_POLY_LINE)
-        cellTypes   = numpy_support.numpy_to_vtk(num_array=cellTypes.ravel(),     \
-                                                  deep=True, array_type=vtkConstants.VTK_UNSIGNED_CHAR)
-        offsets     = numpy_support.numpy_to_vtk(num_array=offsets.ravel(),       \
-                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
-        cells       = numpy_support.numpy_to_vtk(num_array=cells.ravel(),         \
-                                                  deep=True, array_type=vtkConstants.VTK_ID_TYPE)
+        cellTypes = numpy_support.numpy_to_vtk(
+            num_array=cellTypes.ravel(),
+            deep=True,
+            array_type=vtkConstants.VTK_UNSIGNED_CHAR,
+        )
+        offsets = numpy_support.numpy_to_vtk(
+            num_array=offsets.ravel(), deep=True, array_type=vtkConstants.VTK_ID_TYPE
+        )
+        cells = numpy_support.numpy_to_vtk(
+            num_array=cells.ravel(), deep=True, array_type=vtkConstants.VTK_ID_TYPE
+        )
         cellArray = vtkCellArray()
         cellArray.SetData(offsets, cells)
         output.VTKObject.SetCells(cellTypes, cellArray)
-        return 1                                                                                 
+        return 1

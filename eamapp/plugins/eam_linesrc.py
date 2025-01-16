@@ -7,38 +7,44 @@ from vtkmodules.util import vtkConstants, numpy_support
 
 import numpy as np
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # A reader example.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def createModifiedCallback(anobject):
     import weakref
+
     weakref_obj = weakref.ref(anobject)
     anobject = None
+
     def _markmodified(*args, **kwars):
         o = weakref_obj()
         if o is not None:
             o.Modified()
+
     return _markmodified
 
+
 @smproxy.source(name="EAMLineSource")
-@smproperty.xml("""
+@smproperty.xml(
+    """
                 <IntVectorProperty name="longitude"
                     number_of_elements="1"
                     command="SetLongitude"
                     default_values="0">
                 </IntVectorProperty>
-                """)
+                """
+)
 class EAMLineSource(VTKPythonAlgorithmBase):
     def __init__(self):
-        VTKPythonAlgorithmBase.__init__(self,
-            nInputPorts=0,
-            nOutputPorts=1,
-            outputType='vtkPolyData')
+        VTKPythonAlgorithmBase.__init__(
+            self, nInputPorts=0, nOutputPorts=1, outputType="vtkPolyData"
+        )
         self.longitude = 0
 
     def RequestInformation(self, request, inInfo, outInfo):
         return super().RequestInformation(request, inInfo, outInfo)
-        
+
     def RequestUpdateExtent(self, request, inInfo, outInfo):
         return super().RequestUpdateExtent(request, inInfo, outInfo)
 
@@ -63,7 +69,7 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         polyData = vtkPolyData.GetData(outInfo, 0)
         polyData.SetPoints(points)
         polyData.SetLines(line)
-        '''
+        """
         outdata = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
 
         x = self.longitude
@@ -89,5 +95,5 @@ class EAMLineSource(VTKPythonAlgorithmBase):
 
         outdata.SetPoints(coords)
         outdata.VTKObject.SetCells(cellTypes, cellArray)
-        '''
+        """
         return 1
