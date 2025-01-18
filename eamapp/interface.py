@@ -19,7 +19,7 @@ from eamapp.ui.file_selection import FileSelect
 from eamapp.ui.slice_selection import SliceSelection
 from eamapp.ui.projection_selection import ProjectionSelection
 from eamapp.ui.variable_selection import VariableSelection
-from eamapp.ui.view_settings import ViewController
+from eamapp.ui.view_settings import ViewControls, ViewProperties
 
 import numpy as np
 
@@ -524,7 +524,7 @@ class EAMApp:
                                 classes="fill-height", style="overflow: hidden;"
                             ):
                                 with v2.VCardText(
-                                    style="height: calc(100% - 4.75rem); position: relative;",
+                                    style="height: 100%; position: relative;",
                                     classes="pa-0",
                                 ) as cardcontent:
                                     cardcontent.add_child(
@@ -539,12 +539,15 @@ class EAMApp:
                                     html.Div(
                                         style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
                                     )
-                                with v2.VCardActions(classes="pa-0"):
-                                    ViewController(
-                                        apply=self.ApplyColor,
-                                        update=self.UpdateColorProps,
-                                        reset=self.ResetColorProps,
-                                        zoom=self.Zoom,
-                                        move=self.Move,
-                                    )
+                                    # with v2.VCardActions(classes="pa-0"):
+                                    with html.Div(
+                                        style="position:absolute; bottom: 1rem; left: 1rem; height: 2rem; z-index: 2;"
+                                    ):
+                                        ViewProperties(
+                                            apply=self.ApplyColor,
+                                            update=self.UpdateColorProps,
+                                            reset=self.ResetColorProps,
+                                        )
+                                        ViewControls(zoom=self.Zoom, move=self.Move)
+
         return self._ui

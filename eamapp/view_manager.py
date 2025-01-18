@@ -248,10 +248,6 @@ class ViewManager:
         vars3Dm = source.vars.get("3Dm", None)
         vars3Di = source.vars.get("3Di", None)
 
-        numViews = len(vars2D) + len(vars3Dm) + len(vars3Di)
-        if numViews == 0:
-            return
-
         to_render = vars2D + vars3Dm + vars3Di
         rendered = self.cache.keys()
         to_delete = set(rendered) - set(to_render)
@@ -328,7 +324,6 @@ class ViewManager:
                 style="width: 100%; height: 100%;",
                 trame_server=self.server,
             )
-            print(widget)
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
             layout.append({"x": x, "y": y, "w": wdt, "h": hgt, "i": index})
@@ -367,25 +362,32 @@ class ViewManager:
 
     def ResetColorProps(self, index):
         var = self.state.ccardsentry[index]
-        colordata: ViewData = self.cache[var]
-        self.state.varmin[index] = colordata.min
+        viewdata: ViewData = self.cache[var]
+        self.state.varmin[index] = viewdata.min
         self.state.dirty("varmin")
-        self.state.varmax[index] = colordata.max
+        self.state.varmax[index] = viewdata.max
         self.state.dirty("varmax")
-        colordata.rep.RescaleTransferFunctionToDataRange(False, True)
+        viewdata.rep.RescaleTransferFunctionToDataRange(False, True)
         self.UpdateCamera()
 
     def ZoomIn(self, index):
-        rview = self.rViews[index]
+        var = self.state.ccardsentry[index]
+        viewdata: ViewData = self.cache[var]
+        rview = viewdata.view
         rview.CameraParallelScale *= 0.95
         self.UpdateCamera()
 
     def ZoomOut(self, index):
-        rview = self.rViews[index]
+        var = self.state.ccardsentry[index]
+        viewdata: ViewData = self.cache[var]
+        rview = viewdata.view
         rview.CameraParallelScale *= 1.05
         self.UpdateCamera()
 
     def Move(self, vindex, dir, factor):
+        var = self.state.ccardsentry[vindex]
+        viewdata: ViewData = self.cache[var]
+        rview = viewdata.view
         extents = self.source.moveextents
         move = (
             (extents[1] - extents[0]) * 0.05,
@@ -393,7 +395,6 @@ class ViewManager:
             (extents[5] - extents[4]) * 0.05,
         )
 
-        rview = self.rViews[vindex]
         pos = rview.CameraPosition
         foc = rview.CameraFocalPoint
         pos[dir] += move[dir] if factor > 0 else -move[dir]
