@@ -421,41 +421,79 @@ class EAMApp:
                     v2.VDivider(vertical=True, classes="mx-2")
                     with v2.VListItemGroup(dense=True):
                         v2.VCheckbox(
-                            label="Use CVD friendly colormaps",
+                            label="Use CVD colors",
                             value=0,
                             v_model=("cmaps",),
                             dense=True,
-                            style="min-height : unset",
                             hide_details=True,
                             change=(self.updatecolors, "[$event]"),
                         ),
                         v2.VCheckbox(
-                            label="Use non-CVD friendly colormaps",
+                            label="Use non-CVD colors",
                             value=1,
                             v_model=("cmaps",),
                             dense=True,
-                            style="min-height : unset",
                             hide_details=True,
                             change=(self.updatecolors, "[$event]"),
                         )
                     v2.VDivider(vertical=True, classes="mx-2")
-                    html.Div(
-                        f'Connectivity File :  "{self.state.ConnFile}" <br> Data File :  "{self.state.DataFile}"',
-                        style="padding: 10px;",
-                    )
+                    with html.Div(style="width: 25%;"):
+                        with v2.VRow():
+                            with v2.VCol(cols=4, classes="py-0 text-right"):
+                                html.Span("Connectivity File")
+                            with v2.VCol(classes="py-0 text-left"):
+                                with v2.VTooltip(bottom=True):
+                                    with html.Template(
+                                        v_slot_activator="{ on, attrs }"
+                                    ):
+                                        html.Span(
+                                            os.path.basename(self.state.ConnFile),
+                                            v_bind="attrs",
+                                            v_on="on",
+                                        )
+                                    html.Span(f"{self.state.ConnFile}")
+                        with v2.VRow():
+                            with v2.VCol(cols=4, classes="py-0 text-right"):
+                                html.Span("Data File")
+                            with v2.VCol(classes="py-0 text-left"):
+                                with v2.VTooltip(bottom=True):
+                                    with html.Template(
+                                        v_slot_activator="{ on, attrs }"
+                                    ):
+                                        html.Span(
+                                            os.path.basename(self.state.DataFile),
+                                            v_bind="attrs",
+                                            v_on="on",
+                                        )
+                                    html.Span(f"{self.state.DataFile}")
                     v2.VDivider(vertical=True, classes="mx-2")
-                    v2.VBtn(
-                        "Export",
-                        click="export_config = true",
-                    )
+                    with v2.VTooltip(bottom=True):
+                        with html.Template(v_slot_activator="{ on, attrs }"):
+                            with v2.VBtn(
+                                icon=True,
+                                tile=True,
+                                click="export_config = true",
+                                v_bind="attrs",
+                                v_on="on",
+                            ):
+                                v2.VIcon("mdi-content-save")
+                        html.Span(f"Save Application State")
                     with v2.VDialog(v_model=("export_config",), max_width=800):
                         with v2.VContainer(
                             fluid=True, classes="d-flex justify-center align-center"
                         ):
                             FileSelect()
                     v2.VDivider(vertical=True, classes="mx-2")
-                    with v2.VBtn(icon=True, click=self.ctrl.view_reset_camera):
-                        v2.VIcon("mdi-restore")
+                    with v2.VTooltip(bottom=True):
+                        with html.Template(v_slot_activator="{ on, attrs }"):
+                            with v2.VBtn(
+                                icon=True,
+                                v_bind="attrs",
+                                v_on="on",
+                                click=self.ctrl.view_reset_camera,
+                            ):
+                                v2.VIcon("mdi-restore")
+                        html.Span(f"Reset View Cameras")
 
                 with layout.drawer as drawer:
                     drawer.width = 400

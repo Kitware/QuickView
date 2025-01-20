@@ -217,6 +217,8 @@ class EAMSource(VTKPythonAlgorithmBase):
             return
         vardata = netCDF4.Dataset(self._DataFileName, "r")
         for name, info in vardata.variables.items():
+            if "ncol_d" in info.dimensions:
+                continue
             varmeta = VarMeta(name, info)
             if varmeta.type == VarType._1D:
                 self._vars1D.append(varmeta)
@@ -616,6 +618,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             return
         vardata = netCDF4.Dataset(self._DataFileName, "r")
         for name, info in vardata.variables.items():
+            if "ncol_d" in info.dimensions:
+                continue
             varmeta = VarMeta(name, info)
             if varmeta.type == VarType._1D:
                 self._vars1D.append(varmeta)
@@ -760,6 +764,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         dims = meshdata.dimensions
         mdims = np.array(list(meshdata.dimensions.keys()))
         mvars = np.array(list(meshdata.variables.keys()))
+        print(mdims)
         ncells2D = dims[
             mdims[
                 np.where(
