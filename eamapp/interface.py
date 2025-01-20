@@ -372,17 +372,17 @@ class EAMApp:
 
     def Clear2D(self):
         self.state.vars2Dstate = [False] * len(self.state.vars2Dstate)
-        self.vars2Dstate = [False] * len(self.vars2Dstate)
+        self.vars2Dstate = np.array([False] * len(self.vars2Dstate))
         self.state.dirty("vars2Dstate")
 
     def Clear3Dm(self):
         self.state.vars3Dmstate = [False] * len(self.state.vars3Dmstate)
-        self.vars3Dmstate = [False] * len(self.vars3Dmstate)
+        self.vars3Dmstate = np.array([False] * len(self.vars3Dmstate))
         self.state.dirty("vars3Dmstate")
 
     def Clear3Di(self):
         self.state.vars3Distate = [False] * len(self.state.vars3Distate)
-        self.vars3Distate = [False] * len(self.vars3Distate)
+        self.vars3Distate = np.array([False] * len(self.vars3Distate))
         self.state.dirty("vars3Distate")
 
     def start(self, **kwargs):
