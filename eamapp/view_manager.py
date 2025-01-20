@@ -1,8 +1,9 @@
-from trame.widgets import vuetify, paraview as pvWidgets
-
 import math
-import os
 import numpy as np
+import paraview.servermanager as sm
+
+from trame.widgets import paraview as pvWidgets
+from trame.decorators import TrameApp, trigger, change
 from pyproj import Proj, Transformer
 
 from vtkmodules.numpy_interface import dataset_adapter as dsa
@@ -16,7 +17,7 @@ from paraview.simple import (
     GetColorTransferFunction,
 )
 
-import paraview.servermanager as sm
+from eamapp.pipeline import EAMVisSource
 
 
 def ApplyProj(projection, point):
@@ -134,10 +135,7 @@ def UpdateRenderView(index, var, viewdata: ViewData, sources, annotations):
 
     from timeit import default_timer as timer
 
-    # rview = CreateRenderView(f'rv{index}')
-
     rview = viewdata.view
-    print("Updating View with data : ", viewdata)
 
     data = sources["2DProj"]
     rep = Show(data, rview)
@@ -183,10 +181,6 @@ def UpdateRenderView(index, var, viewdata: ViewData, sources, annotations):
 
     rview.CameraParallelProjection = 1
     rview.ResetCamera(True)
-
-
-from eamapp.pipeline import EAMVisSource
-from trame.decorators import TrameApp, trigger, change
 
 
 @TrameApp()
@@ -251,7 +245,6 @@ class ViewManager:
         to_render = vars2D + vars3Dm + vars3Di
         rendered = self.cache.keys()
         to_delete = set(rendered) - set(to_render)
-        print("View to delete : ", to_delete)
         # Move old variables so they their proxies can be deleted
         self.to_delete.extend([self.cache[x].view for x in to_delete])
 
@@ -300,7 +293,6 @@ class ViewManager:
                 range = vtkvar.GetRange()
                 vardata = np.array(vtkvar)
                 average = np.sum(area * vardata) / np.sum(area)
-                print(f"Average for {var} : {average}")
 
                 viewdata.avg = average
                 viewdata.color = self.state.varcolor[index]

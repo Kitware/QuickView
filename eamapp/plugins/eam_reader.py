@@ -931,6 +931,5 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
 
         output = vtkUnstructuredGrid.GetData(outInfo, 0)
         output.ShallowCopy(self._output)
-        print(output)
 
         return 1
