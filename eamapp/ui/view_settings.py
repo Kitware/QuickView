@@ -126,52 +126,35 @@ class ViewControls(v2.VMenu):
                 classes="overflow-hidden pa-2",
                 rounded="lg",
             ):
+                style = dict(icon=True, tile=True, outlined=True)
                 with v2.VCardText(classes="pa-2"):
                     with v2.VBtn(
-                        icon=True,
-                        tile=True,
-                        outlined=True,
-                        # style="height: 20px; width: 20px",
+                        **style,
                         click=(zoom, "['in', idx]"),
                     ):
                         v2.VIcon("mdi-magnify-plus")
                     with v2.VBtn(
-                        icon=True,
-                        tile=True,
-                        outlined=True,
-                        # style="height: 20px; width: 20px",
+                        **style,
                         click=(zoom, "['out', idx]"),
                     ):
                         v2.VIcon("mdi-magnify-minus")
                     with v2.VBtn(
-                        icon=True,
-                        tile=True,
-                        outlined=True,
-                        # style="height: 20px; width: 20px",
+                        **style,
                         click=(move, "['up', idx]"),
                     ):
                         v2.VIcon("mdi-arrow-up")
                     with v2.VBtn(
-                        icon=True,
-                        tile=True,
-                        outlined=True,
-                        # style="height: 20px; width: 20px",
+                        **style,
                         click=(move, "['down', idx]"),
                     ):
                         v2.VIcon("mdi-arrow-down")
                     with v2.VBtn(
-                        icon=True,
-                        tile=True,
-                        outlined=True,
-                        # style="height: 20px; width: 20px",
+                        **style,
                         click=(move, "['left', idx]"),
                     ):
                         v2.VIcon("mdi-arrow-left")
                     with v2.VBtn(
-                        icon=True,
-                        tile=True,
-                        outlined=True,
-                        # style="height: 20px; width: 20px",
+                        **style,
                         click=(move, "['right', idx]"),
                     ):
                         v2.VIcon("mdi-arrow-right")
