@@ -1,27 +1,32 @@
+import os
+import json
+import numpy as np
+import xml.etree.ElementTree as ET
+
 from pathlib import Path
 from typing import Union
 
 from trame.app import get_server
-
 from trame.decorators import TrameApp, change
+from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame.widgets import vuetify as v2, html, client
 from trame.widgets import paraview as pvWidgets
 from trame.widgets import grid
 
-from trame.ui.vuetify import SinglePageWithDrawerLayout
-
 from trame_server.core import Server
 
 from eamapp.pipeline import EAMVisSource
-from eamapp.view_manager import ViewManager
 from eamapp.ui.file_selection import FileSelect
 from eamapp.ui.slice_selection import SliceSelection
 from eamapp.ui.projection_selection import ProjectionSelection
 from eamapp.ui.variable_selection import VariableSelection
 from eamapp.ui.view_settings import ViewControls, ViewProperties
 
-import numpy as np
+from eamapp.view_manager import ViewManager
+
+from paraview.simple import ImportPresets, GetLookupTableNames
+
 
 # -----------------------------------------------------------------------------
 # trame setup
@@ -70,16 +75,18 @@ save_state_keys = [
     "varmax",
 ]
 
-import os
 
 try:
+    existing = GetLookupTableNames()
     presdir = os.path.join(os.path.dirname(__file__), "presets")
     presets = os.listdir(path=presdir)
     for preset in presets:
         prespath = os.path.abspath(os.path.join(presdir, preset))
         if os.path.isfile(prespath):
-            name = preset.split("_")[0]
-            ImportPresets(prespath)
+            name = ET.parse(prespath).getroot()[0].attrib["name"]
+            if name not in existing:
+                print("Importing non existing preset ", name)
+                ImportPresets(prespath)
             cvd.append({"text": name.title(), "value": name})
 except Exception as e:
     print("Error loading presets :", e)
@@ -150,12 +157,10 @@ class EAMApp:
         ctrl.on_server_ready.add(ctrl.view_update)
         server.trigger_name(ctrl.view_reset_camera)
 
-        cvd = [{"text": ele.title(), "value": ele} for ele in self.viewmanager.colors]
-
         state.colormaps = noncvd
 
         # User controlled state varialbes
-        if initstate == None:
+        if initstate is None:
             state.vlev = 0
             state.vilev = 0
             state.vars2Dstate = [False] * len(source.vars2D)
@@ -173,8 +178,6 @@ class EAMApp:
             self.Apply()
 
     def GenerateState(self):
-        import json, os
-
         all = self.state.to_dict()
         to_export = {k: all[k] for k in save_state_keys}
         # with open(os.path.join(self.workdir, "state.json"), "w") as outfile:
@@ -286,7 +289,7 @@ class EAMApp:
     def Update2DVarSelection(self, index, event):
         self.state.vars2Dstate[index] = event
         self.state.dirty("vars2Dstate")
-        if not self.ind2d is None:
+        if self.ind2d is not None:
             ind = self.ind2d[index]
             self.vars2Dstate[ind] = event
         else:
@@ -295,7 +298,7 @@ class EAMApp:
     def Update3DmVarSelection(self, index, event):
         self.state.vars3Dmstate[index] = event
         self.state.dirty("vars3Dmstate")
-        if not self.ind3dm is None:
+        if self.ind3dm is not None:
             ind = self.ind3dm[index]
             self.vars3Dmstate[ind] = event
         else:
@@ -304,14 +307,14 @@ class EAMApp:
     def Update3DiVarSelection(self, index, event):
         self.state.vars3Distate[index] = event
         self.state.dirty("vars3Distate")
-        if not self.ind3di is None:
+        if self.ind3di is not None:
             ind = self.ind3di[index]
             self.vars3Distate[ind] = event
         else:
             self.vars3Distate[index] = event
 
     def Search2DVars(self, search: str):
-        if search == None or len(search) == 0:
+        if search is None or len(search) == 0:
             filtVars = self.source.vars2D
             self.ind2d = None
             self.state.vars2D = self.source.vars2D
@@ -325,13 +328,13 @@ class EAMApp:
             ]
             filtVars = [var for (_, var) in filtered]
             self.ind2d = [idx for (idx, _) in filtered]
-        if not self.ind2d is None:
+        if self.ind2d is not None:
             self.state.vars2D = list(filtVars)
             self.state.vars2Dstate = self.vars2Dstate[self.ind2d].tolist()
             self.state.dirty("vars2Dstate")
 
     def Search3DmVars(self, search: str):
-        if search == None or len(search) == 0:
+        if search is None or len(search) == 0:
             filtVars = self.source.vars3Dm
             self.ind3dm = None
             self.state.vars3Dm = self.source.vars3Dm
@@ -345,13 +348,13 @@ class EAMApp:
             ]
             filtVars = [var for (_, var) in filtered]
             self.ind3dm = [idx for (idx, _) in filtered]
-        if not self.ind3dm is None:
+        if self.ind3dm is not None:
             self.state.vars3Dm = list(filtVars)
             self.state.vars3Dmstate = self.vars3Dmstate[self.ind3dm].tolist()
             self.state.dirty("vars3Dmstate")
 
     def Search3DiVars(self, search: str):
-        if search == None or len(search) == 0:
+        if search is None or len(search) == 0:
             filtVars = self.source.vars3Di
             self.ind3di = None
             self.state.vars3Di = self.source.vars3Di
@@ -365,7 +368,7 @@ class EAMApp:
             ]
             filtVars = [var for (_, var) in filtered]
             self.ind3di = [idx for (idx, _) in filtered]
-        if not self.ind3dm is None:
+        if self.ind3dm is not None:
             self.state.vars3Di = list(filtVars)
             self.state.vars3Distate = self.vars3Distate[self.ind3di].tolist()
             self.state.dirty("vars3Distate")
@@ -454,7 +457,6 @@ class EAMApp:
                     with v2.VBtn(icon=True, click=self.ctrl.view_reset_camera):
                         v2.VIcon("mdi-restore")
 
-                style = dict(density="compact", hide_details=True)
                 with layout.drawer as drawer:
                     drawer.width = 400
                     drawer.style = (
@@ -519,7 +521,7 @@ class EAMApp:
                             v_for="vref, idx in views",
                             key="vref",
                             v_bind=("layout[idx]",),
-                        ) as griditem:
+                        ):
                             with v2.VCard(
                                 classes="fill-height", style="overflow: hidden;"
                             ):
