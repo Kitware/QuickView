@@ -564,7 +564,7 @@ class EAMApp:
                                 classes="fill-height", style="overflow: hidden;"
                             ):
                                 with v2.VCardText(
-                                    style="height: 100%; position: relative;",
+                                    style="height: calc(100% - 0.66rem); position: relative;",
                                     classes="pa-0",
                                 ) as cardcontent:
                                     cardcontent.add_child(
@@ -577,7 +577,7 @@ class EAMApp:
                                         beforeDestroy="trigger('view_gc', [vref])",
                                     )
                                     html.Div(
-                                        style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
+                                        style="position:absolute; top: 0; left: 0; width: 100%; height: calc(100% - 0.66rem); z-index: 1;"
                                     )
                                     # with v2.VCardActions(classes="pa-0"):
                                     with html.Div(
