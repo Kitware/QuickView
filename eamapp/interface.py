@@ -152,8 +152,8 @@ class EAMApp:
         state.export_completed = False
         state.state_save_file = None
 
-        ctrl.view_update = self.viewmanager.UpdateCamera
-        ctrl.view_reset_camera = self.viewmanager.ResetCamera
+        ctrl.view_update = self.viewmanager.reset_views
+        ctrl.view_reset_camera = self.viewmanager.reset_camera
         ctrl.on_server_ready.add(ctrl.view_update)
         server.trigger_name(ctrl.view_reset_camera)
 
@@ -163,6 +163,7 @@ class EAMApp:
         if initstate is None:
             state.vlev = 0
             state.vilev = 0
+            state.tstamp = 0
             state.vars2Dstate = [False] * len(source.vars2D)
             state.vars3Dmstate = [False] * len(source.vars3Dm)
             state.vars3Distate = [False] * len(source.vars3Di)
@@ -172,18 +173,18 @@ class EAMApp:
         else:
             state.update(initstate)
             # Build color cache here
-            from eamapp.view_manager import BuildColorInformationCache
+            from eamapp.view_manager import build_color_information
 
-            self.viewmanager.cache = BuildColorInformationCache(initstate)
-            self.Apply()
+            self.viewmanager.cache = build_color_information(initstate)
+            self.apply_properties()
 
-    def GenerateState(self):
+    def generate_state(self):
         all = self.state.to_dict()
         to_export = {k: all[k] for k in save_state_keys}
         # with open(os.path.join(self.workdir, "state.json"), "w") as outfile:
         return json.dumps(to_export)
 
-    def Apply(self):
+    def apply_properties(self):
         s2d = []
         s3dm = []
         s3di = []
@@ -213,9 +214,9 @@ class EAMApp:
         self.state.varmax = [np.nan] * len(vars)
 
         with self.state:
-            self.viewmanager.UpdateView()
+            self.viewmanager.create_or_update_views()
 
-    def ApplyColor(self, index, type, value):
+    def apply_colormap(self, index, type, value):
         if type.lower() == "color":
             self.state.varcolor[index] = value
             self.state.dirty("varcolor")
@@ -225,9 +226,9 @@ class EAMApp:
         elif type.lower() == "inv":
             self.state.invert[index] = value
             self.state.dirty("invert")
-        self.viewmanager.UpdateColor(index, type, value)
+        self.viewmanager.apply_colormap(index, type, value)
 
-    def updatecolors(self, event):
+    def update_available_color_maps(self, event):
         if len(event) == 0:
             self.state.colormaps = noncvd
         elif len(event) == 2:
@@ -237,36 +238,36 @@ class EAMApp:
         elif "1" in event:
             self.state.colormaps = noncvd
 
-    def UpdateColorProps(self, index, type, value):
+    def update_view_color_properties(self, index, type, value):
         if type.lower() == "min":
             self.state.varmin[index] = value
             self.state.dirty("varmin")
         elif type.lower() == "max":
             self.state.varmax[index] = value
             self.state.dirty("varmax")
-        self.viewmanager.UpdateColorProps(
+        self.viewmanager.update_view_color_properties(
             index, self.state.varmin[index], self.state.varmax[index]
         )
 
-    def ResetColorProps(self, index):
-        self.viewmanager.ResetColorProps(index)
+    def reset_view_color_properties(self, index):
+        self.viewmanager.reset_view_color_properties(index)
 
-    def Zoom(self, type, index):
+    def zoom(self, type, index):
         if type.lower() == "in":
-            self.viewmanager.ZoomIn(index)
+            self.viewmanager.zoom_in(index)
         elif type.lower() == "out":
-            self.viewmanager.ZoomOut(index)
+            self.viewmanager.zoom_out(index)
         pass
 
-    def Move(self, dir, index):
+    def move(self, dir, index):
         if dir.lower() == "up":
-            self.viewmanager.Move(index, 1, 0)
+            self.viewmanager.move(index, 1, 0)
         elif dir.lower() == "down":
-            self.viewmanager.Move(index, 1, 1)
+            self.viewmanager.move(index, 1, 1)
         elif dir.lower() == "left":
-            self.viewmanager.Move(index, 0, 1)
+            self.viewmanager.move(index, 0, 1)
         elif dir.lower() == "right":
-            self.viewmanager.Move(index, 0, 0)
+            self.viewmanager.move(index, 0, 0)
 
     '''
     def export_config(self, config_file: Union[str, Path, None] = None) -> None:
@@ -286,7 +287,7 @@ class EAMApp:
         return config
     '''
 
-    def Update2DVarSelection(self, index, event):
+    def update_2D_variable_selection(self, index, event):
         self.state.vars2Dstate[index] = event
         self.state.dirty("vars2Dstate")
         if self.ind2d is not None:
@@ -295,7 +296,7 @@ class EAMApp:
         else:
             self.vars2Dstate[index] = event
 
-    def Update3DmVarSelection(self, index, event):
+    def update_3Dm_variable_selection(self, index, event):
         self.state.vars3Dmstate[index] = event
         self.state.dirty("vars3Dmstate")
         if self.ind3dm is not None:
@@ -304,7 +305,7 @@ class EAMApp:
         else:
             self.vars3Dmstate[index] = event
 
-    def Update3DiVarSelection(self, index, event):
+    def update_3Di_variable_selection(self, index, event):
         self.state.vars3Distate[index] = event
         self.state.dirty("vars3Distate")
         if self.ind3di is not None:
@@ -313,7 +314,7 @@ class EAMApp:
         else:
             self.vars3Distate[index] = event
 
-    def Search2DVars(self, search: str):
+    def search_2D_variables(self, search: str):
         if search is None or len(search) == 0:
             filtVars = self.source.vars2D
             self.ind2d = None
@@ -333,7 +334,7 @@ class EAMApp:
             self.state.vars2Dstate = self.vars2Dstate[self.ind2d].tolist()
             self.state.dirty("vars2Dstate")
 
-    def Search3DmVars(self, search: str):
+    def search_3Dm_variables(self, search: str):
         if search is None or len(search) == 0:
             filtVars = self.source.vars3Dm
             self.ind3dm = None
@@ -353,7 +354,7 @@ class EAMApp:
             self.state.vars3Dmstate = self.vars3Dmstate[self.ind3dm].tolist()
             self.state.dirty("vars3Dmstate")
 
-    def Search3DiVars(self, search: str):
+    def search_3Di_variables(self, search: str):
         if search is None or len(search) == 0:
             filtVars = self.source.vars3Di
             self.ind3di = None
@@ -373,17 +374,17 @@ class EAMApp:
             self.state.vars3Distate = self.vars3Distate[self.ind3di].tolist()
             self.state.dirty("vars3Distate")
 
-    def Clear2D(self):
+    def clear_2D_variables(self):
         self.state.vars2Dstate = [False] * len(self.state.vars2Dstate)
         self.vars2Dstate = np.array([False] * len(self.vars2Dstate))
         self.state.dirty("vars2Dstate")
 
-    def Clear3Dm(self):
+    def clear_3Dm_variables(self):
         self.state.vars3Dmstate = [False] * len(self.state.vars3Dmstate)
         self.vars3Dmstate = np.array([False] * len(self.vars3Dmstate))
         self.state.dirty("vars3Dmstate")
 
-    def Clear3Di(self):
+    def clear_3Di_variables(self):
         self.state.vars3Distate = [False] * len(self.state.vars3Distate)
         self.vars3Distate = np.array([False] * len(self.vars3Distate))
         self.state.dirty("vars3Distate")
@@ -402,7 +403,7 @@ class EAMApp:
     def export(self, export_config, **kwargs):
         print(f"Exporting config : {export_config}")
         self.state.export_completed = False
-        self.state.exported_state = self.GenerateState()
+        self.state.exported_state = self.generate_state()
 
     def toggle_drawer(self):
         print("Toggling main drawer : ", self.state.main_drawer)
@@ -426,7 +427,7 @@ class EAMApp:
                             v_model=("cmaps",),
                             dense=True,
                             hide_details=True,
-                            change=(self.updatecolors, "[$event]"),
+                            change=(self.update_available_color_maps, "[$event]"),
                         ),
                         v2.VCheckbox(
                             label="Use non-CVD colors",
@@ -434,7 +435,7 @@ class EAMApp:
                             v_model=("cmaps",),
                             dense=True,
                             hide_details=True,
-                            change=(self.updatecolors, "[$event]"),
+                            change=(self.update_available_color_maps, "[$event]"),
                         )
                     v2.VDivider(vertical=True, classes="mx-2")
                     with html.Div(style="width: 25%;"):
@@ -513,11 +514,11 @@ class EAMApp:
                         ):
                             v2.VBtn(
                                 "Update Views",
-                                click=self.Apply,
+                                click=self.apply_properties,
                                 style="background-color: gray; color: white; width: 200px; height: 50px;",
                             )
 
-                        SliceSelection(self.source)
+                        SliceSelection(self.source, self.viewmanager)
 
                         ProjectionSelection(self.source)
 
@@ -526,9 +527,9 @@ class EAMApp:
                             panel_name="show_vars2D",
                             var_list="vars2D",
                             var_list_state="vars2Dstate",
-                            on_search=self.Search2DVars,
-                            on_clear=self.Clear2D,
-                            on_update=self.Update2DVarSelection,
+                            on_search=self.search_2D_variables,
+                            on_clear=self.clear_2D_variables,
+                            on_update=self.update_2D_variable_selection,
                         )
 
                         VariableSelection(
@@ -536,9 +537,9 @@ class EAMApp:
                             panel_name="show_vars3Dm",
                             var_list="vars3Dm",
                             var_list_state="vars3Dmstate",
-                            on_search=self.Search3DmVars,
-                            on_clear=self.Clear3Dm,
-                            on_update=self.Update3DmVarSelection,
+                            on_search=self.search_3Dm_variables,
+                            on_clear=self.clear_3Dm_variables,
+                            on_update=self.update_3Dm_variable_selection,
                         )
 
                         VariableSelection(
@@ -546,9 +547,9 @@ class EAMApp:
                             panel_name="show_vars3Di",
                             var_list="vars3Di",
                             var_list_state="vars3Distate",
-                            on_search=self.Search3DiVars,
-                            on_clear=self.Clear3Di,
-                            on_update=self.Update3DiVarSelection,
+                            on_search=self.search_3Di_variables,
+                            on_clear=self.clear_3Di_variables,
+                            on_update=self.update_3Di_variable_selection,
                         )
 
                 with layout.content:
@@ -584,10 +585,10 @@ class EAMApp:
                                         style="position:absolute; bottom: 1rem; left: 1rem; height: 2rem; z-index: 2;"
                                     ):
                                         ViewProperties(
-                                            apply=self.ApplyColor,
-                                            update=self.UpdateColorProps,
-                                            reset=self.ResetColorProps,
+                                            apply=self.apply_colormap,
+                                            update=self.update_view_color_properties,
+                                            reset=self.reset_view_color_properties,
                                         )
-                                        ViewControls(zoom=self.Zoom, move=self.Move)
+                                        ViewControls(zoom=self.zoom, move=self.move)
 
         return self._ui

@@ -20,7 +20,7 @@ from paraview.simple import (
 from eamapp.pipeline import EAMVisSource
 
 
-def ApplyProj(projection, point):
+def apply_projection(projection, point):
     if projection is None:
         return point
     else:
@@ -28,7 +28,7 @@ def ApplyProj(projection, point):
         return [new[0], new[1], 1.0]
 
 
-def GenerateAnnotations(long, lat, projection, center):
+def generate_annotations(long, lat, projection, center):
     texts = []
     interval = 30
     llon = long[0]
@@ -47,7 +47,7 @@ def GenerateAnnotations(long, lat, projection, center):
 
     from functools import partial
 
-    proj = partial(ApplyProj, None)
+    proj = partial(apply_projection, None)
     if projection != "Cyl. Equidistant":
         latlon = Proj(init="epsg:4326")
         if projection == "Robinson":
@@ -55,7 +55,7 @@ def GenerateAnnotations(long, lat, projection, center):
         elif projection == "Mollweide":
             proj = Proj(proj="moll")
         xformer = Transformer.from_proj(latlon, proj)
-        proj = partial(ApplyProj, xformer)
+        proj = partial(apply_projection, xformer)
 
     for x in lonx:
         lon = x - center
@@ -81,7 +81,7 @@ def GenerateAnnotations(long, lat, projection, center):
     return texts
 
 
-def AddAnnotations(rview, annotations):
+def add_annotations_to_view(rview, annotations):
     for text, pos in annotations:
         display = Show(text, rview, "TextSourceRepresentation")
         display.TextPropMode = "Billboard 3D Text"
@@ -97,23 +97,29 @@ class ViewData:
     def __init__(
         self,
         view=None,
-        rep=None,
+        index=None,
+        data_rep=None,
+        text_rep=None,
         avg=None,
         color=None,
         uselog=False,
+        inv=False,
         min=None,
         max=None,
     ):
         self.view = view
-        self.rep = rep
+        self.data_rep = data_rep
+        self.text_rep = text_rep
         self.avg = avg
         self.color = color
         self.uselog = uselog
+        self.inv = inv
         self.min = min
         self.max = max
+        self.index = index
 
 
-def BuildColorInformationCache(state: map):
+def build_color_information(state: map):
     vars = state["ccardsentry"]
     colors = state["varcolor"]
     logscl = state["uselogscale"]
@@ -131,58 +137,6 @@ def BuildColorInformationCache(state: map):
     return cache
 
 
-def UpdateRenderView(index, var, viewdata: ViewData, sources, annotations):
-
-    from timeit import default_timer as timer
-
-    rview = viewdata.view
-
-    data = sources["2DProj"]
-    rep = Show(data, rview)
-    viewdata.rep = rep
-    ColorBy(rep, ("CELLS", var))
-    coltrfunc = GetColorTransferFunction(var)
-    coltrfunc.ApplyPreset(viewdata.color, True)
-    rep.SetScalarBarVisibility(rview, True)
-    LUTColorBar = GetScalarBar(coltrfunc, rview)
-    LUTColorBar.AutoOrient = 1
-    # LUTColorBar.Orientation = 'Horizontal'
-    LUTColorBar.WindowLocation = "Lower Right Corner"
-    LUTColorBar.Title = ""
-    LUTColorBar.ScalarBarLength = 0.75
-    # coltrfunc.RescaleTransferFunction(float(viewdata.min), float(viewdata.max))
-
-    globe = sources["GProj"]
-    repG = Show(globe, rview)
-    ColorBy(repG, None)
-    repG.SetRepresentationType("Wireframe")
-    repG.RenderLinesAsTubes = 1
-    repG.LineWidth = 1.0
-    repG.AmbientColor = [0.67, 0.67, 0.67]
-    repG.DiffuseColor = [0.67, 0.67, 0.67]
-
-    annot = sources["GLines"]
-    repAn = Show(annot, rview)
-    repAn.SetRepresentationType("Wireframe")
-    repAn.AmbientColor = [0.67, 0.67, 0.67]
-    repAn.DiffuseColor = [0.67, 0.67, 0.67]
-    repAn.Opacity = 0.4
-
-    text = Text(registrationName=f"Text{index}")
-    text.Text = var + "  Avg: %.2f" % viewdata.avg
-    textrep = Show(text, rview, "TextSourceRepresentation")
-    textrep.Bold = 1
-    textrep.FontSize = 22
-    textrep.Italic = 1
-    textrep.Shadow = 1
-    textrep.WindowLocation = "Upper Center"
-
-    AddAnnotations(rview, annotations)
-
-    rview.CameraParallelProjection = 1
-    rview.ResetCamera(True)
-
-
 @TrameApp()
 class ViewManager:
     def __init__(self, source: EAMVisSource, server, state):
@@ -196,13 +150,98 @@ class ViewManager:
         self.to_delete = []
         self.rep_change = False
 
-    def ResetCamera(self, **kwargs):
+    def step_update_existing_views(self):
+        data = sm.Fetch(self.source.views["2DProj"])
+        area = np.array(data.GetCellData().GetArray("area"))
+
+        for var, viewdata in self.cache.items():
+            vardata = data.GetCellData().GetArray(var)
+            varrange = vardata.GetRange()
+            varavg = np.sum(area * np.array(vardata)) / np.sum(area)
+            viewdata.min = varrange[0]
+            viewdata.max = varrange[1]
+            viewdata.avg = varavg
+
+            viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
+            if viewdata.text_rep is not None:
+                viewdata.text_rep.Text = var + "  Avg: %.2f" % viewdata.avg
+
+        self.update_state_color_properties(viewdata.index, viewdata)
+
+    def update_existing_view(self, var, viewdata: ViewData):
+        viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
+        if viewdata.text_rep is not None:
+            viewdata.text_rep.Text = var + "  Avg: %.2f" % viewdata.avg
+
+    def update_new_view(self, var, viewdata: ViewData, sources, annotations):
+        rview = viewdata.view
+
+        # Update unique sources to all render views
+        data = sources["2DProj"]
+        rep = Show(data, rview)
+        viewdata.data_rep = rep
+        ColorBy(rep, ("CELLS", var))
+        coltrfunc = GetColorTransferFunction(var)
+        coltrfunc.ApplyPreset(viewdata.color, True)
+        rep.SetScalarBarVisibility(rview, True)
+        LUTColorBar = GetScalarBar(coltrfunc, rview)
+        LUTColorBar.AutoOrient = 1
+        # LUTColorBar.Orientation = 'Horizontal'
+        LUTColorBar.WindowLocation = "Lower Right Corner"
+        LUTColorBar.Title = ""
+        LUTColorBar.ScalarBarLength = 0.75
+        # coltrfunc.RescaleTransferFunction(float(viewdata.min), float(viewdata.max))
+
+        text = Text(registrationName=f"Text{var}")
+        text.Text = var + "  Avg: %.2f" % viewdata.avg
+        viewdata.text_rep = text
+        textrep = Show(text, rview, "TextSourceRepresentation")
+        textrep.Bold = 1
+        textrep.FontSize = 22
+        textrep.Italic = 1
+        textrep.Shadow = 1
+        textrep.WindowLocation = "Upper Center"
+
+        # Update common sources to all render views
+
+        globe = sources["GProj"]
+        repG = Show(globe, rview)
+        ColorBy(repG, None)
+        repG.SetRepresentationType("Wireframe")
+        repG.RenderLinesAsTubes = 1
+        repG.LineWidth = 1.0
+        repG.AmbientColor = [0.67, 0.67, 0.67]
+        repG.DiffuseColor = [0.67, 0.67, 0.67]
+
+        annot = sources["GLines"]
+        repAn = Show(annot, rview)
+        repAn.SetRepresentationType("Wireframe")
+        repAn.AmbientColor = [0.67, 0.67, 0.67]
+        repAn.DiffuseColor = [0.67, 0.67, 0.67]
+        repAn.Opacity = 0.4
+
+        add_annotations_to_view(rview, annotations)
+
+        rview.CameraParallelProjection = 1
+        rview.ResetCamera(True)
+
+    def update_state_color_properties(self, index, viewdata: ViewData):
+        state = self.state
+        state.varcolor[index] = viewdata.color
+        state.varmin[index] = viewdata.min
+        state.varmax[index] = viewdata.max
+        state.uselogscale[index] = viewdata.uselog
+
+    def reset_camera(self, **kwargs):
         for widget in self.widgets:
             widget.reset_camera()
 
-    def UpdateCamera(self, **kwargs):
+    def reset_views(self, **kwargs):
         for widget in self.widgets:
             widget.update()
+
+    def reset_specific_view(self, index):
+        self.widgets[index].update()
 
     @trigger("view_gc")
     def DeleteRenderView(self, ref_name):
@@ -224,7 +263,7 @@ class ViewManager:
     def timechange(self, **kwargs):
         self.rep_change = True
 
-    def UpdateView(self):
+    def create_or_update_views(self):
         self.widgets.clear()
         state = self.state
         source = self.source
@@ -253,7 +292,7 @@ class ViewManager:
         vtkdata = sm.Fetch(data)
         area = np.array(vtkdata.GetCellData().GetArray("area"))
 
-        self.annotations = GenerateAnnotations(
+        self.annotations = generate_annotations(
             state.cliplong,
             state.cliplat,
             state.projection,
@@ -271,44 +310,36 @@ class ViewManager:
         for index, var in enumerate(to_render):
             x = int(index % 3) * wdt
             y = int(index / 3) * hgt
+
+            vardata = vtkdata.GetCellData().GetArray(var)
+            varrange = vardata.GetRange()
+            varavg = np.sum(area * np.array(vardata)) / np.sum(area)
+
             view = None
 
             viewdata: ViewData = self.cache.get(var, None)
             if viewdata is not None:
                 view = viewdata.view
-                UpdateRenderView(
-                    index, var, viewdata, self.source.views, self.annotations
-                )
-                state.varmin[index] = viewdata.min
-                state.varmax[index] = viewdata.max
+                viewdata.avg = varavg
+                viewdata.min = varrange[0]
+                viewdata.max = varrange[1]
+                self.update_existing_view(var, viewdata)
             else:
-                viewdata = ViewData()
-
                 view = CreateRenderView()
+                viewdata = ViewData(
+                    view=view,
+                    color=state.varcolor[0],
+                    avg=varavg,
+                    min=varrange[0],
+                    max=varrange[1],
+                )
                 view.UseColorPaletteForBackground = 0
                 view.BackgroundColorMode = "Gradient"
-                viewdata.view = view
-
-                vtkvar = vtkdata.GetCellData().GetArray(var)
-                range = vtkvar.GetRange()
-                vardata = np.array(vtkvar)
-                average = np.sum(area * vardata) / np.sum(area)
-
-                viewdata.avg = average
-                viewdata.color = self.state.varcolor[index]
-                viewdata.min = range[0]
-                viewdata.max = range[1]
-
-                UpdateRenderView(
-                    index, var, viewdata, self.source.views, self.annotations
-                )
-
-                state.varmin[index] = viewdata.min
-                state.varmax[index] = viewdata.max
-
                 self.cache[var] = viewdata
+                self.update_new_view(var, viewdata, self.source.views, self.annotations)
+            viewdata.index = index
+            self.update_state_color_properties(index, viewdata)
 
-            print(var, view)
             widget = pvWidgets.VtkRemoteView(
                 view,
                 interactive_ratio=1,
@@ -326,7 +357,7 @@ class ViewManager:
         self.state.views = sWidgets
         self.state.layout = layout
 
-    def UpdateColor(self, index, type, value):
+    def apply_colormap(self, index, type, value):
         var = self.state.ccardsentry[index]
         coltrfunc = GetColorTransferFunction(var)
 
@@ -344,37 +375,37 @@ class ViewManager:
                 coltrfunc.UseLogScale = 0
         elif type.lower() == "inv":
             coltrfunc.InvertTransferFunction()
-        self.UpdateCamera()
+        self.reset_specific_view(index)
 
-    def UpdateColorProps(self, index, min, max):
+    def update_view_color_properties(self, index, min, max):
         var = self.state.ccardsentry[index]
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
-        self.UpdateCamera()
+        self.reset_specific_view(index)
 
-    def ResetColorProps(self, index):
+    def reset_view_color_properties(self, index):
         var = self.state.ccardsentry[index]
         viewdata: ViewData = self.cache[var]
         self.state.varmin[index] = viewdata.min
         self.state.dirty("varmin")
         self.state.varmax[index] = viewdata.max
         self.state.dirty("varmax")
-        viewdata.rep.RescaleTransferFunctionToDataRange(False, True)
-        self.UpdateCamera()
+        viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
+        self.reset_specific_view(index)
 
-    def ZoomIn(self, index):
+    def zoom_in(self, index):
         var = self.state.ccardsentry[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         rview.CameraParallelScale *= 0.95
-        self.UpdateCamera()
+        self.reset_specific_view(index)
 
     def ZoomOut(self, index):
         var = self.state.ccardsentry[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         rview.CameraParallelScale *= 1.05
-        self.UpdateCamera()
+        self.reset_specific_view(index)
 
     def Move(self, vindex, dir, factor):
         var = self.state.ccardsentry[vindex]
@@ -393,4 +424,4 @@ class ViewManager:
         foc[dir] += move[dir] if factor > 0 else -move[dir]
         rview.CameraPosition = pos
         rview.CameraFocalPoint = foc
-        self.UpdateCamera()
+        self.reset_specific_view(vindex)

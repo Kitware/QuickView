@@ -764,7 +764,6 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         dims = meshdata.dimensions
         mdims = np.array(list(meshdata.dimensions.keys()))
         mvars = np.array(list(meshdata.variables.keys()))
-        print(mdims)
         ncells2D = dims[
             mdims[
                 np.where(
@@ -914,8 +913,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                                     .transpose()
                                     .flatten()[ilstart:ilend]
                                 )
-                        data = np.where(data == varmeta.fillval, np.nan, data)
-                        output2D.CellData.append(data, varmeta.name)
+                            data = np.where(data == varmeta.fillval, np.nan, data)
+                            output2D.CellData.append(data, varmeta.name)
             self._ilev_update = False
         except Exception as e:
             print_error(
