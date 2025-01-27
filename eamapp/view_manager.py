@@ -81,6 +81,7 @@ def generate_annotations(long, lat, projection, center):
     return texts
 
 
+"""
 def add_annotations_to_view(rview, annotations):
     for text, pos in annotations:
         display = Show(text, rview, "TextSourceRepresentation")
@@ -91,6 +92,7 @@ def add_annotations_to_view(rview, annotations):
         display.Italic = 1
         display.Shadow = 1
     pass
+"""
 
 
 class ViewData:
@@ -147,7 +149,6 @@ class ViewManager:
         self.state = state
         self.widgets = []
         self.colors = []
-        self.annotations = []
         self.cache = {}
         self.to_delete = []
         self.rep_change = False
@@ -167,7 +168,7 @@ class ViewManager:
             viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
             if viewdata.text_rep is not None:
                 viewdata.text_rep.Text = (
-                    var + "  (Avg:" + "{:.2E}".format(viewdata.avg) + ")"
+                    var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
                 )
 
         self.update_state_color_properties(viewdata.index, viewdata)
@@ -176,11 +177,14 @@ class ViewManager:
         viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
         if viewdata.text_rep is not None:
             viewdata.text_rep.Text = (
-                var + "  (Avg:" + "{:.2E}".format(viewdata.avg) + ")"
+                var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
             )
 
-    def update_new_view(self, var, viewdata: ViewData, sources, annotations):
+    def update_new_view(self, var, viewdata: ViewData, sources):
         rview = viewdata.view
+        rview.AxesGrid.XTitle = "Long"
+        rview.AxesGrid.YTitle = "Lat"
+        rview.AxesGrid.Visibility = 1
 
         # Update unique sources to all render views
         data = sources["2DProj"]
@@ -199,7 +203,7 @@ class ViewManager:
         # coltrfunc.RescaleTransferFunction(float(viewdata.min), float(viewdata.max))
 
         text = Text(registrationName=f"Text{var}")
-        text.Text = var + "  (Avg:" + "{:.2E}".format(viewdata.avg) + ")"
+        text.Text = var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
         viewdata.text_rep = text
         textrep = Show(text, rview, "TextSourceRepresentation")
         textrep.Bold = 1
@@ -225,8 +229,6 @@ class ViewManager:
         repAn.AmbientColor = [0.67, 0.67, 0.67]
         repAn.DiffuseColor = [0.67, 0.67, 0.67]
         repAn.Opacity = 0.4
-
-        add_annotations_to_view(rview, annotations)
 
         rview.CameraParallelProjection = 1
         rview.ResetCamera(True)
@@ -297,13 +299,14 @@ class ViewManager:
         data = self.source.views["2DProj"]
         vtkdata = sm.Fetch(data)
         area = np.array(vtkdata.GetCellData().GetArray("area"))
-
+        """
         self.annotations = generate_annotations(
             state.cliplong,
             state.cliplat,
             state.projection,
             source.center,
         )
+        """
 
         del self.state.views[:]
         del self.state.layout[:]
@@ -342,7 +345,7 @@ class ViewManager:
                 view.UseColorPaletteForBackground = 0
                 view.BackgroundColorMode = "Gradient"
                 self.cache[var] = viewdata
-                self.update_new_view(var, viewdata, self.source.views, self.annotations)
+                self.update_new_view(var, viewdata, self.source.views)
             viewdata.index = index
             self.update_state_color_properties(index, viewdata)
 
