@@ -182,7 +182,7 @@ class EAMApp:
         all = self.state.to_dict()
         to_export = {k: all[k] for k in save_state_keys}
         # with open(os.path.join(self.workdir, "state.json"), "w") as outfile:
-        return json.dumps(to_export)
+        return json.dumps(to_export, indent=2)
 
     def apply_properties(self):
         s2d = []
@@ -405,20 +405,23 @@ class EAMApp:
         self.state.export_completed = False
         self.state.exported_state = self.generate_state()
 
-    def toggle_drawer(self):
-        print("Toggling main drawer : ", self.state.main_drawer)
-        self.state.main_drawer = self.state.main_drawer
-        self.state.flush()
-
     @property
     def ui(self) -> SinglePageWithDrawerLayout:
         if self._ui is None:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
+                layout.footer.clear()
+
                 layout.title.set_text("EAM QuickView")
                 with layout.toolbar as toolbar:
                     toolbar.density = "compact"
                     v2.VSpacer()
+                    v2.VBtn(
+                        "Update Views",
+                        classes="ma-2",
+                        click=self.apply_properties,
+                        style="background-color: gray; color: white; width: 200px; height: 50px;",
+                    )
                     v2.VDivider(vertical=True, classes="mx-2")
                     with v2.VListItemGroup(dense=True):
                         v2.VCheckbox(
@@ -509,15 +512,6 @@ class EAMApp:
                         style="pointer-events: auto;",
                         flat=True,
                     ):
-                        with v2.VContainer(
-                            fluid=True, classes="d-flex justify-center align-center"
-                        ):
-                            v2.VBtn(
-                                "Update Views",
-                                click=self.apply_properties,
-                                style="background-color: gray; color: white; width: 200px; height: 50px;",
-                            )
-
                         SliceSelection(self.source, self.viewmanager)
 
                         ProjectionSelection(self.source)

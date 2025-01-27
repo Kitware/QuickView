@@ -34,7 +34,7 @@ class FileSelect(vuetify.VCard):
                             if ($event){
                                 try {
                                     window.showSaveFilePicker({
-                                        suggestedName: 'pan3d_state.json',
+                                        suggestedName: 'eamapp_state.json',
                                         types: [{
                                             accept: {
                                                 'application/json': ['.json']

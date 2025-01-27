@@ -90,7 +90,7 @@ class ViewProperties(v2.VMenu):
                             )
                     with html.Div(classes="pt-2 align-center text-center"):
                         v2.VBtn(
-                            "Reset Colors to Range",
+                            "Reset Colors to Data Range",
                             outlined=True,
                             style="background-color: gray; color: white;",
                             click=(

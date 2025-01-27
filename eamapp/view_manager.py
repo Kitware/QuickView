@@ -123,6 +123,7 @@ def build_color_information(state: map):
     vars = state["ccardsentry"]
     colors = state["varcolor"]
     logscl = state["uselogscale"]
+    invert = state["invert"]
     varmin = state["varmin"]
     varmax = state["varmax"]
     cache = {}
@@ -131,6 +132,7 @@ def build_color_information(state: map):
             colors[index],
             rep=None,
             uselog=logscl[index],
+            inv=invert[index],
             min=varmin[index],
             max=varmax[index],
         )
@@ -164,14 +166,18 @@ class ViewManager:
 
             viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
             if viewdata.text_rep is not None:
-                viewdata.text_rep.Text = var + "  Avg: %.2f" % viewdata.avg
+                viewdata.text_rep.Text = (
+                    var + "  (Avg:" + "{:.2E}".format(viewdata.avg) + ")"
+                )
 
         self.update_state_color_properties(viewdata.index, viewdata)
 
     def update_existing_view(self, var, viewdata: ViewData):
         viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
         if viewdata.text_rep is not None:
-            viewdata.text_rep.Text = var + "  Avg: %.2f" % viewdata.avg
+            viewdata.text_rep.Text = (
+                var + "  (Avg:" + "{:.2E}".format(viewdata.avg) + ")"
+            )
 
     def update_new_view(self, var, viewdata: ViewData, sources, annotations):
         rview = viewdata.view
@@ -193,7 +199,7 @@ class ViewManager:
         # coltrfunc.RescaleTransferFunction(float(viewdata.min), float(viewdata.max))
 
         text = Text(registrationName=f"Text{var}")
-        text.Text = var + "  Avg: %.2f" % viewdata.avg
+        text.Text = var + "  (Avg:" + "{:.2E}".format(viewdata.avg) + ")"
         viewdata.text_rep = text
         textrep = Show(text, rview, "TextSourceRepresentation")
         textrep.Bold = 1
@@ -244,7 +250,7 @@ class ViewManager:
         self.widgets[index].update()
 
     @trigger("view_gc")
-    def DeleteRenderView(self, ref_name):
+    def delete_render_view(self, ref_name):
         view_to_delete = None
         view_id = self.state[f"{ref_name}Id"]
         for view in self.to_delete:
@@ -356,6 +362,7 @@ class ViewManager:
 
         self.state.views = sWidgets
         self.state.layout = layout
+        self.state.dirty("views")
 
     def apply_colormap(self, index, type, value):
         var = self.state.ccardsentry[index]
@@ -374,6 +381,7 @@ class ViewManager:
                 coltrfunc.MapControlPointsToLinearSpace()
                 coltrfunc.UseLogScale = 0
         elif type.lower() == "inv":
+            viewdata.inv = value
             coltrfunc.InvertTransferFunction()
         self.reset_specific_view(index)
 
@@ -400,14 +408,14 @@ class ViewManager:
         rview.CameraParallelScale *= 0.95
         self.reset_specific_view(index)
 
-    def ZoomOut(self, index):
+    def zoom_out(self, index):
         var = self.state.ccardsentry[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         rview.CameraParallelScale *= 1.05
         self.reset_specific_view(index)
 
-    def Move(self, vindex, dir, factor):
+    def move(self, vindex, dir, factor):
         var = self.state.ccardsentry[vindex]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
