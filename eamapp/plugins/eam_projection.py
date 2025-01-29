@@ -305,6 +305,8 @@ class EAMProject(VTKPythonAlgorithmBase):
         vtk_coords.SetData(_coords)
         outWrap.SetPoints(vtk_coords)
 
+        print("Returning projection")
+
         return 1
 
 

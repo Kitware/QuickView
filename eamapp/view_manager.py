@@ -81,20 +81,6 @@ def generate_annotations(long, lat, projection, center):
     return texts
 
 
-"""
-def add_annotations_to_view(rview, annotations):
-    for text, pos in annotations:
-        display = Show(text, rview, "TextSourceRepresentation")
-        display.TextPropMode = "Billboard 3D Text"
-        display.BillboardPosition = pos
-        display.Bold = 1
-        display.FontSize = 12
-        display.Italic = 1
-        display.Shadow = 1
-    pass
-"""
-
-
 class ViewData:
     def __init__(
         self,
@@ -170,8 +156,7 @@ class ViewManager:
                 viewdata.text_rep.Text = (
                     var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
                 )
-
-        self.update_state_color_properties(viewdata.index, viewdata)
+            self.update_state_color_properties(viewdata.index, viewdata)
 
     def update_existing_view(self, var, viewdata: ViewData):
         viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
@@ -179,12 +164,14 @@ class ViewManager:
             viewdata.text_rep.Text = (
                 var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
             )
+        rview = viewdata.view
+        rview.ResetCamera(True)
 
     def update_new_view(self, var, viewdata: ViewData, sources):
         rview = viewdata.view
-        rview.AxesGrid.XTitle = "Long"
-        rview.AxesGrid.YTitle = "Lat"
-        rview.AxesGrid.Visibility = 1
+        # rview.AxesGrid.XTitle = "Long"
+        # rview.AxesGrid.YTitle = "Lat"
+        # rview.AxesGrid.Visibility = 1
 
         # Update unique sources to all render views
         data = sources["2DProj"]
@@ -200,7 +187,6 @@ class ViewManager:
         LUTColorBar.WindowLocation = "Lower Right Corner"
         LUTColorBar.Title = ""
         LUTColorBar.ScalarBarLength = 0.75
-        # coltrfunc.RescaleTransferFunction(float(viewdata.min), float(viewdata.max))
 
         text = Text(registrationName=f"Text{var}")
         text.Text = var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"

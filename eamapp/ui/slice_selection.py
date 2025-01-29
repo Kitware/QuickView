@@ -180,6 +180,15 @@ class SliceSelection(CollapsableSection):
                 classes="pt-2 px-6",
             )
 
+    @change("vlev", "vilev", "tstamp")
+    def update_pipeline_interactive(self, **kwargs):
+        lev = self.state.vlev
+        ilev = self.state.vilev
+        self.source.UpdateLev(lev, ilev)
+        self.source.UpdatePipeline()
+        self.views.step_update_existing_views()
+        self.views.reset_views()
+
     def on_click_advance_middle(self, diff):
         current = self.state.vlev
         ilev = self.state.vilev
@@ -187,10 +196,10 @@ class SliceSelection(CollapsableSection):
         if update >= 0 and update <= len(self.state.lev) - 1:
             # make update happen
             self.state.vlev = update
-            self.source.UpdateLev(update, ilev)
-            self.source.UpdatePipeline()
-        self.views.step_update_existing_views()
-        self.views.reset_views()
+        #    self.source.UpdateLev(update, ilev)
+        #    self.source.UpdatePipeline()
+        # self.views.step_update_existing_views()
+        # self.views.reset_views()
 
     def on_click_advance_interface(self, diff):
         current = self.state.vilev
@@ -200,9 +209,9 @@ class SliceSelection(CollapsableSection):
             # make update happen
             self.state.vilev = update
             self.source.UpdateLev(lev, update)
-            self.source.UpdatePipeline()
-        self.views.step_update_existing_views()
-        self.views.reset_views()
+        #    self.source.UpdatePipeline()
+        # self.views.step_update_existing_views()
+        # self.views.reset_views()
 
     def on_click_advance_time(self, diff):
         current = self.state.tstamp
