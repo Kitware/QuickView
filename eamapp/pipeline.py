@@ -93,7 +93,6 @@ class EAMVisSource:
 
     def UpdateTimeStep(self, t_index):
         time = self.timestamps[t_index]
-        print("Setting time to ", time)
         tk = GetTimeKeeper()
         tk.Time = time
 
