@@ -90,12 +90,18 @@ class EAMVisSource:
             eamproj2D.Projection = proj
             eamprojG.Projection = proj
             projA.Projection = proj
-        self.moveextents = eamproj2D.GetDataInformation().GetBounds()
+
+    def UpdateTimeStep(self, t_index):
+        time = self.timestamps[t_index]
+        print("Setting time to ", time)
+        tk = GetTimeKeeper()
+        tk.Time = time
 
     def UpdatePipeline(self):
         eamproj2D = FindSource("2DProj")
         if eamproj2D:
             eamproj2D.UpdatePipeline()
+        self.moveextents = eamproj2D.GetDataInformation().GetBounds()
         eamprojG = FindSource("GProj")
         if eamprojG:
             eamprojG.UpdatePipeline()
@@ -200,13 +206,6 @@ class EAMVisSource:
         data1 = dsa.WrapDataObject(data1)
         self.lev = data1.FieldData["lev"].tolist()
         self.ilev = data1.FieldData["ilev"].tolist()
-
-    def UpdateTimeStep(self, timeprop):
-        time = self.timestamps[0] + (self.timestamps[-1:][0] - self.timestamps[0]) * (
-            timeprop / 100.0
-        )
-        tk = GetTimeKeeper()
-        tk.Time = time
 
     def LoadVariables(self, v2d, v3dm, v3di):
         self.data.a2DVariables = v2d

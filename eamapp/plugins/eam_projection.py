@@ -31,8 +31,10 @@ import math
 
 try:
     import numpy as np
+    import warnings
     from pyproj import Proj, Transformer
 
+    warnings.filterwarnings("ignore", category=FutureWarning, module="pyproj")
     _has_deps = True
 except ImportError as ie:
     print_error(
@@ -304,8 +306,6 @@ class EAMProject(VTKPythonAlgorithmBase):
         vtk_coords = vtkPoints()
         vtk_coords.SetData(_coords)
         outWrap.SetPoints(vtk_coords)
-
-        print("Returning projection")
 
         return 1
 

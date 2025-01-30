@@ -248,15 +248,6 @@ class ViewManager:
             self.to_delete = [v for v in self.to_delete if v != view_to_delete]
             Delete(view_to_delete)
 
-    # All the variables that deem previous renders outdated need to be updated
-    @change("cliplon", "cliplat", "vlev", "vilev", "conter", "projection")
-    def repchange(self, **kwargs):
-        self.rep_change = True
-
-    @change("tstamp")
-    def timechange(self, **kwargs):
-        self.rep_change = True
-
     def create_or_update_views(self):
         self.widgets.clear()
         state = self.state

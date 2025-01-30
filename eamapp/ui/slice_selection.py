@@ -101,14 +101,14 @@ class SliceSelection(CollapsableSection):
                         icon=True,
                         flat=True,
                         **style,
-                        click=self.on_click_advance_time(-1),
+                        click=(self.on_click_advance_time, "[-1]"),
                     ):
                         v2.VIcon("mdi-skip-previous")
                     with v2.VBtn(
                         icon=True,
                         flat=True,
                         **style,
-                        click=self.on_click_advance_time(1),
+                        click=(self.on_click_advance_time, "[1]"),
                     ):
                         v2.VIcon("mdi-skip-next")
             with v2.VRow(
@@ -184,38 +184,31 @@ class SliceSelection(CollapsableSection):
     def update_pipeline_interactive(self, **kwargs):
         lev = self.state.vlev
         ilev = self.state.vilev
+        tstamp = self.state.tstamp
+        print("Default time stamp", tstamp)
         self.source.UpdateLev(lev, ilev)
+        self.source.UpdateTimeStep(tstamp)
         self.source.UpdatePipeline()
         self.views.step_update_existing_views()
         self.views.reset_views()
 
     def on_click_advance_middle(self, diff):
+        print("Updating on click middle")
         current = self.state.vlev
-        ilev = self.state.vilev
         update = current + diff
         if update >= 0 and update <= len(self.state.lev) - 1:
-            # make update happen
             self.state.vlev = update
-        #    self.source.UpdateLev(update, ilev)
-        #    self.source.UpdatePipeline()
-        # self.views.step_update_existing_views()
-        # self.views.reset_views()
 
     def on_click_advance_interface(self, diff):
+        print("Updating on click interface")
         current = self.state.vilev
-        lev = self.state.vlev
         update = current + diff
         if update >= 0 and update <= len(self.state.ilev) - 1:
-            # make update happen
             self.state.vilev = update
-            self.source.UpdateLev(lev, update)
-        #    self.source.UpdatePipeline()
-        # self.views.step_update_existing_views()
-        # self.views.reset_views()
 
     def on_click_advance_time(self, diff):
+        print("Updating on click time")
         current = self.state.tstamp
         update = current + diff
         if update >= 0 and update <= len(self.state.timesteps) - 1:
-            # make update happen
             self.state.tstamp = update

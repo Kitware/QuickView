@@ -19,9 +19,10 @@ except ImportError as ie:
     )
     _has_deps = False
 
-dims2 = ("time", "ncol")
-dims3i = ("time", "ilev", "ncol")
-dims3m = ("time", "lev", "ncol")
+dims1 = set(["ncol"])
+dims2 = set(["time", "ncol"])
+dims3i = set(["time", "ilev", "ncol"])
+dims3m = set(["time", "lev", "ncol"])
 
 
 class EAMConstants:
@@ -575,6 +576,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         self._DataFileName = None
         self._ConnFileName = None
         self._dirty = False
+        self._2d_update = True
         self._lev_update = True
         self._ilev_update = True
 
@@ -618,7 +620,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             return
         vardata = netCDF4.Dataset(self._DataFileName, "r")
         for name, info in vardata.variables.items():
-            if "ncol_d" in info.dimensions:
+            dims = set(info.dimensions)
+            if not (dims == dims1 or dims == dims2 or dims == dims3m or dims == dims3i):
                 continue
             varmeta = VarMeta(name, info)
             if varmeta.type == VarType._1D:
@@ -651,6 +654,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             if fname != self._DataFileName:
                 self._DataFileName = fname
                 self._dirty = True
+                self._2d_update = True
                 self._lev_update = True
                 self._ilev_update = True
                 self._clear()
@@ -661,6 +665,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         if fname != self._ConnFileName:
             self._ConnFileName = fname
             self._dirty = True
+            self._2d_update = True
             self._lev_update = True
             self._ilev_update = True
             self.Modified()
@@ -721,16 +726,18 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
     def RequestUpdateExtent(self, request, inInfo, outInfo):
         return super().RequestUpdateExtent(request, inInfo, outInfo)
 
-    def GetTimeIndex(self, time):
+    def get_time_index(self, outInfo, executive, from_port):
+        timeInfo = outInfo.GetInformationObject(from_port)
         timeInd = 0
-        if self._timeSteps != None and len(self._timeSteps) > 1:
-            for t in self._timeSteps[1:]:
-                if time == t:
+        if timeInfo.Has(executive.UPDATE_TIME_STEP()) and len(self._timeSteps) > 1:
+            time = timeInfo.Get(executive.UPDATE_TIME_STEP())
+            for t in self._timeSteps:
+                if time <= t:
                     break
                 else:
                     timeInd = timeInd + 1
             return timeInd
-        return 0
+        return timeInd
 
     def RequestData(self, request, inInfo, outInfo):
         if (
@@ -751,11 +758,12 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         # Getting the correct time index
         executive = self.GetExecutive()
         from_port = request.Get(executive.FROM_OUTPUT_PORT())
-        timeInfo = outInfo.GetInformationObject(from_port)
-        timeInd = 0
-        if timeInfo.Has(executive.UPDATE_TIME_STEP()) and len(self._timeSteps) > 0:
-            time = timeInfo.Get(executive.UPDATE_TIME_STEP())
-            timeInd = self.GetTimeIndex(time)
+        timeInd = self.get_time_index(outInfo, executive, from_port)
+        if self._time != timeInd:
+            self._time = timeInd
+            self._2d_update = True
+            self._lev_update = True
+            self._ilev_update = True
 
         meshdata = netCDF4.Dataset(self._ConnFileName, "r")
         vardata = netCDF4.Dataset(self._DataFileName, "r")
@@ -824,10 +832,11 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             if self._vars2Darr.ArrayIsEnabled(varmeta.name):
                 if output2D.CellData.HasArray(varmeta.name):
                     to_remove.remove(varmeta.name)
-                else:
+                if not output2D.CellData.HasArray(varmeta.name) or self._2d_update:
                     data = vardata[varmeta.name][:].data[timeInd].flatten()
                     data = np.where(data == varmeta.fillval, np.nan, data)
                     output2D.CellData.append(data, varmeta.name)
+        self._2d_update = False
 
         try:
             lev_field_name = "lev"
