@@ -130,31 +130,31 @@ class ViewControls(v2.VMenu):
                 with v2.VCardText(classes="pa-2"):
                     with v2.VBtn(
                         **style,
-                        click=(zoom, "['in', idx]"),
+                        click=(zoom, "['in']"),
                     ):
                         v2.VIcon("mdi-magnify-plus")
                     with v2.VBtn(
                         **style,
-                        click=(zoom, "['out', idx]"),
+                        click=(zoom, "['out']"),
                     ):
                         v2.VIcon("mdi-magnify-minus")
                     with v2.VBtn(
                         **style,
-                        click=(move, "['up', idx]"),
+                        click=(move, "['up']"),
                     ):
                         v2.VIcon("mdi-arrow-up")
                     with v2.VBtn(
                         **style,
-                        click=(move, "['down', idx]"),
+                        click=(move, "['down']"),
                     ):
                         v2.VIcon("mdi-arrow-down")
                     with v2.VBtn(
                         **style,
-                        click=(move, "['left', idx]"),
+                        click=(move, "['left']"),
                     ):
                         v2.VIcon("mdi-arrow-left")
                     with v2.VBtn(
                         **style,
-                        click=(move, "['right', idx]"),
+                        click=(move, "['right']"),
                     ):
                         v2.VIcon("mdi-arrow-right")

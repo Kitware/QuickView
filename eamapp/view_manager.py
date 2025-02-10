@@ -15,6 +15,7 @@ from paraview.simple import (
     GetScalarBar,
     ColorBy,
     GetColorTransferFunction,
+    AddCameraLink,
 )
 
 from eamapp.pipeline import EAMVisSource
@@ -293,6 +294,7 @@ class ViewManager:
         wdt = 4
         hgt = 3
 
+        view0 = None
         for index, var in enumerate(to_render):
             x = int(index % 3) * wdt
             y = int(index / 3) * hgt
@@ -302,7 +304,6 @@ class ViewManager:
             varavg = np.sum(area * np.array(vardata)) / np.sum(area)
 
             view = None
-
             viewdata: ViewData = self.cache.get(var, None)
             if viewdata is not None:
                 view = viewdata.view
@@ -325,6 +326,11 @@ class ViewManager:
                 self.update_new_view(var, viewdata, self.source.views)
             viewdata.index = index
             self.update_state_color_properties(index, viewdata)
+
+            if index == 0:
+                view0 = view
+            else:
+                AddCameraLink(view, view0, f"viewlink{index}")
 
             widget = pvWidgets.VtkRemoteView(
                 view,
@@ -379,24 +385,24 @@ class ViewManager:
         self.state.varmax[index] = viewdata.max
         self.state.dirty("varmax")
         viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
-        self.reset_specific_view(index)
+        self.reset_views()
 
-    def zoom_in(self, index):
+    def zoom_in(self, index=0):
         var = self.state.ccardsentry[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         rview.CameraParallelScale *= 0.95
-        self.reset_specific_view(index)
+        self.reset_views()
 
-    def zoom_out(self, index):
+    def zoom_out(self, index=0):
         var = self.state.ccardsentry[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         rview.CameraParallelScale *= 1.05
-        self.reset_specific_view(index)
+        self.reset_views()
 
-    def move(self, vindex, dir, factor):
-        var = self.state.ccardsentry[vindex]
+    def move(self, dir, factor, index=0):
+        var = self.state.ccardsentry[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         extents = self.source.moveextents
@@ -412,4 +418,4 @@ class ViewManager:
         foc[dir] += move[dir] if factor > 0 else -move[dir]
         rview.CameraPosition = pos
         rview.CameraFocalPoint = foc
-        self.reset_specific_view(vindex)
+        self.reset_views()

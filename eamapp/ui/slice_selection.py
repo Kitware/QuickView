@@ -185,7 +185,6 @@ class SliceSelection(CollapsableSection):
         lev = self.state.vlev
         ilev = self.state.vilev
         tstamp = self.state.tstamp
-        print("Default time stamp", tstamp)
         self.source.UpdateLev(lev, ilev)
         self.source.UpdateTimeStep(tstamp)
         self.source.UpdatePipeline()

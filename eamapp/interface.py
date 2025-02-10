@@ -252,22 +252,22 @@ class EAMApp:
     def reset_view_color_properties(self, index):
         self.viewmanager.reset_view_color_properties(index)
 
-    def zoom(self, type, index):
+    def zoom(self, type):
         if type.lower() == "in":
-            self.viewmanager.zoom_in(index)
+            self.viewmanager.zoom_in()
         elif type.lower() == "out":
-            self.viewmanager.zoom_out(index)
+            self.viewmanager.zoom_out()
         pass
 
-    def move(self, dir, index):
+    def move(self, dir):
         if dir.lower() == "up":
-            self.viewmanager.move(index, 1, 0)
+            self.viewmanager.move(1, 0)
         elif dir.lower() == "down":
-            self.viewmanager.move(index, 1, 1)
+            self.viewmanager.move(1, 1)
         elif dir.lower() == "left":
-            self.viewmanager.move(index, 0, 1)
+            self.viewmanager.move(0, 1)
         elif dir.lower() == "right":
-            self.viewmanager.move(index, 0, 0)
+            self.viewmanager.move(0, 0)
 
     '''
     def export_config(self, config_file: Union[str, Path, None] = None) -> None:
@@ -423,7 +423,7 @@ class EAMApp:
                         style="background-color: gray; color: white; width: 200px; height: 50px;",
                     )
                     v2.VDivider(vertical=True, classes="mx-2")
-                    with v2.VListItemGroup(dense=True):
+                    with v2.VListItemGroup(classes="text-truncate", dense=True):
                         v2.VCheckbox(
                             label="Use CVD colors",
                             value=0,
@@ -441,11 +441,15 @@ class EAMApp:
                             change=(self.update_available_color_maps, "[$event]"),
                         )
                     v2.VDivider(vertical=True, classes="mx-2")
-                    with html.Div(style="width: 25%;"):
-                        with v2.VRow():
-                            with v2.VCol(cols=4, classes="py-0 text-right"):
+                    ViewControls(zoom=self.zoom, move=self.move)
+                    v2.VDivider(vertical=True, classes="mx-2")
+                    with v2.VCol(style="width: 25%;", classes="justify-center"):
+                        with v2.VRow(classes="ma-0"):
+                            with v2.VCol(
+                                cols=4, classes="text-truncate py-0 text-right"
+                            ):
                                 html.Span("Connectivity File")
-                            with v2.VCol(classes="py-0 text-left"):
+                            with v2.VCol(classes="text-truncate py-0 text-left"):
                                 with v2.VTooltip(bottom=True):
                                     with html.Template(
                                         v_slot_activator="{ on, attrs }"
@@ -456,10 +460,12 @@ class EAMApp:
                                             v_on="on",
                                         )
                                     html.Span(f"{self.state.ConnFile}")
-                        with v2.VRow():
-                            with v2.VCol(cols=4, classes="py-0 text-right"):
+                        with v2.VRow(classes="ma-0"):
+                            with v2.VCol(
+                                cols=4, classes="text-truncate py-0 text-right"
+                            ):
                                 html.Span("Data File")
-                            with v2.VCol(classes="py-0 text-left"):
+                            with v2.VCol(classes="text-truncate py-0 text-left"):
                                 with v2.VTooltip(bottom=True):
                                     with html.Template(
                                         v_slot_activator="{ on, attrs }"
@@ -583,6 +589,5 @@ class EAMApp:
                                             update=self.update_view_color_properties,
                                             reset=self.reset_view_color_properties,
                                         )
-                                        ViewControls(zoom=self.zoom, move=self.move)
 
         return self._ui
