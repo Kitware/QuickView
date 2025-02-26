@@ -1,3 +1,4 @@
+from trame.app import asynchronous
 from trame.decorators import TrameApp, change
 from trame.widgets import html, vuetify2 as v2
 
@@ -5,6 +6,8 @@ from eamapp.ui.collapsible import CollapsableSection
 
 from eamapp.view_manager import ViewManager
 from eamapp.pipeline import EAMVisSource
+
+import asyncio
 
 
 @TrameApp()
@@ -22,7 +25,7 @@ class SliceSelection(CollapsableSection):
             ):
                 with v2.VCol(classes="text-left py-0"):
                     html.Div("Middle Layer")
-                with v2.VCol(classes="py-0"):
+                with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
                         flat=True,
@@ -30,6 +33,7 @@ class SliceSelection(CollapsableSection):
                         click=(self.on_click_advance_middle, "[-1]"),
                     ):
                         v2.VIcon("mdi-skip-previous")
+                with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
                         flat=True,
@@ -37,6 +41,15 @@ class SliceSelection(CollapsableSection):
                         click=(self.on_click_advance_middle, "[1]"),
                     ):
                         v2.VIcon("mdi-skip-next")
+                with v2.VCol(classes="mr-4 py-0", cols=1):
+                    v2.VCheckbox(
+                        v_model=("play_lev", False),
+                        off_icon="mdi-play",
+                        on_icon="mdi-stop",
+                        classes="ma-0 pa-0",
+                        **style,
+                    )
+
             with v2.VRow(
                 classes="text-center align-center justify-center text-subtitle-1 pb-3 px-3"
             ):
@@ -59,7 +72,7 @@ class SliceSelection(CollapsableSection):
             ):
                 with v2.VCol(classes="text-left py-0"):
                     html.Div("Interface Layer")
-                with v2.VCol(classes="py-0"):
+                with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
                         flat=True,
@@ -67,6 +80,7 @@ class SliceSelection(CollapsableSection):
                         click=(self.on_click_advance_interface, "[-1]"),
                     ):
                         v2.VIcon("mdi-skip-previous")
+                with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
                         flat=True,
@@ -74,6 +88,15 @@ class SliceSelection(CollapsableSection):
                         click=(self.on_click_advance_interface, "[1]"),
                     ):
                         v2.VIcon("mdi-skip-next")
+                with v2.VCol(classes="mr-4 py-0", cols=1):
+                    v2.VCheckbox(
+                        v_model=("play_ilev", False),
+                        off_icon="mdi-play",
+                        on_icon="mdi-stop",
+                        classes="ma-0 pa-0",
+                        **style,
+                    )
+
             with v2.VRow(
                 classes="text-center align-center justify-center text-subtitle-1 pb-3 px-3"
             ):
@@ -96,7 +119,7 @@ class SliceSelection(CollapsableSection):
             ):
                 with v2.VCol(classes="text-left py-0"):
                     html.Div("Time")
-                with v2.VCol(classes="py-0"):
+                with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
                         flat=True,
@@ -104,6 +127,7 @@ class SliceSelection(CollapsableSection):
                         click=(self.on_click_advance_time, "[-1]"),
                     ):
                         v2.VIcon("mdi-skip-previous")
+                with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
                         flat=True,
@@ -111,6 +135,15 @@ class SliceSelection(CollapsableSection):
                         click=(self.on_click_advance_time, "[1]"),
                     ):
                         v2.VIcon("mdi-skip-next")
+                with v2.VCol(classes="mr-4 py-0", cols=1):
+                    v2.VCheckbox(
+                        v_model=("play_time", False),
+                        off_icon="mdi-play",
+                        on_icon="mdi-stop",
+                        classes="ma-0 pa-0",
+                        **style,
+                    )
+
             with v2.VRow(
                 classes="text-center align-center justify-center text-subtitle-1 pb-3 px-3"
             ):
@@ -192,22 +225,46 @@ class SliceSelection(CollapsableSection):
         self.views.reset_views()
 
     def on_click_advance_middle(self, diff):
-        print("Updating on click middle")
         current = self.state.vlev
         update = current + diff
         if update >= 0 and update <= len(self.state.lev) - 1:
             self.state.vlev = update
 
+    @change("play_lev")
+    @asynchronous.task
+    async def play_lev(self, **kwargs):
+        state = self.state
+        while state.play_lev:
+            with state:
+                self.on_click_advance_middle(1)
+            await asyncio.sleep(0.1)
+
     def on_click_advance_interface(self, diff):
-        print("Updating on click interface")
         current = self.state.vilev
         update = current + diff
         if update >= 0 and update <= len(self.state.ilev) - 1:
             self.state.vilev = update
 
+    @change("play_ilev")
+    @asynchronous.task
+    async def play_ilev(self, **kwargs):
+        state = self.state
+        while state.play_ilev:
+            with state:
+                self.on_click_advance_interface(1)
+            await asyncio.sleep(0.1)
+
     def on_click_advance_time(self, diff):
-        print("Updating on click time")
         current = self.state.tstamp
         update = current + diff
         if update >= 0 and update <= len(self.state.timesteps) - 1:
             self.state.tstamp = update
+
+    @change("play_time")
+    @asynchronous.task
+    async def play_time(self, **kwargs):
+        state = self.state
+        while state.play_time:
+            with state:
+                self.on_click_advance_time(1)
+            await asyncio.sleep(0.1)

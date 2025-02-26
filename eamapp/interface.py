@@ -17,11 +17,14 @@ from trame.widgets import grid
 from trame_server.core import Server
 
 from eamapp.pipeline import EAMVisSource
+
 from eamapp.ui.file_selection import FileSelect
 from eamapp.ui.slice_selection import SliceSelection
 from eamapp.ui.projection_selection import ProjectionSelection
 from eamapp.ui.variable_selection import VariableSelection
 from eamapp.ui.view_settings import ViewControls, ViewProperties
+
+from eamapp.utilities import EventType
 
 from eamapp.view_manager import ViewManager
 
@@ -217,13 +220,14 @@ class EAMApp:
             self.viewmanager.create_or_update_views()
 
     def apply_colormap(self, index, type, value):
-        if type.lower() == "color":
+        print(type)
+        if type == EventType.COL.value:
             self.state.varcolor[index] = value
             self.state.dirty("varcolor")
-        elif type.lower() == "log":
+        elif type == EventType.LOG.value:
             self.state.uselogscale[index] = value
             self.state.dirty("uselogscale")
-        elif type.lower() == "inv":
+        elif type == EventType.INV.value:
             self.state.invert[index] = value
             self.state.dirty("invert")
         self.viewmanager.apply_colormap(index, type, value)
@@ -416,11 +420,13 @@ class EAMApp:
                 with layout.toolbar as toolbar:
                     toolbar.density = "compact"
                     v2.VSpacer()
+                    ViewControls(zoom=self.zoom, move=self.move)
+                    v2.VDivider(vertical=True, classes="mx-2")
                     v2.VBtn(
-                        "Update Views",
+                        "Load Variables",
                         classes="ma-2",
                         click=self.apply_properties,
-                        style="background-color: gray; color: white; width: 200px; height: 50px;",
+                        style="background-color: lightgray;",  # width: 200px; height: 50px;",
                     )
                     v2.VDivider(vertical=True, classes="mx-2")
                     with v2.VListItemGroup(classes="text-truncate", dense=True):
@@ -440,8 +446,6 @@ class EAMApp:
                             hide_details=True,
                             change=(self.update_available_color_maps, "[$event]"),
                         )
-                    v2.VDivider(vertical=True, classes="mx-2")
-                    ViewControls(zoom=self.zoom, move=self.move)
                     v2.VDivider(vertical=True, classes="mx-2")
                     with v2.VCol(style="width: 25%;", classes="justify-center"):
                         with v2.VRow(classes="ma-0"):

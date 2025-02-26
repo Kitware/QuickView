@@ -19,6 +19,7 @@ from paraview.simple import (
 )
 
 from eamapp.pipeline import EAMVisSource
+from eamapp.utilities import EventType
 
 
 def apply_projection(projection, point):
@@ -181,7 +182,6 @@ class ViewManager:
         ColorBy(rep, ("CELLS", var))
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.ApplyPreset(viewdata.color, True)
-        rep.SetScalarBarVisibility(rview, True)
         LUTColorBar = GetScalarBar(coltrfunc, rview)
         LUTColorBar.AutoOrient = 1
         # LUTColorBar.Orientation = 'Horizontal'
@@ -217,6 +217,7 @@ class ViewManager:
         repAn.DiffuseColor = [0.67, 0.67, 0.67]
         repAn.Opacity = 0.4
 
+        rep.SetScalarBarVisibility(rview, False)
         rview.CameraParallelProjection = 1
         rview.ResetCamera(True)
 
@@ -355,10 +356,10 @@ class ViewManager:
         coltrfunc = GetColorTransferFunction(var)
 
         viewdata: ViewData = self.cache[var]
-        if type.lower() == "color":
+        if type == EventType.COL.value:
             viewdata.color = value
             coltrfunc.ApplyPreset(viewdata.color, True)
-        elif type.lower() == "log":
+        elif type == EventType.LOG.value:
             viewdata.uselog = value
             if viewdata.uselog:
                 coltrfunc.MapControlPointsToLogSpace()
@@ -366,9 +367,13 @@ class ViewManager:
             else:
                 coltrfunc.MapControlPointsToLinearSpace()
                 coltrfunc.UseLogScale = 0
-        elif type.lower() == "inv":
+        elif type == EventType.INV.value:
             viewdata.inv = value
             coltrfunc.InvertTransferFunction()
+        elif type == EventType.BAR.value:
+            var = self.state.ccardsentry[index]
+            viewdata: ViewData = self.cache[var]
+            viewdata.data_rep.SetScalarBarVisibility(viewdata.view, value)
         self.reset_specific_view(index)
 
     def update_view_color_properties(self, index, min, max):

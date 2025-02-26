@@ -1,6 +1,8 @@
 from trame.widgets import vuetify2 as v2, html
 from trame.decorators import TrameApp
 
+from eamapp.utilities import EventType
+
 
 @TrameApp()
 class ViewProperties(v2.VMenu):
@@ -40,7 +42,7 @@ class ViewProperties(v2.VMenu):
                         ),
                         **style,
                     )
-                    html.Div("Mapping Options", classes="pt-2")
+                    html.Div("Scalar Mapping Options", classes="pt-2")
                     with v2.VRow():
                         with v2.VCol():
                             v2.VCheckbox(
@@ -48,7 +50,7 @@ class ViewProperties(v2.VMenu):
                                 v_model=("uselogscale[idx]",),
                                 change=(
                                     apply,
-                                    "[idx, 'log', $event]",
+                                    f"[idx, {EventType.LOG.value}, $event]",
                                 ),
                                 **style,
                             )
@@ -58,10 +60,21 @@ class ViewProperties(v2.VMenu):
                                 v_model=("invert[idx]",),
                                 change=(
                                     apply,
-                                    "[idx, 'inv', $event]",
+                                    f"[idx, {EventType.INV.value}, $event]",
                                 ),
                                 **style,
                             )
+                        with v2.VCol():
+                            v2.VCheckbox(
+                                label="Show Scalar Bar",
+                                v_model=("invert[idx]",),
+                                change=(
+                                    apply,
+                                    f"[idx, {EventType.BAR.value}, $event]",
+                                ),
+                                **style,
+                            )
+
                     html.Div("Scalar Range", classes="pt-2")
                     with v2.VRow():
                         with v2.VCol():
@@ -101,16 +114,15 @@ class ViewProperties(v2.VMenu):
 
 
 @TrameApp()
-class ViewControls(v2.VMenu):
+class ViewControls(v2.VCard):
     def __init__(self, zoom=None, move=None, **kwargs):
         super().__init__(
-            transition="slide-y-transition",
-            close_on_content_click=False,
-            persistent=True,
-            no_click_animation=True,
+            classes="overflow-hidden pa-0 ma-2",
+            rounded="lg",
             **kwargs,
         )
         with self:
+            """
             with v2.Template(v_slot_activator="{ on, attrs }"):
                 with v2.VBtn(
                     icon=True,
@@ -122,39 +134,51 @@ class ViewControls(v2.VMenu):
                 ):
                     v2.VIcon("mdi-camera")
             style = dict(dense=True, hide_details=True)
-            with v2.VCard(
-                classes="overflow-hidden pa-2",
-                rounded="lg",
-            ):
-                style = dict(icon=True, tile=True, outlined=True)
-                with v2.VCardText(classes="pa-2"):
-                    with v2.VBtn(
-                        **style,
-                        click=(zoom, "['in']"),
-                    ):
-                        v2.VIcon("mdi-magnify-plus")
-                    with v2.VBtn(
-                        **style,
-                        click=(zoom, "['out']"),
-                    ):
-                        v2.VIcon("mdi-magnify-minus")
-                    with v2.VBtn(
-                        **style,
-                        click=(move, "['up']"),
-                    ):
-                        v2.VIcon("mdi-arrow-up")
-                    with v2.VBtn(
-                        **style,
-                        click=(move, "['down']"),
-                    ):
-                        v2.VIcon("mdi-arrow-down")
-                    with v2.VBtn(
-                        **style,
-                        click=(move, "['left']"),
-                    ):
-                        v2.VIcon("mdi-arrow-left")
-                    with v2.VBtn(
-                        **style,
-                        click=(move, "['right']"),
-                    ):
-                        v2.VIcon("mdi-arrow-right")
+            """
+            style = dict(
+                icon=True,
+                flat=True,
+                outlined=False,
+                density="compact",
+                hide_details=True,
+            )
+            with v2.VCardText(classes="pa-0", style="background-color: lightgray;"):
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with html.Div():
+                            with v2.VBtn(
+                                **style,
+                                click=(zoom, "['in']"),
+                            ):
+                                v2.VIcon("mdi-magnify-plus")
+                            v2.VDivider(vertical=True)
+                            with v2.VBtn(
+                                **style,
+                                click=(zoom, "['out']"),
+                            ):
+                                v2.VIcon("mdi-magnify-minus")
+                            v2.VDivider(vertical=True)
+                            with v2.VBtn(
+                                **style,
+                                click=(move, "['up']"),
+                            ):
+                                v2.VIcon("mdi-arrow-up")
+                            v2.VDivider(vertical=True)
+                            with v2.VBtn(
+                                **style,
+                                click=(move, "['down']"),
+                            ):
+                                v2.VIcon("mdi-arrow-down")
+                            v2.VDivider(vertical=True)
+                            with v2.VBtn(
+                                **style,
+                                click=(move, "['left']"),
+                            ):
+                                v2.VIcon("mdi-arrow-left")
+                            v2.VDivider(vertical=True)
+                            with v2.VBtn(
+                                **style,
+                                click=(move, "['right']"),
+                            ):
+                                v2.VIcon("mdi-arrow-right")
+                    html.Span("View Camera Controls")
