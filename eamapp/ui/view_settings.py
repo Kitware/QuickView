@@ -38,7 +38,7 @@ class ViewProperties(v2.VMenu):
                         outlined=True,
                         change=(
                             apply,
-                            "[idx, 'color', $event]",
+                            f"[idx, {EventType.COL.value}, $event]",
                         ),
                         **style,
                     )
