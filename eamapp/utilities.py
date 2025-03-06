@@ -6,7 +6,6 @@ class EventType(Enum):
     COL = 0
     LOG = 1
     INV = 2
-    BAR = 3
 
 
 def ValidateArguments(ConnFile, DataFile, StateFile, WorkDir):

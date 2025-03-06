@@ -64,17 +64,6 @@ class ViewProperties(v2.VMenu):
                                 ),
                                 **style,
                             )
-                        with v2.VCol():
-                            v2.VCheckbox(
-                                label="Show Scalar Bar",
-                                v_model=("invert[idx]",),
-                                change=(
-                                    apply,
-                                    f"[idx, {EventType.BAR.value}, $event]",
-                                ),
-                                **style,
-                            )
-
                     html.Div("Scalar Range", classes="pt-2")
                     with v2.VRow():
                         with v2.VCol():
@@ -141,11 +130,16 @@ class ViewControls(v2.VCard):
                 outlined=False,
                 density="compact",
                 hide_details=True,
+                height="30px",
+                width="30px",
             )
-            with v2.VCardText(classes="pa-0", style="background-color: lightgray;"):
+            with v2.VCardText(classes="pa-0", style="opacity: 80%"):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
-                        with html.Div():
+                        with html.Div(
+                            v_bind="attrs",
+                            v_on="on",
+                        ):
                             with v2.VBtn(
                                 **style,
                                 click=(zoom, "['in']"),

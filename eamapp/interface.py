@@ -220,7 +220,6 @@ class EAMApp:
             self.viewmanager.create_or_update_views()
 
     def apply_colormap(self, index, type, value):
-        print(type)
         if type == EventType.COL.value:
             self.state.varcolor[index] = value
             self.state.dirty("varcolor")
@@ -231,6 +230,9 @@ class EAMApp:
             self.state.invert[index] = value
             self.state.dirty("invert")
         self.viewmanager.apply_colormap(index, type, value)
+
+    def update_scalar_bars(self, event):
+        self.viewmanager.update_scalar_bars(event)
 
     def update_available_color_maps(self, event):
         if len(event) == 0:
@@ -437,6 +439,7 @@ class EAMApp:
                             dense=True,
                             hide_details=True,
                             change=(self.update_available_color_maps, "[$event]"),
+                            style="height: 20px;",
                         ),
                         v2.VCheckbox(
                             label="Use non-CVD colors",
@@ -445,6 +448,16 @@ class EAMApp:
                             dense=True,
                             hide_details=True,
                             change=(self.update_available_color_maps, "[$event]"),
+                            style="height: 20px;",
+                        )
+                        v2.VCheckbox(
+                            label="Show Scalar Bar",
+                            value=1,
+                            v_model=("scalarbar", False),
+                            dense=True,
+                            hide_details=True,
+                            change=(self.update_scalar_bars, "[$event]"),
+                            style="height: 20px;",
                         )
                     v2.VDivider(vertical=True, classes="mx-2")
                     with v2.VCol(style="width: 25%;", classes="justify-center"):
@@ -564,6 +577,7 @@ class EAMApp:
                             v_for="vref, idx in views",
                             key="vref",
                             v_bind=("layout[idx]",),
+                            style="transition-property: none;",
                         ):
                             with v2.VCard(
                                 classes="fill-height", style="overflow: hidden;"
@@ -580,6 +594,21 @@ class EAMApp:
                                     )
                                     client.ClientTriggers(
                                         beforeDestroy="trigger('view_gc', [vref])",
+                                        # mounted="""
+                                        #        $nextTick(() => setTimeout(() => trigger('resetview', [
+                                        #            idx,
+                                        #            {
+                                        #              width: Math.floor($refs[vref].vtkContainer.getBoundingClientRect().width),
+                                        #              height: Math.floor($refs[vref].vtkContainer.getBoundingClientRect().height)
+                                        #            }
+                                        #        ]), 500))
+                                        #        """,
+                                        # mounted="$nextTick(() => setTimeout(() => console.log($refs[vref].vtkContainer.getBoundingClientRect()), 500))",
+                                        # mounted="$nextTick(() => setTimeout(() => $refs[vref].render(), 500))",
+                                        # mounted=(self.viewmanager.reset_specific_view, '''[idx,
+                                        #         {width: $refs[vref].vtkContainer.getBoundingClientRect().width,
+                                        #         height: $refs[vref].vtkContainer.getBoundingClientRect().height}]
+                                        #         ''')
                                     )
                                     html.Div(
                                         style="position:absolute; top: 0; left: 0; width: 100%; height: calc(100% - 0.66rem); z-index: 1;"

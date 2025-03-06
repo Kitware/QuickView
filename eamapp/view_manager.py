@@ -16,6 +16,8 @@ from paraview.simple import (
     ColorBy,
     GetColorTransferFunction,
     AddCameraLink,
+    Render,
+    ResetCamera,
 )
 
 from eamapp.pipeline import EAMVisSource
@@ -167,7 +169,10 @@ class ViewManager:
                 var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
             )
         rview = viewdata.view
-        rview.ResetCamera(True)
+        Render(rview)
+        ResetCamera(rview)
+        # rview.ResetCamera(True)
+        Render(rview)
 
     def update_new_view(self, var, viewdata: ViewData, sources):
         rview = viewdata.view
@@ -217,9 +222,11 @@ class ViewManager:
         repAn.DiffuseColor = [0.67, 0.67, 0.67]
         repAn.Opacity = 0.4
 
-        rep.SetScalarBarVisibility(rview, False)
+        rep.SetScalarBarVisibility(rview, self.state.scalarbar)
         rview.CameraParallelProjection = 1
-        rview.ResetCamera(True)
+        Render(rview)
+        ResetCamera(rview)
+        Render(rview)
 
     def update_state_color_properties(self, index, viewdata: ViewData):
         state = self.state
@@ -237,6 +244,23 @@ class ViewManager:
             widget.update()
 
     def reset_specific_view(self, index):
+        self.widgets[index].update()
+
+    @trigger("resetview")
+    async def reset_resize_specific_view(self, index, sizeinfo=None):
+        if sizeinfo is not None:
+            var = self.state.ccardsentry[index]
+            viewdata: ViewData = self.cache[var]
+            print(sizeinfo)
+            height = int(sizeinfo["height"])
+            width = int(sizeinfo["width"])
+            print(width, height)
+            viewdata.view.ViewSize = (width, height)
+            Render(viewdata.view)
+        print(f"Resetting view with index {index}")
+        import asyncio
+
+        await asyncio.sleep(0.01)
         self.widgets[index].update()
 
     @trigger("view_gc")
@@ -350,6 +374,19 @@ class ViewManager:
         self.state.views = sWidgets
         self.state.layout = layout
         self.state.dirty("views")
+        # from trame.app import asynchronous
+        # asynchronous.create_task(self.flushViews())
+
+    """
+    async def flushViews(self):
+        await self.server.network_completion
+        print("Flushing views")
+        self.reset_views()
+        import asyncio
+        await asyncio.sleep(1)
+        print("Resetting views after sleep")
+        self.reset_views()
+    """
 
     def apply_colormap(self, index, type, value):
         var = self.state.ccardsentry[index]
@@ -370,11 +407,13 @@ class ViewManager:
         elif type == EventType.INV.value:
             viewdata.inv = value
             coltrfunc.InvertTransferFunction()
-        elif type == EventType.BAR.value:
-            var = self.state.ccardsentry[index]
-            viewdata: ViewData = self.cache[var]
-            viewdata.data_rep.SetScalarBarVisibility(viewdata.view, value)
         self.reset_specific_view(index)
+
+    def update_scalar_bars(self, event):
+        for var, viewdata in self.cache.items():
+            view = viewdata.view
+            viewdata.data_rep.SetScalarBarVisibility(view, event)
+        self.reset_views()
 
     def update_view_color_properties(self, index, min, max):
         var = self.state.ccardsentry[index]
