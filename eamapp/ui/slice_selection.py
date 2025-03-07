@@ -32,7 +32,7 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_middle, "[-1]"),
                     ):
-                        v2.VIcon("mdi-skip-previous")
+                        v2.VIcon("mdi-chevron-left")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -40,11 +40,11 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_middle, "[1]"),
                     ):
-                        v2.VIcon("mdi-skip-next")
+                        v2.VIcon("mdi-chevron-right")
                 with v2.VCol(classes="mr-4 py-0", cols=1):
                     v2.VCheckbox(
                         v_model=("play_lev", False),
-                        off_icon="mdi-play",
+                        off_icon="mdi-play-circle",
                         on_icon="mdi-stop",
                         classes="ma-0 pa-0",
                         **style,
@@ -79,7 +79,7 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_interface, "[-1]"),
                     ):
-                        v2.VIcon("mdi-skip-previous")
+                        v2.VIcon("mdi-chevron-left")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -87,11 +87,11 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_interface, "[1]"),
                     ):
-                        v2.VIcon("mdi-skip-next")
+                        v2.VIcon("mdi-chevron-right")
                 with v2.VCol(classes="mr-4 py-0", cols=1):
                     v2.VCheckbox(
                         v_model=("play_ilev", False),
-                        off_icon="mdi-play",
+                        off_icon="mdi-play-circle",
                         on_icon="mdi-stop",
                         classes="ma-0 pa-0",
                         **style,
@@ -126,7 +126,7 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_time, "[-1]"),
                     ):
-                        v2.VIcon("mdi-skip-previous")
+                        v2.VIcon("mdi-chevron-left")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -134,11 +134,11 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_time, "[1]"),
                     ):
-                        v2.VIcon("mdi-skip-next")
+                        v2.VIcon("mdi-chevron-right")
                 with v2.VCol(classes="mr-4 py-0", cols=1):
                     v2.VCheckbox(
                         v_model=("play_time", False),
-                        off_icon="mdi-play",
+                        off_icon="mdi-play-circle",
                         on_icon="mdi-stop",
                         classes="ma-0 pa-0",
                         **style,
@@ -213,13 +213,16 @@ class SliceSelection(CollapsableSection):
                 classes="pt-2 px-6",
             )
 
-    @change("vlev", "vilev", "tstamp")
+    @change("vlev", "vilev", "tstamp", "cliplat", "cliplong")
     def update_pipeline_interactive(self, **kwargs):
         lev = self.state.vlev
         ilev = self.state.vilev
         tstamp = self.state.tstamp
+        long = self.state.cliplong
+        lat = self.state.cliplat
         self.source.UpdateLev(lev, ilev)
         self.source.UpdateTimeStep(tstamp)
+        self.source.ApplyClipping(long, lat)
         self.source.UpdatePipeline()
         self.views.step_update_existing_views()
         self.views.reset_views()

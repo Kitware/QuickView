@@ -91,7 +91,8 @@ class ViewData:
         view=None,
         index=None,
         data_rep=None,
-        text_rep=None,
+        var_text=None,
+        var_info=None,
         avg=None,
         color=None,
         uselog=False,
@@ -101,7 +102,8 @@ class ViewData:
     ):
         self.view = view
         self.data_rep = data_rep
-        self.text_rep = text_rep
+        self.var_text = var_text
+        self.var_info = var_info
         self.avg = avg
         self.color = color
         self.uselog = uselog
@@ -156,29 +158,45 @@ class ViewManager:
             viewdata.avg = varavg
 
             viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
-            if viewdata.text_rep is not None:
-                viewdata.text_rep.Text = (
-                    var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
-                )
+            (v_text, V_info) = self.get_var_info(var, viewdata.avg)
+            if viewdata.var_text is not None:
+                viewdata.var_text.Text = v_text
+            if viewdata.var_info is not None:
+                viewdata.var_info.Text = V_info
             self.update_state_color_properties(viewdata.index, viewdata)
 
     def update_existing_view(self, var, viewdata: ViewData):
         viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
-        if viewdata.text_rep is not None:
-            viewdata.text_rep.Text = (
-                var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
-            )
+        (v_text, V_info) = self.get_var_info(var, viewdata.avg)
+        if viewdata.var_text is not None:
+            viewdata.var_text.Text = v_text
+        if viewdata.var_info is not None:
+            viewdata.var_info.Text = V_info
         rview = viewdata.view
+
         Render(rview)
-        ResetCamera(rview)
-        # rview.ResetCamera(True)
-        Render(rview)
+        # ResetCamera(rview)
+
+    def get_var_info(self, var, average):
+        var_text = var + "\n(avg: " + "{:.2E}".format(average) + ")"
+        info_text = None
+        vars = self.source.vars.get("2D", None)
+        t = self.state.tstamp
+        if var in vars:
+            info_text = f"t = {t}"
+        vars = self.source.vars.get("3Dm", None)
+        if var in vars:
+            k = self.state.vlev
+            info_text = f"k = {k}\nt = {t}"
+        vars = self.source.vars.get("3Di", None)
+        if var in vars:
+            k = self.state.vilev
+            info_text = f"k = {k}\nt = {t}"
+
+        return (var_text, info_text)
 
     def update_new_view(self, var, viewdata: ViewData, sources):
         rview = viewdata.view
-        # rview.AxesGrid.XTitle = "Long"
-        # rview.AxesGrid.YTitle = "Lat"
-        # rview.AxesGrid.Visibility = 1
 
         # Update unique sources to all render views
         data = sources["2DProj"]
@@ -194,15 +212,18 @@ class ViewManager:
         LUTColorBar.Title = ""
         LUTColorBar.ScalarBarLength = 0.75
 
+        (v_text, V_info) = self.get_var_info(var, viewdata.avg)
         text = Text(registrationName=f"Text{var}")
-        text.Text = var + "  (Avg: " + "{:.2E}".format(viewdata.avg) + ")"
-        viewdata.text_rep = text
+        text.Text = v_text
+        viewdata.var_text = text
         textrep = Show(text, rview, "TextSourceRepresentation")
-        textrep.Bold = 1
-        textrep.FontSize = 22
-        textrep.Italic = 1
-        textrep.Shadow = 1
-        textrep.WindowLocation = "Upper Center"
+        textrep.WindowLocation = "Upper Left Corner"
+
+        info = Text(registrationName=f"Info{var}")
+        info.Text = V_info
+        viewdata.var_info = info
+        textrep = Show(info, rview, "TextSourceRepresentation")
+        textrep.WindowLocation = "Upper Right Corner"
 
         # Update common sources to all render views
 
@@ -224,9 +245,9 @@ class ViewManager:
 
         rep.SetScalarBarVisibility(rview, self.state.scalarbar)
         rview.CameraParallelProjection = 1
+
         Render(rview)
-        ResetCamera(rview)
-        Render(rview)
+        # ResetCamera(rview)
 
     def update_state_color_properties(self, index, viewdata: ViewData):
         state = self.state
@@ -251,13 +272,10 @@ class ViewManager:
         if sizeinfo is not None:
             var = self.state.ccardsentry[index]
             viewdata: ViewData = self.cache[var]
-            print(sizeinfo)
             height = int(sizeinfo["height"])
             width = int(sizeinfo["width"])
-            print(width, height)
             viewdata.view.ViewSize = (width, height)
             Render(viewdata.view)
-        print(f"Resetting view with index {index}")
         import asyncio
 
         await asyncio.sleep(0.01)
@@ -302,14 +320,6 @@ class ViewManager:
         data = self.source.views["2DProj"]
         vtkdata = sm.Fetch(data)
         area = np.array(vtkdata.GetCellData().GetArray("area"))
-        """
-        self.annotations = generate_annotations(
-            state.cliplong,
-            state.cliplat,
-            state.projection,
-            source.center,
-        )
-        """
 
         del self.state.views[:]
         del self.state.layout[:]

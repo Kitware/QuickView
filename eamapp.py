@@ -27,8 +27,6 @@ def serve():
     StateFile = args.state
     WorkDir = args.workdir
 
-    print(f"{DataFile, ConnFile, StateFile, WorkDir}")
-
     from eamapp.utilities import ValidateArguments
 
     ValidateArguments(ConnFile, DataFile, StateFile, WorkDir)

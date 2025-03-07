@@ -407,7 +407,6 @@ class EAMApp:
 
     @change("export_config")
     def export(self, export_config, **kwargs):
-        print(f"Exporting config : {export_config}")
         self.state.export_completed = False
         self.state.exported_state = self.generate_state()
 
@@ -433,6 +432,7 @@ class EAMApp:
                     v2.VDivider(vertical=True, classes="mx-2")
                     with v2.VListItemGroup(classes="text-truncate", dense=True):
                         v2.VCheckbox(
+                            classes="ma-0",
                             label="Use CVD colors",
                             value=0,
                             v_model=("cmaps",),
@@ -442,6 +442,7 @@ class EAMApp:
                             style="height: 20px;",
                         ),
                         v2.VCheckbox(
+                            classes="ma-0",
                             label="Use non-CVD colors",
                             value=1,
                             v_model=("cmaps",),
@@ -451,6 +452,7 @@ class EAMApp:
                             style="height: 20px;",
                         )
                         v2.VCheckbox(
+                            classes="ma-0",
                             label="Show Scalar Bar",
                             value=1,
                             v_model=("scalarbar", False),
@@ -537,7 +539,7 @@ class EAMApp:
                     ):
                         SliceSelection(self.source, self.viewmanager)
 
-                        ProjectionSelection(self.source)
+                        ProjectionSelection(self.source, self.viewmanager)
 
                         VariableSelection(
                             title="2D Variables",

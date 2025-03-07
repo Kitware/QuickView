@@ -50,7 +50,6 @@ class EAMVisSource:
             print("Error loading plugin :", e)
 
     def UpdateLev(self, lev, ilev):
-        eamproj2D = FindSource("2DProj")
         if self.data == None:
             return
         if self.lev != lev or self.ilev != ilev:
@@ -58,9 +57,6 @@ class EAMVisSource:
             self.ilev = ilev
             self.data.MiddleLayer = lev
             self.data.InterfaceLayer = ilev
-            # eamproj2D.UpdatePipeline()
-            # self.views["2DProj"]  = OutputPort(eamproj2D,  0)
-            # self.UpdateProjection(self.projection)
 
     def ApplyClipping(self, cliplong, cliplat):
         extract = FindSource("DataExtract")
@@ -72,6 +68,7 @@ class EAMVisSource:
         gextract.LatitudeRange = cliplat
 
     def UpdateCenter(self, center):
+        """
         if self.center != int(center):
             self.center = int(center)
 
@@ -80,6 +77,8 @@ class EAMVisSource:
 
             gmeridian = FindSource("GCMeridian")
             gmeridian.CenterMeridian = self.center
+        """
+        pass
 
     def UpdateProjection(self, proj):
         eamproj2D = FindSource("2DProj")
@@ -101,12 +100,14 @@ class EAMVisSource:
         if eamproj2D:
             eamproj2D.UpdatePipeline()
         self.moveextents = eamproj2D.GetDataInformation().GetBounds()
+
         eamprojG = FindSource("GProj")
         if eamprojG:
             eamprojG.UpdatePipeline()
 
-        meridian = FindSource("CenterMeridian")
-        bounds = meridian.GetDataInformation().GetBounds()
+        extract = FindSource("DataExtract")
+        bounds = extract.GetDataInformation().GetBounds()
+
         grid = FindSource("OGLines")
         if grid:
             grid.LongitudeRange = [bounds[0], bounds[1]]
@@ -161,13 +162,13 @@ class EAMVisSource:
         )
         extract.LongitudeRange = [-180.0, 180.0]
         extract.LatitudeRange = [-90.0, 90.0]
-        meridian = EAMCenterMeridian(
-            registrationName="CenterMeridian", Input=OutputPort(extract, 0)
-        )
-        meridian.CenterMeridian = 0
-        meridian.UpdatePipeline()
-        self.extents = meridian.GetDataInformation().GetBounds()
-        proj2D = EAMProject(registrationName="2DProj", Input=OutputPort(meridian, 0))
+        # meridian = EAMCenterMeridian(
+        #    registrationName="CenterMeridian", Input=OutputPort(extract, 0)
+        # )
+        # meridian.CenterMeridian = 0
+        extract.UpdatePipeline()
+        self.extents = extract.GetDataInformation().GetBounds()
+        proj2D = EAMProject(registrationName="2DProj", Input=OutputPort(extract, 0))
         proj2D.Projection = self.projection
         proj2D.Translate = 0
         proj2D.UpdatePipeline()
@@ -176,14 +177,15 @@ class EAMVisSource:
         gextract = EAMTransformAndExtract(registrationName="GExtract", Input=self.globe)
         gextract.LongitudeRange = [-180.0, 180.0]
         gextract.LatitudeRange = [-90.0, 90.0]
-        gmeridian = EAMCenterMeridian(
-            registrationName="GCMeridian", Input=OutputPort(gextract, 0)
-        )
-        gmeridian.CenterMeridian = 0
-        gmeridian.UpdatePipeline()
-        projG = EAMProject(registrationName="GProj", Input=OutputPort(gmeridian, 0))
+        gextract.UpdatePipeline()
+        # gmeridian = EAMCenterMeridian(
+        #    registrationName="GCMeridian", Input=OutputPort(gextract, 0)
+        # )
+        # gmeridian.CenterMeridian = 0
+        # gmeridian.UpdatePipeline()
+        projG = EAMProject(registrationName="GProj", Input=OutputPort(gextract, 0))
         projG.Projection = self.projection
-        projG.Translate = 1
+        projG.Translate = 0
         projG.UpdatePipeline()
 
         glines = EAMGridLines(registrationName="OGLines")
