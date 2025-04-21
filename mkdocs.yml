@@ -5,7 +5,13 @@ plugins:
   - mkdocstrings
 nav:
   - Home: README.md
+  - Setup:
+    - Requirements : setup/requirements.md
+    - Execution : setup/execution.md
   - Tutorials:
     - QuickView : tutorials/eamapp.md
+    - Tool Bar:  tutorials/tool_bar.md
+    - Control Panel: tutorials/control_panel.md
+    - View Port:  tutorials/view_port.md
 markdown_extensions:
   - attr_list
