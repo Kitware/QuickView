@@ -1,5 +1,7 @@
 ## Requirements 
 
+At version 1.0, QuickView is expected to be installed and used from a personal computer with the data files also being local. Future versions are expected to support the server-client model.
+
 EAM QuickView has two key requirements, python version `>=3.10` and ParaView `>=5.13`
 
 ### Python version 3.10
