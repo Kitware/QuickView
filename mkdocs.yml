@@ -1,4 +1,4 @@
-site_name: EAM QuickView Documentation
+site_name: EAM QuickView 1.0 Documentation
 theme: 'material'
 plugins:
   - search
@@ -7,11 +7,13 @@ nav:
   - Home: README.md
   - Setup:
     - Requirements : setup/requirements.md
-    - Execution : setup/execution.md
-  - Tutorials:
-    - QuickView : tutorials/eamapp.md
-    - Tool Bar:  tutorials/tool_bar.md
-    - Control Panel: tutorials/control_panel.md
-    - View Port:  tutorials/view_port.md
+    - Execution:     setup/execution.md
+  - User Guide:
+    - Key Reminders:      userguide/reminders.md
+    - Connectivity Files: userguide/connectivity.md
+    - Launch:             userguide/launch.md
+    - Toolbar:            userguide/toolbar.md
+    - Control Panel:      userguide/control_panel.md
+    - View Port:          userguide/view_port.md
 markdown_extensions:
   - attr_list
