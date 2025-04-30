@@ -1,4 +1,4 @@
-# EAM QuickView Tutorial
+# Launching the QuickView app
 
 ## Usage
 
@@ -43,7 +43,7 @@ The following table provides additional information about the parameters and
 
 The QuickView app has three main components, they are highlighted in the above screen shot.
 
-1. [Toolbar](tool_bar.md) -- highlighted in green, let's the users control some global properties of the application and displays helpful information.
+1. [Toolbar](toolbar.md) -- highlighted in green, let's the users control some global properties of the application and displays helpful information.
     
 2. [Control Panel](control_panel.md) -- highlighted in red, let's the user control the data to represent, e.g. slicing or dicing the data to focus on certain regions/aspects of the data
     
