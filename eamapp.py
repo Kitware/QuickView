@@ -1,5 +1,14 @@
-import traceback, argparse
+import os
+import json
+import argparse
+import traceback
+from pathlib import Path
+
 import paraview.web.venv
+
+from eamapp.pipeline import EAMVisSource
+from eamapp.interface import EAMApp
+from eamapp.utilities import ValidateArguments
 
 
 def serve():
@@ -16,51 +25,39 @@ def serve():
     )
     args, xargs = parser.parse_known_args()
 
-    import os
+    data_file = args.data
+    state_file = args.state
+    work_dir = args.workdir
+    conn_file = args.conn
 
-    ConnFile = args.conn
+    # ValidateArguments(conn_file, data_file, state_file, work_dir)
+
     if args.conn is None:
-        ConnFile = os.path.join(
+        conn_file = os.path.join(
             os.path.dirname(__file__), "eamapp", "data", "connectivity.nc"
         )
-    DataFile = args.data
-    StateFile = args.state
-    WorkDir = args.workdir
 
-    from eamapp.utilities import ValidateArguments
+    globe_file = os.path.join(os.path.dirname(__file__), "eamapp", "data", "globe.vtk")
 
-    ValidateArguments(ConnFile, DataFile, StateFile, WorkDir)
-
-    if WorkDir is None:
-        WorkDir = str(os.getcwd())
-    from eamapp.pipeline import EAMVisSource
-
-    GlobeFile = os.path.join(os.path.dirname(__file__), "eamapp", "data", "globe.vtk")
-
-    from eamapp.interface import EAMApp
+    if work_dir is None:
+        work_dir = str(os.getcwd())
 
     source = EAMVisSource()
-    import json
-
+    state = None
     try:
-        if StateFile is not None:
-            from pathlib import Path
-
-            path = Path(StateFile)
-            state = json.loads(path.read_text())
-            DataFile = state["DataFile"]
-            ConnFile = state["ConnFile"]
-            source.Update(
-                datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0
-            )
-            app = EAMApp(source, workdir=WorkDir, initstate=state)
-            app.start()
-        else:
-            source.Update(
-                datafile=DataFile, connfile=ConnFile, globefile=GlobeFile, lev=0
-            )
-            app = EAMApp(source, workdir=WorkDir)
-            app.start()
+        if state_file is not None:
+            state = json.loads(Path(state_file).read_text())
+            data_file = state["DataFile"]
+            conn_file = state["ConnFile"]
+        source.Update(
+            data_file=data_file,
+            conn_file=conn_file,
+            globefile=globe_file,
+            lev=0,
+            ilev=0,
+        )
+        app = EAMApp(source, workdir=work_dir, initstate=state)
+        app.start()
     except Exception as e:
         print("Problem : ", e)
         traceback.print_exc()

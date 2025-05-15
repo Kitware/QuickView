@@ -146,6 +146,9 @@ class ViewManager:
         self.rep_change = False
 
     def step_update_existing_views(self):
+        if len(self.cache) == 0:
+            return
+
         data = sm.Fetch(self.source.views["2DProj"])
         area = np.array(data.GetCellData().GetArray("area"))
 

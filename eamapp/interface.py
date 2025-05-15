@@ -121,8 +121,8 @@ class EAMApp:
 
         # Load state variables from the source object
 
-        state.DataFile = source.DataFile
-        state.ConnFile = source.ConnFile
+        state.DataFile = source.data_file if source.data_file else ""
+        state.ConnFile = source.conn_file if source.conn_file else ""
         state.timesteps = source.timestamps
         state.lev = source.lev
         state.ilev = source.ilev
