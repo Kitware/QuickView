@@ -3,8 +3,8 @@ import os
 from trame.decorators import TrameApp
 from trame.widgets import html, vuetify2 as v2
 
-from eamapp.ui.view_settings import ViewControls
-from eamapp.ui.file_selection import FileSelect
+from quickview.ui.view_settings import ViewControls
+from quickview.ui.file_selection import FileSelect
 
 
 @TrameApp()

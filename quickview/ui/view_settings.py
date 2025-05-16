@@ -1,7 +1,7 @@
 from trame.widgets import vuetify2 as v2, html
 from trame.decorators import TrameApp
 
-from eamapp.utilities import EventType
+from quickview.utilities import EventType
 
 
 @TrameApp()

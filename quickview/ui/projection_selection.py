@@ -1,10 +1,10 @@
 from trame.decorators import TrameApp, change
 from trame.widgets import html, vuetify2 as v2
 
-from eamapp.ui.collapsible import CollapsableSection
+from quickview.ui.collapsible import CollapsableSection
 
-from eamapp.view_manager import ViewManager
-from eamapp.pipeline import EAMVisSource
+from quickview.view_manager import ViewManager
+from quickview.pipeline import EAMVisSource
 
 
 @TrameApp()

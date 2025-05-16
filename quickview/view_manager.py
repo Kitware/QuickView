@@ -20,8 +20,8 @@ from paraview.simple import (
     ResetCamera,
 )
 
-from eamapp.pipeline import EAMVisSource
-from eamapp.utilities import EventType
+from quickview.pipeline import EAMVisSource
+from quickview.utilities import EventType
 
 
 def apply_projection(projection, point):

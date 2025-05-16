@@ -1,7 +1,7 @@
 from trame.decorators import TrameApp, change
 from trame.widgets import html, vuetify2 as v2
 
-from eamapp.ui.collapsible import CollapsableSection
+from quickview.ui.collapsible import CollapsableSection
 
 style = dict(density="compact", hide_details=True)
 

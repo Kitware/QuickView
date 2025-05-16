@@ -16,17 +16,17 @@ from trame.widgets import grid
 
 from trame_server.core import Server
 
-from eamapp.pipeline import EAMVisSource
+from quickview.pipeline import EAMVisSource
 
-from eamapp.ui.slice_selection import SliceSelection
-from eamapp.ui.projection_selection import ProjectionSelection
-from eamapp.ui.variable_selection import VariableSelection
-from eamapp.ui.view_settings import ViewProperties
-from eamapp.ui.toolbar import Toolbar
+from quickview.ui.slice_selection import SliceSelection
+from quickview.ui.projection_selection import ProjectionSelection
+from quickview.ui.variable_selection import VariableSelection
+from quickview.ui.view_settings import ViewProperties
+from quickview.ui.toolbar import Toolbar
 
-from eamapp.utilities import EventType
+from quickview.utilities import EventType
 
-from eamapp.view_manager import ViewManager
+from quickview.view_manager import ViewManager
 
 from paraview.simple import ImportPresets, GetLookupTableNames
 
@@ -163,7 +163,7 @@ class EAMApp:
         else:
             state.update(initstate)
             # Build color cache here
-            from eamapp.view_manager import build_color_information
+            from quickview.view_manager import build_color_information
 
             self.viewmanager.cache = build_color_information(initstate)
             self.load_variables()
