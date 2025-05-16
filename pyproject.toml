@@ -1,6 +1,6 @@
 [project]
-name = "EAMQuickView"
-version = "0.8.8"
+name = "QuickView"
+version = "0.1.0"
 description = "An application to explore/analyze data for the Earth Atmosphere Model (EAM)"
 authors = [
     {name = "Kitware Inc."},
@@ -34,3 +34,6 @@ where = ["."]
 
 [tool.setuptools.package-data]
 eamapp = ["presets/**"]
+
+[project.scripts]
+quickview = "eamapp.eamapp:main"

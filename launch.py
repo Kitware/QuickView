@@ -30,7 +30,7 @@ if __name__ == "__main__":
             "Env. variable 'EAMPVIEW' to point to ParaView python 'pvpython' not set/found"
         )
 
-    args = [eampv, "--force-offscreen-rendering", "eamapp.py", "--venv", ".pvenv"]
+    args = [eampv, "--force-offscreen-rendering", "eamapp/eamapp.py", "--venv", ".pvenv"]
     args.extend(sys.argv[1:])
 
     try:

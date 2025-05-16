@@ -10,7 +10,6 @@ from eamapp.pipeline import EAMVisSource
 from eamapp.interface import EAMApp
 from eamapp.utilities import ValidateArguments
 
-
 def serve():
     parser = argparse.ArgumentParser(
         prog="eamapp.py", description="Trame based app for visualizing EAM data"
