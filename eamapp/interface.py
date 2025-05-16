@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Union
 
 from trame.app import get_server
-from trame.decorators import TrameApp, change
+from trame.decorators import TrameApp, change, life_cycle
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame.widgets import vuetify as v2, html, client
@@ -167,6 +167,14 @@ class EAMApp:
 
             self.viewmanager.cache = build_color_information(initstate)
             self.load_variables()
+
+    @life_cycle.server_ready
+    def _tauri_ready(self, **_):
+        print(f"tauri-server-port={self.server.port}", flush=True)
+
+    @life_cycle.client_connected
+    def _tauri_show(self, **_):
+        print("tauri-client-ready", flush=True)
 
     def init_app_configuration(self):
         state = self.state
