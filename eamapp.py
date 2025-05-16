@@ -37,8 +37,6 @@ def serve():
             os.path.dirname(__file__), "eamapp", "data", "connectivity.nc"
         )
 
-    globe_file = os.path.join(os.path.dirname(__file__), "eamapp", "data", "globe.vtk")
-
     if work_dir is None:
         work_dir = str(os.getcwd())
 
@@ -52,9 +50,6 @@ def serve():
         source.Update(
             data_file=data_file,
             conn_file=conn_file,
-            globefile=globe_file,
-            lev=0,
-            ilev=0,
         )
         app = EAMApp(source, workdir=work_dir, initstate=state)
         app.start()

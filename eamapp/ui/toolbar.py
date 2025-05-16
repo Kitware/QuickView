@@ -13,9 +13,10 @@ class Toolbar:
         self,
         layout_toolbar,
         server,
+        load_data=None,
+        load_variables=None,
         zoom=None,
         move=None,
-        apply_properties=None,
         update_available_color_maps=None,
         update_scalar_bars=None,
         **kwargs,
@@ -31,7 +32,7 @@ class Toolbar:
             v2.VBtn(
                 "Load Variables",
                 classes="ma-2",
-                click=apply_properties,
+                click=load_variables,
                 style="background-color: lightgray;",  # width: 200px; height: 50px;",
             )
             v2.VDivider(vertical=True, classes="mx-2")
@@ -74,24 +75,41 @@ class Toolbar:
                     with v2.VCol(classes="text-truncate py-0 text-left"):
                         with v2.VTooltip(bottom=True):
                             with html.Template(v_slot_activator="{ on, attrs }"):
-                                html.Span(
-                                    os.path.basename(self.state.ConnFile),
+                                v2.VTextField(
+                                    v_model=("ConnFile", ""),
+                                    label="Connectivity File",
+                                    classes="text-truncate py-0 text-left",
+                                    hide_details=True,
+                                    style="width: 100%;",
                                     v_bind="attrs",
                                     v_on="on",
                                 )
                             html.Span(f"{self.state.ConnFile}")
+
                 with v2.VRow(classes="ma-0"):
                     with v2.VCol(cols=4, classes="text-truncate py-0 text-right"):
                         html.Span("Data File")
                     with v2.VCol(classes="text-truncate py-0 text-left"):
                         with v2.VTooltip(bottom=True):
                             with html.Template(v_slot_activator="{ on, attrs }"):
-                                html.Span(
-                                    os.path.basename(self.state.DataFile),
+                                v2.VTextField(
+                                    v_model=("DataFile", ""),
+                                    label="Data File",
+                                    classes="text-truncate py-0 text-left",
+                                    hide_details=True,
+                                    style="width: 100%;",
                                     v_bind="attrs",
                                     v_on="on",
                                 )
                             html.Span(f"{self.state.DataFile}")
+            with v2.VCol(classes="justify-center"):
+                v2.VBtn(
+                    "Load Data",
+                    classes="ma-2",
+                    click=load_data,
+                    style="background-color: lightgray;",  # width: 200px; height: 50px;",
+                )
+
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):

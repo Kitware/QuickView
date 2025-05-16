@@ -123,13 +123,8 @@ class EAMApp:
 
         state.DataFile = source.data_file if source.data_file else ""
         state.ConnFile = source.conn_file if source.conn_file else ""
-        state.timesteps = source.timestamps
-        state.lev = source.lev
-        state.ilev = source.ilev
-        state.extents = list(source.extents)
-        state.vars2D = source.vars2D
-        state.vars3Di = source.vars3Di
-        state.vars3Dm = source.vars3Dm
+
+        self.update_state_from_source()
 
         self.ind2d = None
         self.ind3dm = None
@@ -164,22 +159,38 @@ class EAMApp:
 
         # User controlled state varialbes
         if initstate is None:
-            state.vlev = 0
-            state.vilev = 0
-            state.tstamp = 0
-            state.vars2Dstate = [False] * len(source.vars2D)
-            state.vars3Dmstate = [False] * len(source.vars3Dm)
-            state.vars3Distate = [False] * len(source.vars3Di)
-            self.vars2Dstate = np.array([False] * len(source.vars2D))
-            self.vars3Dmstate = np.array([False] * len(source.vars3Dm))
-            self.vars3Distate = np.array([False] * len(source.vars3Di))
+            self.init_app_configuration()
         else:
             state.update(initstate)
             # Build color cache here
             from eamapp.view_manager import build_color_information
 
             self.viewmanager.cache = build_color_information(initstate)
-            self.apply_properties()
+            self.load_variables()
+
+    def init_app_configuration(self):
+        state = self.state
+        source = self.source
+        state.vlev = 0
+        state.vilev = 0
+        state.tstamp = 0
+        state.vars2Dstate = [False] * len(source.vars2D)
+        state.vars3Dmstate = [False] * len(source.vars3Dm)
+        state.vars3Distate = [False] * len(source.vars3Di)
+        self.vars2Dstate = np.array([False] * len(source.vars2D))
+        self.vars3Dmstate = np.array([False] * len(source.vars3Dm))
+        self.vars3Distate = np.array([False] * len(source.vars3Di))
+
+    def update_state_from_source(self):
+        state = self.state
+        source = self.source
+        state.timesteps = source.timestamps
+        state.lev = source.lev
+        state.ilev = source.ilev
+        state.extents = list(source.extents)
+        state.vars2D = source.vars2D
+        state.vars3Di = source.vars3Di
+        state.vars3Dm = source.vars3Dm
 
     def generate_state(self):
         all = self.state.to_dict()
@@ -187,7 +198,15 @@ class EAMApp:
         # with open(os.path.join(self.workdir, "state.json"), "w") as outfile:
         return json.dumps(to_export, indent=2)
 
-    def apply_properties(self):
+    def load_data(self):
+        self.source.Update(
+            data_file=self.state.DataFile,
+            conn_file=self.state.ConnFile,
+        )
+        self.init_app_configuration()
+        self.update_state_from_source()
+
+    def load_variables(self):
         s2d = []
         s3dm = []
         s3di = []
@@ -422,9 +441,10 @@ class EAMApp:
                     Toolbar(
                         toolbar,
                         self.server,
+                        load_data=self.load_data,
+                        load_variables=self.load_variables,
                         zoom=self.zoom,
                         move=self.move,
-                        apply_properties=self.apply_properties,
                         update_available_color_maps=self.update_available_color_maps,
                         update_scalar_bars=self.update_scalar_bars,
                     )

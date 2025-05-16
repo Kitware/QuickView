@@ -1,6 +1,8 @@
-import os
 import fnmatch
 import numpy as np
+import os
+import traceback
+
 
 from paraview.simple import (
     FindSource,
@@ -148,7 +150,10 @@ class EAMVisSource:
         self.views["GProj"] = OutputPort(eamprojG, 0)
         self.views["GLines"] = OutputPort(projA, 0)
 
-    def Update(self, data_file, conn_file, globefile, lev, ilev):
+    def Update(self, data_file, conn_file, lev=0, ilev=0):
+        if self.data_file == data_file and self.conn_file == conn_file:
+            return
+
         self.data_file = data_file
         self.conn_file = conn_file
 
@@ -162,13 +167,13 @@ class EAMVisSource:
             data.InterfaceLayer = ilev
             self.data = data
         else:
-            self.data.SetDataFileName(data_file)
-            self.data.SetConnFileName(conn_file)
+            self.data.DataFile = data_file
+            self.data.ConnectivityFile = conn_file
 
         try:
-            data.UpdatePipeline()
+            self.data.UpdatePipeline()
 
-            data_wrapped = dsa.WrapDataObject(sm.Fetch(data))
+            data_wrapped = dsa.WrapDataObject(sm.Fetch(self.data))
             self.lev = data_wrapped.FieldData["lev"].tolist()
             self.ilev = data_wrapped.FieldData["ilev"].tolist()
 
@@ -204,7 +209,12 @@ class EAMVisSource:
             self.moveextents = proj2D.GetDataInformation().GetBounds()
 
             if self.globe == None:
-                gdata = LegacyVTKReader(registrationName="globe", FileNames=[globefile])
+                globe_file = os.path.join(
+                    os.path.dirname(__file__), "data", "globe.vtk"
+                )
+                gdata = LegacyVTKReader(
+                    registrationName="globe", FileNames=[globe_file]
+                )
                 cgdata = Contour(registrationName="gcontour", Input=gdata)
                 cgdata.ContourBy = ["POINTS", "cstar"]
                 cgdata.Isosurfaces = [0.5]
@@ -241,6 +251,7 @@ class EAMVisSource:
             self.valid = True
         except Exception as e:
             print("Error in UpdatePipeline :", e)
+            traceback.print_stack()
             self.valid = False
             return
 
