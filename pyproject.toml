@@ -33,7 +33,10 @@ classifiers = [
 where = ["."]
 
 [tool.setuptools.package-data]
-quickview = ["presets/**"]
+quickview = [
+  "presets/**",
+  "data/**"
+]
 
 [project.scripts]
 quickview = "quickview.app:main"
