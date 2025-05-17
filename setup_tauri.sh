@@ -11,8 +11,8 @@ python -m PyInstaller --clean --noconfirm \
         --collect-data trame_vtk \
         --collect-data trame_client \
         --collect-data trame_vuetify \
-        --collect-data paraview \
-        --collect-data quickview \
+        --collect-all paraview \
+        --collect-all quickview \
         --hidden-import pkgutil \
         --add-binary="$(which pvpython):."  \
         quickview/app.py
