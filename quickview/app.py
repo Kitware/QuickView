@@ -33,7 +33,7 @@ def serve():
 
     if args.conn is None:
         conn_file = os.path.join(
-            os.path.dirname(__file__), "eamapp", "data", "connectivity.nc"
+            os.path.dirname(__file__), "quickview", "data", "connectivity.nc"
         )
 
     if work_dir is None:

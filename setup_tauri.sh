@@ -8,9 +8,14 @@ pip install .
 python -m PyInstaller --clean --noconfirm \
         --distpath src-tauri \
         --name server --hidden-import pkgutil \
-        --collect-data trame_vtk \
-        --collect-data trame_client \
-        --collect-data trame_vuetify \
+        --collect-all trame \
+        --collect-all trame_client \
+        --collect-all trame_components \
+        --collect-all trame-grid-layout \
+        --collect-all trame_vtk \
+        --collect-all trame_vuetify \
+        --collect-all pyproj \
+        --collect-all netCDF4 \
         --collect-all paraview \
         --collect-all quickview \
         --hidden-import pkgutil \
