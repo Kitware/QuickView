@@ -17,6 +17,7 @@ from paraview.simple import (
 
 from paraview import servermanager as sm
 from paraview.vtk.numpy_interface import dataset_adapter as dsa
+from vtkmodules.vtkCommonCore import vtkLogger
 
 
 class EAMVisSource:
@@ -61,6 +62,8 @@ class EAMVisSource:
                 plugpath = os.path.abspath(os.path.join(plugin_dir, plugin))
                 if os.path.isfile(plugpath):
                     LoadPlugin(plugpath, ns=globals())
+
+            vtkLogger.SetStderrVerbosity(vtkLogger.VERBOSITY_OFF)
         except Exception as e:
             print("Error loading plugin :", e)
 
@@ -250,8 +253,8 @@ class EAMVisSource:
 
             self.valid = True
         except Exception as e:
-            print("Error in UpdatePipeline :", e)
-            traceback.print_stack()
+            # print("Error in UpdatePipeline :", e)
+            # traceback.print_stack()
             self.valid = False
             return
 
