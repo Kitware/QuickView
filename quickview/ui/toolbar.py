@@ -15,8 +15,6 @@ class Toolbar:
         server,
         load_data=None,
         load_variables=None,
-        zoom=None,
-        move=None,
         update_available_color_maps=None,
         update_scalar_bars=None,
         **kwargs,
@@ -27,7 +25,6 @@ class Toolbar:
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
             v2.VSpacer()
-            ViewControls(zoom=zoom, move=move)
             v2.VDivider(vertical=True, classes="mx-2")
             v2.VBtn(
                 "Load Variables",

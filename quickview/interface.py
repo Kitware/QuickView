@@ -21,7 +21,7 @@ from quickview.pipeline import EAMVisSource
 from quickview.ui.slice_selection import SliceSelection
 from quickview.ui.projection_selection import ProjectionSelection
 from quickview.ui.variable_selection import VariableSelection
-from quickview.ui.view_settings import ViewProperties
+from quickview.ui.view_settings import ViewProperties, ViewControls
 from quickview.ui.toolbar import Toolbar
 
 from quickview.utilities import EventType
@@ -456,6 +456,21 @@ class EAMApp:
                         update_available_color_maps=self.update_available_color_maps,
                         update_scalar_bars=self.update_scalar_bars,
                     )
+
+                card_style = """
+                    position: absolute; 
+                    bottom: 1rem; 
+                    right: 1rem; 
+                    height: 2.4rem; 
+                    z-index: 2; 
+                    display: flex; 
+                    align-items: center;
+                """
+                ViewControls(
+                    zoom=self.zoom,
+                    move=self.move,
+                    style=card_style,
+                )
 
                 with layout.drawer as drawer:
                     drawer.width = 400
