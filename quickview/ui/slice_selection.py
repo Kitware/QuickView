@@ -24,7 +24,7 @@ class SliceSelection(CollapsableSection):
                 classes="text-center align-center justify-center text-subtitle-1 pt-3 px-3"
             ):
                 with v2.VCol(classes="text-left py-0"):
-                    html.Div("Middle Layer")
+                    html.Div("Layer Midpoints")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -71,7 +71,7 @@ class SliceSelection(CollapsableSection):
                 classes="text-center align-center justify-center text-subtitle-1 pt-3 px-3"
             ):
                 with v2.VCol(classes="text-left py-0"):
-                    html.Div("Interface Layer")
+                    html.Div("Layer Interfaces")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,

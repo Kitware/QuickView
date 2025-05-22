@@ -220,13 +220,15 @@ class ViewManager:
         text.Text = v_text
         viewdata.var_text = text
         textrep = Show(text, rview, "TextSourceRepresentation")
-        textrep.WindowLocation = "Upper Left Corner"
+        textrep.WindowLocation = "Upper Right Corner"
+        textrep.FontFamily = 'Times'
 
         info = Text(registrationName=f"Info{var}")
         info.Text = V_info
         viewdata.var_info = info
         textrep = Show(info, rview, "TextSourceRepresentation")
-        textrep.WindowLocation = "Upper Right Corner"
+        textrep.WindowLocation = "Upper Left Corner"
+        textrep.FontFamily = 'Times'
 
         # Update common sources to all render views
 

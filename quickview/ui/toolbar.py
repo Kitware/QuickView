@@ -1,14 +1,26 @@
 import os
 
-from trame.decorators import TrameApp
-from trame.widgets import html, vuetify2 as v2
+from trame.decorators import TrameApp, task
+from trame.widgets import html, vuetify2 as v2, tauri
 
 from quickview.ui.view_settings import ViewControls
 from quickview.ui.file_selection import FileSelect
 
-
 @TrameApp()
 class Toolbar:
+
+    @task
+    async def select_data_file(self):
+        with self.state:
+            response = await self.ctrl.select_file("Open Data File")
+            self.state.DataFile = response
+
+    @task
+    async def select_connectivity_file(self):
+        with self.state:
+            response = await self.ctrl.select_file("Open Connectivity File")
+            self.state.ConnFile = response
+
     def __init__(
         self,
         layout_toolbar,
@@ -22,6 +34,9 @@ class Toolbar:
         self.server = server
         self.state = server.state
         self.ctrl = server.controller
+        with tauri.Dialog() as dialog:
+            self.ctrl.select_file = dialog.open
+
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
             v2.VSpacer()
@@ -56,7 +71,7 @@ class Toolbar:
                 )
                 v2.VCheckbox(
                     classes="ma-0",
-                    label="Show Scalar Bar",
+                    label="Show Color Bar",
                     value=1,
                     v_model=("scalarbar", False),
                     dense=True,
@@ -65,7 +80,60 @@ class Toolbar:
                     style="height: 20px;",
                 )
             v2.VDivider(vertical=True, classes="mx-2")
-            with v2.VCol(style="width: 25%;", classes="justify-center"):
+            with v2.VCol(style="width: 25%;", classes="justify-center pa-0"):
+                with v2.VRow(no_gutters=True, classes="align-center mt-n4", style="max-height: 2rem;"):
+                    #with v2.VCol():
+                    #    html.Div("Connectivity File")
+                    with v2.VCol():
+                        v2.VTextField(
+                            prepend_inner_icon="mdi-vector-rectangle",
+                            label="Connectivity File",
+                            v_model=("ConnFile", ""),
+                            hide_details=True,
+                            dense=True,
+                            flat=True,
+                            variant="solo",
+                            reverse=True,
+                        )
+                    with html.Div(classes="flex-0"):
+                        with v2.VBtn(
+                            icon=True,
+                            size="sm",
+                            dense=True,
+                            flat=True,
+                            variant="outlined",
+                            classes="mx-2",
+                            click=self.select_connectivity_file,
+                        ):
+                            v2.VIcon("mdi-upload")
+            
+                with v2.VRow(no_gutters=True, classes="align-center mr-0" , style="max-height: 2rem;"):
+                    #with v2.VCol():
+                    #    html.Div("Data File")
+                    with v2.VCol():
+                        v2.VTextField(
+                            prepend_inner_icon="mdi-database",
+                            label="Data File",
+                            v_model=("DataFile", ""),
+                            hide_details=True,
+                            dense=True,
+                            flat=True,
+                            variant="solo",
+                            reverse=True,
+                        )
+                    with html.Div(classes="flex-0"):
+                        with v2.VBtn(
+                            icon=True,
+                            size="sm",
+                            dense=True,
+                            flat=True,
+                            variant="outlined",
+                            classes="mx-2",
+                            click=self.select_data_file,
+                        ):
+                            v2.VIcon("mdi-upload")
+
+                """
                 with v2.VRow(classes="ma-0"):
                     with v2.VCol(cols=4, classes="text-truncate py-0 text-right"):
                         html.Span("Connectivity File")
@@ -82,6 +150,16 @@ class Toolbar:
                                     v_on="on",
                                 )
                             html.Span(f"{self.state.ConnFile}")
+                    with v2.VCol(cols=1):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            size="sm",
+                            flat=True,
+                            variant="outlined",
+                            classes="mx-2",
+                        ):
+                            v2.VIcon("mdi-upload")
 
                 with v2.VRow(classes="ma-0"):
                     with v2.VCol(cols=4, classes="text-truncate py-0 text-right"):
@@ -99,10 +177,10 @@ class Toolbar:
                                     v_on="on",
                                 )
                             html.Span(f"{self.state.DataFile}")
-                            
+                """                
             with v2.VCol(classes="justify-center"):
                 v2.VBtn(
-                    "Load Data",
+                    "Load Files",
                     classes="ma-2",
                     click=load_data,
                     style="background-color: lightgray;",  # width: 200px; height: 50px;",

@@ -42,7 +42,7 @@ class ViewProperties(v2.VMenu):
                         ),
                         **style,
                     )
-                    html.Div("Scalar Mapping Options", classes="pt-2")
+                    html.Div("Color Map Options", classes="pt-2")
                     with v2.VRow():
                         with v2.VCol():
                             v2.VCheckbox(
@@ -56,7 +56,7 @@ class ViewProperties(v2.VMenu):
                             )
                         with v2.VCol():
                             v2.VCheckbox(
-                                label="Invert Colors",
+                                label="Revert Colors",
                                 v_model=("invert[idx]",),
                                 change=(
                                     apply,
@@ -64,7 +64,7 @@ class ViewProperties(v2.VMenu):
                                 ),
                                 **style,
                             )
-                    html.Div("Scalar Range", classes="pt-2")
+                    html.Div("Value Range", classes="pt-2")
                     with v2.VRow():
                         with v2.VCol():
                             v2.VTextField(

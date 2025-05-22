@@ -443,7 +443,7 @@ class EAMApp:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
                 layout.footer.clear()
-                layout.title.set_text("EAM QuickView")
+                layout.title.set_text("EAM QuickView v1.0")
 
                 with layout.toolbar as toolbar:
                     Toolbar(

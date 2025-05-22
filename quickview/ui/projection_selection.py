@@ -10,7 +10,7 @@ from quickview.pipeline import EAMVisSource
 @TrameApp()
 class ProjectionSelection(CollapsableSection):
     def __init__(self, source: EAMVisSource, view_manager: ViewManager):
-        super().__init__("Map Projection Properties", "show_projection")
+        super().__init__("Map Projection", "show_projection")
 
         self.source = source
         self.views = view_manager

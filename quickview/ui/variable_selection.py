@@ -47,10 +47,12 @@ class VariableSelection(CollapsableSection):
                         **style,
                     )
                 with v2.VCol(cols=3):
-                    with v2.VTooltip(text="Clear all"):
-                        with html.Template(v_slot_activator="{ props }"):
+                    with v2.VTooltip(bottom=True):
+                        with html.Template(v_slot_activator="{ on, attrs }"):
                             with v2.VBtn(
-                                icon=True, click=(on_clear), color="primary", **style
+                                icon=True, click=(on_clear), color="primary", v_bind="attrs", v_on="on", **style
                             ):
-                                v2.VIcon("mdi-checkbox-multiple-blank-outline")
+                                v2.VIcon("mdi-sim-off")
+                        html.Span("Clear Selection")
                 SelectionList(var_list, var_list_state, on_update)
+
