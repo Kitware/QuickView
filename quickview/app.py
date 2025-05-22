@@ -10,6 +10,7 @@ from quickview.pipeline import EAMVisSource
 from quickview.interface import EAMApp
 from quickview.utilities import ValidateArguments
 
+
 def serve():
     parser = argparse.ArgumentParser(
         prog="eamapp.py", description="Trame based app for visualizing EAM data"

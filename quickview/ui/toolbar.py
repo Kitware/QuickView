@@ -6,11 +6,12 @@ from trame.widgets import html, vuetify2 as v2, tauri
 from quickview.ui.view_settings import ViewControls
 from quickview.ui.file_selection import FileSelect
 
+
 @TrameApp()
 class Toolbar:
     @task
     async def select_data_file(self):
-        print("Selecting data file : ",self.ctrl.open)
+        print("Selecting data file : ", self.ctrl.open)
         with self.state:
             response = await self.ctrl.open("Open Data File")
             print(f"Selected data file: {response}")
@@ -90,8 +91,12 @@ class Toolbar:
                 )
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VCol(style="width: 25%;", classes="justify-center pa-0"):
-                with v2.VRow(no_gutters=True, classes="align-center mt-n4", style="max-height: 2rem;"):
-                    #with v2.VCol():
+                with v2.VRow(
+                    no_gutters=True,
+                    classes="align-center mt-n4",
+                    style="max-height: 2rem;",
+                ):
+                    # with v2.VCol():
                     #    html.Div("Connectivity File")
                     with v2.VCol():
                         v2.VTextField(
@@ -115,8 +120,12 @@ class Toolbar:
                             click=self.select_connectivity_file,
                         ):
                             v2.VIcon("mdi-folder-upload")
-                with v2.VRow(no_gutters=True, classes="align-center mr-0" , style="max-height: 2rem;"):
-                    #with v2.VCol():
+                with v2.VRow(
+                    no_gutters=True,
+                    classes="align-center mr-0",
+                    style="max-height: 2rem;",
+                ):
+                    # with v2.VCol():
                     #    html.Div("Data File")
                     with v2.VCol():
                         v2.VTextField(
@@ -140,7 +149,7 @@ class Toolbar:
                             click=self.select_data_file,
                         ):
                             v2.VIcon("mdi-folder-upload")
-                
+
             with html.Div(classes="flex-0"):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):

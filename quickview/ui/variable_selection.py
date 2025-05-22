@@ -23,6 +23,7 @@ class SelectionList(v2.VContainer):
                     dense=True,
                 )
 
+
 @TrameApp()
 class VariableSelection(CollapsableSection):
     def __init__(
@@ -50,9 +51,13 @@ class VariableSelection(CollapsableSection):
                     with v2.VTooltip(bottom=True):
                         with html.Template(v_slot_activator="{ on, attrs }"):
                             with v2.VBtn(
-                                icon=True, click=(on_clear), color="primary", v_bind="attrs", v_on="on", **style
+                                icon=True,
+                                click=(on_clear),
+                                color="primary",
+                                v_bind="attrs",
+                                v_on="on",
+                                **style,
                             ):
                                 v2.VIcon("mdi-sim-off")
                         html.Span("Clear Selection")
                 SelectionList(var_list, var_list_state, on_update)
-
