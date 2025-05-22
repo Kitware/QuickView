@@ -23,7 +23,6 @@ class SelectionList(v2.VContainer):
                     dense=True,
                 )
 
-
 @TrameApp()
 class VariableSelection(CollapsableSection):
     def __init__(
@@ -41,6 +40,7 @@ class VariableSelection(CollapsableSection):
             with v2.VRow(classes="px-5 pt-2"):
                 with v2.VCol(cols=9):
                     v2.VTextField(
+                        prepend_inner_icon="mdi-magnify",
                         label="variable search",
                         change=(on_search, "[$event]"),
                         classes="py-0",

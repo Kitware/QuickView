@@ -144,35 +144,35 @@ class ViewControls(v2.VCard):
                                 **style,
                                 click=(zoom, "['in']"),
                             ):
-                                v2.VIcon("mdi-magnify-plus")
+                                v2.VIcon("mdi-magnify-plus", large=True)
                             v2.VDivider(vertical=True)
                             with v2.VBtn(
                                 **style,
                                 click=(zoom, "['out']"),
                             ):
-                                v2.VIcon("mdi-magnify-minus")
+                                v2.VIcon("mdi-magnify-minus", large=True)
                             v2.VDivider(vertical=True)
                             with v2.VBtn(
                                 **style,
                                 click=(move, "['up']"),
                             ):
-                                v2.VIcon("mdi-arrow-up")
+                                v2.VIcon("mdi-arrow-up-thick", large=True)
                             v2.VDivider(vertical=True)
                             with v2.VBtn(
                                 **style,
                                 click=(move, "['down']"),
                             ):
-                                v2.VIcon("mdi-arrow-down")
+                                v2.VIcon("mdi-arrow-down-thick", large=True)
                             v2.VDivider(vertical=True)
                             with v2.VBtn(
                                 **style,
                                 click=(move, "['left']"),
                             ):
-                                v2.VIcon("mdi-arrow-left")
+                                v2.VIcon("mdi-arrow-left-thick", large=True)
                             v2.VDivider(vertical=True)
                             with v2.VBtn(
                                 **style,
                                 click=(move, "['right']"),
                             ):
-                                v2.VIcon("mdi-arrow-right")
+                                v2.VIcon("mdi-arrow-right-thick", large=True)
                     html.Span("View Camera Controls")

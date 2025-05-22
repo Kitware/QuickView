@@ -112,8 +112,6 @@ class EAMApp:
 
         self.workdir = workdir
         self.server = server
-        self.state = state
-        self.ctrl = ctrl
         pvWidgets.initialize(server)
 
         self.source = source
@@ -167,6 +165,14 @@ class EAMApp:
 
             self.viewmanager.cache = build_color_information(initstate)
             self.load_variables()
+
+    @property
+    def state(self):
+        return self.server.state
+
+    @property
+    def ctrl(self):
+        return self.server.controller
 
     @life_cycle.server_ready
     def _tauri_ready(self, **_):
@@ -442,7 +448,7 @@ class EAMApp:
         if self._ui is None:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
-                layout.footer.clear()
+                #layout.footer.clear()
                 layout.title.set_text("EAM QuickView v1.0")
 
                 with layout.toolbar as toolbar:
@@ -471,7 +477,7 @@ class EAMApp:
                     move=self.move,
                     style=card_style,
                 )
-
+                
                 with layout.drawer as drawer:
                     drawer.width = 400
                     drawer.style = (
