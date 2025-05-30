@@ -25,17 +25,17 @@ def serve():
     )
     args, xargs = parser.parse_known_args()
 
-    data_file = args.data
+    data_file = "/Users/abhi.yenpure/repositories/eam/aerosol_F2010.eam.h0.2014-12.nc"  # args.data
     state_file = args.state
     work_dir = args.workdir
-    conn_file = args.conn
+    conn_file = "/Users/abhi.yenpure/repositories/eam/TEMPEST_ne30pg2.scrip.renamed.nc"  # args.conn
 
     # ValidateArguments(conn_file, data_file, state_file, work_dir)
 
-    if args.conn is None:
-        conn_file = os.path.join(
-            os.path.dirname(__file__), "quickview", "data", "connectivity.nc"
-        )
+    # if args.conn is None:
+    #    conn_file = os.path.join(
+    #        os.path.dirname(__file__), "quickview", "data", "connectivity.nc"
+    #    )
 
     if work_dir is None:
         work_dir = str(os.getcwd())
@@ -45,8 +45,8 @@ def serve():
     try:
         if state_file is not None:
             state = json.loads(Path(state_file).read_text())
-            data_file = state["DataFile"]
-            conn_file = state["ConnFile"]
+            data_file = state["data_file"]
+            conn_file = state["conn_file"]
         source.Update(
             data_file=data_file,
             conn_file=conn_file,

@@ -16,7 +16,7 @@ class Toolbar:
         with self.state:
             response = await self.ctrl.open("Open Data File")
             print(f"Selected data file: {response}")
-            self.state.DataFile = response
+            self.state.data_file = response
 
     @task
     async def select_connectivity_file(self):
@@ -24,7 +24,7 @@ class Toolbar:
         with self.state:
             response = await self.ctrl.open("Open Connectivity File")
             print(f"Selected connectivity file: {response}")
-            self.state.ConnFile = response
+            self.state.conn_file = response
 
     @task
     async def export_state(self):
@@ -127,7 +127,7 @@ class Toolbar:
                         v2.VTextField(
                             prepend_icon="mdi-vector-rectangle",
                             placeholder="Connectivity File",
-                            v_model=("ConnFile", ""),
+                            v_model=("conn_file", ""),
                             hide_details=True,
                             dense=True,
                             flat=True,
@@ -156,7 +156,7 @@ class Toolbar:
                         v2.VTextField(
                             prepend_icon="mdi-database",
                             placeholder="Data File",
-                            v_model=("DataFile", ""),
+                            v_model=("data_file", ""),
                             hide_details=True,
                             dense=True,
                             flat=True,

@@ -57,8 +57,8 @@ cvd = []
 
 save_state_keys = [
     # Data files
-    "DataFile",
-    "ConnFile",
+    "data_file",
+    "conn_file",
     # Data slice related related variables
     "vlev",
     "vilev",
@@ -119,8 +119,8 @@ class EAMApp:
 
         # Load state variables from the source object
 
-        state.DataFile = source.data_file if source.data_file else ""
-        state.ConnFile = source.conn_file if source.conn_file else ""
+        state.data_file = source.data_file if source.data_file else ""
+        state.conn_file = source.conn_file if source.conn_file else ""
 
         self.update_state_from_source()
 
@@ -214,8 +214,8 @@ class EAMApp:
 
     def load_data(self):
         self.source.Update(
-            data_file=self.state.DataFile,
-            conn_file=self.state.ConnFile,
+            data_file=self.state.data_file,
+            conn_file=self.state.conn_file,
         )
         self.init_app_configuration()
         self.update_state_from_source()
