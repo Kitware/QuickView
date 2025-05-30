@@ -59,7 +59,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self' 'unsafe-inline' ws: localhost; script-src 'unsafe-eval' 'self';"
+      "csp": "default-src 'self' 'unsafe-inline'; connect-src 'self' ws: localhost; script-src 'unsafe-eval' 'self'; img-src 'self' data: blob:;"
     },
     "updater": {
       "active": false
@@ -69,7 +69,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "Cone",
+        "title": "QuickView",
         "width": 800,
         "visible": false
       },
