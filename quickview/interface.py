@@ -210,7 +210,7 @@ class EAMApp:
         all = self.state.to_dict()
         to_export = {k: all[k] for k in save_state_keys}
         # with open(os.path.join(self.workdir, "state.json"), "w") as outfile:
-        return json.dumps(to_export, indent=2)
+        return to_export
 
     def load_data(self):
         self.source.Update(
@@ -432,17 +432,6 @@ class EAMApp:
         """Initialize the UI and start the server for GeoTrame."""
         self.ui.server.start(**kwargs)
 
-    def import_config(self):
-        return
-
-    def export_config(self, config_file: Union[str, Path, None] = None) -> None:
-        pass
-
-    @change("export_config")
-    def export(self, export_config, **kwargs):
-        self.state.export_completed = False
-        self.state.exported_state = self.generate_state()
-
     @property
     def ui(self) -> SinglePageWithDrawerLayout:
         if self._ui is None:
@@ -461,6 +450,7 @@ class EAMApp:
                         move=self.move,
                         update_available_color_maps=self.update_available_color_maps,
                         update_scalar_bars=self.update_scalar_bars,
+                        generate_state=self.generate_state,
                     )
 
                 card_style = """

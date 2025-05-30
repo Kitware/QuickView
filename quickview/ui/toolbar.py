@@ -5,6 +5,7 @@ from trame.widgets import html, vuetify2 as v2, tauri
 
 from quickview.ui.view_settings import ViewControls
 from quickview.ui.file_selection import FileSelect
+import json
 
 
 @TrameApp()
@@ -25,6 +26,27 @@ class Toolbar:
             print(f"Selected connectivity file: {response}")
             self.state.ConnFile = response
 
+    @task
+    async def export_state(self):
+        print("Exporting state!!!!")
+        if self.generate_state is not None:
+            state = self.generate_state()
+            print(state)
+        with self.state:
+            response = await self.ctrl.save("Export State")
+            print(f"Selected export location: {response}")
+            export_path = response
+            with open(export_path, "w") as file:
+                json.dump(state, file, indent=4)
+
+    @task
+    async def import_state(self):
+        print("Importing state")
+        with self.state:
+            response = await self.ctrl.open("Import State", filter=["json"])
+            print(f"Selected import location: {response}")
+            import_path = response
+
     @property
     def state(self):
         return self.server.state
@@ -41,11 +63,14 @@ class Toolbar:
         load_variables=None,
         update_available_color_maps=None,
         update_scalar_bars=None,
+        generate_state=None,
         **kwargs,
     ):
         self.server = server
         with tauri.Dialog() as dialog:
             self.ctrl.open = dialog.open
+            self.ctrl.save = dialog.save
+        self.generate_state = generate_state
 
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
@@ -186,7 +211,7 @@ class Toolbar:
                     with v2.VBtn(
                         icon=True,
                         tile=True,
-                        click="export_config = true",
+                        click=self.export_state,
                         v_bind="attrs",
                         v_on="on",
                     ):
@@ -197,7 +222,7 @@ class Toolbar:
                     with v2.VBtn(
                         icon=True,
                         tile=True,
-                        click="export_config = true",
+                        click=self.import_state,
                         v_bind="attrs",
                         v_on="on",
                     ):

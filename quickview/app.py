@@ -25,6 +25,7 @@ def serve():
     )
     args, xargs = parser.parse_known_args()
 
+    print("Here  1 !!")
     data_file = args.data
     state_file = args.state
     work_dir = args.workdir
@@ -32,6 +33,7 @@ def serve():
 
     # ValidateArguments(conn_file, data_file, state_file, work_dir)
 
+    print("Here 2 !!")
     if args.conn is None:
         conn_file = os.path.join(
             os.path.dirname(__file__), "quickview", "data", "connectivity.nc"
@@ -40,6 +42,7 @@ def serve():
     if work_dir is None:
         work_dir = str(os.getcwd())
 
+    print("Here 3 !!")
     source = EAMVisSource()
     state = None
     try:
@@ -51,6 +54,7 @@ def serve():
             data_file=data_file,
             conn_file=conn_file,
         )
+        print("Here 4 !!")
         app = EAMApp(source, workdir=work_dir, initstate=state)
         app.start()
     except Exception as e:
