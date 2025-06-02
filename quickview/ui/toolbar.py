@@ -29,15 +29,14 @@ class Toolbar:
     @task
     async def export_state(self):
         print("Exporting state!!!!")
-        if self.generate_state is not None:
-            state = self.generate_state()
-            print(state)
+        if self._generate_state is not None:
+            config = self._generate_state()
         with self.state:
             response = await self.ctrl.save("Export State")
             print(f"Selected export location: {response}")
             export_path = response
             with open(export_path, "w") as file:
-                json.dump(state, file, indent=4)
+                json.dump(config, file, indent=4)
 
     @task
     async def import_state(self):
@@ -46,6 +45,8 @@ class Toolbar:
             response = await self.ctrl.open("Import State", filter=["json"])
             print(f"Selected import location: {response}")
             import_path = response
+            if self._load_state is not None:
+                self._load_state(import_path)
 
     @property
     def state(self):
@@ -60,6 +61,7 @@ class Toolbar:
         layout_toolbar,
         server,
         load_data=None,
+        load_state=None,
         load_variables=None,
         update_available_color_maps=None,
         update_scalar_bars=None,
@@ -70,7 +72,8 @@ class Toolbar:
         with tauri.Dialog() as dialog:
             self.ctrl.open = dialog.open
             self.ctrl.save = dialog.save
-        self.generate_state = generate_state
+        self._generate_state = generate_state
+        self._load_state = load_state
 
         with layout_toolbar as toolbar:
             toolbar.density = "compact"

@@ -25,10 +25,10 @@ def serve():
     )
     args, xargs = parser.parse_known_args()
 
-    data_file = "/Users/abhi.yenpure/repositories/eam/aerosol_F2010.eam.h0.2014-12.nc"  # args.data
+    data_file = args.data
     state_file = args.state
     work_dir = args.workdir
-    conn_file = "/Users/abhi.yenpure/repositories/eam/TEMPEST_ne30pg2.scrip.renamed.nc"  # args.conn
+    conn_file = args.conn
 
     # ValidateArguments(conn_file, data_file, state_file, work_dir)
 

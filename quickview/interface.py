@@ -24,6 +24,9 @@ from quickview.ui.variable_selection import VariableSelection
 from quickview.ui.view_settings import ViewProperties, ViewControls
 from quickview.ui.toolbar import Toolbar
 
+# Build color cache here
+from quickview.view_manager import build_color_information
+
 from quickview.utilities import EventType
 
 from quickview.view_manager import ViewManager
@@ -60,18 +63,16 @@ save_state_keys = [
     "data_file",
     "conn_file",
     # Data slice related related variables
+    "tstamp",
     "vlev",
     "vilev",
-    "vars2Dstate",
-    "vars3Distate",
-    "vars3Dmstate",
     # Latitude/Longitude clipping
     "cliplat",
     "cliplong",
     # Projection
     "projection",
     # Color map related variables
-    "ccardsentry",
+    "variables",
     "varcolor",
     "uselogscale",
     "varmin",
@@ -133,7 +134,7 @@ class EAMApp:
         # state.cliplat       = [self.source.extents[2], self.source.extents[3]],
         state.cmaps = ["1"]
         state.layout = []
-        state.ccardsentry = []
+        state.variables = []
         state.ccardscolor = [None] * len(
             source.vars2D + source.vars3Di + source.vars3Dm
         )
@@ -159,12 +160,7 @@ class EAMApp:
         if initstate is None:
             self.init_app_configuration()
         else:
-            state.update(initstate)
-            # Build color cache here
-            from quickview.view_manager import build_color_information
-
-            self.viewmanager.cache = build_color_information(initstate)
-            self.load_variables()
+            self.update_state_from_config(initstate)
 
     @property
     def state(self):
@@ -206,11 +202,45 @@ class EAMApp:
         state.vars3Di = source.vars3Di
         state.vars3Dm = source.vars3Dm
 
+    def update_state_from_config(self, initstate):
+        state = self.state
+        source = self.source
+        state.vars2D = source.vars2D
+        state.vars3Di = source.vars3Di
+        state.vars3Dm = source.vars3Dm
+        state.update(initstate)
+        selection = state.variables
+        selection2D = np.isin(state.vars2D, selection).tolist()
+        selection3Dm = np.isin(state.vars3Dm, selection).tolist()
+        selection3Di = np.isin(state.vars3Di, selection).tolist()
+
+        state.vars2Dstate = selection2D
+        state.vars3Dmstate = selection3Dm
+        state.vars3Distate = selection3Di
+        self.vars2Dstate = np.array(selection2D)
+        self.vars3Dmstate = np.array(selection3Dm)
+        self.vars3Distate = np.array(selection3Di)
+
+        self.viewmanager.cache = build_color_information(initstate)
+        self.load_variables()
+
     def generate_state(self):
         all = self.state.to_dict()
         to_export = {k: all[k] for k in save_state_keys}
         # with open(os.path.join(self.workdir, "state.json"), "w") as outfile:
         return to_export
+
+    def load_state(self, state_file):
+        print("Loading state")
+        state = json.loads(Path(state_file).read_text())
+        data_file = state["data_file"]
+        conn_file = state["conn_file"]
+        self.source.Update(
+            data_file=data_file,
+            conn_file=conn_file,
+        )
+        self.update_state_from_source()
+        self.update_state_from_config(state)
 
     def load_data(self):
         self.source.Update(
@@ -236,13 +266,11 @@ class EAMApp:
             v3di = np.array(self.state.vars3Di)
             f3di = np.array(self.state.vars3Distate)
             s3di = v3di[f3di].tolist()
+        print(s2d, s3di, s3dm)
         self.source.LoadVariables(s2d, s3dm, s3di)
 
         vars = s2d + s3dm + s3di
 
-        self.state.ccardsentry = vars
-
-        self.state.ccardsvars = [{"text": var, "value": var} for var in vars]
         self.state.varcolor = [self.state.colormaps[0]["value"]] * len(vars)
         self.state.uselogscale = [False] * len(vars)
         self.state.invert = [False] * len(vars)
@@ -445,9 +473,8 @@ class EAMApp:
                         toolbar,
                         self.server,
                         load_data=self.load_data,
+                        load_state=self.load_state,
                         load_variables=self.load_variables,
-                        zoom=self.zoom,
-                        move=self.move,
                         update_available_color_maps=self.update_available_color_maps,
                         update_scalar_bars=self.update_scalar_bars,
                         generate_state=self.generate_state,

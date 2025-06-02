@@ -114,19 +114,18 @@ class ViewData:
 
 
 def build_color_information(state: map):
-    vars = state["ccardsentry"]
+    vars = state["variables"]
     colors = state["varcolor"]
     logscl = state["uselogscale"]
-    invert = state["invert"]
+    # invert = state["invert"]
     varmin = state["varmin"]
     varmax = state["varmax"]
     cache = {}
     for index, var in enumerate(vars):
         cache[var] = ViewData(
-            colors[index],
-            rep=None,
+            view=None,
+            color=colors[index],
             uselog=logscl[index],
-            inv=invert[index],
             min=varmin[index],
             max=varmax[index],
         )
@@ -275,7 +274,7 @@ class ViewManager:
     @trigger("resetview")
     async def reset_resize_specific_view(self, index, sizeinfo=None):
         if sizeinfo is not None:
-            var = self.state.ccardsentry[index]
+            var = self.state.variables[index]
             viewdata: ViewData = self.cache[var]
             height = int(sizeinfo["height"])
             width = int(sizeinfo["width"])
@@ -298,28 +297,32 @@ class ViewManager:
             Delete(view_to_delete)
 
     def create_or_update_views(self):
+        print("Here -- creating vars!")
         self.widgets.clear()
         state = self.state
         source = self.source
-
+        print("1")
         long = state.cliplong
         lat = state.cliplat
-
+        print("2")
         source.UpdateLev(self.state.vlev, self.state.vilev)
         source.ApplyClipping(long, lat)
         source.UpdateCenter(self.state.center)
         source.UpdateProjection(self.state.projection)
+        print("2.5")
         source.UpdatePipeline()
-
+        print("3")
         vars2D = source.vars.get("2D", None)
         vars3Dm = source.vars.get("3Dm", None)
         vars3Di = source.vars.get("3Di", None)
-
+        print("4")
         to_render = vars2D + vars3Dm + vars3Di
         rendered = self.cache.keys()
         to_delete = set(rendered) - set(to_render)
         # Move old variables so they their proxies can be deleted
         self.to_delete.extend([self.cache[x].view for x in to_delete])
+
+        print("Here to render !", to_render)
 
         # Get area variable to calculate weighted average
         data = self.source.views["2DProj"]
@@ -350,7 +353,12 @@ class ViewManager:
                 viewdata.avg = varavg
                 viewdata.min = varrange[0]
                 viewdata.max = varrange[1]
-                self.update_existing_view(var, viewdata)
+                if view is None:
+                    view = CreateRenderView()
+                    viewdata.view = view
+                    view.UseColorPaletteForBackground = 0
+                    view.BackgroundColorMode = "Gradient"
+                    self.update_new_view(var, viewdata, self.source.views)
             else:
                 view = CreateRenderView()
                 viewdata = ViewData(
@@ -371,7 +379,6 @@ class ViewManager:
                 view0 = view
             else:
                 AddCameraLink(view, view0, f"viewlink{index}")
-
             widget = pvWidgets.VtkRemoteView(
                 view,
                 interactive_ratio=1,
@@ -404,7 +411,7 @@ class ViewManager:
     """
 
     def apply_colormap(self, index, type, value):
-        var = self.state.ccardsentry[index]
+        var = self.state.variables[index]
         coltrfunc = GetColorTransferFunction(var)
 
         viewdata: ViewData = self.cache[var]
@@ -431,13 +438,13 @@ class ViewManager:
         self.reset_views()
 
     def update_view_color_properties(self, index, min, max):
-        var = self.state.ccardsentry[index]
+        var = self.state.variables[index]
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
         self.reset_specific_view(index)
 
     def reset_view_color_properties(self, index):
-        var = self.state.ccardsentry[index]
+        var = self.state.variables[index]
         viewdata: ViewData = self.cache[var]
         self.state.varmin[index] = viewdata.min
         self.state.dirty("varmin")
@@ -447,21 +454,21 @@ class ViewManager:
         self.reset_views()
 
     def zoom_in(self, index=0):
-        var = self.state.ccardsentry[index]
+        var = self.state.variables[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         rview.CameraParallelScale *= 0.95
         self.reset_views()
 
     def zoom_out(self, index=0):
-        var = self.state.ccardsentry[index]
+        var = self.state.variables[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         rview.CameraParallelScale *= 1.05
         self.reset_views()
 
     def move(self, dir, factor, index=0):
-        var = self.state.ccardsentry[index]
+        var = self.state.variables[index]
         viewdata: ViewData = self.cache[var]
         rview = viewdata.view
         extents = self.source.moveextents
