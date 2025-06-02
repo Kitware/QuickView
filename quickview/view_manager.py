@@ -154,7 +154,7 @@ class ViewManager:
         for var, viewdata in self.cache.items():
             vardata = data.GetCellData().GetArray(var)
             varrange = vardata.GetRange()
-            varavg = np.sum(area * np.array(vardata)) / np.sum(area)
+            varavg = self.compute_average(vardata, area)
             viewdata.min = varrange[0]
             viewdata.max = varrange[1]
             viewdata.avg = varavg
@@ -207,12 +207,14 @@ class ViewManager:
         ColorBy(rep, ("CELLS", var))
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.ApplyPreset(viewdata.color, True)
+        coltrfunc.NanOpacity = 0.0
         LUTColorBar = GetScalarBar(coltrfunc, rview)
         LUTColorBar.AutoOrient = 1
-        # LUTColorBar.Orientation = 'Horizontal'
         LUTColorBar.WindowLocation = "Lower Right Corner"
         LUTColorBar.Title = ""
+        LUTColorBar.ComponentTitle = ""
         LUTColorBar.ScalarBarLength = 0.75
+        #LUTColorBar.NanOpacity = 0.0
 
         (v_text, V_info) = self.get_var_info(var, viewdata.avg)
         text = Text(registrationName=f"Text{var}")
@@ -296,6 +298,15 @@ class ViewManager:
             self.to_delete = [v for v in self.to_delete if v != view_to_delete]
             Delete(view_to_delete)
 
+    def compute_average(self, vardata, area):
+        if np.isnan(vardata).any():
+            mask = ~np.isnan(vardata)
+            if not np.any(mask):
+                return np.nan  # all values are NaN
+            vardata = np.array(vardata)[mask]
+            area = np.array(area)[mask]
+        return np.average(vardata, weights=area)
+
     def create_or_update_views(self):
         print("Here -- creating vars!")
         self.widgets.clear()
@@ -337,7 +348,7 @@ class ViewManager:
 
             vardata = vtkdata.GetCellData().GetArray(var)
             varrange = vardata.GetRange()
-            varavg = np.sum(area * np.array(vardata)) / np.sum(area)
+            varavg = self.compute_average(vardata, area)
 
             view = None
             viewdata: ViewData = self.cache.get(var, None)
@@ -352,6 +363,8 @@ class ViewManager:
                     view.UseColorPaletteForBackground = 0
                     view.BackgroundColorMode = "Gradient"
                     self.update_new_view(var, viewdata, self.source.views)
+                else:
+                    self.update_existing_view(var, viewdata)
             else:
                 view = CreateRenderView()
                 viewdata = ViewData(
@@ -425,9 +438,15 @@ class ViewManager:
         self.reset_specific_view(index)
 
     def update_scalar_bars(self, event):
+        print("Updating Scalar bar")
         for var, viewdata in self.cache.items():
             view = viewdata.view
             viewdata.data_rep.SetScalarBarVisibility(view, event)
+            coltrfunc = GetColorTransferFunction(var)
+            coltrfunc.ApplyPreset(viewdata.color, True)
+            LUTColorBar = GetScalarBar(coltrfunc, view)
+            LUTColorBar.Title = ""
+            LUTColorBar.ComponentTitle = ""
         self.reset_views()
 
     def update_view_color_properties(self, index, min, max):
