@@ -172,11 +172,11 @@ class EAMApp:
 
     @life_cycle.server_ready
     def _tauri_ready(self, **_):
-        print(f"\ntauri-server-port={self.server.port}", flush=True)
+        os.write(1, f"tauri-server-port={self.server.port}\n".encode())
 
     @life_cycle.client_connected
     def _tauri_show(self, **_):
-        print("\ntauri-client-ready", flush=True)
+        os.write(1, "tauri-client-ready\n".encode())
 
     def init_app_configuration(self):
         state = self.state

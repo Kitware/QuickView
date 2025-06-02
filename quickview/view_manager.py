@@ -301,28 +301,21 @@ class ViewManager:
         self.widgets.clear()
         state = self.state
         source = self.source
-        print("1")
         long = state.cliplong
         lat = state.cliplat
-        print("2")
         source.UpdateLev(self.state.vlev, self.state.vilev)
         source.ApplyClipping(long, lat)
         source.UpdateCenter(self.state.center)
         source.UpdateProjection(self.state.projection)
-        print("2.5")
         source.UpdatePipeline()
-        print("3")
         vars2D = source.vars.get("2D", None)
         vars3Dm = source.vars.get("3Dm", None)
         vars3Di = source.vars.get("3Di", None)
-        print("4")
         to_render = vars2D + vars3Dm + vars3Di
         rendered = self.cache.keys()
         to_delete = set(rendered) - set(to_render)
         # Move old variables so they their proxies can be deleted
         self.to_delete.extend([self.cache[x].view for x in to_delete])
-
-        print("Here to render !", to_render)
 
         # Get area variable to calculate weighted average
         data = self.source.views["2DProj"]

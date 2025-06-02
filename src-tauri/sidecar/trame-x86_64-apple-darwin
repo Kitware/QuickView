@@ -3,4 +3,4 @@ rootdir=`dirname $0`
 rootdir=`cd $rootdir && cd .. && pwd`
 
 export PYTHONUNBUFFERED=1
-$rootdir/Resources/server/_internal/pvpython --force-offscreen-rendering -m quickview.app $@
+$rootdir/Resources/server/server $@

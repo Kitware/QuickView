@@ -2,4 +2,4 @@
 rootdir=`dirname $0`
 rootdir=`cd $rootdir && cd ../lib/quickview && pwd`
 
-$rootdir/server/_internal/pvpython --force-offscreen-rendering -m quickview.app $@
+$rootdir/server/server $@
