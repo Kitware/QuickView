@@ -271,6 +271,9 @@ class EAMApp:
 
         vars = s2d + s3dm + s3di
 
+        # Tracking variables to control camera and color properties
+        self.state.variables = vars
+        
         self.state.varcolor = [self.state.colormaps[0]["value"]] * len(vars)
         self.state.uselogscale = [False] * len(vars)
         self.state.invert = [False] * len(vars)
