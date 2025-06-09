@@ -481,7 +481,7 @@ class EAMApp:
                     )
 
                 card_style = """
-                    position: absolute; 
+                    position: fixed; 
                     bottom: 1rem; 
                     right: 1rem; 
                     height: 2.4rem; 
@@ -523,7 +523,7 @@ class EAMApp:
                         )
 
                         VariableSelection(
-                            title="3D Middle Layer Variables",
+                            title="Variables at Layer Midpoints",
                             panel_name="show_vars3Dm",
                             var_list="vars3Dm",
                             var_list_state="vars3Dmstate",
@@ -533,7 +533,7 @@ class EAMApp:
                         )
 
                         VariableSelection(
-                            title="3D Interface Layer Variables",
+                            title="Variables at Layer Interfaces",
                             panel_name="show_vars3Di",
                             var_list="vars3Di",
                             var_list_state="vars3Distate",

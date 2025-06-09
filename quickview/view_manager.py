@@ -308,7 +308,6 @@ class ViewManager:
         return np.average(vardata, weights=area)
 
     def create_or_update_views(self):
-        print("Here -- creating vars!")
         self.widgets.clear()
         state = self.state
         source = self.source
@@ -359,6 +358,7 @@ class ViewManager:
                 viewdata.max = varrange[1]
                 if view is None:
                     view = CreateRenderView()
+                    view.GetRenderWindow().SetOffScreenRendering(True)
                     viewdata.view = view
                     view.UseColorPaletteForBackground = 0
                     view.BackgroundColorMode = "Gradient"

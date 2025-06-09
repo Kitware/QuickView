@@ -81,6 +81,10 @@ class Toolbar:
             v2.VBtn(
                 "Load Variables",
                 classes="ma-2",
+                dense=True,
+                #flat=True,
+                tonal=True,
+                small=True,
                 click=load_variables,
                 style="background-color: lightgray;",  # width: 200px; height: 50px;",
             )
@@ -121,7 +125,7 @@ class Toolbar:
             with v2.VCol(style="width: 25%;", classes="justify-center pa-0"):
                 with v2.VRow(
                     no_gutters=True,
-                    classes="align-center mt-n4",
+                    classes="align-center",
                     style="max-height: 2rem;",
                 ):
                     # with v2.VCol():
@@ -133,24 +137,12 @@ class Toolbar:
                             v_model=("conn_file", ""),
                             hide_details=True,
                             dense=True,
-                            flat=True,
-                            variant="solo",
-                            reverse=True,
+                            append_icon="mdi-folder-upload",
+                            click_append=self.select_connectivity_file,
                         )
-                    with html.Div(classes="flex-0"):
-                        with v2.VBtn(
-                            icon=True,
-                            size="sm",
-                            dense=True,
-                            flat=True,
-                            variant="outlined",
-                            classes="mx-2",
-                            click=self.select_connectivity_file,
-                        ):
-                            v2.VIcon("mdi-folder-upload")
                 with v2.VRow(
                     no_gutters=True,
-                    classes="align-center mr-0",
+                    classes="overflow-x-hidden align-center mr-0",
                     style="max-height: 2rem;",
                 ):
                     # with v2.VCol():
@@ -162,58 +154,44 @@ class Toolbar:
                             v_model=("data_file", ""),
                             hide_details=True,
                             dense=True,
-                            flat=True,
-                            variant="solo",
-                            reverse=True,
+                            append_icon="mdi-folder-upload",
+                            click_append=self.select_data_file,
                         )
-                    with html.Div(classes="flex-0"):
-                        with v2.VBtn(
-                            icon=True,
-                            size="sm",
-                            dense=True,
-                            flat=True,
-                            variant="outlined",
-                            classes="mx-2",
-                            click=self.select_data_file,
-                        ):
-                            v2.VIcon("mdi-folder-upload")
-
-            with html.Div(classes="flex-0"):
-                with v2.VTooltip(bottom=True):
-                    with html.Template(v_slot_activator="{ on, attrs }"):
-                        with v2.VBtn(
-                            icon=True,
-                            dense=True,
-                            flat=True,
-                            large=True,
-                            classes="mx-2",
-                            click=load_data,
-                            v_bind="attrs",
-                            v_on="on",
-                        ):
-                            v2.VIcon("mdi-file-check")
-                    html.Span(f"Load Files")
-                with v2.VTooltip(bottom=True):
-                    with html.Template(v_slot_activator="{ on, attrs }"):
-                        with v2.VBtn(
-                            icon=True,
-                            dense=True,
-                            flat=True,
-                            large=True,
-                            classes="mx-2",
-                            click=load_data,
-                            v_bind="attrs",
-                            v_on="on",
-                        ):
-                            v2.VIcon("mdi-swap-horizontal")
-                    html.Span(f"Replace Files")
+            with v2.VTooltip(bottom=True):
+                with html.Template(v_slot_activator="{ on, attrs }"):
+                    with v2.VBtn(
+                        icon=True,
+                        dense=True,
+                        flat=True,
+                        small=True,
+                        click=load_data,
+                        v_bind="attrs",
+                        v_on="on",
+                    ):
+                        v2.VIcon("mdi-file-check")
+                html.Span(f"Load Files")
+            with v2.VTooltip(bottom=True):
+                with html.Template(v_slot_activator="{ on, attrs }"):
+                    with v2.VBtn(
+                        icon=True,
+                        dense=True,
+                        flat=True,
+                        small=True,
+                        click=load_data,
+                        v_bind="attrs",
+                        v_on="on",
+                    ):
+                        v2.VIcon("mdi-swap-horizontal")
+                html.Span(f"Replace Files")
 
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(
                         icon=True,
-                        tile=True,
+                        dense=True,
+                        flat=True,
+                        small=True,
                         click=self.export_state,
                         v_bind="attrs",
                         v_on="on",
@@ -224,7 +202,9 @@ class Toolbar:
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(
                         icon=True,
-                        tile=True,
+                        dense=True,
+                        flat=True,
+                        small=True,
                         click=self.import_state,
                         v_bind="attrs",
                         v_on="on",
