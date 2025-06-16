@@ -230,7 +230,7 @@ class SliceSelection(CollapsableSection):
     def on_click_advance_middle(self, diff):
         current = self.state.vlev
         update = current + diff
-        #if update >= 0 and update <= len(self.state.lev) - 1:
+        # if update >= 0 and update <= len(self.state.lev) - 1:
         self.state.vlev = update % len(self.state.lev)
 
     @change("play_lev")
@@ -238,14 +238,16 @@ class SliceSelection(CollapsableSection):
     async def play_lev(self, **kwargs):
         state = self.state
         while state.play_lev:
+            state.play_ilev = False
+            state.play_time = False
             with state:
                 self.on_click_advance_middle(1)
-            await asyncio.sleep(0.1)
+                await asyncio.sleep(0.1)
 
     def on_click_advance_interface(self, diff):
         current = self.state.vilev
         update = current + diff
-        #if update >= 0 and update <= len(self.state.ilev) - 1:
+        # if update >= 0 and update <= len(self.state.ilev) - 1:
         self.state.vilev = update % len(self.state.ilev)
 
     @change("play_ilev")
@@ -253,21 +255,25 @@ class SliceSelection(CollapsableSection):
     async def play_ilev(self, **kwargs):
         state = self.state
         while state.play_ilev:
+            state.play_lev = False
+            state.play_time = False
             with state:
                 self.on_click_advance_interface(1)
-            await asyncio.sleep(0.1)
+                await asyncio.sleep(0.1)
 
     def on_click_advance_time(self, diff):
         current = self.state.tstamp
         update = current + diff
-        #if update >= 0 and update <= len(self.state.timesteps) - 1:
+        # if update >= 0 and update <= len(self.state.timesteps) - 1:
         self.state.tstamp = update % len(self.state.timesteps)
 
     @change("play_time")
     @asynchronous.task
     async def play_time(self, **kwargs):
-        state = self.state  
+        state = self.state
         while state.play_time:
+            state.play_lev = False
+            state.play_ilev = False
             with state:
                 self.on_click_advance_time(1)
-            await asyncio.sleep(0.1)
+                await asyncio.sleep(0.1)

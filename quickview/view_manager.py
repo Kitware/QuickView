@@ -99,6 +99,7 @@ class ViewData:
         inv=False,
         min=None,
         max=None,
+        override=False,
     ):
         self.view = view
         self.data_rep = data_rep
@@ -111,6 +112,7 @@ class ViewData:
         self.min = min
         self.max = max
         self.index = index
+        self.override=override
 
 
 def build_color_information(state: map):
@@ -147,19 +149,16 @@ class ViewManager:
     def step_update_existing_views(self):
         if len(self.cache) == 0:
             return
-
         data = sm.Fetch(self.source.views["2DProj"])
-        area = np.array(data.GetCellData().GetArray("area"))
 
         for var, viewdata in self.cache.items():
-            vardata = data.GetCellData().GetArray(var)
-            varrange = vardata.GetRange()
-            varavg = self.compute_average(vardata, area)
-            viewdata.min = varrange[0]
-            viewdata.max = varrange[1]
+            varavg = self.compute_average(var, vtkdata=data)
             viewdata.avg = varavg
-
-            viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
+            if not viewdata.override:
+                viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
+                range = self.compute_range(var=var)
+                viewdata.min = range[0]
+                viewdata.max = range[1]
             (v_text, V_info) = self.get_var_info(var, viewdata.avg)
             if viewdata.var_text is not None:
                 viewdata.var_text.Text = v_text
@@ -168,7 +167,8 @@ class ViewManager:
             self.update_state_color_properties(viewdata.index, viewdata)
 
     def update_existing_view(self, var, viewdata: ViewData):
-        viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
+        if not viewdata.override:
+            viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
         (v_text, V_info) = self.get_var_info(var, viewdata.avg)
         if viewdata.var_text is not None:
             viewdata.var_text.Text = v_text
@@ -214,7 +214,7 @@ class ViewManager:
         LUTColorBar.Title = ""
         LUTColorBar.ComponentTitle = ""
         LUTColorBar.ScalarBarLength = 0.75
-        #LUTColorBar.NanOpacity = 0.0
+        # LUTColorBar.NanOpacity = 0.0
 
         (v_text, V_info) = self.get_var_info(var, viewdata.avg)
         text = Text(registrationName=f"Text{var}")
@@ -256,12 +256,12 @@ class ViewManager:
         # ResetCamera(rview)
 
     def update_state_color_properties(self, index, viewdata: ViewData):
-        state = self.state
-        state.varcolor[index] = viewdata.color
-        state.varmin[index] = viewdata.min
-        state.varmax[index] = viewdata.max
-        state.uselogscale[index] = viewdata.uselog
-
+        with self.state as state:
+            state.varcolor[index] = viewdata.color
+            state.varmin[index] = viewdata.min
+            state.varmax[index] = viewdata.max
+            state.uselogscale[index] = viewdata.uselog
+        
     def reset_camera(self, **kwargs):
         for widget in self.widgets:
             widget.reset_camera()
@@ -298,7 +298,12 @@ class ViewManager:
             self.to_delete = [v for v in self.to_delete if v != view_to_delete]
             Delete(view_to_delete)
 
-    def compute_average(self, vardata, area):
+    def compute_average(self, var, vtkdata=None):
+        if vtkdata is None:
+            data = self.source.views["2DProj"]
+            vtkdata = sm.Fetch(data)
+        vardata = vtkdata.GetCellData().GetArray(var)
+        area = np.array(vtkdata.GetCellData().GetArray("area"))
         if np.isnan(vardata).any():
             mask = ~np.isnan(vardata)
             if not np.any(mask):
@@ -306,6 +311,13 @@ class ViewManager:
             vardata = np.array(vardata)[mask]
             area = np.array(area)[mask]
         return np.average(vardata, weights=area)
+
+    def compute_range(self, var, vtkdata=None):
+        if vtkdata is None:
+            data = self.source.views["2DProj"]
+            vtkdata = sm.Fetch(data)
+        vardata = vtkdata.GetCellData().GetArray(var)
+        return vardata.GetRange()
 
     def create_or_update_views(self):
         self.widgets.clear()
@@ -330,7 +342,6 @@ class ViewManager:
         # Get area variable to calculate weighted average
         data = self.source.views["2DProj"]
         vtkdata = sm.Fetch(data)
-        area = np.array(vtkdata.GetCellData().GetArray("area"))
 
         del self.state.views[:]
         del self.state.layout[:]
@@ -345,23 +356,22 @@ class ViewManager:
             x = int(index % 3) * wdt
             y = int(index / 3) * hgt
 
-            vardata = vtkdata.GetCellData().GetArray(var)
-            varrange = vardata.GetRange()
-            varavg = self.compute_average(vardata, area)
+            varrange = self.compute_range(var, vtkdata=vtkdata)
+            varavg = self.compute_average(var, vtkdata=vtkdata)
 
             view = None
             viewdata: ViewData = self.cache.get(var, None)
             if viewdata is not None:
                 view = viewdata.view
                 viewdata.avg = varavg
-                viewdata.min = varrange[0]
-                viewdata.max = varrange[1]
                 if view is None:
                     view = CreateRenderView()
-                    view.GetRenderWindow().SetOffScreenRendering(True)
-                    viewdata.view = view
                     view.UseColorPaletteForBackground = 0
                     view.BackgroundColorMode = "Gradient"
+                    view.GetRenderWindow().SetOffScreenRendering(True)
+                    viewdata.view = view
+                    viewdata.min = varrange[0]
+                    viewdata.max = varrange[1]
                     self.update_new_view(var, viewdata, self.source.views)
                 else:
                     self.update_existing_view(var, viewdata)
@@ -373,6 +383,7 @@ class ViewManager:
                     avg=varavg,
                     min=varrange[0],
                     max=varrange[1],
+                    override=False,
                 )
                 view.UseColorPaletteForBackground = 0
                 view.BackgroundColorMode = "Gradient"
@@ -451,13 +462,19 @@ class ViewManager:
 
     def update_view_color_properties(self, index, min, max):
         var = self.state.variables[index]
+        viewdata: ViewData = self.cache[var]
+        viewdata.override = True
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
         self.reset_specific_view(index)
 
     def reset_view_color_properties(self, index):
         var = self.state.variables[index]
+        # Get colors from main file
+        varrange = self.compute_range(var)
         viewdata: ViewData = self.cache[var]
+        viewdata.min = varrange[0]
+        viewdata.max = varrange[1]
         self.state.varmin[index] = viewdata.min
         self.state.dirty("varmin")
         self.state.varmax[index] = viewdata.max
