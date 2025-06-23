@@ -1,0 +1,7 @@
+name: quickview
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip
+  - paraview=5.13.3
