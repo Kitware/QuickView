@@ -11,10 +11,12 @@ dependencies = [
     "trame-vuetify>=2.4",
     "trame-components>=2.3.2",
     "trame-grid-layout>=1.0.3",
+    "trame-tauri>=0.6.2",
     "pyproj>=3.6.1",
     "netCDF4>=1.6.5",
+    "pyinstaller",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "Apache Software License"}
 keywords = ["Python", "Interactive", "Web", "Application", "Framework"]
