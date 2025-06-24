@@ -40,7 +40,9 @@ jobs:
         shell: bash -l {0}
 
       - name: Package using PyInstaller
-        run: setup_tauri.sh
+        run: | 
+          chmod +x setup_tauri.sh
+          ./setup_tauri.sh
         shell: bash -l {0}
 
       - name: setup node
