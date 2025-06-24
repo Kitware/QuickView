@@ -1,8 +1,8 @@
-name: 'publish'
+name: 'Package and Release'
 
 on:
   push:
-    branches: [master]
+    branches: [release*]
   
 # This workflow will trigger on each push to the `master` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
 
