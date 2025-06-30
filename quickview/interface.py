@@ -144,11 +144,6 @@ class EAMApp:
         state.varmin = []
         state.varmax = []
 
-        state.export_config = False
-        state.exported_state = None
-        state.export_completed = False
-        state.state_save_file = None
-
         ctrl.view_update = self.viewmanager.reset_views
         ctrl.view_reset_camera = self.viewmanager.reset_camera
         ctrl.on_server_ready.add(ctrl.view_update)
@@ -156,6 +151,7 @@ class EAMApp:
 
         state.colormaps = noncvd
 
+        self.state.pipeline_valid = False
         # User controlled state varialbes
         if initstate is None:
             self.init_app_configuration()
@@ -179,44 +175,45 @@ class EAMApp:
         os.write(1, "tauri-client-ready\n".encode())
 
     def init_app_configuration(self):
-        state = self.state
         source = self.source
-        state.vlev = 0
-        state.vilev = 0
-        state.tstamp = 0
-        state.vars2Dstate = [False] * len(source.vars2D)
-        state.vars3Dmstate = [False] * len(source.vars3Dm)
-        state.vars3Distate = [False] * len(source.vars3Di)
+        with self.state as state:
+            state.vlev = 0
+            state.vilev = 0
+            state.tstamp = 0
+            state.vars2Dstate = [False] * len(source.vars2D)
+            state.vars3Dmstate = [False] * len(source.vars3Dm)
+            state.vars3Distate = [False] * len(source.vars3Di)
         self.vars2Dstate = np.array([False] * len(source.vars2D))
         self.vars3Dmstate = np.array([False] * len(source.vars3Dm))
         self.vars3Distate = np.array([False] * len(source.vars3Di))
 
     def update_state_from_source(self):
-        state = self.state
         source = self.source
-        state.timesteps = source.timestamps
-        state.lev = source.lev
-        state.ilev = source.ilev
-        state.extents = list(source.extents)
-        state.vars2D = source.vars2D
-        state.vars3Di = source.vars3Di
-        state.vars3Dm = source.vars3Dm
+        with self.state as state:
+            state.timesteps = source.timestamps
+            state.lev = source.lev
+            state.ilev = source.ilev
+            state.extents = list(source.extents)
+            state.vars2D = source.vars2D
+            state.vars3Di = source.vars3Di
+            state.vars3Dm = source.vars3Dm
 
     def update_state_from_config(self, initstate):
-        state = self.state
         source = self.source
-        state.vars2D = source.vars2D
-        state.vars3Di = source.vars3Di
-        state.vars3Dm = source.vars3Dm
-        state.update(initstate)
-        selection = state.variables
-        selection2D = np.isin(state.vars2D, selection).tolist()
-        selection3Dm = np.isin(state.vars3Dm, selection).tolist()
-        selection3Di = np.isin(state.vars3Di, selection).tolist()
+        with self.state as state:
+            state.vars2D = source.vars2D
+            state.vars3Di = source.vars3Di
+            state.vars3Dm = source.vars3Dm
+            state.update(initstate)
 
-        state.vars2Dstate = selection2D
-        state.vars3Dmstate = selection3Dm
-        state.vars3Distate = selection3Di
+            selection = state.variables
+            selection2D = np.isin(state.vars2D, selection).tolist()
+            selection3Dm = np.isin(state.vars3Dm, selection).tolist()
+            selection3Di = np.isin(state.vars3Di, selection).tolist()
+            state.vars2Dstate = selection2D
+            state.vars3Dmstate = selection3Dm
+            state.vars3Distate = selection3Di
+
         self.vars2Dstate = np.array(selection2D)
         self.vars3Dmstate = np.array(selection3Dm)
         self.vars3Distate = np.array(selection3Di)
@@ -235,7 +232,7 @@ class EAMApp:
         state = json.loads(Path(state_file).read_text())
         data_file = state["data_file"]
         conn_file = state["conn_file"]
-        self.source.Update(
+        self.state.pipeline_valid = self.source.Update(
             data_file=data_file,
             conn_file=conn_file,
         )
@@ -243,7 +240,7 @@ class EAMApp:
         self.update_state_from_config(state)
 
     def load_data(self):
-        self.source.Update(
+        self.state.pipeline_valid = self.source.Update(
             data_file=self.state.data_file,
             conn_file=self.state.conn_file,
         )
@@ -272,90 +269,75 @@ class EAMApp:
         vars = s2d + s3dm + s3di
 
         # Tracking variables to control camera and color properties
-        self.state.variables = vars
-        
-        self.state.varcolor = [self.state.colormaps[0]["value"]] * len(vars)
-        self.state.uselogscale = [False] * len(vars)
-        self.state.invert = [False] * len(vars)
-        self.state.varmin = [np.nan] * len(vars)
-        self.state.varmax = [np.nan] * len(vars)
+        with self.state as state:
+            state.variables = vars
+            state.varcolor = [state.colormaps[0]["value"]] * len(vars)
+            state.uselogscale = [False] * len(vars)
+            state.invert = [False] * len(vars)
+            state.varmin = [np.nan] * len(vars)
+            state.varmax = [np.nan] * len(vars)
 
-        with self.state:
             self.viewmanager.create_or_update_views()
 
     def apply_colormap(self, index, type, value):
-        if type == EventType.COL.value:
-            self.state.varcolor[index] = value
-            self.state.dirty("varcolor")
-        elif type == EventType.LOG.value:
-            self.state.uselogscale[index] = value
-            self.state.dirty("uselogscale")
-        elif type == EventType.INV.value:
-            self.state.invert[index] = value
-            self.state.dirty("invert")
-        self.viewmanager.apply_colormap(index, type, value)
+        with self.state as state:
+            if type == EventType.COL.value:
+                state.varcolor[index] = value
+                state.dirty("varcolor")
+            elif type == EventType.LOG.value:
+                state.uselogscale[index] = value
+                state.dirty("uselogscale")
+            elif type == EventType.INV.value:
+                state.invert[index] = value
+                state.dirty("invert")
+            self.viewmanager.apply_colormap(index, type, value)
 
     def update_scalar_bars(self, event):
         self.viewmanager.update_scalar_bars(event)
 
     def update_available_color_maps(self, event):
-        if len(event) == 0:
-            self.state.colormaps = noncvd
-        elif len(event) == 2:
-            self.state.colormaps = cvd + noncvd
-        elif "0" in event:
-            self.state.colormaps = cvd
-        elif "1" in event:
-            self.state.colormaps = noncvd
+        with self.state as state:
+            if len(event) == 0:
+                state.colormaps = noncvd
+            elif len(event) == 2:
+                state.colormaps = cvd + noncvd
+            elif "0" in event:
+                state.colormaps = cvd
+            elif "1" in event:
+                state.colormaps = noncvd
 
     def update_view_color_properties(self, index, type, value):
-        if type.lower() == "min":
-            self.state.varmin[index] = value
-            self.state.dirty("varmin")
-        elif type.lower() == "max":
-            self.state.varmax[index] = value
-            self.state.dirty("varmax")
-        self.viewmanager.update_view_color_properties(
-            index, self.state.varmin[index], self.state.varmax[index]
-        )
+        with self.state as state:
+            if type.lower() == "min":
+                state.varmin[index] = value
+                state.dirty("varmin")
+            elif type.lower() == "max":
+                state.varmax[index] = value
+                state.dirty("varmax")
+            self.viewmanager.update_view_color_properties(
+                index, state.varmin[index], state.varmax[index]
+            )
 
     def reset_view_color_properties(self, index):
         self.viewmanager.reset_view_color_properties(index)
 
     def zoom(self, type):
-        if type.lower() == "in":
-            self.viewmanager.zoom_in()
-        elif type.lower() == "out":
-            self.viewmanager.zoom_out()
-        pass
+        with self.viewmanager as manager:
+            if type.lower() == "in":
+                manager.zoom_in()
+            elif type.lower() == "out":
+                manager.zoom_out()
 
     def move(self, dir):
-        if dir.lower() == "up":
-            self.viewmanager.move(1, 0)
-        elif dir.lower() == "down":
-            self.viewmanager.move(1, 1)
-        elif dir.lower() == "left":
-            self.viewmanager.move(0, 1)
-        elif dir.lower() == "right":
-            self.viewmanager.move(0, 0)
-
-    '''
-    def export_config(self, config_file: Union[str, Path, None] = None) -> None:
-        """Export the current state to a JSON configuration file.
-
-        Parameters:
-            config_file: Can be a string or Path representing the destination of the JSON configuration file.
-                If None, a dictionary containing the current configuration will be returned.
-                For details, see Configuration Files documentation.
-        """
-        # Populate config as a map
-        config = {
-
-        }
-        if config_file:
-            Path(config_file).write_text(json.dumps(config))
-        return config
-    '''
+        with self.viewmanager as manager:
+            if dir.lower() == "up":
+                manager.move(1, 0)
+            elif dir.lower() == "down":
+                manager.move(1, 1)
+            elif dir.lower() == "left":
+                manager.move(0, 1)
+            elif dir.lower() == "right":
+                manager.move(0, 0)
 
     def update_2D_variable_selection(self, index, event):
         self.state.vars2Dstate[index] = event

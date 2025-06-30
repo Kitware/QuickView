@@ -20,6 +20,19 @@ from paraview.vtk.numpy_interface import dataset_adapter as dsa
 from vtkmodules.vtkCommonCore import vtkLogger
 
 
+# Define a VTK error observer
+class ErrorObserver:
+    def __init__(self):
+        self.error_occurred = False
+        self.error_message = ""
+
+    def __call__(self, obj, event):
+        self.error_occurred = True
+
+    def clear(self):
+        self.error_occurred = False
+
+
 class EAMVisSource:
     def __init__(self):
         # flag to check if the pipeline is valid
@@ -54,6 +67,7 @@ class EAMVisSource:
         self.views = {}
         self.vars = {}
 
+        self.observer = ErrorObserver()
         try:
             plugin_dir = os.path.join(os.path.dirname(__file__), "plugins")
             plugins = fnmatch.filter(os.listdir(path=plugin_dir), "*.py")
@@ -169,12 +183,23 @@ class EAMVisSource:
             data.MiddleLayer = lev
             data.InterfaceLayer = ilev
             self.data = data
+            vtk_obj = data.GetClientSideObject()
+            vtk_obj.AddObserver("ErrorEvent", self.observer)
+            vtk_obj.GetExecutive().AddObserver("ErrorEvent", self.observer)
+            self.observer.clear()
         else:
             self.data.DataFile = data_file
             self.data.ConnectivityFile = conn_file
+            self.observer.clear()
 
         try:
             self.data.UpdatePipeline()
+            if self.observer.error_occurred:
+                raise RuntimeError(
+                    "Error occurred in UpdatePipeline. "
+                    "Please check if the data and connectivity files exist "
+                    "and are compatible"
+                )
 
             data_wrapped = dsa.WrapDataObject(sm.Fetch(self.data))
             self.lev = data_wrapped.FieldData["lev"].tolist()
@@ -252,9 +277,11 @@ class EAMVisSource:
             self.views["GLines"] = OutputPort(projA, 0)
 
             self.valid = True
+            self.observer.clear()
         except Exception as e:
             # print("Error in UpdatePipeline :", e)
             # traceback.print_stack()
+            print(e)
             self.valid = False
             return
 

@@ -1,10 +1,6 @@
-import os
-
 from trame.decorators import TrameApp, task
 from trame.widgets import html, vuetify2 as v2, tauri
 
-from quickview.ui.view_settings import ViewControls
-from quickview.ui.file_selection import FileSelect
 import json
 
 
@@ -15,7 +11,6 @@ class Toolbar:
         print("Selecting data file : ", self.ctrl.open)
         with self.state:
             response = await self.ctrl.open("Open Data File")
-            print(f"Selected data file: {response}")
             self.state.data_file = response
 
     @task
@@ -23,7 +18,6 @@ class Toolbar:
         print("Selecting connectivity file : ", self.ctrl.open)
         with self.state:
             response = await self.ctrl.open("Open Connectivity File")
-            print(f"Selected connectivity file: {response}")
             self.state.conn_file = response
 
     @task
@@ -33,7 +27,6 @@ class Toolbar:
             config = self._generate_state()
         with self.state:
             response = await self.ctrl.save("Export State")
-            print(f"Selected export location: {response}")
             export_path = response
             with open(export_path, "w") as file:
                 json.dump(config, file, indent=4)
@@ -43,7 +36,6 @@ class Toolbar:
         print("Importing state")
         with self.state:
             response = await self.ctrl.open("Import State", filter=["json"])
-            print(f"Selected import location: {response}")
             import_path = response
             if self._load_state is not None:
                 self._load_state(import_path)
@@ -82,7 +74,7 @@ class Toolbar:
                 "Load Variables",
                 classes="ma-2",
                 dense=True,
-                #flat=True,
+                # flat=True,
                 tonal=True,
                 small=True,
                 click=load_variables,
@@ -181,7 +173,7 @@ class Toolbar:
                         v_bind="attrs",
                         v_on="on",
                     ):
-                        v2.VIcon("mdi-swap-horizontal")
+                        v2.VIcon("mdi-swap-horizontal", color="red")
                 html.Span(f"Replace Files")
 
             v2.VDivider(vertical=True, classes="mx-2")
@@ -211,11 +203,6 @@ class Toolbar:
                     ):
                         v2.VIcon("mdi-upload")
                 html.Span(f"Load State")
-            with v2.VDialog(v_model=("export_config",), max_width=800):
-                with v2.VContainer(
-                    fluid=True, classes="d-flex justify-center align-center"
-                ):
-                    FileSelect()
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
