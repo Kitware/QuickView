@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Union
 
 from trame.app import get_server
-from trame.decorators import TrameApp, change, life_cycle
+from trame.decorators import TrameApp, life_cycle
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame.widgets import vuetify as v2, html, client
@@ -151,8 +151,8 @@ class EAMApp:
 
         state.colormaps = noncvd
 
-        self.state.pipeline_valid = False
-        # User controlled state varialbes
+        self.state.pipeline_valid = source.valid
+        # User controlled state variables
         if initstate is None:
             self.init_app_configuration()
         else:
@@ -197,6 +197,7 @@ class EAMApp:
             state.vars2D = source.vars2D
             state.vars3Di = source.vars3Di
             state.vars3Dm = source.vars3Dm
+            state.pipeline_valid = source.valid
 
     def update_state_from_config(self, initstate):
         source = self.source
@@ -229,23 +230,24 @@ class EAMApp:
 
     def load_state(self, state_file):
         print("Loading state")
-        state = json.loads(Path(state_file).read_text())
-        data_file = state["data_file"]
-        conn_file = state["conn_file"]
-        self.state.pipeline_valid = self.source.Update(
+        from_state = json.loads(Path(state_file).read_text())
+        data_file = from_state["data_file"]
+        conn_file = from_state["conn_file"]
+        self.source.Update(
             data_file=data_file,
             conn_file=conn_file,
         )
         self.update_state_from_source()
-        self.update_state_from_config(state)
+        self.update_state_from_config(from_state)
 
     def load_data(self):
-        self.state.pipeline_valid = self.source.Update(
-            data_file=self.state.data_file,
-            conn_file=self.state.conn_file,
-        )
-        self.init_app_configuration()
-        self.update_state_from_source()
+        with self.state as state:
+            state.pipeline_valid = self.source.Update(
+                data_file=self.state.data_file,
+                conn_file=self.state.conn_file,
+            )
+            self.init_app_configuration()
+            self.update_state_from_source()
 
     def load_variables(self):
         s2d = []
@@ -466,12 +468,12 @@ class EAMApp:
                     )
 
                 card_style = """
-                    position: fixed; 
-                    bottom: 1rem; 
-                    right: 1rem; 
-                    height: 2.4rem; 
-                    z-index: 2; 
-                    display: flex; 
+                    position: fixed;
+                    bottom: 1rem;
+                    right: 1rem;
+                    height: 2.4rem;
+                    z-index: 2;
+                    display: flex;
                     align-items: center;
                 """
                 ViewControls(

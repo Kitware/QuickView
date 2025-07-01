@@ -3,10 +3,9 @@ import numpy as np
 import paraview.servermanager as sm
 
 from trame.widgets import paraview as pvWidgets
-from trame.decorators import TrameApp, trigger, change
+from trame.decorators import TrameApp, trigger
 from pyproj import Proj, Transformer
 
-from vtkmodules.numpy_interface import dataset_adapter as dsa
 from paraview.simple import (
     Delete,
     Text,
@@ -17,7 +16,6 @@ from paraview.simple import (
     GetColorTransferFunction,
     AddCameraLink,
     Render,
-    ResetCamera,
 )
 
 from quickview.pipeline import EAMVisSource
@@ -112,7 +110,7 @@ class ViewData:
         self.min = min
         self.max = max
         self.index = index
-        self.override=override
+        self.override = override
 
 
 def build_color_information(state: map):
@@ -261,7 +259,7 @@ class ViewManager:
             state.varmin[index] = viewdata.min
             state.varmax[index] = viewdata.max
             state.uselogscale[index] = viewdata.uselog
-        
+
     def reset_camera(self, **kwargs):
         for widget in self.widgets:
             widget.reset_camera()

@@ -83,16 +83,18 @@ class Toolbar:
             v2.VSpacer()
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VListItemGroup(classes="text-truncate", dense=True):
-                v2.VCheckbox(
-                    classes="ma-0",
-                    label="Use CVD colors",
-                    value=0,
-                    v_model=("cmaps",),
-                    dense=True,
-                    hide_details=True,
-                    change=(update_available_color_maps, "[$event]"),
-                    style="height: 20px;",
-                ),
+                (
+                    v2.VCheckbox(
+                        classes="ma-0",
+                        label="Use CVD colors",
+                        value=0,
+                        v_model=("cmaps",),
+                        dense=True,
+                        hide_details=True,
+                        change=(update_available_color_maps, "[$event]"),
+                        style="height: 20px;",
+                    ),
+                )
                 v2.VCheckbox(
                     classes="ma-0",
                     label="Use non-CVD colors",
@@ -120,8 +122,6 @@ class Toolbar:
                     classes="align-center",
                     style="max-height: 2rem;",
                 ):
-                    # with v2.VCol():
-                    #    html.Div("Connectivity File")
                     with v2.VCol():
                         v2.VTextField(
                             prepend_icon="mdi-vector-rectangle",
@@ -137,8 +137,6 @@ class Toolbar:
                     classes="overflow-x-hidden align-center mr-0",
                     style="max-height: 2rem;",
                 ):
-                    # with v2.VCol():
-                    #    html.Div("Data File")
                     with v2.VCol():
                         v2.VTextField(
                             prepend_icon="mdi-database",
@@ -161,7 +159,7 @@ class Toolbar:
                         v_on="on",
                     ):
                         v2.VIcon("mdi-file-check")
-                html.Span(f"Load Files")
+                html.Span("Load Files")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(
@@ -173,8 +171,31 @@ class Toolbar:
                         v_bind="attrs",
                         v_on="on",
                     ):
-                        v2.VIcon("mdi-swap-horizontal", color="red")
-                html.Span(f"Replace Files")
+                        v2.VIcon("mdi-swap-horizontal")
+                html.Span("Replace Files")
+            with v2.VTooltip(bottom=True):
+                with html.Template(v_slot_activator="{ on, attrs }"):
+                    with v2.VBtn(
+                        icon=True,
+                        dense=True,
+                        flat=True,
+                        small=True,
+                        v_bind="attrs",
+                        v_on="on",
+                    ):
+                        v2.VIcon(
+                            v_if="pipeline_valid",
+                            children=["mdi-check-circle-outline"],
+                            color="green",
+                        )
+                        v2.VIcon(
+                            v_if="!pipeline_valid",
+                            children=["mdi-alert-circle-outline"],
+                            color="red",
+                        )
+                html.Span(
+                    f"Pipeline {'Valid' if self.state.pipeline_valid else 'Invalid'}"
+                )
 
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VTooltip(bottom=True):
@@ -189,7 +210,7 @@ class Toolbar:
                         v_on="on",
                     ):
                         v2.VIcon("mdi-download")
-                html.Span(f"Save State")
+                html.Span("Save State")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(
@@ -202,7 +223,7 @@ class Toolbar:
                         v_on="on",
                     ):
                         v2.VIcon("mdi-upload")
-                html.Span(f"Load State")
+                html.Span("Load State")
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
@@ -213,4 +234,4 @@ class Toolbar:
                         click=self.ctrl.view_reset_camera,
                     ):
                         v2.VIcon("mdi-restore")
-                html.Span(f"Reset View Cameras")
+                html.Span("Reset View Cameras")
