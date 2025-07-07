@@ -126,69 +126,81 @@ class Toolbar:
             )
             v2.VSpacer()
             v2.VDivider(vertical=True, classes="mx-2")
-            # Color options toggle buttons
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        small=True,
-                        v_bind="attrs",
-                        v_on="on",
-                        click=self._handle_cvd_toggle,
-                        color=("use_cvd_colors ? 'primary' : ''",),
-                    ):
-                        v2.VIcon("mdi-eye-check-outline")
-                html.Span("CVD-friendly colors")
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        small=True,
-                        v_bind="attrs",
-                        v_on="on",
-                        click=self._handle_standard_toggle,
-                        color=("use_standard_colors ? 'primary' : ''",),
-                    ):
-                        v2.VIcon("mdi-palette")
-                html.Span("Standard colors")
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        small=True,
-                        v_bind="attrs",
-                        v_on="on",
-                        click=self._handle_color_bar_toggle,
-                        color=("show_color_bar ? 'primary' : ''",),
-                    ):
-                        v2.VIcon("mdi-format-color-fill")
-                html.Span("Show color bar")
+            # Color options toggle buttons group
+            with v2.VCard(
+                flat=True,
+                classes="d-flex align-center px-2 py-1 mx-1",
+                style="background-color: #f5f5f5; border-radius: 4px;",
+            ):
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            small=True,
+                            v_bind="attrs",
+                            v_on="on",
+                            click=self._handle_cvd_toggle,
+                            color=("use_cvd_colors ? 'primary' : ''",),
+                            classes="mx-1",
+                        ):
+                            v2.VIcon("mdi-eye-check-outline")
+                    html.Span("CVD-friendly colors")
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            small=True,
+                            v_bind="attrs",
+                            v_on="on",
+                            click=self._handle_standard_toggle,
+                            color=("use_standard_colors ? 'primary' : ''",),
+                            classes="mx-1",
+                        ):
+                            v2.VIcon("mdi-palette")
+                    html.Span("Standard colors")
+                v2.VDivider(vertical=True, classes="mx-2", style="height: 24px;")
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            small=True,
+                            v_bind="attrs",
+                            v_on="on",
+                            click=self._handle_color_bar_toggle,
+                            color=("show_color_bar ? 'primary' : ''",),
+                            classes="mx-1",
+                        ):
+                            v2.VIcon("mdi-format-color-fill")
+                    html.Span("Show color bar")
             v2.VDivider(vertical=True, classes="mx-2")
-            with v2.VCol(style="width: 25%;", classes="justify-center pa-0"):
-                with v2.VRow(
-                    no_gutters=True,
-                    classes="align-center",
-                    style="max-height: 2rem;",
-                ):
-                    with v2.VCol():
+            with v2.VCard(
+                flat=True,
+                classes="d-flex align-center px-2 py-1 mx-1",
+                style="background-color: #f5f5f5; border-radius: 4px; min-width: 35%;",
+            ):
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
                         v2.VTextField(
                             prepend_icon="mdi-vector-rectangle",
-                            placeholder="Connectivity File",
+                            placeholder="Connectivity",
                             v_model=("conn_file", ""),
                             hide_details=True,
                             dense=True,
                             append_icon="mdi-folder-upload",
                             click_append=self.select_connectivity_file,
+                            filled=True,
+                            background_color="white",
+                            classes="mr-2",
+                            style="max-width: 48%;",
+                            v_bind="attrs",
+                            v_on="on",
                         )
-                with v2.VRow(
-                    no_gutters=True,
-                    classes="overflow-x-hidden align-center mr-0",
-                    style="max-height: 2rem;",
-                ):
-                    with v2.VCol():
+                    html.Span("SCRIP or TEMPEST connectivity/mesh file (.nc)")
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
                         v2.VTextField(
                             prepend_icon="mdi-database",
                             placeholder="Data File",
@@ -197,33 +209,39 @@ class Toolbar:
                             dense=True,
                             append_icon="mdi-folder-upload",
                             click_append=self.select_data_file,
+                            filled=True,
+                            background_color="white",
+                            style="max-width: 48%;",
+                            v_bind="attrs",
+                            v_on="on",
                         )
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        flat=True,
-                        small=True,
-                        click=load_data,
-                        v_bind="attrs",
-                        v_on="on",
-                    ):
-                        v2.VIcon("mdi-file-check")
-                html.Span("Load Files")
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        flat=True,
-                        small=True,
-                        click=load_data,
-                        v_bind="attrs",
-                        v_on="on",
-                    ):
-                        v2.VIcon("mdi-swap-horizontal")
-                html.Span("Replace Files")
+                    html.Span("E3SM/EAM atmospheric data file (.nc)")
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            flat=True,
+                            small=True,
+                            click=load_data,
+                            v_bind="attrs",
+                            v_on="on",
+                        ):
+                            v2.VIcon("mdi-file-check")
+                    html.Span("Load Files")
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            flat=True,
+                            small=True,
+                            click=load_data,
+                            v_bind="attrs",
+                            v_on="on",
+                        ):
+                            v2.VIcon("mdi-swap-horizontal")
+                    html.Span("Replace Files")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(
@@ -244,37 +262,46 @@ class Toolbar:
                             children=["mdi-alert-circle-outline"],
                             color="red",
                         )
-                html.Span(
-                    f"Pipeline {'Valid' if self.state.pipeline_valid else 'Invalid'}"
-                )
+                with html.Div(v_if="pipeline_valid"):
+                    html.Span("Pipeline Valid")
+                with html.Div(v_if="!pipeline_valid"):
+                    html.Span("Pipeline Invalid")
 
             v2.VDivider(vertical=True, classes="mx-2")
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        flat=True,
-                        small=True,
-                        click=self.export_state,
-                        v_bind="attrs",
-                        v_on="on",
-                    ):
-                        v2.VIcon("mdi-download")
-                html.Span("Save State")
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        flat=True,
-                        small=True,
-                        click=self.import_state,
-                        v_bind="attrs",
-                        v_on="on",
-                    ):
-                        v2.VIcon("mdi-upload")
-                html.Span("Load State")
+            # State management buttons group
+            with v2.VCard(
+                flat=True,
+                classes="d-flex align-center px-2 py-1 mx-1",
+                style="background-color: #f5f5f5; border-radius: 4px;",
+            ):
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            flat=True,
+                            small=True,
+                            click=self.export_state,
+                            v_bind="attrs",
+                            v_on="on",
+                            classes="mx-1",
+                        ):
+                            v2.VIcon("mdi-download")
+                    html.Span("Save State")
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            flat=True,
+                            small=True,
+                            click=self.import_state,
+                            v_bind="attrs",
+                            v_on="on",
+                            classes="mx-1",
+                        ):
+                            v2.VIcon("mdi-upload")
+                    html.Span("Load State")
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
