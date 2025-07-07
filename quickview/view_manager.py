@@ -247,7 +247,7 @@ class ViewManager:
         repAn.DiffuseColor = [0.67, 0.67, 0.67]
         repAn.Opacity = 0.4
 
-        rep.SetScalarBarVisibility(rview, self.state.scalarbar)
+        rep.SetScalarBarVisibility(rview, self.state.show_color_bar)
         rview.CameraParallelProjection = 1
 
         Render(rview)

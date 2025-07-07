@@ -48,6 +48,35 @@ class Toolbar:
     def ctrl(self):
         return self.server.controller
 
+    def _handle_cvd_toggle(self):
+        """Handle CVD-friendly colors toggle button click"""
+        with self.state:
+            # Toggle CVD colors, but ensure at least one option is selected
+            if not self.state.use_cvd_colors or self.state.use_standard_colors:
+                self.state.use_cvd_colors = not self.state.use_cvd_colors
+            self._update_color_maps()
+
+    def _handle_standard_toggle(self):
+        """Handle standard colors toggle button click"""
+        with self.state:
+            # Toggle standard colors, but ensure at least one option is selected
+            if not self.state.use_standard_colors or self.state.use_cvd_colors:
+                self.state.use_standard_colors = not self.state.use_standard_colors
+            self._update_color_maps()
+
+    def _update_color_maps(self):
+        """Update the available color maps based on toggle states"""
+        if self._update_available_color_maps is not None:
+            # Directly call update_available_color_maps without parameters
+            self._update_available_color_maps()
+
+    def _handle_color_bar_toggle(self):
+        """Toggle the color bar visibility"""
+        with self.state:
+            self.state.show_color_bar = not self.state.show_color_bar
+            if self._update_scalar_bars is not None:
+                self._update_scalar_bars(self.state.show_color_bar)
+
     def __init__(
         self,
         layout_toolbar,
@@ -66,6 +95,21 @@ class Toolbar:
             self.ctrl.save = dialog.save
         self._generate_state = generate_state
         self._load_state = load_state
+        self._update_available_color_maps = update_available_color_maps
+        self._update_scalar_bars = update_scalar_bars
+
+        # Initialize toggle states
+        with self.state:
+            self.state.use_cvd_colors = False
+            self.state.use_standard_colors = True
+            self.state.show_color_bar = True
+
+        # Set initial color maps based on default toggle states
+        self._update_color_maps()
+        
+        # Apply initial scalar bar visibility
+        if self._update_scalar_bars is not None:
+            self._update_scalar_bars(True)
 
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
@@ -82,54 +126,46 @@ class Toolbar:
             )
             v2.VSpacer()
             v2.VDivider(vertical=True, classes="mx-2")
-            with v2.VMenu(offset_y=True):
-                with html.Template(v_slot_activator="{ on: menu, attrs }"):
-                    with v2.VTooltip(bottom=True):
-                        with html.Template(v_slot_activator="{ on: tooltip, attrs }"):
-                            with v2.VBtn(
-                                icon=True,
-                                dense=True,
-                                flat=True,
-                                small=True,
-                                v_bind="attrs",
-                                v_on="{ ...tooltip, ...menu }",
-                            ):
-                                v2.VIcon("mdi-palette")
-                        html.Span("Color Options")
-                with v2.VList():
-                    with v2.VListItem():
-                        v2.VCheckbox(
-                            classes="ma-0",
-                            label="Use CVD colors",
-                            value=0,
-                            v_model=("cmaps",),
-                            dense=True,
-                            hide_details=True,
-                            change=(update_available_color_maps, "[$event]"),
-                            style="height: 20px;",
-                        )
-                    with v2.VListItem():
-                        v2.VCheckbox(
-                            classes="ma-0",
-                            label="Use non-CVD colors",
-                            value=1,
-                            v_model=("cmaps",),
-                            dense=True,
-                            hide_details=True,
-                            change=(update_available_color_maps, "[$event]"),
-                            style="height: 20px;",
-                        )
-                    with v2.VListItem():
-                        v2.VCheckbox(
-                            classes="ma-0",
-                            label="Show Color Bar",
-                            value=1,
-                            v_model=("scalarbar", False),
-                            dense=True,
-                            hide_details=True,
-                            change=(update_scalar_bars, "[$event]"),
-                            style="height: 20px;",
-                        )
+            # Color options toggle buttons
+            with v2.VTooltip(bottom=True):
+                with html.Template(v_slot_activator="{ on, attrs }"):
+                    with v2.VBtn(
+                        icon=True,
+                        dense=True,
+                        small=True,
+                        v_bind="attrs",
+                        v_on="on",
+                        click=self._handle_cvd_toggle,
+                        color=("use_cvd_colors ? 'primary' : ''",),
+                    ):
+                        v2.VIcon("mdi-eye-check-outline")
+                html.Span("CVD-friendly colors")
+            with v2.VTooltip(bottom=True):
+                with html.Template(v_slot_activator="{ on, attrs }"):
+                    with v2.VBtn(
+                        icon=True,
+                        dense=True,
+                        small=True,
+                        v_bind="attrs",
+                        v_on="on",
+                        click=self._handle_standard_toggle,
+                        color=("use_standard_colors ? 'primary' : ''",),
+                    ):
+                        v2.VIcon("mdi-palette")
+                html.Span("Standard colors")
+            with v2.VTooltip(bottom=True):
+                with html.Template(v_slot_activator="{ on, attrs }"):
+                    with v2.VBtn(
+                        icon=True,
+                        dense=True,
+                        small=True,
+                        v_bind="attrs",
+                        v_on="on",
+                        click=self._handle_color_bar_toggle,
+                        color=("show_color_bar ? 'primary' : ''",),
+                    ):
+                        v2.VIcon("mdi-format-color-fill")
+                html.Span("Show color bar")
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VCol(style="width: 25%;", classes="justify-center pa-0"):
                 with v2.VRow(

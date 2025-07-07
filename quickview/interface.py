@@ -132,7 +132,7 @@ class EAMApp:
         # state.projection    = "Cyl. Equidistant"
         # state.cliplong      = [self.source.extents[0], self.source.extents[1]],
         # state.cliplat       = [self.source.extents[2], self.source.extents[3]],
-        state.cmaps = ["1"]
+        # Removed cmaps initialization - now handled by toolbar toggle buttons
         state.layout = []
         state.variables = []
         state.ccardscolor = [None] * len(
@@ -297,15 +297,17 @@ class EAMApp:
     def update_scalar_bars(self, event):
         self.viewmanager.update_scalar_bars(event)
 
-    def update_available_color_maps(self, event):
+    def update_available_color_maps(self):
         with self.state as state:
-            if len(event) == 0:
-                state.colormaps = noncvd
-            elif len(event) == 2:
+            # Directly use the toggle states to determine which colormaps to show
+            if state.use_cvd_colors and state.use_standard_colors:
                 state.colormaps = cvd + noncvd
-            elif "0" in event:
+            elif state.use_cvd_colors:
                 state.colormaps = cvd
-            elif "1" in event:
+            elif state.use_standard_colors:
+                state.colormaps = noncvd
+            else:
+                # Fallback to standard colors if nothing is selected
                 state.colormaps = noncvd
 
     def update_view_color_properties(self, index, type, value):
