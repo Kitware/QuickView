@@ -79,6 +79,7 @@ save_state_keys = [
     "invert",
     "varmin",
     "varmax",
+    "override_range",  # Track manual color range override per variable
     # Color options from toolbar
     "use_cvd_colors",
     "use_standard_colors",
@@ -149,6 +150,7 @@ class EAMApp:
         state.invert = []
         state.varmin = []
         state.varmax = []
+        state.override_range = []
 
         ctrl.view_update = self.viewmanager.render_all_views
         ctrl.view_reset_camera = self.viewmanager.reset_camera
@@ -235,7 +237,6 @@ class EAMApp:
         return to_export
 
     def load_state(self, state_file):
-        print("Loading state")
         from_state = json.loads(Path(state_file).read_text())
         data_file = from_state["data_file"]
         conn_file = from_state["conn_file"]
@@ -271,7 +272,6 @@ class EAMApp:
             v3di = np.array(self.state.vars3Di)
             f3di = np.array(self.state.vars3Distate)
             s3di = v3di[f3di].tolist()
-        print(s2d, s3di, s3dm)
         self.source.LoadVariables(s2d, s3dm, s3di)
 
         vars = s2d + s3dm + s3di
@@ -284,6 +284,7 @@ class EAMApp:
             state.invert = [False] * len(vars)
             state.varmin = [np.nan] * len(vars)
             state.varmax = [np.nan] * len(vars)
+            state.override_range = [False] * len(vars)
 
             self.viewmanager.rebuild_visualization_layout()
 

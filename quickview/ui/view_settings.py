@@ -64,7 +64,17 @@ class ViewProperties(v2.VMenu):
                                 ),
                                 **style,
                             )
-                    html.Div("Value Range", classes="pt-2")
+                    with html.Div(classes="pt-2 d-flex align-center"):
+                        html.Span("Value Range", classes="mr-2")
+                        with v2.VChip(
+                            v_if=("override_range[idx]",),
+                            x_small=True,
+                            color="primary",
+                            dark=True,
+                            classes="ml-auto",
+                        ):
+                            v2.VIcon("mdi-lock", x_small=True, left=True)
+                            html.Span("Manual")
                     with v2.VRow():
                         with v2.VCol():
                             v2.VTextField(
@@ -76,6 +86,7 @@ class ViewProperties(v2.VMenu):
                                     "[idx, 'min', $event]",
                                 ),
                                 style="height=50px",
+                                color=("override_range[idx] ? 'primary' : ''",),
                                 **style,
                             )
                         with v2.VCol():
@@ -88,6 +99,7 @@ class ViewProperties(v2.VMenu):
                                     "[idx, 'max', $event]",
                                 ),
                                 style="height=50px",
+                                color=("override_range[idx] ? 'primary' : ''",),
                                 **style,
                             )
                     with html.Div(classes="pt-2 align-center text-center"):

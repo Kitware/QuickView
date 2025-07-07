@@ -8,21 +8,18 @@ import json
 class Toolbar:
     @task
     async def select_data_file(self):
-        print("Selecting data file : ", self.ctrl.open)
         with self.state:
             response = await self.ctrl.open("Open Data File")
             self.state.data_file = response
 
     @task
     async def select_connectivity_file(self):
-        print("Selecting connectivity file : ", self.ctrl.open)
         with self.state:
             response = await self.ctrl.open("Open Connectivity File")
             self.state.conn_file = response
 
     @task
     async def export_state(self):
-        print("Exporting state!!!!")
         if self._generate_state is not None:
             config = self._generate_state()
         with self.state:
@@ -33,7 +30,6 @@ class Toolbar:
 
     @task
     async def import_state(self):
-        print("Importing state")
         with self.state:
             response = await self.ctrl.open("Import State", filter=["json"])
             import_path = response

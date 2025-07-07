@@ -191,8 +191,18 @@ def build_color_information(state: map):
     invert = state["invert"]
     varmin = state["varmin"]
     varmax = state["varmax"]
+    # Get override_range from state if available
+    override_range = state.get("override_range", None)
+
     registry = ViewRegistry()
     for index, var in enumerate(vars):
+        # Use provided override_range if available
+        if override_range is not None and index < len(override_range):
+            override = override_range[index]
+        else:
+            # Legacy behavior for older saved states without override_range
+            override = True
+
         config = ViewConfiguration(
             variable=var,
             colormap=colors[index],
@@ -200,7 +210,7 @@ def build_color_information(state: map):
             invert_colors=invert[index],
             min_value=varmin[index],
             max_value=varmax[index],
-            override_range=True,  # Since we're loading from state, assume it's user-set
+            override_range=override,
         )
         view_state = ViewState()
         context = ViewContext(config, view_state, index)
@@ -339,6 +349,7 @@ class ViewManager:
             state.varmin[index] = context.config.min_value
             state.varmax[index] = context.config.max_value
             state.uselogscale[index] = context.config.use_log_scale
+            state.override_range[index] = context.config.override_range
 
     def reset_camera(self, **kwargs):
         for widget in self.widgets:
@@ -457,6 +468,14 @@ class ViewManager:
                     self.refresh_view_display(var, context)
             else:
                 view = CreateRenderView()
+                # Preserve override flag if context already exists
+                existing_context = self.registry.get_view(var)
+                override = (
+                    existing_context.config.override_range
+                    if existing_context
+                    else False
+                )
+
                 config = ViewConfiguration(
                     variable=var,
                     colormap=state.varcolor[0],
@@ -464,7 +483,7 @@ class ViewManager:
                     invert_colors=False,
                     min_value=varrange[0],
                     max_value=varrange[1],
-                    override_range=False,
+                    override_range=override,
                 )
                 view_state = ViewState(
                     view_proxy=view,
@@ -535,7 +554,6 @@ class ViewManager:
         self.render_view_by_index(index)
 
     def update_scalar_bars(self, event):
-        print("Updating Scalar bar")
         for var, context in self.registry.items():
             view = context.state.view_proxy
             context.state.data_representation.SetScalarBarVisibility(view, event)
@@ -552,6 +570,9 @@ class ViewManager:
         context.config.override_range = True
         context.config.min_value = float(min)
         context.config.max_value = float(max)
+        # Update state to reflect manual override
+        self.state.override_range[index] = True
+        self.state.dirty("override_range")
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
         self.render_view_by_index(index)
@@ -568,6 +589,8 @@ class ViewManager:
         self.state.dirty("varmin")
         self.state.varmax[index] = context.config.max_value
         self.state.dirty("varmax")
+        self.state.override_range[index] = context.config.override_range
+        self.state.dirty("override_range")
         context.state.data_representation.RescaleTransferFunctionToDataRange(
             False, True
         )
