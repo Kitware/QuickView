@@ -326,22 +326,20 @@ class EAMApp:
         self.viewmanager.revert_to_auto_color_range(index)
 
     def zoom(self, type):
-        with self.viewmanager as manager:
-            if type.lower() == "in":
-                manager.zoom_in()
-            elif type.lower() == "out":
-                manager.zoom_out()
+        if type.lower() == "in":
+            self.viewmanager.zoom_in()
+        elif type.lower() == "out":
+            self.viewmanager.zoom_out()
 
     def pan_camera(self, dir):
-        with self.viewmanager as manager:
-            if dir.lower() == "up":
-                manager.pan_camera(1, 0)
-            elif dir.lower() == "down":
-                manager.pan_camera(1, 1)
-            elif dir.lower() == "left":
-                manager.pan_camera(0, 1)
-            elif dir.lower() == "right":
-                manager.pan_camera(0, 0)
+        if dir.lower() == "up":
+            self.viewmanager.pan_camera(1, 0)
+        elif dir.lower() == "down":
+            self.viewmanager.pan_camera(1, 1)
+        elif dir.lower() == "left":
+            self.viewmanager.pan_camera(0, 1)
+        elif dir.lower() == "right":
+            self.viewmanager.pan_camera(0, 0)
 
     def update_2D_variable_selection(self, index, event):
         self.state.vars2Dstate[index] = event
