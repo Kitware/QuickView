@@ -82,39 +82,54 @@ class Toolbar:
             )
             v2.VSpacer()
             v2.VDivider(vertical=True, classes="mx-2")
-            with v2.VListItemGroup(classes="text-truncate", dense=True):
-                (
-                    v2.VCheckbox(
-                        classes="ma-0",
-                        label="Use CVD colors",
-                        value=0,
-                        v_model=("cmaps",),
-                        dense=True,
-                        hide_details=True,
-                        change=(update_available_color_maps, "[$event]"),
-                        style="height: 20px;",
-                    ),
-                )
-                v2.VCheckbox(
-                    classes="ma-0",
-                    label="Use non-CVD colors",
-                    value=1,
-                    v_model=("cmaps",),
-                    dense=True,
-                    hide_details=True,
-                    change=(update_available_color_maps, "[$event]"),
-                    style="height: 20px;",
-                )
-                v2.VCheckbox(
-                    classes="ma-0",
-                    label="Show Color Bar",
-                    value=1,
-                    v_model=("scalarbar", False),
-                    dense=True,
-                    hide_details=True,
-                    change=(update_scalar_bars, "[$event]"),
-                    style="height: 20px;",
-                )
+            with v2.VMenu(offset_y=True):
+                with html.Template(v_slot_activator="{ on: menu, attrs }"):
+                    with v2.VTooltip(bottom=True):
+                        with html.Template(v_slot_activator="{ on: tooltip, attrs }"):
+                            with v2.VBtn(
+                                icon=True,
+                                dense=True,
+                                flat=True,
+                                small=True,
+                                v_bind="attrs",
+                                v_on="{ ...tooltip, ...menu }",
+                            ):
+                                v2.VIcon("mdi-palette")
+                        html.Span("Color Options")
+                with v2.VList():
+                    with v2.VListItem():
+                        v2.VCheckbox(
+                            classes="ma-0",
+                            label="Use CVD colors",
+                            value=0,
+                            v_model=("cmaps",),
+                            dense=True,
+                            hide_details=True,
+                            change=(update_available_color_maps, "[$event]"),
+                            style="height: 20px;",
+                        )
+                    with v2.VListItem():
+                        v2.VCheckbox(
+                            classes="ma-0",
+                            label="Use non-CVD colors",
+                            value=1,
+                            v_model=("cmaps",),
+                            dense=True,
+                            hide_details=True,
+                            change=(update_available_color_maps, "[$event]"),
+                            style="height: 20px;",
+                        )
+                    with v2.VListItem():
+                        v2.VCheckbox(
+                            classes="ma-0",
+                            label="Show Color Bar",
+                            value=1,
+                            v_model=("scalarbar", False),
+                            dense=True,
+                            hide_details=True,
+                            change=(update_scalar_bars, "[$event]"),
+                            style="height: 20px;",
+                        )
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VCol(style="width: 25%;", classes="justify-center pa-0"):
                 with v2.VRow(
