@@ -20,6 +20,101 @@ from paraview.simple import (
 
 from quickview.pipeline import EAMVisSource
 from quickview.utilities import EventType
+from typing import Dict, List, Optional
+
+
+class ViewRegistry:
+    """Central registry for managing views"""
+    def __init__(self):
+        self._contexts: Dict[str, "ViewContext"] = {}
+        self._view_order: List[str] = []
+    
+    def register_view(self, variable: str, context: "ViewContext"):
+        """Register a new view or update existing one"""
+        self._contexts[variable] = context
+        if variable not in self._view_order:
+            self._view_order.append(variable)
+    
+    def get_view(self, variable: str) -> Optional["ViewContext"]:
+        """Get view context for a variable"""
+        return self._contexts.get(variable)
+    
+    def remove_view(self, variable: str):
+        """Remove a view from the registry"""
+        if variable in self._contexts:
+            del self._contexts[variable]
+            self._view_order.remove(variable)
+    
+    def get_ordered_views(self) -> List["ViewContext"]:
+        """Get all views in order they were added"""
+        return [self._contexts[var] for var in self._view_order if var in self._contexts]
+    
+    def get_all_variables(self) -> List[str]:
+        """Get all registered variable names"""
+        return list(self._contexts.keys())
+    
+    def items(self):
+        """Iterate over variable-context pairs"""
+        return self._contexts.items()
+    
+    def clear(self):
+        """Clear all registered views"""
+        self._contexts.clear()
+        self._view_order.clear()
+    
+    def __len__(self):
+        """Get number of registered views"""
+        return len(self._contexts)
+    
+    def __contains__(self, variable: str):
+        """Check if a variable is registered"""
+        return variable in self._contexts
+
+
+class ViewConfiguration:
+    """Mutable configuration for a view - what the user can control"""
+    def __init__(
+        self,
+        variable: str,
+        colormap: str,
+        use_log_scale: bool = False,
+        invert_colors: bool = False,
+        min_value: float = None,
+        max_value: float = None,
+        override_range: bool = False,
+    ):
+        self.variable = variable
+        self.colormap = colormap
+        self.use_log_scale = use_log_scale
+        self.invert_colors = invert_colors
+        self.min_value = min_value
+        self.max_value = max_value
+        self.override_range = override_range  # True when user manually sets min/max
+
+
+class ViewState:
+    """Runtime state for a view - ParaView objects and computed values"""
+    def __init__(
+        self,
+        view_proxy=None,
+        data_representation=None,
+        var_text_proxy=None,
+        var_info_proxy=None,
+        computed_average: float = None,
+    ):
+        self.view_proxy = view_proxy
+        self.data_representation = data_representation
+        self.var_text_proxy = var_text_proxy
+        self.var_info_proxy = var_info_proxy
+        self.computed_average = computed_average
+
+
+class ViewContext:
+    """Complete context for a rendered view combining configuration and state"""
+    def __init__(self, config: ViewConfiguration, state: ViewState, index: int):
+        self.config = config
+        self.state = state
+        self.index = index
 
 
 def apply_projection(projection, point):
@@ -83,36 +178,6 @@ def generate_annotations(long, lat, projection, center):
     return texts
 
 
-class ViewData:
-    def __init__(
-        self,
-        view=None,
-        index=None,
-        data_rep=None,
-        var_text=None,
-        var_info=None,
-        avg=None,
-        color=None,
-        uselog=False,
-        inv=False,
-        min=None,
-        max=None,
-        override=False,
-    ):
-        self.view = view
-        self.data_rep = data_rep
-        self.var_text = var_text
-        self.var_info = var_info
-        self.avg = avg
-        self.color = color
-        self.uselog = uselog
-        self.inv = inv
-        self.min = min
-        self.max = max
-        self.index = index
-        self.override = override
-
-
 def build_color_information(state: map):
     vars = state["variables"]
     colors = state["varcolor"]
@@ -120,16 +185,20 @@ def build_color_information(state: map):
     # invert = state["invert"]
     varmin = state["varmin"]
     varmax = state["varmax"]
-    cache = {}
+    registry = ViewRegistry()
     for index, var in enumerate(vars):
-        cache[var] = ViewData(
-            view=None,
-            color=colors[index],
-            uselog=logscl[index],
-            min=varmin[index],
-            max=varmax[index],
+        config = ViewConfiguration(
+            variable=var,
+            colormap=colors[index],
+            use_log_scale=logscl[index],
+            min_value=varmin[index],
+            max_value=varmax[index],
+            override_range=True,  # Since we're loading from state, assume it's user-set
         )
-    return cache
+        view_state = ViewState()
+        context = ViewContext(config, view_state, index)
+        registry.register_view(var, context)
+    return registry
 
 
 @TrameApp()
@@ -140,39 +209,39 @@ class ViewManager:
         self.state = state
         self.widgets = []
         self.colors = []
-        self.cache = {}
+        self.registry = ViewRegistry()  # Central registry for view management
         self.to_delete = []
         self.rep_change = False
 
-    def step_update_existing_views(self):
-        if len(self.cache) == 0:
+    def update_views_for_timestep(self):
+        if len(self.registry) == 0:
             return
         data = sm.Fetch(self.source.views["2DProj"])
 
-        for var, viewdata in self.cache.items():
+        for var, context in self.registry.items():
             varavg = self.compute_average(var, vtkdata=data)
-            viewdata.avg = varavg
-            if not viewdata.override:
-                viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
+            context.state.computed_average = varavg
+            if not context.config.override_range:
+                context.state.data_representation.RescaleTransferFunctionToDataRange(False, True)
                 range = self.compute_range(var=var)
-                viewdata.min = range[0]
-                viewdata.max = range[1]
-            (v_text, V_info) = self.get_var_info(var, viewdata.avg)
-            if viewdata.var_text is not None:
-                viewdata.var_text.Text = v_text
-            if viewdata.var_info is not None:
-                viewdata.var_info.Text = V_info
-            self.update_state_color_properties(viewdata.index, viewdata)
+                context.config.min_value = range[0]
+                context.config.max_value = range[1]
+            (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
+            if context.state.var_text_proxy is not None:
+                context.state.var_text_proxy.Text = v_text
+            if context.state.var_info_proxy is not None:
+                context.state.var_info_proxy.Text = V_info
+            self.sync_color_config_to_state(context.index, context)
 
-    def update_existing_view(self, var, viewdata: ViewData):
-        if not viewdata.override:
-            viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
-        (v_text, V_info) = self.get_var_info(var, viewdata.avg)
-        if viewdata.var_text is not None:
-            viewdata.var_text.Text = v_text
-        if viewdata.var_info is not None:
-            viewdata.var_info.Text = V_info
-        rview = viewdata.view
+    def refresh_view_display(self, var, context: ViewContext):
+        if not context.config.override_range:
+            context.state.data_representation.RescaleTransferFunctionToDataRange(False, True)
+        (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
+        if context.state.var_text_proxy is not None:
+            context.state.var_text_proxy.Text = v_text
+        if context.state.var_info_proxy is not None:
+            context.state.var_info_proxy.Text = V_info
+        rview = context.state.view_proxy
 
         Render(rview)
         # ResetCamera(rview)
@@ -195,16 +264,16 @@ class ViewManager:
 
         return (var_text, info_text)
 
-    def update_new_view(self, var, viewdata: ViewData, sources):
-        rview = viewdata.view
+    def configure_new_view(self, var, context: ViewContext, sources):
+        rview = context.state.view_proxy
 
         # Update unique sources to all render views
         data = sources["2DProj"]
         rep = Show(data, rview)
-        viewdata.data_rep = rep
+        context.state.data_representation = rep
         ColorBy(rep, ("CELLS", var))
         coltrfunc = GetColorTransferFunction(var)
-        coltrfunc.ApplyPreset(viewdata.color, True)
+        coltrfunc.ApplyPreset(context.config.colormap, True)
         coltrfunc.NanOpacity = 0.0
         LUTColorBar = GetScalarBar(coltrfunc, rview)
         LUTColorBar.AutoOrient = 1
@@ -214,17 +283,17 @@ class ViewManager:
         LUTColorBar.ScalarBarLength = 0.75
         # LUTColorBar.NanOpacity = 0.0
 
-        (v_text, V_info) = self.get_var_info(var, viewdata.avg)
+        (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
         text = Text(registrationName=f"Text{var}")
         text.Text = v_text
-        viewdata.var_text = text
+        context.state.var_text_proxy = text
         textrep = Show(text, rview, "TextSourceRepresentation")
         textrep.WindowLocation = "Upper Right Corner"
         textrep.FontFamily = "Times"
 
         info = Text(registrationName=f"Info{var}")
         info.Text = V_info
-        viewdata.var_info = info
+        context.state.var_info_proxy = info
         textrep = Show(info, rview, "TextSourceRepresentation")
         textrep.WindowLocation = "Upper Left Corner"
         textrep.FontFamily = "Times"
@@ -253,33 +322,33 @@ class ViewManager:
         Render(rview)
         # ResetCamera(rview)
 
-    def update_state_color_properties(self, index, viewdata: ViewData):
+    def sync_color_config_to_state(self, index, context: ViewContext):
         with self.state as state:
-            state.varcolor[index] = viewdata.color
-            state.varmin[index] = viewdata.min
-            state.varmax[index] = viewdata.max
-            state.uselogscale[index] = viewdata.uselog
+            state.varcolor[index] = context.config.colormap
+            state.varmin[index] = context.config.min_value
+            state.varmax[index] = context.config.max_value
+            state.uselogscale[index] = context.config.use_log_scale
 
     def reset_camera(self, **kwargs):
         for widget in self.widgets:
             widget.reset_camera()
 
-    def reset_views(self, **kwargs):
+    def render_all_views(self, **kwargs):
         for widget in self.widgets:
             widget.update()
 
-    def reset_specific_view(self, index):
+    def render_view_by_index(self, index):
         self.widgets[index].update()
 
     @trigger("resetview")
-    async def reset_resize_specific_view(self, index, sizeinfo=None):
+    async def resize_and_refresh_view(self, index, sizeinfo=None):
         if sizeinfo is not None:
             var = self.state.variables[index]
-            viewdata: ViewData = self.cache[var]
+            context: ViewContext = self.registry.get_view(var)
             height = int(sizeinfo["height"])
             width = int(sizeinfo["width"])
-            viewdata.view.ViewSize = (width, height)
-            Render(viewdata.view)
+            context.state.view_proxy.ViewSize = (width, height)
+            Render(context.state.view_proxy)
         import asyncio
 
         await asyncio.sleep(0.01)
@@ -317,7 +386,7 @@ class ViewManager:
         vardata = vtkdata.GetCellData().GetArray(var)
         return vardata.GetRange()
 
-    def create_or_update_views(self):
+    def rebuild_visualization_layout(self):
         self.widgets.clear()
         state = self.state
         source = self.source
@@ -332,10 +401,10 @@ class ViewManager:
         vars3Dm = source.vars.get("3Dm", None)
         vars3Di = source.vars.get("3Di", None)
         to_render = vars2D + vars3Dm + vars3Di
-        rendered = self.cache.keys()
+        rendered = self.registry.get_all_variables()
         to_delete = set(rendered) - set(to_render)
         # Move old variables so they their proxies can be deleted
-        self.to_delete.extend([self.cache[x].view for x in to_delete])
+        self.to_delete.extend([self.registry.get_view(x).state.view_proxy for x in to_delete])
 
         # Get area variable to calculate weighted average
         data = self.source.views["2DProj"]
@@ -358,37 +427,43 @@ class ViewManager:
             varavg = self.compute_average(var, vtkdata=vtkdata)
 
             view = None
-            viewdata: ViewData = self.cache.get(var, None)
-            if viewdata is not None:
-                view = viewdata.view
-                viewdata.avg = varavg
+            context: ViewContext = self.registry.get_view(var)
+            if context is not None:
+                view = context.state.view_proxy
+                context.state.computed_average = varavg
                 if view is None:
                     view = CreateRenderView()
                     view.UseColorPaletteForBackground = 0
                     view.BackgroundColorMode = "Gradient"
                     view.GetRenderWindow().SetOffScreenRendering(True)
-                    viewdata.view = view
-                    viewdata.min = varrange[0]
-                    viewdata.max = varrange[1]
-                    self.update_new_view(var, viewdata, self.source.views)
+                    context.state.view_proxy = view
+                    context.config.min_value = varrange[0]
+                    context.config.max_value = varrange[1]
+                    self.configure_new_view(var, context, self.source.views)
                 else:
-                    self.update_existing_view(var, viewdata)
+                    self.refresh_view_display(var, context)
             else:
                 view = CreateRenderView()
-                viewdata = ViewData(
-                    view=view,
-                    color=state.varcolor[0],
-                    avg=varavg,
-                    min=varrange[0],
-                    max=varrange[1],
-                    override=False,
+                config = ViewConfiguration(
+                    variable=var,
+                    colormap=state.varcolor[0],
+                    use_log_scale=False,
+                    invert_colors=False,
+                    min_value=varrange[0],
+                    max_value=varrange[1],
+                    override_range=False,
                 )
+                view_state = ViewState(
+                    view_proxy=view,
+                    computed_average=varavg,
+                )
+                context = ViewContext(config, view_state, index)
                 view.UseColorPaletteForBackground = 0
                 view.BackgroundColorMode = "Gradient"
-                self.cache[var] = viewdata
-                self.update_new_view(var, viewdata, self.source.views)
-            viewdata.index = index
-            self.update_state_color_properties(index, viewdata)
+                self.registry.register_view(var, context)
+                self.configure_new_view(var, context, self.source.views)
+            context.index = index
+            self.sync_color_config_to_state(index, context)
 
             if index == 0:
                 view0 = view
@@ -406,7 +481,7 @@ class ViewManager:
             layout.append({"x": x, "y": y, "w": wdt, "h": hgt, "i": index})
 
         for var in to_delete:
-            self.cache.pop(var)
+            self.registry.remove_view(var)
 
         self.state.views = sWidgets
         self.state.layout = layout
@@ -418,86 +493,89 @@ class ViewManager:
     async def flushViews(self):
         await self.server.network_completion
         print("Flushing views")
-        self.reset_views()
+        self.render_all_views()
         import asyncio
         await asyncio.sleep(1)
         print("Resetting views after sleep")
-        self.reset_views()
+        self.render_all_views()
     """
 
-    def apply_colormap(self, index, type, value):
+    def update_view_color_settings(self, index, type, value):
         var = self.state.variables[index]
         coltrfunc = GetColorTransferFunction(var)
 
-        viewdata: ViewData = self.cache[var]
+        context: ViewContext = self.registry.get_view(var)
         if type == EventType.COL.value:
-            viewdata.color = value
-            coltrfunc.ApplyPreset(viewdata.color, True)
+            context.config.colormap = value
+            coltrfunc.ApplyPreset(context.config.colormap, True)
         elif type == EventType.LOG.value:
-            viewdata.uselog = value
-            if viewdata.uselog:
+            context.config.use_log_scale = value
+            if context.config.use_log_scale:
                 coltrfunc.MapControlPointsToLogSpace()
                 coltrfunc.UseLogScale = 1
             else:
                 coltrfunc.MapControlPointsToLinearSpace()
                 coltrfunc.UseLogScale = 0
         elif type == EventType.INV.value:
-            viewdata.inv = value
+            context.config.invert_colors = value
             coltrfunc.InvertTransferFunction()
-        self.reset_specific_view(index)
+        self.render_view_by_index(index)
 
     def update_scalar_bars(self, event):
         print("Updating Scalar bar")
-        for var, viewdata in self.cache.items():
-            view = viewdata.view
-            viewdata.data_rep.SetScalarBarVisibility(view, event)
+        for var, context in self.registry.items():
+            view = context.state.view_proxy
+            context.state.data_representation.SetScalarBarVisibility(view, event)
             coltrfunc = GetColorTransferFunction(var)
-            coltrfunc.ApplyPreset(viewdata.color, True)
+            coltrfunc.ApplyPreset(context.config.colormap, True)
             LUTColorBar = GetScalarBar(coltrfunc, view)
             LUTColorBar.Title = ""
             LUTColorBar.ComponentTitle = ""
-        self.reset_views()
+        self.render_all_views()
 
-    def update_view_color_properties(self, index, min, max):
+    def set_manual_color_range(self, index, min, max):
         var = self.state.variables[index]
-        viewdata: ViewData = self.cache[var]
-        viewdata.override = True
+        context: ViewContext = self.registry.get_view(var)
+        context.config.override_range = True
+        context.config.min_value = float(min)
+        context.config.max_value = float(max)
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
-        self.reset_specific_view(index)
+        self.render_view_by_index(index)
 
-    def reset_view_color_properties(self, index):
+    def revert_to_auto_color_range(self, index):
         var = self.state.variables[index]
         # Get colors from main file
         varrange = self.compute_range(var)
-        viewdata: ViewData = self.cache[var]
-        viewdata.min = varrange[0]
-        viewdata.max = varrange[1]
-        self.state.varmin[index] = viewdata.min
+        context: ViewContext = self.registry.get_view(var)
+        context.config.override_range = False
+        context.config.min_value = varrange[0]
+        context.config.max_value = varrange[1]
+        self.state.varmin[index] = context.config.min_value
         self.state.dirty("varmin")
-        self.state.varmax[index] = viewdata.max
+        self.state.varmax[index] = context.config.max_value
         self.state.dirty("varmax")
-        viewdata.data_rep.RescaleTransferFunctionToDataRange(False, True)
-        self.reset_views()
+        context.state.data_representation.RescaleTransferFunctionToDataRange(False, True)
+        self.render_all_views()
 
     def zoom_in(self, index=0):
         var = self.state.variables[index]
-        viewdata: ViewData = self.cache[var]
-        rview = viewdata.view
+        context: ViewContext = self.registry.get_view(var)
+        rview = context.state.view_proxy
         rview.CameraParallelScale *= 0.95
-        self.reset_views()
+        self.render_all_views()
 
     def zoom_out(self, index=0):
         var = self.state.variables[index]
-        viewdata: ViewData = self.cache[var]
-        rview = viewdata.view
+        context: ViewContext = self.registry.get_view(var)
+        rview = context.state.view_proxy
         rview.CameraParallelScale *= 1.05
-        self.reset_views()
+        self.render_all_views()
 
-    def move(self, dir, factor, index=0):
+    def pan_camera(self, dir, factor, index=0):
         var = self.state.variables[index]
-        viewdata: ViewData = self.cache[var]
-        rview = viewdata.view
+        context: ViewContext = self.registry.get_view(var)
+        rview = context.state.view_proxy
         extents = self.source.moveextents
         move = (
             (extents[1] - extents[0]) * 0.05,
@@ -511,4 +589,4 @@ class ViewManager:
         foc[dir] += move[dir] if factor > 0 else -move[dir]
         rview.CameraPosition = pos
         rview.CameraFocalPoint = foc
-        self.reset_views()
+        self.render_all_views()

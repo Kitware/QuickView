@@ -144,7 +144,7 @@ class EAMApp:
         state.varmin = []
         state.varmax = []
 
-        ctrl.view_update = self.viewmanager.reset_views
+        ctrl.view_update = self.viewmanager.render_all_views
         ctrl.view_reset_camera = self.viewmanager.reset_camera
         ctrl.on_server_ready.add(ctrl.view_update)
         server.trigger_name(ctrl.view_reset_camera)
@@ -219,7 +219,7 @@ class EAMApp:
         self.vars3Dmstate = np.array(selection3Dm)
         self.vars3Distate = np.array(selection3Di)
 
-        self.viewmanager.cache = build_color_information(initstate)
+        self.viewmanager.registry = build_color_information(initstate)
         self.load_variables()
 
     def generate_state(self):
@@ -279,9 +279,9 @@ class EAMApp:
             state.varmin = [np.nan] * len(vars)
             state.varmax = [np.nan] * len(vars)
 
-            self.viewmanager.create_or_update_views()
+            self.viewmanager.rebuild_visualization_layout()
 
-    def apply_colormap(self, index, type, value):
+    def update_view_color_settings(self, index, type, value):
         with self.state as state:
             if type == EventType.COL.value:
                 state.varcolor[index] = value
@@ -292,7 +292,7 @@ class EAMApp:
             elif type == EventType.INV.value:
                 state.invert[index] = value
                 state.dirty("invert")
-            self.viewmanager.apply_colormap(index, type, value)
+            self.viewmanager.update_view_color_settings(index, type, value)
 
     def update_scalar_bars(self, event):
         self.viewmanager.update_scalar_bars(event)
@@ -310,7 +310,7 @@ class EAMApp:
                 # Fallback to standard colors if nothing is selected
                 state.colormaps = noncvd
 
-    def update_view_color_properties(self, index, type, value):
+    def set_manual_color_range(self, index, type, value):
         with self.state as state:
             if type.lower() == "min":
                 state.varmin[index] = value
@@ -318,12 +318,12 @@ class EAMApp:
             elif type.lower() == "max":
                 state.varmax[index] = value
                 state.dirty("varmax")
-            self.viewmanager.update_view_color_properties(
+            self.viewmanager.set_manual_color_range(
                 index, state.varmin[index], state.varmax[index]
             )
 
-    def reset_view_color_properties(self, index):
-        self.viewmanager.reset_view_color_properties(index)
+    def revert_to_auto_color_range(self, index):
+        self.viewmanager.revert_to_auto_color_range(index)
 
     def zoom(self, type):
         with self.viewmanager as manager:
@@ -332,16 +332,16 @@ class EAMApp:
             elif type.lower() == "out":
                 manager.zoom_out()
 
-    def move(self, dir):
+    def pan_camera(self, dir):
         with self.viewmanager as manager:
             if dir.lower() == "up":
-                manager.move(1, 0)
+                manager.pan_camera(1, 0)
             elif dir.lower() == "down":
-                manager.move(1, 1)
+                manager.pan_camera(1, 1)
             elif dir.lower() == "left":
-                manager.move(0, 1)
+                manager.pan_camera(0, 1)
             elif dir.lower() == "right":
-                manager.move(0, 0)
+                manager.pan_camera(0, 0)
 
     def update_2D_variable_selection(self, index, event):
         self.state.vars2Dstate[index] = event
@@ -480,7 +480,7 @@ class EAMApp:
                 """
                 ViewControls(
                     zoom=self.zoom,
-                    move=self.move,
+                    move=self.pan_camera,
                     style=card_style,
                 )
 
@@ -580,9 +580,9 @@ class EAMApp:
                                         style="position:absolute; bottom: 1rem; left: 1rem; height: 2rem; z-index: 2;"
                                     ):
                                         ViewProperties(
-                                            apply=self.apply_colormap,
-                                            update=self.update_view_color_properties,
-                                            reset=self.reset_view_color_properties,
+                                            apply=self.update_view_color_settings,
+                                            update=self.set_manual_color_range,
+                                            reset=self.revert_to_auto_color_range,
                                         )
 
         return self._ui

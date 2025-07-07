@@ -38,5 +38,5 @@ class ProjectionSelection(CollapsableSection):
         projection = self.state.projection
         self.source.UpdateProjection(projection)
         self.source.UpdatePipeline()
-        self.views.step_update_existing_views()
-        self.views.reset_views()
+        self.views.update_views_for_timestep()
+        self.views.render_all_views()
