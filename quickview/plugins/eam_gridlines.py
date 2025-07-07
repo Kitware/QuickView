@@ -1,23 +1,17 @@
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
-from vtkmodules.vtkCommonCore import vtkPoints, vtkIdTypeArray
-from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkCellArray, vtkPolyData
-from vtkmodules.vtkFiltersCore import vtkAppendPolyData
-from vtkmodules.vtkRenderingFreeType import vtkVectorText
-from vtkmodules.vtkRenderingCore import vtkPolyDataMapper, vtkBillboardTextActor3D
+from vtkmodules.vtkCommonCore import vtkPoints
+from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkCellArray
 
 from vtkmodules.util import numpy_support, vtkConstants
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 import numpy as np
 
-try:
-    from vtkmodules.vtkFiltersGeneral import vtkCleanUnstructuredGrid as uGridFilter
-except ImportError:
-    from paraview.modules.vtkPVVTKExtensionsFiltersGeneral import (
-        vtkCleanUnstructuredGrid as uGridFilter,
-    )
-
-    pass
+# Optional import that may be used in future versions
+# try:
+#     from vtkmodules.vtkFiltersGeneral import vtkCleanUnstructuredGrid as uGridFilter
+# except ImportError:
+#     pass
 
 
 @smproxy.source(name="EAMGridLines")

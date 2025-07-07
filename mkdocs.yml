@@ -1,19 +1,19 @@
 site_name: EAM QuickView 1.0 Documentation
-theme: 'material'
+theme: "material"
 plugins:
   - search
   - mkdocstrings
 nav:
   - Home: README.md
   - Setup:
-    - Requirements : setup/requirements.md
-    - Execution:     setup/execution.md
+      - Requirements: setup/requirements.md
+      - Execution: setup/execution.md
   - User Guide:
-    - Key Reminders:      userguide/reminders.md
-    - Connectivity Files: userguide/connectivity.md
-    - Launch:             userguide/launch.md
-    - Toolbar:            userguide/toolbar.md
-    - Control Panel:      userguide/control_panel.md
-    - Viewport:           userguide/viewport.md
+      - Key Reminders: userguide/reminders.md
+      - Connectivity Files: userguide/connectivity.md
+      - Launch: userguide/launch.md
+      - Toolbar: userguide/toolbar.md
+      - Control Panel: userguide/control_panel.md
+      - Viewport: userguide/viewport.md
 markdown_extensions:
   - attr_list

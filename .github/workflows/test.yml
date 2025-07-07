@@ -19,7 +19,7 @@ jobs:
         with:
           auto-update-conda: true
           activate-environment: quickview
-          environment-file: quickview-env.yml  # optional (see below)
+          environment-file: quickview-env.yml # optional (see below)
           channel-priority: strict
 
       - name: Install dependencies

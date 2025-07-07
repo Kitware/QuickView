@@ -106,7 +106,7 @@ class Toolbar:
 
         # Set initial color maps based on default toggle states
         self._update_color_maps()
-        
+
         # Apply initial scalar bar visibility
         if self._update_scalar_bars is not None:
             self._update_scalar_bars(True)

@@ -4,11 +4,9 @@ import argparse
 import traceback
 from pathlib import Path
 
-import paraview.web.venv
 
 from quickview.pipeline import EAMVisSource
 from quickview.interface import EAMApp
-from quickview.utilities import ValidateArguments
 
 
 def serve():

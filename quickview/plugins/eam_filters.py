@@ -1,13 +1,8 @@
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
-from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import (
-    vtkUnstructuredGrid,
     vtkCellArray,
-    vtkPolyData,
-    vtkPlane,
 )
-from vtkmodules.vtkFiltersCore import vtkAppendFilter
 from vtkmodules.util import vtkConstants, numpy_support
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from paraview import print_error
@@ -291,7 +286,7 @@ class EAMAverage(VTKPythonAlgorithmBase):
         dims = inData.GetDimensions()
         origin = inData.GetOrigin()
         bounds = inData.GetBounds()
-        extent = inData.GetExtent()
+        inData.GetExtent()
         outData.SetOrigin(0, origin[1], origin[2])
         outData.SetSpacing(
             0,

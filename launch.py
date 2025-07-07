@@ -25,7 +25,7 @@ if __name__ == "__main__":
     setup_env()
     eampv = os.environ["EAMPVIEW"]
 
-    if eampv == None or len(eampv) == 0:
+    if eampv is None or len(eampv) == 0:
         print(
             "Env. variable 'EAMPVIEW' to point to ParaView python 'pvpython' not set/found"
         )

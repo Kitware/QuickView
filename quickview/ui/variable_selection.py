@@ -1,4 +1,4 @@
-from trame.decorators import TrameApp, change
+from trame.decorators import TrameApp
 from trame.widgets import html, vuetify2 as v2
 
 from quickview.ui.collapsible import CollapsableSection

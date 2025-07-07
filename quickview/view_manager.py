@@ -25,47 +25,50 @@ from typing import Dict, List, Optional
 
 class ViewRegistry:
     """Central registry for managing views"""
+
     def __init__(self):
         self._contexts: Dict[str, "ViewContext"] = {}
         self._view_order: List[str] = []
-    
+
     def register_view(self, variable: str, context: "ViewContext"):
         """Register a new view or update existing one"""
         self._contexts[variable] = context
         if variable not in self._view_order:
             self._view_order.append(variable)
-    
+
     def get_view(self, variable: str) -> Optional["ViewContext"]:
         """Get view context for a variable"""
         return self._contexts.get(variable)
-    
+
     def remove_view(self, variable: str):
         """Remove a view from the registry"""
         if variable in self._contexts:
             del self._contexts[variable]
             self._view_order.remove(variable)
-    
+
     def get_ordered_views(self) -> List["ViewContext"]:
         """Get all views in order they were added"""
-        return [self._contexts[var] for var in self._view_order if var in self._contexts]
-    
+        return [
+            self._contexts[var] for var in self._view_order if var in self._contexts
+        ]
+
     def get_all_variables(self) -> List[str]:
         """Get all registered variable names"""
         return list(self._contexts.keys())
-    
+
     def items(self):
         """Iterate over variable-context pairs"""
         return self._contexts.items()
-    
+
     def clear(self):
         """Clear all registered views"""
         self._contexts.clear()
         self._view_order.clear()
-    
+
     def __len__(self):
         """Get number of registered views"""
         return len(self._contexts)
-    
+
     def __contains__(self, variable: str):
         """Check if a variable is registered"""
         return variable in self._contexts
@@ -73,6 +76,7 @@ class ViewRegistry:
 
 class ViewConfiguration:
     """Mutable configuration for a view - what the user can control"""
+
     def __init__(
         self,
         variable: str,
@@ -94,6 +98,7 @@ class ViewConfiguration:
 
 class ViewState:
     """Runtime state for a view - ParaView objects and computed values"""
+
     def __init__(
         self,
         view_proxy=None,
@@ -111,6 +116,7 @@ class ViewState:
 
 class ViewContext:
     """Complete context for a rendered view combining configuration and state"""
+
     def __init__(self, config: ViewConfiguration, state: ViewState, index: int):
         self.config = config
         self.state = state
@@ -223,7 +229,9 @@ class ViewManager:
             varavg = self.compute_average(var, vtkdata=data)
             context.state.computed_average = varavg
             if not context.config.override_range:
-                context.state.data_representation.RescaleTransferFunctionToDataRange(False, True)
+                context.state.data_representation.RescaleTransferFunctionToDataRange(
+                    False, True
+                )
                 range = self.compute_range(var=var)
                 context.config.min_value = range[0]
                 context.config.max_value = range[1]
@@ -236,7 +244,9 @@ class ViewManager:
 
     def refresh_view_display(self, var, context: ViewContext):
         if not context.config.override_range:
-            context.state.data_representation.RescaleTransferFunctionToDataRange(False, True)
+            context.state.data_representation.RescaleTransferFunctionToDataRange(
+                False, True
+            )
         (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
         if context.state.var_text_proxy is not None:
             context.state.var_text_proxy.Text = v_text
@@ -405,7 +415,9 @@ class ViewManager:
         rendered = self.registry.get_all_variables()
         to_delete = set(rendered) - set(to_render)
         # Move old variables so they their proxies can be deleted
-        self.to_delete.extend([self.registry.get_view(x).state.view_proxy for x in to_delete])
+        self.to_delete.extend(
+            [self.registry.get_view(x).state.view_proxy for x in to_delete]
+        )
 
         # Get area variable to calculate weighted average
         data = self.source.views["2DProj"]
@@ -556,7 +568,9 @@ class ViewManager:
         self.state.dirty("varmin")
         self.state.varmax[index] = context.config.max_value
         self.state.dirty("varmax")
-        context.state.data_representation.RescaleTransferFunctionToDataRange(False, True)
+        context.state.data_representation.RescaleTransferFunctionToDataRange(
+            False, True
+        )
         self.render_all_views()
 
     def zoom_in(self, index=0):

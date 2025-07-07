@@ -1,7 +1,6 @@
 import fnmatch
 import numpy as np
 import os
-import traceback
 
 
 from paraview.simple import (
@@ -9,10 +8,8 @@ from paraview.simple import (
     GetTimeKeeper,
     LoadPlugin,
     OutputPort,
-    Clip,
     Contour,
-    Transform,
-    AppendDatasets,
+    LegacyVTKReader,
 )
 
 from paraview import servermanager as sm
@@ -85,7 +82,7 @@ class EAMVisSource:
         if not self.valid:
             return
 
-        if self.data == None:
+        if self.data is None:
             return
         if self.lev != lev or self.ilev != ilev:
             self.lev = lev
@@ -174,7 +171,7 @@ class EAMVisSource:
         self.data_file = data_file
         self.conn_file = conn_file
 
-        if self.data == None:
+        if self.data is None:
             data = EAMSliceDataReader(
                 registrationName="eamdata",
                 ConnectivityFile=conn_file,
@@ -236,7 +233,7 @@ class EAMVisSource:
             proj2D.UpdatePipeline()
             self.moveextents = proj2D.GetDataInformation().GetBounds()
 
-            if self.globe == None:
+            if self.globe is None:
                 globe_file = os.path.join(
                     os.path.dirname(__file__), "data", "globe.vtk"
                 )

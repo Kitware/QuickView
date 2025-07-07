@@ -3,18 +3,14 @@ from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import (
-    vtkUnstructuredGrid,
     vtkPolyData,
     vtkCellArray,
-    vtkBox,
     vtkPlane,
 )
 from vtkmodules.vtkCommonTransforms import vtkTransform
-from vtkmodules.vtkFiltersCore import vtkAppendFilter, vtkClipPolyData
+from vtkmodules.vtkFiltersCore import vtkAppendFilter
 from vtkmodules.vtkFiltersGeneral import (
     vtkTransformFilter,
-    vtkBoxClipDataSet,
-    vtkClipDataSet,
     vtkTableBasedClipDataSet,
 )
 
@@ -98,7 +94,7 @@ class EAMSphere(VTKPythonAlgorithmBase):
             afilter = vtkAppendFilter()
             afilter.AddInputData(inData)
             afilter.Update()
-            out = afilter.GetOutput()
+            afilter.GetOutput()
             outData.DeepCopy(afilter.GetOutput())
         else:
             outData.DeepCopy(inData)
@@ -211,7 +207,6 @@ class EAMLineSource(VTKPythonAlgorithmBase):
         # Create a vtkCellArray to define the connectivity of the polyline
         line = vtkCellArray()
         line.InsertNextCell(len(y))  # 4 is the number of points in the polyline
-        index = 0
         for i in range(len(y)):
             line.InsertCellPoint(i)
         # Create a vtkPolyData object to hold the points and the polyline

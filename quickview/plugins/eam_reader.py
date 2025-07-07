@@ -1,10 +1,9 @@
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.numpy_interface import dataset_adapter as dsa
-from vtkmodules.vtkCommonCore import vtkPoints, vtkIdTypeArray, vtkDataArraySelection
+from vtkmodules.vtkCommonCore import vtkPoints, vtkDataArraySelection
 from vtkmodules.vtkCommonDataModel import vtkUnstructuredGrid, vtkCellArray
 from vtkmodules.util import vtkConstants, numpy_support
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
-from vtkmodules.vtkIOLegacy import vtkUnstructuredGridWriter
 from paraview import print_error
 
 try:
@@ -36,7 +35,7 @@ class EAMConstants:
     PS0 = float(1e5)
 
 
-from enum import Enum
+from enum import Enum  # noqa: E402
 
 
 class VarType(Enum):
@@ -98,7 +97,7 @@ def FindSpecialVariable(data, lev, hya, hyb):
     _hyai = var[find(var, hya) != -1]
     _hybi = var[find(var, hyb) != -1]
     if len(_hyai) != len(_hybi):
-        raise Exception(f"Unmatched pair of hya and hyb variables found")
+        raise Exception("Unmatched pair of hya and hyb variables found")
 
     p0 = EAMConstants.P0
     ps0 = EAMConstants.PS0
@@ -108,7 +107,7 @@ def FindSpecialVariable(data, lev, hya, hyb):
         hybi = data[_hyai[1]][:].flatten()
         if not (len(hyai) == dim and len(hybi) == dim):
             raise Exception(
-                f"Lengths of arrays for hya_ and hyb_ variables do not match"
+                "Lengths of arrays for hya_ and hyb_ variables do not match"
             )
         ldata = ((hyai * p0) + (hybi * ps0)) / 100.0
         return ldata
@@ -116,7 +115,7 @@ def FindSpecialVariable(data, lev, hya, hyb):
         hyai = compare(data, _hyai, dim)
         hybi = compare(data, _hybi, dim)
         if hyai is None or hybi is None:
-            raise Exception(f"Values within hya_ and hyb_ arrays do not match")
+            raise Exception("Values within hya_ and hyb_ arrays do not match")
         else:
             ldata = ((hyai * p0) + (hybi * ps0)) / 100.0
             return ldata
@@ -237,7 +236,7 @@ class EAMSource(VTKPythonAlgorithmBase):
             try:
                 fillval = info.getncattr("_FillValue")
                 varmeta.fillval = fillval
-            except Exception as e:
+            except Exception:
                 traceback.print_exc()
                 pass
         self._vars2Darr.DisableAllArrays()
@@ -304,7 +303,7 @@ class EAMSource(VTKPythonAlgorithmBase):
 
     def GetTimeIndex(self, time):
         timeInd = 0
-        if self._timeSteps != None and len(self._timeSteps) > 1:
+        if self._timeSteps is not None and len(self._timeSteps) > 1:
             for t in self._timeSteps[1:]:
                 if time == t:
                     break
@@ -388,7 +387,7 @@ class EAMSource(VTKPythonAlgorithmBase):
             lev = FindSpecialVariable(
                 vardata, EAMConstants.LEV, EAMConstants.HYAM, EAMConstants.HYBM
             )
-            if not lev is None:
+            if lev is not None:
                 coords3Dm = np.empty((self.levDim, len(lat), 3), dtype=np.float64)
                 levInd = 0
                 for z in lev:
@@ -452,7 +451,7 @@ class EAMSource(VTKPythonAlgorithmBase):
             ilev = FindSpecialVariable(
                 vardata, EAMConstants.ILEV, EAMConstants.HYAI, EAMConstants.HYBI
             )
-            if not ilev is None:
+            if ilev is not None:
                 coords3Di = np.empty((self.ilevDim, len(lat), 3), dtype=np.float64)
                 ilevInd = 0
                 for z in ilev:
@@ -516,7 +515,7 @@ class EAMSource(VTKPythonAlgorithmBase):
         return 1
 
 
-import traceback
+import traceback  # noqa: E402
 
 
 @smproxy.reader(
@@ -640,7 +639,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             try:
                 fillval = info.getncattr("_FillValue")
                 varmeta.fillval = fillval
-            except Exception as e:
+            except Exception:
                 pass
         self._vars2Darr.DisableAllArrays()
         self._vars3Diarr.DisableAllArrays()

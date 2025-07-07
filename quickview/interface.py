@@ -81,7 +81,7 @@ save_state_keys = [
     "varmax",
     # Color options from toolbar
     "use_cvd_colors",
-    "use_standard_colors", 
+    "use_standard_colors",
     "show_color_bar",
 ]
 
@@ -100,6 +100,7 @@ try:
             cvd.append({"text": name.title(), "value": name})
 except Exception as e:
     print("Error loading presets :", e)
+
 
 @TrameApp()
 class EAMApp:
