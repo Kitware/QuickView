@@ -62,21 +62,27 @@ save_state_keys = [
     # Data files
     "data_file",
     "conn_file",
-    # Data slice related related variables
+    # Data slice related variables
     "tstamp",
     "vlev",
     "vilev",
     # Latitude/Longitude clipping
     "cliplat",
     "cliplong",
-    # Projection
+    # Projection and centering
     "projection",
+    "center",
     # Color map related variables
     "variables",
     "varcolor",
     "uselogscale",
+    "invert",
     "varmin",
     "varmax",
+    # Color options from toolbar
+    "use_cvd_colors",
+    "use_standard_colors", 
+    "show_color_bar",
 ]
 
 
@@ -94,7 +100,6 @@ try:
             cvd.append({"text": name.title(), "value": name})
 except Exception as e:
     print("Error loading presets :", e)
-
 
 @TrameApp()
 class EAMApp:

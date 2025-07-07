@@ -182,7 +182,7 @@ def build_color_information(state: map):
     vars = state["variables"]
     colors = state["varcolor"]
     logscl = state["uselogscale"]
-    # invert = state["invert"]
+    invert = state["invert"]
     varmin = state["varmin"]
     varmax = state["varmax"]
     registry = ViewRegistry()
@@ -191,6 +191,7 @@ def build_color_information(state: map):
             variable=var,
             colormap=colors[index],
             use_log_scale=logscl[index],
+            invert_colors=invert[index],
             min_value=varmin[index],
             max_value=varmax[index],
             override_range=True,  # Since we're loading from state, assume it's user-set
