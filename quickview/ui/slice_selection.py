@@ -24,7 +24,7 @@ class SliceSelection(CollapsableSection):
                 classes="text-center align-center justify-center text-subtitle-1 pt-3 px-3"
             ):
                 with v2.VCol(classes="text-left py-0"):
-                    html.Div("Layer Midpoints")
+                    html.Div("Layer Midpoints", classes="mb-1")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -32,7 +32,7 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_middle, "[-1]"),
                     ):
-                        v2.VIcon("mdi-chevron-left")
+                        v2.VIcon("mdi-skip-previous", small=True)
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -40,38 +40,40 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_middle, "[1]"),
                     ):
-                        v2.VIcon("mdi-chevron-right")
+                        v2.VIcon("mdi-skip-next", small=True)
                 with v2.VCol(classes="mr-4 py-0", cols=1):
                     v2.VCheckbox(
                         v_model=("play_lev", False),
                         off_icon="mdi-play-circle",
-                        on_icon="mdi-stop",
+                        on_icon="mdi-stop-circle",
                         classes="ma-0 pa-0",
                         **style,
                     )
 
             with v2.VRow(
-                classes="text-center align-center justify-center text-subtitle-1 pb-3 px-3"
+                classes="text-center align-center justify-center text-subtitle-1 pb-2 px-3"
             ):
                 with v2.VCol(cols=8, classes="py-0 pl-3"):
                     v2.VSlider(
                         v_model=("vlev", 0),
                         min=0,
                         max=("lev.length - 1",),
+                        color="primary",
                         classes="py-0 pl-3",
                         **style,
                     )
                 with v2.VCol(cols=4, classes="text-left py-0"):
                     html.Div(
-                        "{{parseFloat(lev[vlev]).toFixed(2) + ' (k=' + String(vlev) + ')'}}"
+                        "{{parseFloat(lev[vlev]).toFixed(2)}} hPa (k={{vlev}})",
+                        classes="font-weight-medium",
                     )
-            v2.VDivider()
+            v2.VDivider(classes="my-2")
 
             with v2.VRow(
                 classes="text-center align-center justify-center text-subtitle-1 pt-3 px-3"
             ):
                 with v2.VCol(classes="text-left py-0"):
-                    html.Div("Layer Interfaces")
+                    html.Div("Layer Interfaces", classes="mb-1")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -79,7 +81,7 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_interface, "[-1]"),
                     ):
-                        v2.VIcon("mdi-chevron-left")
+                        v2.VIcon("mdi-skip-previous", small=True)
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -87,38 +89,40 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_interface, "[1]"),
                     ):
-                        v2.VIcon("mdi-chevron-right")
+                        v2.VIcon("mdi-skip-next", small=True)
                 with v2.VCol(classes="mr-4 py-0", cols=1):
                     v2.VCheckbox(
                         v_model=("play_ilev", False),
                         off_icon="mdi-play-circle",
-                        on_icon="mdi-stop",
+                        on_icon="mdi-stop-circle",
                         classes="ma-0 pa-0",
                         **style,
                     )
 
             with v2.VRow(
-                classes="text-center align-center justify-center text-subtitle-1 pb-3 px-3"
+                classes="text-center align-center justify-center text-subtitle-1 pb-2 px-3"
             ):
                 with v2.VCol(cols=8, classes="py-0"):
                     v2.VSlider(
                         v_model=("vilev", 0),
                         min=0,
                         max=("ilev.length - 1",),
+                        color="secondary",
                         classes="py-0 pl-3",
                         **style,
                     )
                 with v2.VCol(cols=4, classes="text-left py-0"):
                     html.Div(
-                        "{{parseFloat(ilev[vilev]).toFixed(2) + ' (k=' + String(vilev) + ')'}}"
+                        "{{parseFloat(ilev[vilev]).toFixed(2)}} hPa (k={{vilev}})",
+                        classes="font-weight-medium",
                     )
-            v2.VDivider()
+            v2.VDivider(classes="my-2")
 
             with v2.VRow(
                 classes="text-center align-center justify-center text-subtitle-1 pt-3 px-3"
             ):
                 with v2.VCol(classes="text-left py-0"):
-                    html.Div("Time")
+                    html.Div("Time", classes="mb-1")
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -126,7 +130,7 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_time, "[-1]"),
                     ):
-                        v2.VIcon("mdi-chevron-left")
+                        v2.VIcon("mdi-skip-previous", small=True)
                 with v2.VCol(classes="py-0", cols=1):
                     with v2.VBtn(
                         icon=True,
@@ -134,37 +138,41 @@ class SliceSelection(CollapsableSection):
                         **style,
                         click=(self.on_click_advance_time, "[1]"),
                     ):
-                        v2.VIcon("mdi-chevron-right")
+                        v2.VIcon("mdi-skip-next", small=True)
                 with v2.VCol(classes="mr-4 py-0", cols=1):
                     v2.VCheckbox(
                         v_model=("play_time", False),
                         off_icon="mdi-play-circle",
-                        on_icon="mdi-stop",
+                        on_icon="mdi-stop-circle",
                         classes="ma-0 pa-0",
                         **style,
                     )
 
             with v2.VRow(
-                classes="text-center align-center justify-center text-subtitle-1 pb-3 px-3"
+                classes="text-center align-center justify-center text-subtitle-1 pb-2 px-3"
             ):
                 with v2.VCol(cols=8, classes="py-0"):
                     v2.VSlider(
                         v_model=("tstamp", 0),
                         min=0,
                         max=("timesteps.length - 1",),
+                        color="accent",
                         classes="py-0 pl-3",
                         **style,
                     )
                 with v2.VCol(cols=4, classes="text-left py-0"):
                     html.Div(
-                        "{{parseFloat(timesteps[tstamp]).toFixed(2) + ' (t=' + String(tstamp) + ')'}}"
+                        "{{parseFloat(timesteps[tstamp]).toFixed(2)}} (t={{tstamp}})",
+                        classes="font-weight-medium",
                     )
-            v2.VDivider()
+            v2.VDivider(classes="my-4")
 
-            with v2.VRow(classes="text-center align-center text-subtitle-1 pt-3 pa-2"):
+            with v2.VRow(classes="text-center align-center text-subtitle-1 pt-2 pa-2"):
                 with v2.VCol(cols=3, classes="py-0"):
                     v2.VTextField(
                         v_model=("cliplong[0]",),
+                        label="Min",
+                        suffix="°",
                         classes="py-0",
                         **style,
                     )
@@ -173,6 +181,8 @@ class SliceSelection(CollapsableSection):
                 with v2.VCol(cols=3, classes="py-0"):
                     v2.VTextField(
                         v_model=("cliplong[1]",),
+                        label="Max",
+                        suffix="°",
                         classes="py-0",
                         **style,
                     )
@@ -180,18 +190,20 @@ class SliceSelection(CollapsableSection):
                 v_model=("cliplong", [self.source.extents[0], self.source.extents[1]]),
                 min=-180,
                 max=180,
+                color="blue-grey",
                 **style,
                 flat=True,
                 variant="solo",
                 classes="pt-2 px-6",
             )
-            v2.VDivider()
+            v2.VDivider(classes="my-4")
 
-            v2.VDivider(classes="mx-2")
-            with v2.VRow(classes="text-center align-center text-subtitle-1 pt-3 pa-2"):
+            with v2.VRow(classes="text-center align-center text-subtitle-1 pt-2 pa-2"):
                 with v2.VCol(cols=3, classes="py-0"):
                     v2.VTextField(
                         v_model=("cliplat[0]",),
+                        label="Min",
+                        suffix="°",
                         classes="py-0",
                         **style,
                     )
@@ -200,6 +212,8 @@ class SliceSelection(CollapsableSection):
                 with v2.VCol(cols=3, classes="py-0"):
                     v2.VTextField(
                         v_model=("cliplat[1]",),
+                        label="Max",
+                        suffix="°",
                         classes="py-0",
                         **style,
                     )
@@ -207,6 +221,7 @@ class SliceSelection(CollapsableSection):
                 v_model=("cliplat", [self.source.extents[2], self.source.extents[3]]),
                 min=-90,
                 max=90,
+                color="blue-grey",
                 **style,
                 flat=True,
                 variant="solo",

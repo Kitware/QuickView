@@ -15,23 +15,30 @@ class ProjectionSelection(CollapsableSection):
         self.source = source
         self.views = view_manager
 
-        style = dict(dense=True, hide_details=True)
         self.state.center = 0.0
+
         with self.content:
-            with v2.VRow(classes="text-center align-center"):
-                with v2.VCol(**style):
-                    html.Span("Projection", **style)
-                with v2.VCol(**style):
-                    v2.VSelect(
-                        items=(
-                            "options",
-                            ["Cyl. Equidistant", "Robinson", "Mollweide"],
-                        ),
-                        v_model=("projection", "Cyl. Equidistant"),
-                        **style,
-                        solo=True,
-                        flat=True,
-                    )
+            with v2.VCard(flat=True, elevation=0, classes="pa-2"):
+                with v2.VRow(classes="align-center", no_gutters=True):
+                    with v2.VCol(cols=4, classes="text-right pr-3"):
+                        html.Div(
+                            "Projection:",
+                            classes="text-body-2 font-weight-medium",
+                            style="color: #616161;",
+                        )
+                    with v2.VCol(cols=8):
+                        v2.VSelect(
+                            items=(
+                                "options",
+                                ["Cyl. Equidistant", "Robinson", "Mollweide"],
+                            ),
+                            v_model=("projection", "Cyl. Equidistant"),
+                            outlined=True,
+                            dense=True,
+                            hide_details=True,
+                            color="primary",
+                            classes="elevation-0",
+                        )
 
     @change("projection")
     def update_pipeline_interactive(self, **kwargs):
