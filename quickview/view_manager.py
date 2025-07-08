@@ -233,7 +233,7 @@ class ViewManager:
     def update_views_for_timestep(self):
         if len(self.registry) == 0:
             return
-        data = sm.Fetch(self.source.views["2DProj"])
+        data = sm.Fetch(self.source.views["atmosphere_data"])
 
         for var, context in self.registry.items():
             varavg = self.compute_average(var, vtkdata=data)
@@ -270,16 +270,16 @@ class ViewManager:
     def get_var_info(self, var, average):
         var_text = var + "\n(avg: " + "{:.2E}".format(average) + ")"
         info_text = None
-        vars = self.source.vars.get("2D", None)
+        surface_vars = self.source.vars.get("surface", [])
         t = self.state.tstamp
-        if var in vars:
+        if surface_vars and var in surface_vars:
             info_text = f"t = {t}"
-        vars = self.source.vars.get("3Dm", None)
-        if var in vars:
+        midpoint_vars = self.source.vars.get("midpoint", [])
+        if midpoint_vars and var in midpoint_vars:
             k = self.state.vlev
             info_text = f"k = {k}\nt = {t}"
-        vars = self.source.vars.get("3Di", None)
-        if var in vars:
+        interface_vars = self.source.vars.get("interface", [])
+        if interface_vars and var in interface_vars:
             k = self.state.vilev
             info_text = f"k = {k}\nt = {t}"
 
@@ -289,7 +289,7 @@ class ViewManager:
         rview = context.state.view_proxy
 
         # Update unique sources to all render views
-        data = sources["2DProj"]
+        data = sources["atmosphere_data"]
         rep = Show(data, rview)
         context.state.data_representation = rep
         ColorBy(rep, ("CELLS", var))
@@ -321,7 +321,7 @@ class ViewManager:
 
         # Update common sources to all render views
 
-        globe = sources["GProj"]
+        globe = sources["continents"]
         repG = Show(globe, rview)
         ColorBy(repG, None)
         repG.SetRepresentationType("Wireframe")
@@ -330,7 +330,7 @@ class ViewManager:
         repG.AmbientColor = [0.67, 0.67, 0.67]
         repG.DiffuseColor = [0.67, 0.67, 0.67]
 
-        annot = sources["GLines"]
+        annot = sources["grid_lines"]
         repAn = Show(annot, rview)
         repAn.SetRepresentationType("Wireframe")
         repAn.AmbientColor = [0.67, 0.67, 0.67]
@@ -389,7 +389,7 @@ class ViewManager:
 
     def compute_average(self, var, vtkdata=None):
         if vtkdata is None:
-            data = self.source.views["2DProj"]
+            data = self.source.views["atmosphere_data"]
             vtkdata = sm.Fetch(data)
         vardata = vtkdata.GetCellData().GetArray(var)
         area = np.array(vtkdata.GetCellData().GetArray("area"))
@@ -403,7 +403,7 @@ class ViewManager:
 
     def compute_range(self, var, vtkdata=None):
         if vtkdata is None:
-            data = self.source.views["2DProj"]
+            data = self.source.views["atmosphere_data"]
             vtkdata = sm.Fetch(data)
         vardata = vtkdata.GetCellData().GetArray(var)
         return vardata.GetRange()
@@ -419,10 +419,10 @@ class ViewManager:
         source.UpdateCenter(self.state.center)
         source.UpdateProjection(self.state.projection)
         source.UpdatePipeline()
-        vars2D = source.vars.get("2D", None)
-        vars3Dm = source.vars.get("3Dm", None)
-        vars3Di = source.vars.get("3Di", None)
-        to_render = vars2D + vars3Dm + vars3Di
+        surface_vars = source.vars.get("surface", [])
+        midpoint_vars = source.vars.get("midpoint", [])
+        interface_vars = source.vars.get("interface", [])
+        to_render = surface_vars + midpoint_vars + interface_vars
         rendered = self.registry.get_all_variables()
         to_delete = set(rendered) - set(to_render)
         # Move old variables so they their proxies can be deleted
@@ -431,7 +431,7 @@ class ViewManager:
         )
 
         # Get area variable to calculate weighted average
-        data = self.source.views["2DProj"]
+        data = self.source.views["atmosphere_data"]
         vtkdata = sm.Fetch(data)
 
         del self.state.views[:]

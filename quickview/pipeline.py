@@ -44,13 +44,13 @@ class EAMVisSource:
         self.ilev = 0
 
         # List of all available variables
-        self.vars2D = []
-        self.vars3Dm = []
-        self.vars3Di = []
+        self.surface_vars = []
+        self.midpoint_vars = []
+        self.interface_vars = []
         # List of selected variables
-        self.vars2D_sel = []
-        self.vars3Di_sel = []
-        self.vars3Dm_sel = []
+        self.surface_vars_sel = []
+        self.interface_vars_sel = []
+        self.midpoint_vars_sel = []
 
         self.data = None
         self.globe = None
@@ -62,7 +62,7 @@ class EAMVisSource:
         self.moveextents = [-180.0, 180.0, -90.0, 90.0]
 
         self.views = {}
-        self.vars = {}
+        self.vars = {"surface": [], "midpoint": [], "interface": []}
 
         self.observer = ErrorObserver()
         try:
@@ -94,13 +94,13 @@ class EAMVisSource:
         if not self.valid:
             return
 
-        extract = FindSource("DataExtract")
-        extract.LongitudeRange = cliplong
-        extract.LatitudeRange = cliplat
+        atmos_extract = FindSource("AtmosExtract")
+        atmos_extract.LongitudeRange = cliplong
+        atmos_extract.LatitudeRange = cliplat
 
-        gextract = FindSource("GExtract")
-        gextract.LongitudeRange = cliplong
-        gextract.LatitudeRange = cliplat
+        cont_extract = FindSource("ContExtract")
+        cont_extract.LongitudeRange = cliplong
+        cont_extract.LatitudeRange = cliplat
 
     def UpdateCenter(self, center):
         """
@@ -119,14 +119,14 @@ class EAMVisSource:
         if not self.valid:
             return
 
-        eamproj2D = FindSource("2DProj")
-        eamprojG = FindSource("GProj")
-        projA = FindSource("GLines")
+        atmos_proj = FindSource("AtmosProj")
+        cont_proj = FindSource("ContProj")
+        grid_proj = FindSource("GridProj")
         if self.projection != proj:
             self.projection = proj
-            eamproj2D.Projection = proj
-            eamprojG.Projection = proj
-            projA.Projection = proj
+            atmos_proj.Projection = proj
+            cont_proj.Projection = proj
+            grid_proj.Projection = proj
 
     def UpdateTimeStep(self, t_index):
         if not self.valid:
@@ -140,29 +140,29 @@ class EAMVisSource:
         if not self.valid:
             return
 
-        eamproj2D = FindSource("2DProj")
-        if eamproj2D:
-            eamproj2D.UpdatePipeline()
-        self.moveextents = eamproj2D.GetDataInformation().GetBounds()
+        atmos_proj = FindSource("AtmosProj")
+        if atmos_proj:
+            atmos_proj.UpdatePipeline()
+        self.moveextents = atmos_proj.GetDataInformation().GetBounds()
 
-        eamprojG = FindSource("GProj")
-        if eamprojG:
-            eamprojG.UpdatePipeline()
+        cont_proj = FindSource("ContProj")
+        if cont_proj:
+            cont_proj.UpdatePipeline()
 
-        extract = FindSource("DataExtract")
-        bounds = extract.GetDataInformation().GetBounds()
+        atmos_extract = FindSource("AtmosExtract")
+        bounds = atmos_extract.GetDataInformation().GetBounds()
 
-        grid = FindSource("OGLines")
-        if grid:
-            grid.LongitudeRange = [bounds[0], bounds[1]]
-            grid.LatitudeRange = [bounds[2], bounds[3]]
-        projA = FindSource("GLines")
-        if projA:
-            projA.UpdatePipeline()
+        grid_gen = FindSource("GridGen")
+        if grid_gen:
+            grid_gen.LongitudeRange = [bounds[0], bounds[1]]
+            grid_gen.LatitudeRange = [bounds[2], bounds[3]]
+        grid_proj = FindSource("GridProj")
+        if grid_proj:
+            grid_proj.UpdatePipeline()
 
-        self.views["2DProj"] = OutputPort(eamproj2D, 0)
-        self.views["GProj"] = OutputPort(eamprojG, 0)
-        self.views["GLines"] = OutputPort(projA, 0)
+        self.views["atmosphere_data"] = OutputPort(atmos_proj, 0)
+        self.views["continents"] = OutputPort(cont_proj, 0)
+        self.views["grid_lines"] = OutputPort(grid_proj, 0)
 
     def Update(self, data_file, conn_file, lev=0, ilev=0):
         if self.data_file == data_file and self.conn_file == conn_file:
@@ -173,7 +173,7 @@ class EAMVisSource:
 
         if self.data is None:
             data = EAMSliceDataReader(
-                registrationName="eamdata",
+                registrationName="AtmosReader",
                 ConnectivityFile=conn_file,
                 DataFile=data_file,
             )
@@ -202,13 +202,13 @@ class EAMVisSource:
             self.lev = data_wrapped.FieldData["lev"].tolist()
             self.ilev = data_wrapped.FieldData["ilev"].tolist()
 
-            self.vars2D = list(
+            self.surface_vars = list(
                 np.asarray(self.data.GetProperty("a2DVariablesInfo"))[::2]
             )
-            self.vars3Dm = list(
+            self.midpoint_vars = list(
                 np.asarray(self.data.GetProperty("a3DMiddleLayerVariablesInfo"))[::2]
             )
-            self.vars3Di = list(
+            self.interface_vars = list(
                 np.asarray(self.data.GetProperty("a3DInterfaceLayerVariablesInfo"))[::2]
             )
 
@@ -216,62 +216,71 @@ class EAMVisSource:
             self.timestamps = np.array(tk.TimestepValues).tolist()
             tk.Time = tk.TimestepValues[0]
 
-            extract = EAMTransformAndExtract(
-                registrationName="DataExtract", Input=self.data
+            # Step 1: Extract and transform atmospheric data
+            atmos_extract = EAMTransformAndExtract(
+                registrationName="AtmosExtract", Input=self.data
             )
-            extract.LongitudeRange = [-180.0, 180.0]
-            extract.LatitudeRange = [-90.0, 90.0]
-            # meridian = EAMCenterMeridian(
-            #    registrationName="CenterMeridian", Input=OutputPort(extract, 0)
-            # )
-            # meridian.CenterMeridian = 0
-            extract.UpdatePipeline()
-            self.extents = extract.GetDataInformation().GetBounds()
-            proj2D = EAMProject(registrationName="2DProj", Input=OutputPort(extract, 0))
-            proj2D.Projection = self.projection
-            proj2D.Translate = 0
-            proj2D.UpdatePipeline()
-            self.moveextents = proj2D.GetDataInformation().GetBounds()
+            atmos_extract.LongitudeRange = [-180.0, 180.0]
+            atmos_extract.LatitudeRange = [-90.0, 90.0]
+            atmos_extract.UpdatePipeline()
+            self.extents = atmos_extract.GetDataInformation().GetBounds()
 
+            # Step 2: Apply map projection to atmospheric data
+            atmos_proj = EAMProject(
+                registrationName="AtmosProj", Input=OutputPort(atmos_extract, 0)
+            )
+            atmos_proj.Projection = self.projection
+            atmos_proj.Translate = 0
+            atmos_proj.UpdatePipeline()
+            self.moveextents = atmos_proj.GetDataInformation().GetBounds()
+
+            # Step 3: Load and process continent outlines
             if self.globe is None:
                 globe_file = os.path.join(
                     os.path.dirname(__file__), "data", "globe.vtk"
                 )
-                gdata = LegacyVTKReader(
-                    registrationName="globe", FileNames=[globe_file]
+                globe_reader = LegacyVTKReader(
+                    registrationName="ContReader", FileNames=[globe_file]
                 )
-                cgdata = Contour(registrationName="gcontour", Input=gdata)
-                cgdata.ContourBy = ["POINTS", "cstar"]
-                cgdata.Isosurfaces = [0.5]
-                cgdata.PointMergeMethod = "Uniform Binning"
-                self.globe = cgdata
+                cont_contour = Contour(
+                    registrationName="ContContour", Input=globe_reader
+                )
+                cont_contour.ContourBy = ["POINTS", "cstar"]
+                cont_contour.Isosurfaces = [0.5]
+                cont_contour.PointMergeMethod = "Uniform Binning"
+                self.globe = cont_contour
 
-            gextract = EAMTransformAndExtract(
-                registrationName="GExtract", Input=self.globe
+            # Step 4: Extract and transform continent data
+            cont_extract = EAMTransformAndExtract(
+                registrationName="ContExtract", Input=self.globe
             )
-            gextract.LongitudeRange = [-180.0, 180.0]
-            gextract.LatitudeRange = [-90.0, 90.0]
-            # gmeridian = EAMCenterMeridian(
-            #    registrationName="GCMeridian", Input=OutputPort(gextract, 0)
-            # )
-            # gmeridian.CenterMeridian = 0
-            # gmeridian.UpdatePipeline()
-            projG = EAMProject(registrationName="GProj", Input=OutputPort(gextract, 0))
-            projG.Projection = self.projection
-            projG.Translate = 0
-            projG.UpdatePipeline()
+            cont_extract.LongitudeRange = [-180.0, 180.0]
+            cont_extract.LatitudeRange = [-90.0, 90.0]
 
-            glines = EAMGridLines(registrationName="OGLines")
-            glines.UpdatePipeline()
-            # self.annot = glines
-            projA = EAMProject(registrationName="GLines", Input=OutputPort(glines, 0))
-            projA.Projection = self.projection
-            projA.Translate = 0
-            projA.UpdatePipeline()
+            # Step 5: Apply map projection to continents
+            cont_proj = EAMProject(
+                registrationName="ContProj", Input=OutputPort(cont_extract, 0)
+            )
+            cont_proj.Projection = self.projection
+            cont_proj.Translate = 0
+            cont_proj.UpdatePipeline()
 
-            self.views["2DProj"] = OutputPort(proj2D, 0)
-            self.views["GProj"] = OutputPort(projG, 0)
-            self.views["GLines"] = OutputPort(projA, 0)
+            # Step 6: Generate lat/lon grid lines
+            grid_gen = EAMGridLines(registrationName="GridGen")
+            grid_gen.UpdatePipeline()
+
+            # Step 7: Apply map projection to grid lines
+            grid_proj = EAMProject(
+                registrationName="GridProj", Input=OutputPort(grid_gen, 0)
+            )
+            grid_proj.Projection = self.projection
+            grid_proj.Translate = 0
+            grid_proj.UpdatePipeline()
+
+            # Step 8: Cache all projected views for rendering
+            self.views["atmosphere_data"] = OutputPort(atmos_proj, 0)
+            self.views["continents"] = OutputPort(cont_proj, 0)
+            self.views["grid_lines"] = OutputPort(grid_proj, 0)
 
             self.valid = True
             self.observer.clear()
@@ -282,15 +291,15 @@ class EAMVisSource:
             self.valid = False
             return
 
-    def LoadVariables(self, v2d, v3dm, v3di):
+    def LoadVariables(self, surf, mid, intf):
         if not self.valid:
             return
-        self.data.a2DVariables = v2d
-        self.data.a3DMiddleLayerVariables = v3dm
-        self.data.a3DInterfaceLayerVariables = v3di
-        self.vars["2D"] = v2d
-        self.vars["3Dm"] = v3dm
-        self.vars["3Di"] = v3di
+        self.data.a2DVariables = surf
+        self.data.a3DMiddleLayerVariables = mid
+        self.data.a3DInterfaceLayerVariables = intf
+        self.vars["surface"] = surf
+        self.vars["midpoint"] = mid
+        self.vars["interface"] = intf
 
 
 if __name__ == "__main__":

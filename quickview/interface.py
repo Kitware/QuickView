@@ -132,9 +132,9 @@ class EAMApp:
 
         self.update_state_from_source()
 
-        self.ind2d = None
-        self.ind3dm = None
-        self.ind3di = None
+        self.ind_surface = None
+        self.ind_midpoint = None
+        self.ind_interface = None
         state.views = []
         # state.projection    = "Cyl. Equidistant"
         # state.cliplong      = [self.source.extents[0], self.source.extents[1]],
@@ -143,7 +143,7 @@ class EAMApp:
         state.layout = []
         state.variables = []
         state.ccardscolor = [None] * len(
-            source.vars2D + source.vars3Di + source.vars3Dm
+            source.surface_vars + source.interface_vars + source.midpoint_vars
         )
         state.varcolor = []
         state.uselogscale = []
@@ -188,12 +188,12 @@ class EAMApp:
             state.vlev = 0
             state.vilev = 0
             state.tstamp = 0
-            state.vars2Dstate = [False] * len(source.vars2D)
-            state.vars3Dmstate = [False] * len(source.vars3Dm)
-            state.vars3Distate = [False] * len(source.vars3Di)
-        self.vars2Dstate = np.array([False] * len(source.vars2D))
-        self.vars3Dmstate = np.array([False] * len(source.vars3Dm))
-        self.vars3Distate = np.array([False] * len(source.vars3Di))
+            state.surface_vars_state = [False] * len(source.surface_vars)
+            state.midpoint_vars_state = [False] * len(source.midpoint_vars)
+            state.interface_vars_state = [False] * len(source.interface_vars)
+        self.surface_vars_state = np.array([False] * len(source.surface_vars))
+        self.midpoint_vars_state = np.array([False] * len(source.midpoint_vars))
+        self.interface_vars_state = np.array([False] * len(source.interface_vars))
 
     def update_state_from_source(self):
         source = self.source
@@ -202,30 +202,30 @@ class EAMApp:
             state.lev = source.lev
             state.ilev = source.ilev
             state.extents = list(source.extents)
-            state.vars2D = source.vars2D
-            state.vars3Di = source.vars3Di
-            state.vars3Dm = source.vars3Dm
+            state.surface_vars = source.surface_vars
+            state.interface_vars = source.interface_vars
+            state.midpoint_vars = source.midpoint_vars
             state.pipeline_valid = source.valid
 
     def update_state_from_config(self, initstate):
         source = self.source
         with self.state as state:
-            state.vars2D = source.vars2D
-            state.vars3Di = source.vars3Di
-            state.vars3Dm = source.vars3Dm
+            state.surface_vars = source.surface_vars
+            state.interface_vars = source.interface_vars
+            state.midpoint_vars = source.midpoint_vars
             state.update(initstate)
 
             selection = state.variables
-            selection2D = np.isin(state.vars2D, selection).tolist()
-            selection3Dm = np.isin(state.vars3Dm, selection).tolist()
-            selection3Di = np.isin(state.vars3Di, selection).tolist()
-            state.vars2Dstate = selection2D
-            state.vars3Dmstate = selection3Dm
-            state.vars3Distate = selection3Di
+            selection_surface = np.isin(state.surface_vars, selection).tolist()
+            selection_midpoint = np.isin(state.midpoint_vars, selection).tolist()
+            selection_interface = np.isin(state.interface_vars, selection).tolist()
+            state.surface_vars_state = selection_surface
+            state.midpoint_vars_state = selection_midpoint
+            state.interface_vars_state = selection_interface
 
-        self.vars2Dstate = np.array(selection2D)
-        self.vars3Dmstate = np.array(selection3Dm)
-        self.vars3Distate = np.array(selection3Di)
+        self.surface_vars_state = np.array(selection_surface)
+        self.midpoint_vars_state = np.array(selection_midpoint)
+        self.interface_vars_state = np.array(selection_interface)
 
         self.viewmanager.registry = build_color_information(initstate)
         self.load_variables()
@@ -257,24 +257,24 @@ class EAMApp:
             self.update_state_from_source()
 
     def load_variables(self):
-        s2d = []
-        s3dm = []
-        s3di = []
-        if len(self.state.vars2D) > 0:
-            v2d = np.array(self.state.vars2D)
-            f2d = np.array(self.state.vars2Dstate)
-            s2d = v2d[f2d].tolist()
-        if len(self.state.vars3Dm) > 0:
-            v3dm = np.array(self.state.vars3Dm)
-            f3dm = np.array(self.state.vars3Dmstate)
-            s3dm = v3dm[f3dm].tolist()
-        if len(self.state.vars3Di) > 0:
-            v3di = np.array(self.state.vars3Di)
-            f3di = np.array(self.state.vars3Distate)
-            s3di = v3di[f3di].tolist()
-        self.source.LoadVariables(s2d, s3dm, s3di)
+        surf = []
+        mid = []
+        intf = []
+        if len(self.state.surface_vars) > 0:
+            v_surf = np.array(self.state.surface_vars)
+            f_surf = np.array(self.state.surface_vars_state)
+            surf = v_surf[f_surf].tolist()
+        if len(self.state.midpoint_vars) > 0:
+            v_mid = np.array(self.state.midpoint_vars)
+            f_mid = np.array(self.state.midpoint_vars_state)
+            mid = v_mid[f_mid].tolist()
+        if len(self.state.interface_vars) > 0:
+            v_intf = np.array(self.state.interface_vars)
+            f_intf = np.array(self.state.interface_vars_state)
+            intf = v_intf[f_intf].tolist()
+        self.source.LoadVariables(surf, mid, intf)
 
-        vars = s2d + s3dm + s3di
+        vars = surf + mid + intf
 
         # Tracking variables to control camera and color properties
         with self.state as state:
@@ -348,107 +348,113 @@ class EAMApp:
         elif dir.lower() == "right":
             self.viewmanager.pan_camera(0, 0)
 
-    def update_2D_variable_selection(self, index, event):
-        self.state.vars2Dstate[index] = event
-        self.state.dirty("vars2Dstate")
-        if self.ind2d is not None:
-            ind = self.ind2d[index]
-            self.vars2Dstate[ind] = event
+    def update_surface_var_selection(self, index, event):
+        self.state.surface_vars_state[index] = event
+        self.state.dirty("surface_vars_state")
+        if self.ind_surface is not None:
+            ind = self.ind_surface[index]
+            self.surface_vars_state[ind] = event
         else:
-            self.vars2Dstate[index] = event
+            self.surface_vars_state[index] = event
 
-    def update_3Dm_variable_selection(self, index, event):
-        self.state.vars3Dmstate[index] = event
-        self.state.dirty("vars3Dmstate")
-        if self.ind3dm is not None:
-            ind = self.ind3dm[index]
-            self.vars3Dmstate[ind] = event
+    def update_midpoint_var_selection(self, index, event):
+        self.state.midpoint_vars_state[index] = event
+        self.state.dirty("midpoint_vars_state")
+        if self.ind_midpoint is not None:
+            ind = self.ind_midpoint[index]
+            self.midpoint_vars_state[ind] = event
         else:
-            self.vars3Dmstate[index] = event
+            self.midpoint_vars_state[index] = event
 
-    def update_3Di_variable_selection(self, index, event):
-        self.state.vars3Distate[index] = event
-        self.state.dirty("vars3Distate")
-        if self.ind3di is not None:
-            ind = self.ind3di[index]
-            self.vars3Distate[ind] = event
+    def update_interface_var_selection(self, index, event):
+        self.state.interface_vars_state[index] = event
+        self.state.dirty("interface_vars_state")
+        if self.ind_interface is not None:
+            ind = self.ind_interface[index]
+            self.interface_vars_state[ind] = event
         else:
-            self.vars3Distate[index] = event
+            self.interface_vars_state[index] = event
 
-    def search_2D_variables(self, search: str):
+    def search_surface_vars(self, search: str):
         if search is None or len(search) == 0:
-            filtVars = self.source.vars2D
-            self.ind2d = None
-            self.state.vars2D = self.source.vars2D
-            self.state.vars2Dstate = self.vars2Dstate.tolist()
-            self.state.dirty("vars2Dstate")
+            filtVars = self.source.surface_vars
+            self.ind_surface = None
+            self.state.surface_vars = self.source.surface_vars
+            self.state.surface_vars_state = self.surface_vars_state.tolist()
+            self.state.dirty("surface_vars_state")
         else:
             filtered = [
                 (idx, var)
-                for idx, var in enumerate(self.source.vars2D)
+                for idx, var in enumerate(self.source.surface_vars)
                 if search.lower() in var.lower()
             ]
             filtVars = [var for (_, var) in filtered]
-            self.ind2d = [idx for (idx, _) in filtered]
-        if self.ind2d is not None:
-            self.state.vars2D = list(filtVars)
-            self.state.vars2Dstate = self.vars2Dstate[self.ind2d].tolist()
-            self.state.dirty("vars2Dstate")
+            self.ind_surface = [idx for (idx, _) in filtered]
+        if self.ind_surface is not None:
+            self.state.surface_vars = list(filtVars)
+            self.state.surface_vars_state = self.surface_vars_state[
+                self.ind_surface
+            ].tolist()
+            self.state.dirty("surface_vars_state")
 
-    def search_3Dm_variables(self, search: str):
+    def search_midpoint_vars(self, search: str):
         if search is None or len(search) == 0:
-            filtVars = self.source.vars3Dm
-            self.ind3dm = None
-            self.state.vars3Dm = self.source.vars3Dm
-            self.state.vars3Dmstate = self.vars3Dmstate.tolist()
-            self.state.dirty("vars3Dmstate")
+            filtVars = self.source.midpoint_vars
+            self.ind_midpoint = None
+            self.state.midpoint_vars = self.source.midpoint_vars
+            self.state.midpoint_vars_state = self.midpoint_vars_state.tolist()
+            self.state.dirty("midpoint_vars_state")
         else:
             filtered = [
                 (idx, var)
-                for idx, var in enumerate(self.source.vars3Dm)
+                for idx, var in enumerate(self.source.midpoint_vars)
                 if search.lower() in var.lower()
             ]
             filtVars = [var for (_, var) in filtered]
-            self.ind3dm = [idx for (idx, _) in filtered]
-        if self.ind3dm is not None:
-            self.state.vars3Dm = list(filtVars)
-            self.state.vars3Dmstate = self.vars3Dmstate[self.ind3dm].tolist()
-            self.state.dirty("vars3Dmstate")
+            self.ind_midpoint = [idx for (idx, _) in filtered]
+        if self.ind_midpoint is not None:
+            self.state.midpoint_vars = list(filtVars)
+            self.state.midpoint_vars_state = self.midpoint_vars_state[
+                self.ind_midpoint
+            ].tolist()
+            self.state.dirty("midpoint_vars_state")
 
-    def search_3Di_variables(self, search: str):
+    def search_interface_vars(self, search: str):
         if search is None or len(search) == 0:
-            filtVars = self.source.vars3Di
-            self.ind3di = None
-            self.state.vars3Di = self.source.vars3Di
-            self.state.vars3Distate = self.vars3Distate.tolist()
-            self.state.dirty("vars3Distate")
+            filtVars = self.source.interface_vars
+            self.ind_interface = None
+            self.state.interface_vars = self.source.interface_vars
+            self.state.interface_vars_state = self.interface_vars_state.tolist()
+            self.state.dirty("interface_vars_state")
         else:
             filtered = [
                 (idx, var)
-                for idx, var in enumerate(self.source.vars3Di)
+                for idx, var in enumerate(self.source.interface_vars)
                 if search.lower() in var.lower()
             ]
             filtVars = [var for (_, var) in filtered]
-            self.ind3di = [idx for (idx, _) in filtered]
-        if self.ind3dm is not None:
-            self.state.vars3Di = list(filtVars)
-            self.state.vars3Distate = self.vars3Distate[self.ind3di].tolist()
-            self.state.dirty("vars3Distate")
+            self.ind_interface = [idx for (idx, _) in filtered]
+        if self.ind_interface is not None:
+            self.state.interface_vars = list(filtVars)
+            self.state.interface_vars_state = self.interface_vars_state[
+                self.ind_interface
+            ].tolist()
+            self.state.dirty("interface_vars_state")
 
-    def clear_2D_variables(self):
-        self.state.vars2Dstate = [False] * len(self.state.vars2Dstate)
-        self.vars2Dstate = np.array([False] * len(self.vars2Dstate))
-        self.state.dirty("vars2Dstate")
+    def clear_surface_vars(self):
+        self.state.surface_vars_state = [False] * len(self.state.surface_vars_state)
+        self.surface_vars_state = np.array([False] * len(self.surface_vars_state))
+        self.state.dirty("surface_vars_state")
 
-    def clear_3Dm_variables(self):
-        self.state.vars3Dmstate = [False] * len(self.state.vars3Dmstate)
-        self.vars3Dmstate = np.array([False] * len(self.vars3Dmstate))
-        self.state.dirty("vars3Dmstate")
+    def clear_midpoint_vars(self):
+        self.state.midpoint_vars_state = [False] * len(self.state.midpoint_vars_state)
+        self.midpoint_vars_state = np.array([False] * len(self.midpoint_vars_state))
+        self.state.dirty("midpoint_vars_state")
 
-    def clear_3Di_variables(self):
-        self.state.vars3Distate = [False] * len(self.state.vars3Distate)
-        self.vars3Distate = np.array([False] * len(self.vars3Distate))
-        self.state.dirty("vars3Distate")
+    def clear_interface_vars(self):
+        self.state.interface_vars_state = [False] * len(self.state.interface_vars_state)
+        self.interface_vars_state = np.array([False] * len(self.interface_vars_state))
+        self.state.dirty("interface_vars_state")
 
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
@@ -507,33 +513,33 @@ class EAMApp:
                         ProjectionSelection(self.source, self.viewmanager)
 
                         VariableSelection(
-                            title="2D Variables",
-                            panel_name="show_vars2D",
-                            var_list="vars2D",
-                            var_list_state="vars2Dstate",
-                            on_search=self.search_2D_variables,
-                            on_clear=self.clear_2D_variables,
-                            on_update=self.update_2D_variable_selection,
+                            title="Surface Variables",
+                            panel_name="show_surface_vars",
+                            var_list="surface_vars",
+                            var_list_state="surface_vars_state",
+                            on_search=self.search_surface_vars,
+                            on_clear=self.clear_surface_vars,
+                            on_update=self.update_surface_var_selection,
                         )
 
                         VariableSelection(
                             title="Variables at Layer Midpoints",
-                            panel_name="show_vars3Dm",
-                            var_list="vars3Dm",
-                            var_list_state="vars3Dmstate",
-                            on_search=self.search_3Dm_variables,
-                            on_clear=self.clear_3Dm_variables,
-                            on_update=self.update_3Dm_variable_selection,
+                            panel_name="show_midpoint_vars",
+                            var_list="midpoint_vars",
+                            var_list_state="midpoint_vars_state",
+                            on_search=self.search_midpoint_vars,
+                            on_clear=self.clear_midpoint_vars,
+                            on_update=self.update_midpoint_var_selection,
                         )
 
                         VariableSelection(
                             title="Variables at Layer Interfaces",
-                            panel_name="show_vars3Di",
-                            var_list="vars3Di",
-                            var_list_state="vars3Distate",
-                            on_search=self.search_3Di_variables,
-                            on_clear=self.clear_3Di_variables,
-                            on_update=self.update_3Di_variable_selection,
+                            panel_name="show_interface_vars",
+                            var_list="interface_vars",
+                            var_list_state="interface_vars_state",
+                            on_search=self.search_interface_vars,
+                            on_clear=self.clear_interface_vars,
+                            on_update=self.update_interface_var_selection,
                         )
 
                 with layout.content:
