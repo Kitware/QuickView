@@ -90,34 +90,44 @@ class EAMGridLines(VTKPythonAlgorithmBase):
         llon = math.floor(llon / interval) * interval
         hlon = math.ceil(hlon / interval) * interval
         xextent = hlon - llon
-        xspc = xextent / 9.0
-
         llat = math.floor(llat / interval) * interval
         hlat = math.ceil(hlat / interval) * interval
         yextent = hlat - llat
-        yspc = yextent / 99.0
 
         output = dsa.WrapDataObject(vtkUnstructuredGrid.GetData(outInfo, 0))
 
         # Getting Longitude lines
         longs = int(xextent / interval) + 1
-        lonpoints = 100 * longs
+        lonpoints = 100 * longs  # 100 points per longitude line
 
+        # Getting Latitude lines
         lats = int(yextent / interval) + 1
-        latpoints = 10 * lats
+        latpoints = 10 * lats  # 10 points per latitude line
 
         shape = (lonpoints + latpoints, 3)
         coords = np.empty(shape, dtype=np.float64)
 
-        lonx = np.arange(llon, hlon + interval, interval)
-        lonx = np.hstack((lonx,) * 100).reshape((100, longs)).transpose().flatten()
-        lony = np.arange(llat, hlat + yspc, yspc)
-        lony = np.hstack((lony,) * longs)
+        # Generate longitude line x-coordinates (longitude values)
+        lonx = np.linspace(llon, hlon, longs)
+        lonx = np.repeat(lonx, 100)  # Each longitude line has 100 points
 
-        latx = np.arange(llon, hlon + xspc, xspc)
-        latx = np.hstack((latx,) * lats)
-        laty = np.arange(llat, hlat + interval, interval)
-        laty = np.hstack((laty,) * 10).reshape((10, lats)).transpose().flatten()
+        # Generate longitude line y-coordinates (latitude values)
+        lony = np.linspace(llat, hlat, 100)
+        lony = np.tile(lony, longs)  # Repeat for each longitude line
+
+        # Generate latitude line x-coordinates (longitude values)
+        latx = np.linspace(llon, hlon, 10)  # 10 points per latitude line
+        latx = np.tile(latx, lats)  # Repeat for each latitude line
+
+        # Generate latitude line y-coordinates (latitude values)
+        laty = np.linspace(llat, hlat, lats)
+        laty = np.repeat(laty, 10)  # Each latitude line has 10 points
+
+        # Verify array sizes before assignment
+        assert len(lonx) == lonpoints, f"lonx size {len(lonx)} != expected {lonpoints}"
+        assert len(lony) == lonpoints, f"lony size {len(lony)} != expected {lonpoints}"
+        assert len(latx) == latpoints, f"latx size {len(latx)} != expected {latpoints}"
+        assert len(laty) == latpoints, f"laty size {len(laty)} != expected {latpoints}"
 
         coords[:lonpoints, 0] = lonx
         coords[:lonpoints, 1] = lony
@@ -133,13 +143,21 @@ class EAMGridLines(VTKPythonAlgorithmBase):
         ncells = longs + lats
         cellTypes = np.empty(ncells, dtype=np.uint8)
 
+        # Build cell offsets array
         offsets = np.empty(ncells + 1, dtype=np.int64)
-        off1 = np.arange(0, (100 * longs) + 1, 100, dtype=np.int64)
-        off2 = np.arange(lonpoints, lonpoints + (10 * lats) + 1, 10, dtype=np.int64)
 
-        offsets[:longs] = off1[:-1]
-        offsets[longs:] = off2
+        # Longitude line offsets (each line has 100 points)
+        for i in range(longs):
+            offsets[i] = i * 100
 
+        # Latitude line offsets (each line has 10 points)
+        for i in range(lats):
+            offsets[longs + i] = lonpoints + i * 10
+
+        # Final offset
+        offsets[-1] = lonpoints + latpoints
+
+        # Build connectivity array for polylines
         cells = np.arange(lonpoints + latpoints, dtype=np.int64)
 
         cellTypes.fill(vtkConstants.VTK_POLY_LINE)
