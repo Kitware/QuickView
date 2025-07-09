@@ -1,0 +1,147 @@
+name: "Finalize Release"
+on:
+  workflow_run:
+    workflows: ["Package and Release"]
+    types: [completed]
+    branches: [release]
+
+jobs:
+  finalize-release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: release
+
+      - name: Get version from files
+        run: |
+          VERSION=$(python -c "import sys; sys.path.insert(0, '.'); import __init__; print(__init__.__version__)")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "APP_TAG=v$VERSION" >> $GITHUB_ENV
+
+      - name: Wait for all platform builds to complete
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maxWaitTime = 30 * 60 * 1000; // 30 minutes
+            const pollInterval = 30 * 1000; // 30 seconds
+            const startTime = Date.now();
+
+            while (Date.now() - startTime < maxWaitTime) {
+              // Get the draft release
+              const releases = await github.rest.repos.listReleases({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+
+              const draftRelease = releases.data.find(release =>
+                release.draft && release.tag_name === '${{ env.APP_TAG }}'
+              );
+
+              if (!draftRelease) {
+                console.log('Draft release not found yet, waiting...');
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+                continue;
+              }
+
+              // Check if we have assets for both macOS targets
+              const expectedAssets = 2; // aarch64 and x86_64 for macOS
+
+              if (draftRelease.assets.length >= expectedAssets) {
+                console.log(`Found ${draftRelease.assets.length} assets, proceeding with release`);
+                core.setOutput('release_id', draftRelease.id);
+                core.setOutput('release_ready', 'true');
+                break;
+              } else {
+                console.log(`Found ${draftRelease.assets.length}/${expectedAssets} assets, waiting for more...`);
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+              }
+            }
+
+            if (!core.getOutput('release_ready')) {
+              throw new Error('Timeout waiting for all platform builds to complete');
+            }
+
+      - name: Generate comprehensive release notes
+        run: |
+          # Get previous release tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+
+          # Generate changelog
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --oneline --pretty=format:"- %s" HEAD~1)
+          else
+            CHANGELOG=$(git log --oneline --pretty=format:"- %s" ${PREV_TAG}..HEAD~1)
+          fi
+
+          cat > release_notes.md << EOF
+          ## What's New in v${{ env.VERSION }}
+
+          ${CHANGELOG:-"- Initial release"}
+
+          ## Downloads
+
+          This release includes distributables for the following platforms:
+
+          ### macOS
+          - **Apple Silicon (M1/M2/M3)**: Download the \`aarch64-apple-darwin\` version
+          - **Intel Macs**: Download the \`x86_64-apple-darwin\` version
+
+          ## Installation Instructions
+
+          ### macOS
+          1. Download the appropriate \`.dmg\` file for your Mac architecture
+          2. Open the downloaded \`.dmg\` file
+          3. Drag the app to your Applications folder
+          4. Launch the app from Applications
+
+          ## System Requirements
+
+          - **macOS**: 10.15 (Catalina) or later
+
+          ## Support
+
+          If you encounter any issues:
+          1. Check the [Issues](https://github.com/${{ github.repository }}/issues) page
+          2. Create a new issue with details about your problem
+          3. Include your operating system and version information
+
+          ---
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ env.APP_TAG }}
+          EOF
+
+      - name: Publish the release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const releaseNotes = fs.readFileSync('release_notes.md', 'utf8');
+
+            const releaseId = '${{ steps.wait-for-builds.outputs.release_id }}';
+
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: parseInt(releaseId),
+              draft: false,
+              body: releaseNotes,
+              name: `QuickView release v${{ env.VERSION }}`,
+            });
+
+            console.log('Release v${{ env.VERSION }} published successfully!');
+
+      - name: Create release summary
+        run: |
+          echo "## Release Published!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: v${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag**: ${{ env.APP_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL**: https://github.com/${{ github.repository }}/releases/tag/${{ env.APP_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release is now live with all platform distributables attached!" >> $GITHUB_STEP_SUMMARY
