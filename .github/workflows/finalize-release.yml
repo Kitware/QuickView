@@ -4,11 +4,19 @@ on:
     workflows: ["Package and Release"]
     types: [completed]
     branches: [release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to finalize (e.g., 0.1.0)"
+        required: true
+        type: string
 
 jobs:
   finalize-release:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if:
+      ${{ github.event.workflow_run.conclusion == 'success' || github.event_name
+      == 'workflow_dispatch' }}
     permissions:
       contents: write
 
@@ -20,9 +28,16 @@ jobs:
 
       - name: Get version from files
         run: |
-          VERSION=$(python -c "from quickview import __version__; print(__version__)")
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger - use provided version
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # Automatic trigger - read from files
+            VERSION=$(python -c "from quickview import __version__; print(__version__)")
+          fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "APP_TAG=v$VERSION" >> $GITHUB_ENV
+          echo "Using version: $VERSION"
 
       - name: Wait for all platform builds to complete
         id: wait_for_builds
@@ -75,14 +90,31 @@ jobs:
 
       - name: Generate comprehensive release notes
         run: |
-          # Get previous release tag
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
-
-          # Generate changelog
-          if [ -z "$PREV_TAG" ]; then
-            CHANGELOG=$(git log --oneline --pretty=format:"- %s" HEAD~1)
+          # Check if we have any commits
+          if ! git rev-parse HEAD >/dev/null 2>&1; then
+            echo "No commits found"
+            CHANGELOG="- Initial release"
+            PREV_TAG=""
           else
-            CHANGELOG=$(git log --oneline --pretty=format:"- %s" ${PREV_TAG}..HEAD~1)
+            # Get previous release tag (check if any tags exist first)
+            if git tag -l | grep -q .; then
+              PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || echo "")
+            else
+              PREV_TAG=""
+            fi
+
+            # Generate changelog
+            if [ -z "$PREV_TAG" ]; then
+              # No previous tags, get all commits except the version bump
+              if git rev-parse HEAD~1 >/dev/null 2>&1; then
+                CHANGELOG=$(git log --oneline --pretty=format:"- %s" HEAD~1)
+              else
+                CHANGELOG="- Initial release"
+              fi
+            else
+              # Get commits since last tag
+              CHANGELOG=$(git log --oneline --pretty=format:"- %s" ${PREV_TAG}..HEAD~1 2>/dev/null || echo "- Release updates")
+            fi
           fi
 
           cat > release_notes.md << EOF
@@ -119,7 +151,7 @@ jobs:
 
           ---
 
-          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ env.APP_TAG }}
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG:-"Initial"}...${{ env.APP_TAG }}
           EOF
 
       - name: Publish the release
@@ -146,6 +178,7 @@ jobs:
         run: |
           echo "## Release Published!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: v${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "**Tag**: ${{ env.APP_TAG }}" >> $GITHUB_STEP_SUMMARY
           echo "**Release URL**: https://github.com/${{ github.repository }}/releases/tag/${{ env.APP_TAG }}" >> $GITHUB_STEP_SUMMARY
