@@ -23,7 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Set up Python
@@ -41,13 +41,8 @@ jobs:
 
       - name: Bump version
         run: |
-          bump2version ${{ github.event.inputs.version_type }} --verbose
+          bump2version ${{ github.event.inputs.version_type }} --verbose --no-commit --no-tag
           echo "VERSION=$(python -c "from quickview import __version__; print(__version__)")" >> $GITHUB_ENV
-
-      - name: Push version bump to master
-        run: |
-          git push origin master
-          git push origin --tags
 
       - name: Get commit hash for version bump
         run: |
@@ -81,11 +76,11 @@ jobs:
       - name: Create Release Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
           base: release
-          head: master
+          branch: release-v${{ env.VERSION }}
           title: "Release v${{ env.VERSION }}"
-          commit-message: "Merging release v${{ env.VERSION }}"
+          commit-message: "chore: bump version to ${{ env.VERSION }}"
           body-path: changelog.md
           labels: |
             release
