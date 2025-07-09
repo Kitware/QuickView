@@ -42,7 +42,7 @@ jobs:
       - name: Bump version
         run: |
           bump2version ${{ github.event.inputs.version_type }} --verbose
-          echo "VERSION=$(grep 'current_version' .bumpversion.cfg | cut -d'=' -f2 | tr -d ' ')" >> $GITHUB_ENV
+          echo "VERSION=$(python -c "from quickview import __version__; print(__version__)")" >> $GITHUB_ENV
 
       - name: Push version bump to main
         run: |
