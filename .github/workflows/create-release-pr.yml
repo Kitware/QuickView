@@ -44,9 +44,9 @@ jobs:
           bump2version ${{ github.event.inputs.version_type }} --verbose
           echo "VERSION=$(python -c "from quickview import __version__; print(__version__)")" >> $GITHUB_ENV
 
-      - name: Push version bump to main
+      - name: Push version bump to master
         run: |
-          git push origin main
+          git push origin master
           git push origin --tags
 
       - name: Get commit hash for version bump
@@ -83,7 +83,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: release
-          head: main
+          head: master
           title: "Release v${{ env.VERSION }}"
           commit-message: "Merging release v${{ env.VERSION }}"
           body-path: changelog.md
