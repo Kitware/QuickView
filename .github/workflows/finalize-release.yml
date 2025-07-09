@@ -20,7 +20,7 @@ jobs:
 
       - name: Get version from files
         run: |
-          VERSION=$(python -c "import sys; sys.path.insert(0, '.'); import __init__; print(__init__.__version__)")
+          VERSION=$(grep 'version =' pyproject.toml | head -1 | cut -d'"' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "APP_TAG=v$VERSION" >> $GITHUB_ENV
 
