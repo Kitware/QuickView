@@ -55,16 +55,16 @@ class SliceSelection(CollapsableSection):
             ):
                 with v2.VCol(cols=8, classes="py-0 pl-3"):
                     v2.VSlider(
-                        v_model=("vlev", 0),
+                        v_model=("midpoint", 0),
                         min=0,
-                        max=("lev.length - 1",),
+                        max=("Math.max(0, midpoints.length - 1)",),
                         color="primary",
                         classes="py-0 pl-3",
                         **style,
                     )
                 with v2.VCol(cols=4, classes="text-left py-0"):
                     html.Div(
-                        "{{parseFloat(lev[vlev]).toFixed(2)}} hPa (k={{vlev}})",
+                        "{{midpoints.length > 0 ? parseFloat(midpoints[midpoint]).toFixed(2) + ' hPa (k=' + midpoint + ')' : '0.00 hPa (k=0)'}}",
                         classes="font-weight-medium",
                     )
             v2.VDivider(classes="my-2")
@@ -104,16 +104,16 @@ class SliceSelection(CollapsableSection):
             ):
                 with v2.VCol(cols=8, classes="py-0"):
                     v2.VSlider(
-                        v_model=("vilev", 0),
+                        v_model=("interface", 0),
                         min=0,
-                        max=("ilev.length - 1",),
+                        max=("Math.max(0, interfaces.length - 1)",),
                         color="secondary",
                         classes="py-0 pl-3",
                         **style,
                     )
                 with v2.VCol(cols=4, classes="text-left py-0"):
                     html.Div(
-                        "{{parseFloat(ilev[vilev]).toFixed(2)}} hPa (k={{vilev}})",
+                        "{{interfaces.length > 0 ? parseFloat(interfaces[interface]).toFixed(2) + ' hPa (k=' + interface + ')' : '0.00 hPa (k=0)'}}",
                         classes="font-weight-medium",
                     )
             v2.VDivider(classes="my-2")
@@ -155,14 +155,14 @@ class SliceSelection(CollapsableSection):
                     v2.VSlider(
                         v_model=("tstamp", 0),
                         min=0,
-                        max=("timesteps.length - 1",),
+                        max=("Math.max(0, timesteps.length - 1)",),
                         color="accent",
                         classes="py-0 pl-3",
                         **style,
                     )
                 with v2.VCol(cols=4, classes="text-left py-0"):
                     html.Div(
-                        "{{parseFloat(timesteps[tstamp]).toFixed(2)}} (t={{tstamp}})",
+                        "{{timesteps.length > 0 ? parseFloat(timesteps[tstamp]).toFixed(2) + ' (t=' + tstamp + ')' : '0.00 (t=0)'}}",
                         classes="font-weight-medium",
                     )
             v2.VDivider(classes="my-4")
@@ -228,10 +228,10 @@ class SliceSelection(CollapsableSection):
                 classes="pt-2 px-6",
             )
 
-    @change("vlev", "vilev", "tstamp", "cliplat", "cliplong")
+    @change("midpoint", "interface", "tstamp", "cliplat", "cliplong")
     def update_pipeline_interactive(self, **kwargs):
-        lev = self.state.vlev
-        ilev = self.state.vilev
+        lev = self.state.midpoint
+        ilev = self.state.interface
         tstamp = self.state.tstamp
         long = self.state.cliplong
         lat = self.state.cliplat
@@ -243,10 +243,10 @@ class SliceSelection(CollapsableSection):
         self.views.render_all_views()
 
     def on_click_advance_middle(self, diff):
-        current = self.state.vlev
-        update = current + diff
-        # if update >= 0 and update <= len(self.state.lev) - 1:
-        self.state.vlev = update % len(self.state.lev)
+        if len(self.state.midpoints) > 0:
+            current = self.state.midpoint
+            update = current + diff
+            self.state.midpoint = update % len(self.state.midpoints)
 
     @change("play_lev")
     @asynchronous.task
@@ -260,10 +260,10 @@ class SliceSelection(CollapsableSection):
                 await asyncio.sleep(0.1)
 
     def on_click_advance_interface(self, diff):
-        current = self.state.vilev
-        update = current + diff
-        # if update >= 0 and update <= len(self.state.ilev) - 1:
-        self.state.vilev = update % len(self.state.ilev)
+        if len(self.state.interfaces) > 0:
+            current = self.state.interface
+            update = current + diff
+            self.state.interface = update % len(self.state.interfaces)
 
     @change("play_ilev")
     @asynchronous.task
@@ -277,10 +277,10 @@ class SliceSelection(CollapsableSection):
                 await asyncio.sleep(0.1)
 
     def on_click_advance_time(self, diff):
-        current = self.state.tstamp
-        update = current + diff
-        # if update >= 0 and update <= len(self.state.timesteps) - 1:
-        self.state.tstamp = update % len(self.state.timesteps)
+        if len(self.state.timesteps) > 0:
+            current = self.state.tstamp
+            update = current + diff
+            self.state.tstamp = update % len(self.state.timesteps)
 
     @change("play_time")
     @asynchronous.task

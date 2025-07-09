@@ -64,8 +64,8 @@ save_state_keys = [
     "conn_file",
     # Data slice related variables
     "tstamp",
-    "vlev",
-    "vilev",
+    "midpoint",
+    "interface",
     # Latitude/Longitude clipping
     "cliplat",
     "cliplong",
@@ -130,7 +130,42 @@ class EAMApp:
         state.data_file = source.data_file if source.data_file else ""
         state.conn_file = source.conn_file if source.conn_file else ""
 
-        self.update_state_from_source()
+        # Initialize slice selection state variables with defaults
+        state.midpoint = 0  # Selected midpoint index
+        state.interface = 0  # Selected interface index
+        state.tstamp = 0
+        state.timesteps = []
+        state.midpoints = []  # Array of midpoint values
+        state.interfaces = []  # Array of interface values
+        state.cliplong = [-180.0, 180.0]
+        state.cliplat = [-90.0, 90.0]
+
+        # Initialize variable lists
+        state.surface_vars = []
+        state.midpoint_vars = []
+        state.interface_vars = []
+        state.surface_vars_state = []
+        state.midpoint_vars_state = []
+        state.interface_vars_state = []
+
+        # Initialize other required state variables
+        state.pipeline_valid = False
+        state.extents = [-180.0, 180.0, -90.0, 90.0]
+        state.variables = []
+        state.colormaps = noncvd  # Initialize with default colormaps
+        state.use_cvd_colors = False
+        state.use_standard_colors = True
+
+        # Initialize UI panel visibility states
+        state.show_surface_vars = False
+        state.show_midpoint_vars = False
+        state.show_interface_vars = False
+        state.show_slice = True  # Show slice selection by default
+        state.show_projection = False
+
+        # Only update from source if it's valid
+        if source.valid:
+            self.update_state_from_source()
 
         self.ind_surface = None
         self.ind_midpoint = None
@@ -185,8 +220,8 @@ class EAMApp:
     def init_app_configuration(self):
         source = self.source
         with self.state as state:
-            state.vlev = 0
-            state.vilev = 0
+            state.midpoint = 0
+            state.interface = 0
             state.tstamp = 0
             state.surface_vars_state = [False] * len(source.surface_vars)
             state.midpoint_vars_state = [False] * len(source.midpoint_vars)
@@ -199,13 +234,17 @@ class EAMApp:
         source = self.source
         with self.state as state:
             state.timesteps = source.timestamps
-            state.lev = source.lev
-            state.ilev = source.ilev
+            state.midpoints = source.midpoints
+            state.interfaces = source.interfaces
             state.extents = list(source.extents)
             state.surface_vars = source.surface_vars
             state.interface_vars = source.interface_vars
             state.midpoint_vars = source.midpoint_vars
             state.pipeline_valid = source.valid
+            # Update clipping ranges from source extents
+            if source.extents and len(source.extents) >= 4:
+                state.cliplong = [source.extents[0], source.extents[1]]
+                state.cliplat = [source.extents[2], source.extents[3]]
 
     def update_state_from_config(self, initstate):
         source = self.source
@@ -249,12 +288,23 @@ class EAMApp:
 
     def load_data(self):
         with self.state as state:
-            state.pipeline_valid = self.source.Update(
+            # Update returns True/False for validity
+            is_valid = self.source.Update(
                 data_file=self.state.data_file,
                 conn_file=self.state.conn_file,
             )
-            self.init_app_configuration()
-            self.update_state_from_source()
+            state.pipeline_valid = is_valid
+
+            # Update state based on pipeline validity
+            if is_valid:
+                self.update_state_from_source()
+                self.init_app_configuration()
+            else:
+                # Keep the defaults that were set in __init__
+                # but ensure arrays are empty if pipeline failed
+                state.timesteps = []
+                state.midpoints = []
+                state.interfaces = []
 
     def load_variables(self):
         surf = []

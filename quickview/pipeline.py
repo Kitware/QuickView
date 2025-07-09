@@ -40,8 +40,8 @@ class EAMVisSource:
         self.data_file = None
         self.conn_file = None
 
-        self.lev = 0
-        self.ilev = 0
+        self.midpoints = []
+        self.interfaces = []
 
         # List of all available variables
         self.surface_vars = []
@@ -84,11 +84,27 @@ class EAMVisSource:
 
         if self.data is None:
             return
-        if self.lev != lev or self.ilev != ilev:
-            self.lev = lev
-            self.ilev = ilev
-            self.data.MiddleLayer = lev
-            self.data.InterfaceLayer = ilev
+
+        # Handle NaN, None, or invalid values
+        try:
+            if lev is None or (isinstance(lev, float) and np.isnan(lev)):
+                lev_idx = 0
+            else:
+                lev_idx = int(lev)
+        except (ValueError, TypeError):
+            lev_idx = 0
+
+        try:
+            if ilev is None or (isinstance(ilev, float) and np.isnan(ilev)):
+                ilev_idx = 0
+            else:
+                ilev_idx = int(ilev)
+        except (ValueError, TypeError):
+            ilev_idx = 0
+
+        if self.data.MiddleLayer != lev_idx or self.data.InterfaceLayer != ilev_idx:
+            self.data.MiddleLayer = lev_idx
+            self.data.InterfaceLayer = ilev_idx
 
     def ApplyClipping(self, cliplong, cliplat):
         if not self.valid:
@@ -164,9 +180,9 @@ class EAMVisSource:
         self.views["continents"] = OutputPort(cont_proj, 0)
         self.views["grid_lines"] = OutputPort(grid_proj, 0)
 
-    def Update(self, data_file, conn_file, lev=0, ilev=0):
+    def Update(self, data_file, conn_file, midpoint=0, interface=0):
         if self.data_file == data_file and self.conn_file == conn_file:
-            return
+            return self.valid
 
         self.data_file = data_file
         self.conn_file = conn_file
@@ -177,8 +193,8 @@ class EAMVisSource:
                 ConnectivityFile=conn_file,
                 DataFile=data_file,
             )
-            data.MiddleLayer = lev
-            data.InterfaceLayer = ilev
+            data.MiddleLayer = midpoint
+            data.InterfaceLayer = interface
             self.data = data
             vtk_obj = data.GetClientSideObject()
             vtk_obj.AddObserver("ErrorEvent", self.observer)
@@ -199,8 +215,8 @@ class EAMVisSource:
                 )
 
             data_wrapped = dsa.WrapDataObject(sm.Fetch(self.data))
-            self.lev = data_wrapped.FieldData["lev"].tolist()
-            self.ilev = data_wrapped.FieldData["ilev"].tolist()
+            self.midpoints = data_wrapped.FieldData["lev"].tolist()
+            self.interfaces = data_wrapped.FieldData["ilev"].tolist()
 
             self.surface_vars = list(
                 np.asarray(self.data.GetProperty("a2DVariablesInfo"))[::2]
@@ -289,7 +305,8 @@ class EAMVisSource:
             # traceback.print_stack()
             print(e)
             self.valid = False
-            return
+
+        return self.valid
 
     def LoadVariables(self, surf, mid, intf):
         if not self.valid:

@@ -276,11 +276,11 @@ class ViewManager:
             info_text = f"t = {t}"
         midpoint_vars = self.source.vars.get("midpoint", [])
         if midpoint_vars and var in midpoint_vars:
-            k = self.state.vlev
+            k = self.state.midpoint
             info_text = f"k = {k}\nt = {t}"
         interface_vars = self.source.vars.get("interface", [])
         if interface_vars and var in interface_vars:
-            k = self.state.vilev
+            k = self.state.interface
             info_text = f"k = {k}\nt = {t}"
 
         return (var_text, info_text)
@@ -414,7 +414,7 @@ class ViewManager:
         source = self.source
         long = state.cliplong
         lat = state.cliplat
-        source.UpdateLev(self.state.vlev, self.state.vilev)
+        source.UpdateLev(self.state.midpoint, self.state.interface)
         source.ApplyClipping(long, lat)
         source.UpdateCenter(self.state.center)
         source.UpdateProjection(self.state.projection)
