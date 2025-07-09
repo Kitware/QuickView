@@ -20,17 +20,21 @@ jobs:
 
       - name: Get version from files
         run: |
-          VERSION=$(python -c "from quickview import __version__; print(__version__)")
+          VERSION=$(python -c "import sys; sys.path.insert(0, '.'); import __init__; print(__init__.__version__)")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "APP_TAG=v$VERSION" >> $GITHUB_ENV
 
       - name: Wait for all platform builds to complete
+        id: wait_for_builds
         uses: actions/github-script@v7
         with:
           script: |
             const maxWaitTime = 30 * 60 * 1000; // 30 minutes
             const pollInterval = 30 * 1000; // 30 seconds
             const startTime = Date.now();
+
+            let releaseReady = false;
+            let releaseId = null;
 
             while (Date.now() - startTime < maxWaitTime) {
               // Get the draft release
@@ -54,8 +58,8 @@ jobs:
 
               if (draftRelease.assets.length >= expectedAssets) {
                 console.log(`Found ${draftRelease.assets.length} assets, proceeding with release`);
-                core.setOutput('release_id', draftRelease.id);
-                core.setOutput('release_ready', 'true');
+                releaseId = draftRelease.id;
+                releaseReady = true;
                 break;
               } else {
                 console.log(`Found ${draftRelease.assets.length}/${expectedAssets} assets, waiting for more...`);
@@ -63,9 +67,11 @@ jobs:
               }
             }
 
-            if (!core.getOutput('release_ready')) {
+            if (!releaseReady) {
               throw new Error('Timeout waiting for all platform builds to complete');
             }
+
+            return releaseId;
 
       - name: Generate comprehensive release notes
         run: |
@@ -123,7 +129,7 @@ jobs:
             const fs = require('fs');
             const releaseNotes = fs.readFileSync('release_notes.md', 'utf8');
 
-            const releaseId = '${{ steps.wait-for-builds.outputs.release_id }}';
+            const releaseId = '${{ steps.wait_for_builds.outputs.result }}';
 
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
