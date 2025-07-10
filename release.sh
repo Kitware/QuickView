@@ -123,8 +123,9 @@ commit_and_push() {
         exit 1
     fi
 
-    if ! git push origin --tags; then
-        print_error "Failed to push tags"
+    # Push only the new tag
+    if ! git push origin v${version}; then
+        print_error "Failed to push tag v${version}"
         exit 1
     fi
 
