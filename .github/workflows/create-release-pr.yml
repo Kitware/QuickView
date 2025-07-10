@@ -23,8 +23,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          ref: ${{ github.ref_name }} # Use the current branch name dynamically
+          lfs: true
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -41,8 +43,13 @@ jobs:
 
       - name: Bump version
         run: |
-          bump2version ${{ github.event.inputs.version_type }} --verbose --no-commit --no-tag
-          echo "VERSION=$(python -c "from quickview import __version__; print(__version__)")" >> $GITHUB_ENV
+          bump2version ${{ github.event.inputs.version_type }} --verbose --allow-dirty
+          echo "VERSION=$(python -c "import sys; sys.path.insert(0, '.'); import __init__; print(__init__.__version__)")" >> $GITHUB_ENV
+
+      - name: Push version bump to main
+        run: |
+          git push origin ${{ github.ref_name }}
+          git push origin --tags
 
       - name: Get commit hash for version bump
         run: |
@@ -76,11 +83,11 @@ jobs:
       - name: Create Release Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           base: release
-          branch: release-v${{ env.VERSION }}
+          head: ${{ github.ref_name }}
           title: "Release v${{ env.VERSION }}"
-          commit-message: "chore: bump version to ${{ env.VERSION }}"
+          commit-message: "Merging release v${{ env.VERSION }}"
           body-path: changelog.md
           labels: |
             release
