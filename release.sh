@@ -123,13 +123,14 @@ commit_and_push() {
         exit 1
     fi
 
-    # Push only the new tag
-    if ! git push origin v${version}; then
-        print_error "Failed to push tag v${version}"
+    # Push tags (bump2version already created the tag)
+    print_status "Pushing tags..."
+    if ! git push origin --tags; then
+        print_error "Failed to push tags"
         exit 1
     fi
 
-    print_success "Changes pushed to $branch"
+    print_success "Changes and tags pushed to $branch"
 }
 
 # Function to create release PR
