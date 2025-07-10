@@ -123,11 +123,16 @@ commit_and_push() {
         exit 1
     fi
 
-    # Push tags (bump2version already created the tag)
-    print_status "Pushing tags..."
-    if ! git push origin --tags; then
-        print_error "Failed to push tags"
-        exit 1
+    # Push the new tag (bump2version already created it)
+    print_status "Pushing new tag v${version}..."
+    if ! git push origin v${version}; then
+        # Check if tag already exists on remote
+        if git ls-remote --tags origin | grep -q "refs/tags/v${version}$"; then
+            print_warning "Tag v${version} already exists on remote"
+        else
+            print_error "Failed to push tag v${version}"
+            exit 1
+        fi
     fi
 
     print_success "Changes and tags pushed to $branch"
