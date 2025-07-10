@@ -72,12 +72,12 @@ check_prerequisites() {
 
 # Function to get current version from pyproject.toml
 get_current_version() {
-    python -c "import tomllib; f=open('pyproject.toml','rb'); data=tomllib.load(f); f.close(); print(data['project']['version'])"
+    python -c "import tomllib; f=open(\"pyproject.toml\",\"rb\"); data=tomllib.load(f); f.close(); print(data[\"project\"][\"version\"])"
 }
 
 # Function to get previous version from git tags
 get_previous_version() {
-    git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0"
+    git describe --tags --abbrev=0 2>/dev/null | sed "s/^v//" || echo "0.0.0"
 }
 
 # Function to generate changelog
@@ -137,8 +137,8 @@ create_release_pr() {
     local previous_version=$(get_previous_version)
 
     # Determine release type
-    IFS='.' read -ra CURRENT <<< "$current_version"
-    IFS='.' read -ra PREVIOUS <<< "$previous_version"
+    IFS="." read -ra CURRENT <<< "$current_version"
+    IFS="." read -ra PREVIOUS <<< "$previous_version"
 
     if [ "${CURRENT[0]}" != "${PREVIOUS[0]}" ]; then
         release_type="major"
@@ -167,9 +167,9 @@ This pull request contains all changes for the **v${current_version}** release.
 - **Previous version**: v${previous_version}
 - **New version**: v${current_version}
 - **Release type**: ${release_type}
-- **Release date**: $(date '+%Y-%m-%d')
+- **Release date**: $(date +%Y-%m-%d)
 
-### What's Changed
+### What Changed
 
 ${changelog}
 
@@ -251,7 +251,7 @@ main() {
     print_success "Release process completed!"
     echo "Version: v$new_version ($version_type)"
     echo "Review and merge the PR to trigger the release pipeline"
-    echo "PR URL: $(gh pr view --json url --jq .url 2>/dev/null || echo 'Check GitHub for PR link')"
+    echo "PR URL: $(gh pr view --json url --jq .url 2>/dev/null || echo Check GitHub for PR link)"
 }
 
 # Run main function
