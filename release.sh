@@ -101,7 +101,9 @@ bump_version() {
     print_status "Current version: v$old_version"
 
     print_status "Bumping $version_type version..."
-    if ! bump2version $version_type --verbose; then
+    # Redirect all bump2version output to stderr to avoid capturing it
+    bump2version $version_type --verbose >&2
+    if [ $? -ne 0 ]; then
         print_error "Failed to bump version"
         exit 1
     fi
@@ -109,13 +111,19 @@ bump_version() {
     local new_version=$(get_current_version)
     print_success "Version bumped: v$old_version -> v$new_version"
 
-    echo $new_version
+    # Debug: show what we're returning
+    print_status "Returning version: $new_version" >&2
+
+    echo "$new_version"
 }
 
 # Function to commit and push changes
 commit_and_push() {
     local version=$1
     local branch=$(git branch --show-current)
+
+    # Debug: show what version we received
+    print_status "Received version for push: '$version'" >&2
 
     print_status "Pushing changes to $branch..."
     if ! git push origin $branch; then
