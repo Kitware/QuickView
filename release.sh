@@ -100,20 +100,24 @@ bump_version() {
     local old_version=$(get_current_version)
     print_status "Current version: v$old_version"
 
+    # First, get what the new version will be
+    local new_version=$(bump2version --list $version_type --dry-run 2>/dev/null | grep "^new_version=" | cut -d= -f2)
+    if [ -z "$new_version" ]; then
+        print_error "Failed to determine new version"
+        exit 1
+    fi
+
     print_status "Bumping $version_type version..."
-    # Redirect all bump2version output to stderr to avoid capturing it
+    # Now actually bump the version
     bump2version $version_type --verbose >&2
     if [ $? -ne 0 ]; then
         print_error "Failed to bump version"
         exit 1
     fi
 
-    local new_version=$(get_current_version)
     print_success "Version bumped: v$old_version -> v$new_version"
 
-    # Debug: show what we're returning
-    print_status "Returning version: $new_version" >&2
-
+    # Return just the clean version number
     echo "$new_version"
 }
 
