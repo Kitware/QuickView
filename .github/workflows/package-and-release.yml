@@ -20,6 +20,16 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Verify LFS files
+        run: |
+          echo "Checking LFS files..."
+          ls -la quickview/data/
+          file quickview/data/globe.vtk
+          file quickview/data/connectivity.nc
+          echo "LFS file check complete"
 
       - name: Get version for tagging
         id: get_version

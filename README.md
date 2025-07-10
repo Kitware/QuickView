@@ -1,7 +1,7 @@
 # QuickView
 
-[![CI](https://github.com/E3SM-Project/QuickView/actions/workflows/ci.yml/badge.svg)](https://github.com/E3SM-Project/QuickView/actions/workflows/ci.yml)
-[![Pre-commit](https://github.com/E3SM-Project/QuickView/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/E3SM-Project/QuickView/actions/workflows/pre-commit.yml)
+[![Test](https://github.com/ayenpure/QuickView/actions/workflows/test.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/test.yml)
+[![Package and Release](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml)
 
 A scientific visualization application for exploring atmospheric data from the
 E3SM (Energy Exascale Earth System Model) project.
