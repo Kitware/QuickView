@@ -2,19 +2,19 @@
 
 # Function to print output
 print_status() {
-    echo "[INFO] $1"
+    echo "[INFO] $1" >&2
 }
 
 print_success() {
-    echo "[SUCCESS] $1"
+    echo "[SUCCESS] $1" >&2
 }
 
 print_warning() {
-    echo "[WARNING] $1"
+    echo "[WARNING] $1" >&2
 }
 
 print_error() {
-    echo "[ERROR] $1"
+    echo "[ERROR] $1" >&2
 }
 
 # Function to show usage
