@@ -20,6 +20,11 @@ class Toolbar:
 
     @task
     async def export_state(self):
+        # Small delay to ensure client state is synchronized
+        import asyncio
+
+        await asyncio.sleep(0.1)
+
         if self._generate_state is not None:
             config = self._generate_state()
         with self.state:
