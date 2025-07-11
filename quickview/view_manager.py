@@ -193,6 +193,8 @@ def build_color_information(state: map):
     varmax = state["varmax"]
     # Get override_range from state if available
     override_range = state.get("override_range", None)
+    # Store layout from state if available for backward compatibility
+    layout = state.get("layout", None)
 
     registry = ViewRegistry()
     for index, var in enumerate(vars):
@@ -215,6 +217,11 @@ def build_color_information(state: map):
         view_state = ViewState()
         context = ViewContext(config, view_state, index)
         registry.register_view(var, context)
+
+    # Store layout info in registry for later use
+    if layout:
+        registry._saved_layout = [item.copy() for item in layout]
+
     return registry
 
 
@@ -408,7 +415,7 @@ class ViewManager:
         vardata = vtkdata.GetCellData().GetArray(var)
         return vardata.GetRange()
 
-    def rebuild_visualization_layout(self):
+    def rebuild_visualization_layout(self, cached_layout=None):
         self.widgets.clear()
         state = self.state
         source = self.source
@@ -434,6 +441,26 @@ class ViewManager:
         data = self.source.views["atmosphere_data"]
         vtkdata = sm.Fetch(data)
 
+        # Use cached layout if provided, or fall back to saved layout in registry
+        layout_map = cached_layout if cached_layout else {}
+
+        # If no cached layout, check if we have saved layout in registry
+        if not layout_map and hasattr(self.registry, "_saved_layout"):
+            # Convert saved layout array to variable-name-based map
+            temp_map = {}
+            for item in self.registry._saved_layout:
+                if isinstance(item, dict) and "i" in item:
+                    idx = item["i"]
+                    if hasattr(state, "variables") and idx < len(state.variables):
+                        var_name = state.variables[idx]
+                        temp_map[var_name] = {
+                            "x": item.get("x", 0),
+                            "y": item.get("y", 0),
+                            "w": item.get("w", 4),
+                            "h": item.get("h", 3),
+                        }
+            layout_map = temp_map
+
         del self.state.views[:]
         del self.state.layout[:]
         del self.widgets[:]
@@ -444,8 +471,20 @@ class ViewManager:
 
         view0 = None
         for index, var in enumerate(to_render):
-            x = int(index % 3) * wdt
-            y = int(index / 3) * hgt
+            # Check if we have saved position for this variable
+            if var in layout_map:
+                # Use saved position
+                pos = layout_map[var]
+                x = pos["x"]
+                y = pos["y"]
+                wdt = pos["w"]
+                hgt = pos["h"]
+            else:
+                # Default grid position (3 columns)
+                x = int(index % 3) * 4
+                y = int(index / 3) * 3
+                wdt = 4
+                hgt = 3
 
             varrange = self.compute_range(var, vtkdata=vtkdata)
             varavg = self.compute_average(var, vtkdata=vtkdata)
@@ -510,6 +549,7 @@ class ViewManager:
             )
             self.widgets.append(widget)
             sWidgets.append(widget.ref_name)
+            # Use index as identifier to maintain compatibility with grid expectations
             layout.append({"x": x, "y": y, "w": wdt, "h": hgt, "i": index})
 
         for var in to_delete:
@@ -518,6 +558,7 @@ class ViewManager:
         self.state.views = sWidgets
         self.state.layout = layout
         self.state.dirty("views")
+        self.state.dirty("layout")
         # from trame.app import asynchronous
         # asynchronous.create_task(self.flushViews())
 

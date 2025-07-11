@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Union
 
 from trame.app import get_server
-from trame.decorators import TrameApp, life_cycle
+from trame.decorators import TrameApp, life_cycle, trigger
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame.widgets import vuetify as v2, html, client
@@ -84,6 +84,8 @@ save_state_keys = [
     "use_cvd_colors",
     "use_standard_colors",
     "show_color_bar",
+    # Grid layout
+    "layout",
 ]
 
 
@@ -117,6 +119,7 @@ class EAMApp:
         ctrl = server.controller
 
         self._ui = None
+        self._cached_layout = {}  # Cache for layout positions by variable name
 
         self.workdir = workdir
         self.server = server
@@ -269,16 +272,73 @@ class EAMApp:
         self.viewmanager.registry = build_color_information(initstate)
         self.load_variables()
 
+    @trigger("layout_changed")
+    def on_layout_changed_trigger(self, layout, **kwargs):
+        """Cache layout changes to ensure they are properly saved"""
+        # Cache the layout data with variable names as keys for easier lookup
+        self._cached_layout = {}
+        if layout and hasattr(self.state, "variables"):
+            for item in layout:
+                if isinstance(item, dict) and "i" in item:
+                    idx = item["i"]
+                    if idx < len(self.state.variables):
+                        var_name = self.state.variables[idx]
+                        self._cached_layout[var_name] = {
+                            "x": item.get("x", 0),
+                            "y": item.get("y", 0),
+                            "w": item.get("w", 4),
+                            "h": item.get("h", 3),
+                        }
+
     def generate_state(self):
+        # Force state synchronization
+        self.state.flush()
+
         all = self.state.to_dict()
         to_export = {k: all[k] for k in save_state_keys}
-        # with open(os.path.join(self.workdir, "state.json"), "w") as outfile:
+
+        # Convert cached layout back to array format for saving
+        if self._cached_layout and hasattr(self.state, "variables"):
+            layout_array = []
+            for idx, var_name in enumerate(self.state.variables):
+                if var_name in self._cached_layout:
+                    pos = self._cached_layout[var_name]
+                    layout_array.append(
+                        {
+                            "x": pos["x"],
+                            "y": pos["y"],
+                            "w": pos["w"],
+                            "h": pos["h"],
+                            "i": idx,
+                        }
+                    )
+            if layout_array:
+                to_export["layout"] = layout_array
+
         return to_export
 
     def load_state(self, state_file):
         from_state = json.loads(Path(state_file).read_text())
         data_file = from_state["data_file"]
         conn_file = from_state["conn_file"]
+        # Convert loaded layout to variable-name-based cache
+        self._cached_layout = {}
+        if (
+            "layout" in from_state
+            and from_state["layout"]
+            and "variables" in from_state
+        ):
+            for item in from_state["layout"]:
+                if isinstance(item, dict) and "i" in item:
+                    idx = item["i"]
+                    if idx < len(from_state["variables"]):
+                        var_name = from_state["variables"][idx]
+                        self._cached_layout[var_name] = {
+                            "x": item.get("x", 0),
+                            "y": item.get("y", 0),
+                            "w": item.get("w", 4),
+                            "h": item.get("h", 3),
+                        }
         self.source.Update(
             data_file=data_file,
             conn_file=conn_file,
@@ -336,7 +396,21 @@ class EAMApp:
             state.varmax = [np.nan] * len(vars)
             state.override_range = [False] * len(vars)
 
-            self.viewmanager.rebuild_visualization_layout()
+            self.viewmanager.rebuild_visualization_layout(self._cached_layout)
+            # Update cached layout after rebuild
+            if state.layout and state.variables:
+                self._cached_layout = {}
+                for item in state.layout:
+                    if isinstance(item, dict) and "i" in item:
+                        idx = item["i"]
+                        if idx < len(state.variables):
+                            var_name = state.variables[idx]
+                            self._cached_layout[var_name] = {
+                                "x": item.get("x", 0),
+                                "y": item.get("y", 0),
+                                "w": item.get("w", 4),
+                                "h": item.get("h", 3),
+                            }
 
     def update_view_color_settings(self, index, type, value):
         with self.state as state:
@@ -594,7 +668,13 @@ class EAMApp:
 
                 with layout.content:
                     with grid.GridLayout(
-                        layout=("layout", []),
+                        layout=("layout"),
+                        col_num=12,
+                        row_height=100,
+                        is_draggable=True,
+                        is_resizable=True,
+                        vertical_compact=True,
+                        layout_updated="layout = $event; trigger('layout_changed', [$event])",
                     ):
                         with grid.GridItem(
                             v_for="vref, idx in views",

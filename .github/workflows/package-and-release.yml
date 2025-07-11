@@ -88,12 +88,3 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-
-      - name: Create git tag
-        if:
-          matrix.platform == 'macos-latest' && matrix.args == '--target
-          aarch64-apple-darwin'
-        run: |
-          git tag v${{ env.VERSION }}
-          git push origin v${{ env.VERSION }}
-        shell: bash -l {0}
