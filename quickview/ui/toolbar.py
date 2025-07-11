@@ -109,6 +109,7 @@ class Toolbar:
 
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
+            toolbar.style = "overflow-x: auto; overflow-y: hidden;"
             v2.VDivider(vertical=True, classes="mx-2")
             v2.VBtn(
                 "Load Variables",
@@ -126,7 +127,7 @@ class Toolbar:
             with v2.VCard(
                 flat=True,
                 classes="d-flex align-center px-2 py-1 mx-1",
-                style="background-color: #f5f5f5; border-radius: 4px;",
+                style="background-color: #f5f5f5; border-radius: 4px; flex-shrink: 0;",
             ):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
@@ -175,7 +176,7 @@ class Toolbar:
             with v2.VCard(
                 flat=True,
                 classes="d-flex align-center px-2 py-1 mx-1",
-                style="background-color: #f5f5f5; border-radius: 4px; min-width: 35%;",
+                style="background-color: #f5f5f5; border-radius: 4px; min-width: 35%; flex-shrink: 1;",
             ):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
@@ -268,7 +269,7 @@ class Toolbar:
             with v2.VCard(
                 flat=True,
                 classes="d-flex align-center px-2 py-1 mx-1",
-                style="background-color: #f5f5f5; border-radius: 4px;",
+                style="background-color: #f5f5f5; border-radius: 4px; flex-shrink: 0;",
             ):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
