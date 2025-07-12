@@ -370,18 +370,24 @@ class EAMApp:
         surf = []
         mid = []
         intf = []
-        if len(self.state.surface_vars) > 0:
-            v_surf = np.array(self.state.surface_vars)
-            f_surf = np.array(self.state.surface_vars_state)
-            surf = v_surf[f_surf].tolist()
-        if len(self.state.midpoint_vars) > 0:
-            v_mid = np.array(self.state.midpoint_vars)
-            f_mid = np.array(self.state.midpoint_vars_state)
-            mid = v_mid[f_mid].tolist()
-        if len(self.state.interface_vars) > 0:
-            v_intf = np.array(self.state.interface_vars)
-            f_intf = np.array(self.state.interface_vars_state)
-            intf = v_intf[f_intf].tolist()
+        # Use the original unfiltered lists from source and the full selection state
+        if len(self.source.surface_vars) > 0:
+            v_surf = np.array(self.source.surface_vars)
+            f_surf = (
+                self.surface_vars_state
+            )  # Use the full state array, not the filtered one
+            if len(v_surf) == len(f_surf):  # Ensure arrays are same length
+                surf = v_surf[f_surf].tolist()
+        if len(self.source.midpoint_vars) > 0:
+            v_mid = np.array(self.source.midpoint_vars)
+            f_mid = self.midpoint_vars_state  # Use the full state array
+            if len(v_mid) == len(f_mid):  # Ensure arrays are same length
+                mid = v_mid[f_mid].tolist()
+        if len(self.source.interface_vars) > 0:
+            v_intf = np.array(self.source.interface_vars)
+            f_intf = self.interface_vars_state  # Use the full state array
+            if len(v_intf) == len(f_intf):  # Ensure arrays are same length
+                intf = v_intf[f_intf].tolist()
         self.source.LoadVariables(surf, mid, intf)
 
         vars = surf + mid + intf
