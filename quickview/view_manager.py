@@ -18,7 +18,7 @@ from paraview.simple import (
 )
 
 from quickview.pipeline import EAMVisSource
-from quickview.utilities import EventType, build_colorbar_image
+from quickview.utilities import build_colorbar_image
 from typing import Dict, List, Optional
 
 
@@ -304,6 +304,10 @@ class ViewManager:
         coltrfunc.ApplyPreset(context.config.colormap, True)
         coltrfunc.NanOpacity = 0.0
 
+        # Ensure the color transfer function is scaled to the data range
+        if not context.config.override_range:
+            rep.RescaleTransferFunctionToDataRange(False, True)
+
         # ParaView scalar bar is always hidden - using custom HTML colorbar instead
 
         (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
@@ -347,12 +351,18 @@ class ViewManager:
         # ResetCamera(rview)
 
     def sync_color_config_to_state(self, index, context: ViewContext):
-        with self.state as state:
-            state.varcolor[index] = context.config.colormap
-            state.varmin[index] = context.config.min_value
-            state.varmax[index] = context.config.max_value
-            state.uselogscale[index] = context.config.use_log_scale
-            state.override_range[index] = context.config.override_range
+        # Update state arrays directly without context manager to avoid recursive flush
+        self.state.varcolor[index] = context.config.colormap
+        self.state.varmin[index] = context.config.min_value
+        self.state.varmax[index] = context.config.max_value
+        self.state.uselogscale[index] = context.config.use_log_scale
+        self.state.override_range[index] = context.config.override_range
+        # Mark arrays as dirty to ensure UI updates
+        self.state.dirty("varcolor")
+        self.state.dirty("varmin")
+        self.state.dirty("varmax")
+        self.state.dirty("uselogscale")
+        self.state.dirty("override_range")
 
     def generate_colorbar_image(self, index):
         """Generate colorbar image for a variable at given index"""
@@ -385,10 +395,9 @@ class ViewManager:
                 log_scale=False,  # Always False for image generation
                 invert=context.config.invert_colors,
             )
-            # Update state with the new image
-            with self.state as state:
-                state.colorbar_images[index] = image_data
-                state.dirty("colorbar_images")
+            # Update state with the new image without context manager to avoid recursive flush
+            self.state.colorbar_images[index] = image_data
+            self.state.dirty("colorbar_images")
         except Exception as e:
             print(f"Error generating colorbar image for {var}: {e}")
         finally:
@@ -561,9 +570,15 @@ class ViewManager:
 
                 config = ViewConfiguration(
                     variable=var,
-                    colormap=state.varcolor[0],
-                    use_log_scale=False,
-                    invert_colors=False,
+                    colormap=state.varcolor[index]
+                    if index < len(state.varcolor)
+                    else state.varcolor[0],
+                    use_log_scale=state.uselogscale[index]
+                    if index < len(state.uselogscale)
+                    else False,
+                    invert_colors=state.invert[index]
+                    if index < len(state.invert)
+                    else False,
                     min_value=varrange[0],
                     max_value=varrange[1],
                     override_range=override,
@@ -618,34 +633,58 @@ class ViewManager:
         self.render_all_views()
     """
 
-    def update_view_color_settings(self, index, type, value):
+    def update_colormap(self, index, value):
+        """Update the colormap for a variable."""
         var = self.state.variables[index]
         coltrfunc = GetColorTransferFunction(var)
-
         context: ViewContext = self.registry.get_view(var)
-        if type == EventType.COL.value:
-            context.config.colormap = value
-            # Generate new colorbar image BEFORE applying any transformations
-            self.generate_colorbar_image(index)
-            # Now apply the preset with current transformations
-            coltrfunc.ApplyPreset(context.config.colormap, True)
-            # Reapply inversion if it was enabled
-            if context.config.invert_colors:
-                coltrfunc.InvertTransferFunction()
-        elif type == EventType.LOG.value:
-            context.config.use_log_scale = value
-            if context.config.use_log_scale:
-                coltrfunc.MapControlPointsToLogSpace()
-                coltrfunc.UseLogScale = 1
-            else:
-                coltrfunc.MapControlPointsToLinearSpace()
-                coltrfunc.UseLogScale = 0
-            # Log scale doesn't change the image, just the data mapping
-        elif type == EventType.INV.value:
-            context.config.invert_colors = value
+
+        context.config.colormap = value
+        # Generate new colorbar image BEFORE applying any transformations
+        self.generate_colorbar_image(index)
+        # Now apply the preset with current transformations
+        coltrfunc.ApplyPreset(context.config.colormap, True)
+        # Reapply inversion if it was enabled
+        if context.config.invert_colors:
             coltrfunc.InvertTransferFunction()
-            # Generate new colorbar image when colors are inverted
-            self.generate_colorbar_image(index)
+
+        # Sync all color configuration changes back to state
+        self.sync_color_config_to_state(index, context)
+        self.render_view_by_index(index)
+
+    def update_log_scale(self, index, value):
+        """Update the log scale setting for a variable."""
+        var = self.state.variables[index]
+        coltrfunc = GetColorTransferFunction(var)
+        context: ViewContext = self.registry.get_view(var)
+
+        context.config.use_log_scale = value
+        if context.config.use_log_scale:
+            coltrfunc.MapControlPointsToLogSpace()
+            coltrfunc.UseLogScale = 1
+        else:
+            coltrfunc.MapControlPointsToLinearSpace()
+            coltrfunc.UseLogScale = 0
+        # Regenerate colorbar after log scale change
+        self.generate_colorbar_image(index)
+
+        # Sync all color configuration changes back to state
+        self.sync_color_config_to_state(index, context)
+        self.render_view_by_index(index)
+
+    def update_invert_colors(self, index, value):
+        """Update the color inversion setting for a variable."""
+        var = self.state.variables[index]
+        coltrfunc = GetColorTransferFunction(var)
+        context: ViewContext = self.registry.get_view(var)
+
+        context.config.invert_colors = value
+        coltrfunc.InvertTransferFunction()
+        # Generate new colorbar image when colors are inverted
+        self.generate_colorbar_image(index)
+
+        # Sync all color configuration changes back to state
+        self.sync_color_config_to_state(index, context)
         self.render_view_by_index(index)
 
     def update_scalar_bars(self, event):
@@ -662,11 +701,13 @@ class ViewManager:
         context.config.override_range = True
         context.config.min_value = float(min)
         context.config.max_value = float(max)
-        # Update state to reflect manual override
-        self.state.override_range[index] = True
-        self.state.dirty("override_range")
+        # Sync all changes back to state
+        self.sync_color_config_to_state(index, context)
+        # Update color transfer function
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
+        # Generate new colorbar image with updated range
+        self.generate_colorbar_image(index)
         self.render_view_by_index(index)
 
     def revert_to_auto_color_range(self, index):
@@ -677,15 +718,14 @@ class ViewManager:
         context.config.override_range = False
         context.config.min_value = varrange[0]
         context.config.max_value = varrange[1]
-        self.state.varmin[index] = context.config.min_value
-        self.state.dirty("varmin")
-        self.state.varmax[index] = context.config.max_value
-        self.state.dirty("varmax")
-        self.state.override_range[index] = context.config.override_range
-        self.state.dirty("override_range")
+        # Sync all changes back to state
+        self.sync_color_config_to_state(index, context)
+        # Rescale transfer function to data range
         context.state.data_representation.RescaleTransferFunctionToDataRange(
             False, True
         )
+        # Generate new colorbar image with updated range
+        self.generate_colorbar_image(index)
         self.render_all_views()
 
     def zoom_in(self, index=0):

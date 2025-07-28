@@ -1,5 +1,11 @@
 from trame.decorators import TrameApp, task
-from trame.widgets import html, vuetify2 as v2, tauri
+from trame.widgets import html, vuetify2 as v2
+
+try:
+    from trame.widgets import tauri
+except ImportError:
+    # Fallback if tauri is not available
+    tauri = None
 
 import json
 
@@ -83,9 +89,14 @@ class Toolbar:
         **kwargs,
     ):
         self.server = server
-        with tauri.Dialog() as dialog:
-            self.ctrl.open = dialog.open
-            self.ctrl.save = dialog.save
+        if tauri:
+            with tauri.Dialog() as dialog:
+                self.ctrl.open = dialog.open
+                self.ctrl.save = dialog.save
+        else:
+            # Fallback for non-tauri environments
+            self.ctrl.open = lambda title: None
+            self.ctrl.save = lambda title: None
         self._generate_state = generate_state
         self._load_state = load_state
         self._update_available_color_maps = update_available_color_maps

@@ -1,17 +1,10 @@
 import os
-from enum import Enum
 import base64
 import numpy as np
 
 from vtkmodules.vtkCommonCore import vtkUnsignedCharArray, vtkLookupTable
 from vtkmodules.vtkCommonDataModel import vtkImageData
 from vtkmodules.vtkIOImage import vtkPNGWriter
-
-
-class EventType(Enum):
-    COL = 0
-    LOG = 1
-    INV = 2
 
 
 def ValidateArguments(conn_file, data_file, state_file, work_dir):
