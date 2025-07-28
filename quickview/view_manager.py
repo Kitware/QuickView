@@ -11,7 +11,6 @@ from paraview.simple import (
     Text,
     Show,
     CreateRenderView,
-    GetScalarBar,
     ColorBy,
     GetColorTransferFunction,
     AddCameraLink,
@@ -19,7 +18,7 @@ from paraview.simple import (
 )
 
 from quickview.pipeline import EAMVisSource
-from quickview.utilities import EventType
+from quickview.utilities import EventType, build_colorbar_image
 from typing import Dict, List, Optional
 
 
@@ -258,6 +257,7 @@ class ViewManager:
             if context.state.var_info_proxy is not None:
                 context.state.var_info_proxy.Text = V_info
             self.sync_color_config_to_state(context.index, context)
+            self.generate_colorbar_image(context.index)
 
     def refresh_view_display(self, var, context: ViewContext):
         if not context.config.override_range:
@@ -303,13 +303,8 @@ class ViewManager:
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.ApplyPreset(context.config.colormap, True)
         coltrfunc.NanOpacity = 0.0
-        LUTColorBar = GetScalarBar(coltrfunc, rview)
-        LUTColorBar.AutoOrient = 1
-        LUTColorBar.WindowLocation = "Lower Right Corner"
-        LUTColorBar.Title = ""
-        LUTColorBar.ComponentTitle = ""
-        LUTColorBar.ScalarBarLength = 0.75
-        # LUTColorBar.NanOpacity = 0.0
+
+        # ParaView scalar bar is always hidden - using custom HTML colorbar instead
 
         (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
         text = Text(registrationName=f"Text{var}")
@@ -344,7 +339,8 @@ class ViewManager:
         repAn.DiffuseColor = [0.67, 0.67, 0.67]
         repAn.Opacity = 0.4
 
-        rep.SetScalarBarVisibility(rview, self.state.show_color_bar)
+        # Always hide ParaView scalar bar - using custom HTML colorbar
+        rep.SetScalarBarVisibility(rview, False)
         rview.CameraParallelProjection = 1
 
         Render(rview)
@@ -357,6 +353,54 @@ class ViewManager:
             state.varmax[index] = context.config.max_value
             state.uselogscale[index] = context.config.use_log_scale
             state.override_range[index] = context.config.override_range
+
+    def generate_colorbar_image(self, index):
+        """Generate colorbar image for a variable at given index"""
+        if index >= len(self.state.variables):
+            return
+
+        var = self.state.variables[index]
+        context = self.registry.get_view(var)
+        if context is None:
+            return
+
+        # Get the ParaView color transfer function
+        coltrfunc = GetColorTransferFunction(var)
+
+        # Store current state
+        current_use_log = coltrfunc.UseLogScale
+
+        # Reset to linear scale and original range for image generation
+        if current_use_log:
+            coltrfunc.MapControlPointsToLinearSpace()
+            coltrfunc.UseLogScale = 0
+
+        # Apply the colormap preset to get clean colors
+        coltrfunc.ApplyPreset(context.config.colormap, True)
+
+        # Generate the colorbar image with only inversion applied
+        try:
+            image_data = build_colorbar_image(
+                coltrfunc,
+                log_scale=False,  # Always False for image generation
+                invert=context.config.invert_colors,
+            )
+            # Update state with the new image
+            with self.state as state:
+                state.colorbar_images[index] = image_data
+                state.dirty("colorbar_images")
+        except Exception as e:
+            print(f"Error generating colorbar image for {var}: {e}")
+        finally:
+            # Restore the log scale state if it was enabled
+            if current_use_log:
+                coltrfunc.MapControlPointsToLogSpace()
+                coltrfunc.UseLogScale = 1
+            # Restore the range if it was modified
+            if context.config.override_range:
+                coltrfunc.RescaleTransferFunction(
+                    context.config.min_value, context.config.max_value
+                )
 
     def reset_camera(self, **kwargs):
         for widget in self.widgets:
@@ -535,6 +579,7 @@ class ViewManager:
                 self.configure_new_view(var, context, self.source.views)
             context.index = index
             self.sync_color_config_to_state(index, context)
+            self.generate_colorbar_image(index)
 
             if index == 0:
                 view0 = view
@@ -580,7 +625,13 @@ class ViewManager:
         context: ViewContext = self.registry.get_view(var)
         if type == EventType.COL.value:
             context.config.colormap = value
+            # Generate new colorbar image BEFORE applying any transformations
+            self.generate_colorbar_image(index)
+            # Now apply the preset with current transformations
             coltrfunc.ApplyPreset(context.config.colormap, True)
+            # Reapply inversion if it was enabled
+            if context.config.invert_colors:
+                coltrfunc.InvertTransferFunction()
         elif type == EventType.LOG.value:
             context.config.use_log_scale = value
             if context.config.use_log_scale:
@@ -589,20 +640,20 @@ class ViewManager:
             else:
                 coltrfunc.MapControlPointsToLinearSpace()
                 coltrfunc.UseLogScale = 0
+            # Log scale doesn't change the image, just the data mapping
         elif type == EventType.INV.value:
             context.config.invert_colors = value
             coltrfunc.InvertTransferFunction()
+            # Generate new colorbar image when colors are inverted
+            self.generate_colorbar_image(index)
         self.render_view_by_index(index)
 
     def update_scalar_bars(self, event):
+        # Always hide ParaView scalar bars - using custom HTML colorbar
+        # The HTML colorbar is always visible, no toggle needed
         for var, context in self.registry.items():
             view = context.state.view_proxy
-            context.state.data_representation.SetScalarBarVisibility(view, event)
-            coltrfunc = GetColorTransferFunction(var)
-            coltrfunc.ApplyPreset(context.config.colormap, True)
-            LUTColorBar = GetScalarBar(coltrfunc, view)
-            LUTColorBar.Title = ""
-            LUTColorBar.ComponentTitle = ""
+            context.state.data_representation.SetScalarBarVisibility(view, False)
         self.render_all_views()
 
     def set_manual_color_range(self, index, min, max):

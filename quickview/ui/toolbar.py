@@ -71,13 +71,6 @@ class Toolbar:
             # Directly call update_available_color_maps without parameters
             self._update_available_color_maps()
 
-    def _handle_color_bar_toggle(self):
-        """Toggle the color bar visibility"""
-        with self.state:
-            self.state.show_color_bar = not self.state.show_color_bar
-            if self._update_scalar_bars is not None:
-                self._update_scalar_bars(self.state.show_color_bar)
-
     def __init__(
         self,
         layout_toolbar,
@@ -86,7 +79,6 @@ class Toolbar:
         load_state=None,
         load_variables=None,
         update_available_color_maps=None,
-        update_scalar_bars=None,
         generate_state=None,
         **kwargs,
     ):
@@ -97,20 +89,14 @@ class Toolbar:
         self._generate_state = generate_state
         self._load_state = load_state
         self._update_available_color_maps = update_available_color_maps
-        self._update_scalar_bars = update_scalar_bars
 
         # Initialize toggle states
         with self.state:
             self.state.use_cvd_colors = False
             self.state.use_standard_colors = True
-            self.state.show_color_bar = True
 
         # Set initial color maps based on default toggle states
         self._update_color_maps()
-
-        # Apply initial scalar bar visibility
-        if self._update_scalar_bars is not None:
-            self._update_scalar_bars(True)
 
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
@@ -162,21 +148,6 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-palette")
                     html.Span("Standard colors")
-                v2.VDivider(vertical=True, classes="mx-2", style="height: 24px;")
-                with v2.VTooltip(bottom=True):
-                    with html.Template(v_slot_activator="{ on, attrs }"):
-                        with v2.VBtn(
-                            icon=True,
-                            dense=True,
-                            small=True,
-                            v_bind="attrs",
-                            v_on="on",
-                            click=self._handle_color_bar_toggle,
-                            color=("show_color_bar ? 'primary' : ''",),
-                            classes="mx-1",
-                        ):
-                            v2.VIcon("mdi-format-color-fill")
-                    html.Span("Show color bar")
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VCard(
                 flat=True,
