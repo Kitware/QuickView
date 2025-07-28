@@ -26,9 +26,6 @@ from quickview.ui.toolbar import Toolbar
 
 # Build color cache here
 from quickview.view_manager import build_color_information
-
-from quickview.utilities import EventType
-
 from quickview.view_manager import ViewManager
 
 from paraview.simple import ImportPresets, GetLookupTableNames
@@ -83,7 +80,6 @@ save_state_keys = [
     # Color options from toolbar
     "use_cvd_colors",
     "use_standard_colors",
-    "show_color_bar",
     # Grid layout
     "layout",
 ]
@@ -189,6 +185,7 @@ class EAMApp:
         state.varmin = []
         state.varmax = []
         state.override_range = []
+        state.colorbar_images = []
 
         ctrl.view_update = self.viewmanager.render_all_views
         ctrl.view_reset_camera = self.viewmanager.reset_camera
@@ -401,6 +398,7 @@ class EAMApp:
             state.varmin = [np.nan] * len(vars)
             state.varmax = [np.nan] * len(vars)
             state.override_range = [False] * len(vars)
+            state.colorbar_images = [""] * len(vars)  # Initialize empty images
 
             self.viewmanager.rebuild_visualization_layout(self._cached_layout)
             # Update cached layout after rebuild
@@ -418,18 +416,17 @@ class EAMApp:
                                 "h": item.get("h", 3),
                             }
 
-    def update_view_color_settings(self, index, type, value):
-        with self.state as state:
-            if type == EventType.COL.value:
-                state.varcolor[index] = value
-                state.dirty("varcolor")
-            elif type == EventType.LOG.value:
-                state.uselogscale[index] = value
-                state.dirty("uselogscale")
-            elif type == EventType.INV.value:
-                state.invert[index] = value
-                state.dirty("invert")
-            self.viewmanager.update_view_color_settings(index, type, value)
+    def update_colormap(self, index, value):
+        """Update the colormap for a variable."""
+        self.viewmanager.update_colormap(index, value)
+
+    def update_log_scale(self, index, value):
+        """Update the log scale setting for a variable."""
+        self.viewmanager.update_log_scale(index, value)
+
+    def update_invert_colors(self, index, value):
+        """Update the color inversion setting for a variable."""
+        self.viewmanager.update_invert_colors(index, value)
 
     def update_scalar_bars(self, event):
         self.viewmanager.update_scalar_bars(event)
@@ -448,16 +445,11 @@ class EAMApp:
                 state.colormaps = noncvd
 
     def set_manual_color_range(self, index, type, value):
-        with self.state as state:
-            if type.lower() == "min":
-                state.varmin[index] = value
-                state.dirty("varmin")
-            elif type.lower() == "max":
-                state.varmax[index] = value
-                state.dirty("varmax")
-            self.viewmanager.set_manual_color_range(
-                index, state.varmin[index], state.varmax[index]
-            )
+        # Get current values from state to handle min/max independently
+        min_val = self.state.varmin[index] if type.lower() == "max" else value
+        max_val = self.state.varmax[index] if type.lower() == "min" else value
+        # Delegate to view manager which will update both the view and sync state
+        self.viewmanager.set_manual_color_range(index, min_val, max_val)
 
     def revert_to_auto_color_range(self, index):
         self.viewmanager.revert_to_auto_color_range(index)
@@ -606,7 +598,6 @@ class EAMApp:
                         load_state=self.load_state,
                         load_variables=self.load_variables,
                         update_available_color_maps=self.update_available_color_maps,
-                        update_scalar_bars=self.update_scalar_bars,
                         generate_state=self.generate_state,
                     )
 
@@ -695,9 +686,10 @@ class EAMApp:
                                     style="height: calc(100% - 0.66rem); position: relative;",
                                     classes="pa-0",
                                 ) as cardcontent:
+                                    # VTK View takes up most of the space
                                     cardcontent.add_child(
                                         """
-                                        <vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag-ignore" style="width: 100%; height: 100%;" interactiveRatio="1" >
+                                        <vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag-ignore" style="width: 100%; height: calc(100% - 30px);" interactiveRatio="1" >
                                         </vtk-remote-view>
                                         """,
                                     )
@@ -719,17 +711,50 @@ class EAMApp:
                                         #         height: $refs[vref].vtkContainer.getBoundingClientRect().height}]
                                         #         ''')
                                     )
+                                    # Mask to prevent VTK view from getting scroll/mouse events
                                     html.Div(
-                                        style="position:absolute; top: 0; left: 0; width: 100%; height: calc(100% - 0.66rem); z-index: 1;"
+                                        style="position:absolute; top: 0; left: 0; width: 100%; height: calc(100% - 30px); z-index: 1;"
                                     )
-                                    # with v2.VCardActions(classes="pa-0"):
+                                    # View Properties
                                     with html.Div(
-                                        style="position:absolute; bottom: 1rem; left: 1rem; height: 2rem; z-index: 2;"
+                                        style="position:absolute; bottom: 40px; left: 1rem; height: 2rem; z-index: 2;"
                                     ):
                                         ViewProperties(
-                                            apply=self.update_view_color_settings,
-                                            update=self.set_manual_color_range,
+                                            update_colormap=self.update_colormap,
+                                            update_log_scale=self.update_log_scale,
+                                            update_invert=self.update_invert_colors,
+                                            update_range=self.set_manual_color_range,
                                             reset=self.revert_to_auto_color_range,
+                                        )
+
+                                    # Colorbar container (horizontal layout at bottom)
+                                    with html.Div(
+                                        style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; align-items: center; padding: 4px 12px; background-color: rgba(255, 255, 255, 0.9); height: 30px; z-index: 3; overflow: visible;",
+                                        classes="drag-ignore",
+                                    ):
+                                        # Color min value
+                                        html.Span(
+                                            "{{ varmin[idx] !== null && !isNaN(varmin[idx]) ? (uselogscale[idx] && varmin[idx] > 0 ? 'log₁₀(' + Math.log10(varmin[idx]).toFixed(3) + ')' : varmin[idx].toFixed(3)) : 'Auto' }}",
+                                            style="font-size: 12px; color: #333; white-space: nowrap;",
+                                        )
+                                        # Colorbar
+                                        with html.Div(
+                                            style="flex: 1; position: relative; margin: 0 12px; height: 0.75rem;",
+                                            classes="drag-ignore",
+                                        ):
+                                            # Colorbar image
+                                            html.Img(
+                                                src=(
+                                                    "colorbar_images[idx] || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='",
+                                                    None,
+                                                ),
+                                                style="height: 100%; width: 100%; object-fit: fill;",
+                                                classes="rounded-lg border-thin",
+                                            )
+                                        # Color max value
+                                        html.Span(
+                                            "{{ varmax[idx] !== null && !isNaN(varmax[idx]) ? (uselogscale[idx] && varmax[idx] > 0 ? 'log₁₀(' + Math.log10(varmax[idx]).toFixed(3) + ')' : varmax[idx].toFixed(3)) : 'Auto' }}",
+                                            style="font-size: 12px; color: #333; white-space: nowrap;",
                                         )
 
         return self._ui

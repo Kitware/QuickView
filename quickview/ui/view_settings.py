@@ -1,12 +1,18 @@
 from trame.widgets import vuetify2 as v2, html
 from trame.decorators import TrameApp
 
-from quickview.utilities import EventType
-
 
 @TrameApp()
 class ViewProperties(v2.VMenu):
-    def __init__(self, apply=None, update=None, reset=None, **kwargs):
+    def __init__(
+        self,
+        update_colormap=None,
+        update_log_scale=None,
+        update_invert=None,
+        update_range=None,
+        reset=None,
+        **kwargs,
+    ):
         super().__init__(
             transition="slide-y-transition",
             close_on_content_click=False,
@@ -37,8 +43,8 @@ class ViewProperties(v2.VMenu):
                         items=("colormaps",),
                         outlined=True,
                         change=(
-                            apply,
-                            f"[idx, {EventType.COL.value}, $event]",
+                            update_colormap,
+                            "[idx, $event]",
                         ),
                         **style,
                     )
@@ -49,8 +55,8 @@ class ViewProperties(v2.VMenu):
                                 label="Log Scale",
                                 v_model=("uselogscale[idx]",),
                                 change=(
-                                    apply,
-                                    f"[idx, {EventType.LOG.value}, $event]",
+                                    update_log_scale,
+                                    "[idx, $event]",
                                 ),
                                 **style,
                             )
@@ -59,8 +65,8 @@ class ViewProperties(v2.VMenu):
                                 label="Revert Colors",
                                 v_model=("invert[idx]",),
                                 change=(
-                                    apply,
-                                    f"[idx, {EventType.INV.value}, $event]",
+                                    update_invert,
+                                    "[idx, $event]",
                                 ),
                                 **style,
                             )
@@ -82,7 +88,7 @@ class ViewProperties(v2.VMenu):
                                 label="min",
                                 outlined=True,
                                 change=(
-                                    update,
+                                    update_range,
                                     "[idx, 'min', $event]",
                                 ),
                                 style="height=50px",
@@ -95,7 +101,7 @@ class ViewProperties(v2.VMenu):
                                 label="max",
                                 outlined=True,
                                 change=(
-                                    update,
+                                    update_range,
                                     "[idx, 'max', $event]",
                                 ),
                                 style="height=50px",
