@@ -267,7 +267,7 @@ class EAMApp:
         self.interface_vars_state = np.array(selection_interface)
 
         self.viewmanager.registry = build_color_information(initstate)
-        self.load_variables()
+        self.load_variables(use_cached_layout=True)
 
     @trigger("layout_changed")
     def on_layout_changed_trigger(self, layout, **kwargs):
@@ -363,7 +363,7 @@ class EAMApp:
                 state.midpoints = []
                 state.interfaces = []
 
-    def load_variables(self):
+    def load_variables(self, use_cached_layout=False):
         surf = []
         mid = []
         intf = []
@@ -400,7 +400,9 @@ class EAMApp:
             state.override_range = [False] * len(vars)
             state.colorbar_images = [""] * len(vars)  # Initialize empty images
 
-            self.viewmanager.rebuild_visualization_layout(self._cached_layout)
+            # Only use cached layout when explicitly requested (i.e., when loading state)
+            layout_to_use = self._cached_layout if use_cached_layout else None
+            self.viewmanager.rebuild_visualization_layout(layout_to_use)
             # Update cached layout after rebuild
             if state.layout and state.variables:
                 self._cached_layout = {}
@@ -686,10 +688,10 @@ class EAMApp:
                                     style="height: calc(100% - 0.66rem); position: relative;",
                                     classes="pa-0",
                                 ) as cardcontent:
-                                    # VTK View takes up most of the space
+                                    # VTK View fills entire space
                                     cardcontent.add_child(
                                         """
-                                        <vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag-ignore" style="width: 100%; height: calc(100% - 30px);" interactiveRatio="1" >
+                                        <vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag-ignore" style="width: 100%; height: 100%;" interactiveRatio="1" >
                                         </vtk-remote-view>
                                         """,
                                     )
@@ -713,33 +715,31 @@ class EAMApp:
                                     )
                                     # Mask to prevent VTK view from getting scroll/mouse events
                                     html.Div(
-                                        style="position:absolute; top: 0; left: 0; width: 100%; height: calc(100% - 30px); z-index: 1;"
+                                        style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
                                     )
-                                    # View Properties
+                                    # Colorbar container (horizontal layout at bottom)
                                     with html.Div(
-                                        style="position:absolute; bottom: 40px; left: 1rem; height: 2rem; z-index: 2;"
+                                        style="position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; align-items: center; justify-content: center; padding: 4px 8px 4px 8px; background-color: rgba(255, 255, 255, 0.1); height: 28px; z-index: 3; overflow: visible; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
+                                        classes="drag-ignore",
                                     ):
+                                        # View Properties button (small icon)
                                         ViewProperties(
                                             update_colormap=self.update_colormap,
                                             update_log_scale=self.update_log_scale,
                                             update_invert=self.update_invert_colors,
                                             update_range=self.set_manual_color_range,
                                             reset=self.revert_to_auto_color_range,
+                                            style="margin-right: 8px; display: flex; align-items: center;",
                                         )
-
-                                    # Colorbar container (horizontal layout at bottom)
-                                    with html.Div(
-                                        style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; align-items: center; padding: 4px 12px; background-color: rgba(255, 255, 255, 0.9); height: 30px; z-index: 3; overflow: visible;",
-                                        classes="drag-ignore",
-                                    ):
                                         # Color min value
                                         html.Span(
                                             "{{ varmin[idx] !== null && !isNaN(varmin[idx]) ? (uselogscale[idx] && varmin[idx] > 0 ? 'log₁₀(' + Math.log10(varmin[idx]).toFixed(3) + ')' : varmin[idx].toFixed(3)) : 'Auto' }}",
-                                            style="font-size: 12px; color: #333; white-space: nowrap;",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
                                         )
                                         # Colorbar
                                         with html.Div(
-                                            style="flex: 1; position: relative; margin: 0 12px; height: 0.75rem;",
+                                            style="flex: 1; display: flex; align-items: center; margin: 0 8px; height: 0.6rem;",
                                             classes="drag-ignore",
                                         ):
                                             # Colorbar image
@@ -754,7 +754,8 @@ class EAMApp:
                                         # Color max value
                                         html.Span(
                                             "{{ varmax[idx] !== null && !isNaN(varmax[idx]) ? (uselogscale[idx] && varmax[idx] > 0 ? 'log₁₀(' + Math.log10(varmax[idx]).toFixed(3) + ')' : varmax[idx].toFixed(3)) : 'Auto' }}",
-                                            style="font-size: 12px; color: #333; white-space: nowrap;",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
                                         )
 
         return self._ui
