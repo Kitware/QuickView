@@ -1,5 +1,5 @@
 """QuickView: Visual Analysis for E3SM Atmosphere Data."""
 
-__version__ = "0.1.5"
+__version__ = "0.1.6"
 __author__ = "Kitware Inc."
 __license__ = "Apache-2.0"

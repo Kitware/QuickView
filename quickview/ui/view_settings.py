@@ -24,13 +24,15 @@ class ViewProperties(v2.VMenu):
             with v2.Template(v_slot_activator="{ on, attrs }"):
                 with v2.VBtn(
                     icon=True,
+                    dense=True,
+                    small=True,
                     outlined=True,
-                    classes="pa-1",
-                    style="background: white;",
+                    classes="pa-0",
+                    style="background: white; width: 24px; height: 24px;",
                     v_bind="attrs",
                     v_on="on",
                 ):
-                    v2.VIcon("mdi-cog")
+                    v2.VIcon("mdi-cog", small=True)
             style = dict(dense=True, hide_details=True)
             with v2.VCard(
                 classes="overflow-hidden pa-2",
