@@ -77,6 +77,7 @@ save_state_keys = [
     "varmin",
     "varmax",
     "override_range",  # Track manual color range override per variable
+    "varaverage",  # Track computed average per variable
     # Color options from toolbar
     "use_cvd_colors",
     "use_standard_colors",
@@ -186,6 +187,10 @@ class EAMApp:
         state.varmax = []
         state.override_range = []
         state.colorbar_images = []
+        state.varaverage = []
+
+        state.probe_enabled = False
+        state.probe_location = []  # Default probe
 
         ctrl.view_update = self.viewmanager.render_all_views
         ctrl.view_reset_camera = self.viewmanager.reset_camera
@@ -399,6 +404,7 @@ class EAMApp:
             state.varmax = [np.nan] * len(vars)
             state.override_range = [False] * len(vars)
             state.colorbar_images = [""] * len(vars)  # Initialize empty images
+            state.varaverage = [np.nan] * len(vars)
 
             # Only use cached layout when explicitly requested (i.e., when loading state)
             layout_to_use = self._cached_layout if use_cached_layout else None
@@ -717,6 +723,54 @@ class EAMApp:
                                     html.Div(
                                         style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
                                     )
+                                    # Top-left info: time and level info
+                                    with html.Div(
+                                        style="position: absolute; top: 8px; left: 8px; padding: 4px 8px; background-color: rgba(0, 0, 0, 0.7); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2;",
+                                        classes="drag-ignore font-monospace",
+                                    ):
+                                        # Show time
+                                        html.Div(
+                                            "t = {{ tstamp }}",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
+                                        # Show level for midpoint variables
+                                        html.Div(
+                                            v_if="midpoint_vars.includes(variables[idx])",
+                                            children="k = {{ midpoint }}",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
+                                        # Show level for interface variables
+                                        html.Div(
+                                            v_if="interface_vars.includes(variables[idx])",
+                                            children="k = {{ interface }}",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
+                                    # Top-right info: variable name and average
+                                    with html.Div(
+                                        style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; background-color: rgba(0, 0, 0, 0.7); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2; text-align: right;",
+                                        classes="drag-ignore font-monospace",
+                                    ):
+                                        # Variable name
+                                        html.Div(
+                                            "{{ variables[idx] }}",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
+                                        # Average value
+                                        html.Div(
+                                            (
+                                                "(avg: {{ "
+                                                "varaverage[idx] !== null && !isNaN(varaverage[idx]) ? "
+                                                "varaverage[idx].toExponential(2) : "
+                                                "'N/A' "
+                                                "}})"
+                                            ),
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
                                     # Colorbar container (horizontal layout at bottom)
                                     with html.Div(
                                         style="position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; align-items: center; justify-content: center; padding: 4px 8px 4px 8px; background-color: rgba(255, 255, 255, 0.1); height: 28px; z-index: 3; overflow: visible; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
@@ -733,13 +787,21 @@ class EAMApp:
                                         )
                                         # Color min value
                                         html.Span(
-                                            "{{ varmin[idx] !== null && !isNaN(varmin[idx]) ? (uselogscale[idx] && varmin[idx] > 0 ? 'log₁₀(' + Math.log10(varmin[idx]).toFixed(3) + ')' : varmin[idx].toFixed(3)) : 'Auto' }}",
+                                            (
+                                                "{{ "
+                                                "varmin[idx] !== null && !isNaN(varmin[idx]) ? ("
+                                                "uselogscale[idx] && varmin[idx] > 0 ? "
+                                                "'10^(' + Math.log10(varmin[idx]).toFixed(2) + ')' : "
+                                                "varmin[idx].toExponential(3)"
+                                                ") : 'Auto' "
+                                                "}}"
+                                            ),
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )
                                         # Colorbar
                                         with html.Div(
-                                            style="flex: 1; display: flex; align-items: center; margin: 0 8px; height: 0.6rem;",
+                                            style="flex: 1; display: flex; align-items: center; margin: 0 8px; height: 0.6rem; position: relative;",
                                             classes="drag-ignore",
                                         ):
                                             # Colorbar image
@@ -750,10 +812,48 @@ class EAMApp:
                                                 ),
                                                 style="height: 100%; width: 100%; object-fit: fill;",
                                                 classes="rounded-lg border-thin",
+                                                v_on=(
+                                                    "{"
+                                                    "mousemove: (e) => { "
+                                                    "const rect = e.target.getBoundingClientRect(); "
+                                                    "const x = e.clientX - rect.left; "
+                                                    "const width = rect.width; "
+                                                    "const fraction = Math.max(0, Math.min(1, x / width)); "
+                                                    "probe_location = [x, width, fraction, idx]; "
+                                                    "}, "
+                                                    "mouseenter: () => { probe_enabled = true; }, "
+                                                    "mouseleave: () => { probe_enabled = false; probe_location = null; } "
+                                                    "}"
+                                                ),
+                                            )
+                                            # Probe tooltip (pan3d style - as sibling to colorbar)
+                                            html.Div(
+                                                v_if="probe_enabled && probe_location && probe_location[3] === idx",
+                                                v_bind_style="{position: 'absolute', bottom: '100%', left: probe_location[0] + 'px', transform: 'translateX(-50%)', marginBottom: '0.25rem', backgroundColor: '#000000', color: '#ffffff', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.875rem', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 1000, fontFamily: 'monospace', boxShadow: '0 2px 4px rgba(0,0,0,0.3)'}",
+                                                children=(
+                                                    "{{ "
+                                                    "probe_location && varmin[idx] !== null && varmax[idx] !== null ? ("
+                                                    "uselogscale[idx] && varmin[idx] > 0 && varmax[idx] > 0 ? "
+                                                    "'10^(' + ("
+                                                    "Math.log10(varmin[idx]) + "
+                                                    "(Math.log10(varmax[idx]) - Math.log10(varmin[idx])) * probe_location[2]"
+                                                    ").toFixed(2) + ')' : "
+                                                    "(varmin[idx] + (varmax[idx] - varmin[idx]) * probe_location[2]).toExponential(3)"
+                                                    ") : '' "
+                                                    "}}"
+                                                ),
                                             )
                                         # Color max value
                                         html.Span(
-                                            "{{ varmax[idx] !== null && !isNaN(varmax[idx]) ? (uselogscale[idx] && varmax[idx] > 0 ? 'log₁₀(' + Math.log10(varmax[idx]).toFixed(3) + ')' : varmax[idx].toFixed(3)) : 'Auto' }}",
+                                            (
+                                                "{{ "
+                                                "varmax[idx] !== null && !isNaN(varmax[idx]) ? ("
+                                                "uselogscale[idx] && varmax[idx] > 0 ? "
+                                                "'10^(' + Math.log10(varmax[idx]).toFixed(2) + ')' : "
+                                                "varmax[idx].toExponential(3)"
+                                                ") : 'Auto' "
+                                                "}}"
+                                            ),
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )

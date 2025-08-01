@@ -67,7 +67,7 @@ class SliceSelection(CollapsableSection):
                         "{{midpoints.length > 0 ? parseFloat(midpoints[midpoint]).toFixed(2) + ' hPa (k=' + midpoint + ')' : '0.00 hPa (k=0)'}}",
                         classes="font-weight-medium",
                     )
-            v2.VDivider(classes="my-2")
+            # v2.VDivider(classes="my-2")
 
             with v2.VRow(
                 classes="text-center align-center justify-center text-subtitle-1 pt-3 px-3"
@@ -116,7 +116,7 @@ class SliceSelection(CollapsableSection):
                         "{{interfaces.length > 0 ? parseFloat(interfaces[interface]).toFixed(2) + ' hPa (k=' + interface + ')' : '0.00 hPa (k=0)'}}",
                         classes="font-weight-medium",
                     )
-            v2.VDivider(classes="my-2")
+            # v2.VDivider(classes="my-2")
 
             with v2.VRow(
                 classes="text-center align-center justify-center text-subtitle-1 pt-3 px-3"
@@ -165,7 +165,7 @@ class SliceSelection(CollapsableSection):
                         "{{timesteps.length > 0 ? parseFloat(timesteps[tstamp]).toFixed(2) + ' (t=' + tstamp + ')' : '0.00 (t=0)'}}",
                         classes="font-weight-medium",
                     )
-            v2.VDivider(classes="my-4")
+            # v2.VDivider(classes="my-4")
 
             with v2.VRow(classes="text-center align-center text-subtitle-1 pt-2 pa-2"):
                 with v2.VCol(cols=3, classes="py-0"):
@@ -196,7 +196,7 @@ class SliceSelection(CollapsableSection):
                 variant="solo",
                 classes="pt-2 px-6",
             )
-            v2.VDivider(classes="my-4")
+            # v2.VDivider(classes="my-4")
 
             with v2.VRow(classes="text-center align-center text-subtitle-1 pt-2 pa-2"):
                 with v2.VCol(cols=3, classes="py-0"):
