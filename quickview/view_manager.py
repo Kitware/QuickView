@@ -620,8 +620,9 @@ class ViewManager:
         else:
             coltrfunc.MapControlPointsToLinearSpace()
             coltrfunc.UseLogScale = 0
-        # Regenerate colorbar after log scale change
-        self.generate_colorbar_image(index)
+        # Note: We don't regenerate the colorbar image here because the color gradient
+        # itself doesn't change with log scale - only the data mapping changes.
+        # The colorbar always shows a linear color progression.
 
         # Sync all color configuration changes back to state
         self.sync_color_config_to_state(index, context)

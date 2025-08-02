@@ -18,6 +18,7 @@ class ViewProperties(v2.VMenu):
             close_on_content_click=False,
             persistent=True,
             no_click_animation=True,
+            offset_y=True,
             **kwargs,
         )
         with self:
