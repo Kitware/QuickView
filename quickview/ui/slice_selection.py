@@ -198,7 +198,7 @@ class SliceSelection(CollapsableSection):
             )
             # v2.VDivider(classes="my-4")
 
-            with v2.VRow(classes="text-center align-center text-subtitle-1 pt-2 pa-2"):
+            with v2.VRow(classes="text-center align-center text-subtitle-1 pt-4 px-2"):
                 with v2.VCol(cols=3, classes="py-0"):
                     v2.VTextField(
                         v_model=("cliplat[0]",),
