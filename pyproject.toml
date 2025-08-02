@@ -1,6 +1,6 @@
 [project]
 name = "quickview"
-version = "0.1.6"
+version = "0.1.7"
 description = "An application to explore/analyze data for atmosphere component for E3SM"
 authors = [
     {name = "Kitware Inc."},
