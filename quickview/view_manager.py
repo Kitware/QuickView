@@ -96,21 +96,15 @@ class ViewConfiguration:
 
 
 class ViewState:
-    """Runtime state for a view - ParaView objects and computed values"""
+    """Runtime state for a view - ParaView objects"""
 
     def __init__(
         self,
         view_proxy=None,
         data_representation=None,
-        var_text_proxy=None,
-        var_info_proxy=None,
-        computed_average: float = None,
     ):
         self.view_proxy = view_proxy
         self.data_representation = data_representation
-        self.var_text_proxy = var_text_proxy
-        self.var_info_proxy = var_info_proxy
-        self.computed_average = computed_average
 
 
 class ViewContext:
@@ -243,7 +237,9 @@ class ViewManager:
 
         for var, context in self.registry.items():
             varavg = self.compute_average(var, vtkdata=data)
-            context.state.computed_average = varavg
+            # Directly set average in trame state
+            self.state.varaverage[context.index] = varavg
+            self.state.dirty("varaverage")
             if not context.config.override_range:
                 context.state.data_representation.RescaleTransferFunctionToDataRange(
                     False, True
@@ -251,46 +247,18 @@ class ViewManager:
                 range = self.compute_range(var=var)
                 context.config.min_value = range[0]
                 context.config.max_value = range[1]
-            (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
-            if context.state.var_text_proxy is not None:
-                context.state.var_text_proxy.Text = v_text
-            if context.state.var_info_proxy is not None:
-                context.state.var_info_proxy.Text = V_info
             self.sync_color_config_to_state(context.index, context)
             self.generate_colorbar_image(context.index)
 
-    def refresh_view_display(self, var, context: ViewContext):
+    def refresh_view_display(self, context: ViewContext):
         if not context.config.override_range:
             context.state.data_representation.RescaleTransferFunctionToDataRange(
                 False, True
             )
-        (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
-        if context.state.var_text_proxy is not None:
-            context.state.var_text_proxy.Text = v_text
-        if context.state.var_info_proxy is not None:
-            context.state.var_info_proxy.Text = V_info
         rview = context.state.view_proxy
 
         Render(rview)
         # ResetCamera(rview)
-
-    def get_var_info(self, var, average):
-        var_text = var + "\n(avg: " + "{:.2E}".format(average) + ")"
-        info_text = None
-        surface_vars = self.source.vars.get("surface", [])
-        t = self.state.tstamp
-        if surface_vars and var in surface_vars:
-            info_text = f"t = {t}"
-        midpoint_vars = self.source.vars.get("midpoint", [])
-        if midpoint_vars and var in midpoint_vars:
-            k = self.state.midpoint
-            info_text = f"k = {k}\nt = {t}"
-        interface_vars = self.source.vars.get("interface", [])
-        if interface_vars and var in interface_vars:
-            k = self.state.interface
-            info_text = f"k = {k}\nt = {t}"
-
-        return (var_text, info_text)
 
     def configure_new_view(self, var, context: ViewContext, sources):
         rview = context.state.view_proxy
@@ -304,26 +272,24 @@ class ViewManager:
         coltrfunc.ApplyPreset(context.config.colormap, True)
         coltrfunc.NanOpacity = 0.0
 
+        # Apply log scale if configured
+        if context.config.use_log_scale:
+            coltrfunc.MapControlPointsToLogSpace()
+            coltrfunc.UseLogScale = 1
+
+        # Apply inversion if configured
+        if context.config.invert_colors:
+            coltrfunc.InvertTransferFunction()
+
         # Ensure the color transfer function is scaled to the data range
         if not context.config.override_range:
             rep.RescaleTransferFunctionToDataRange(False, True)
+        else:
+            coltrfunc.RescaleTransferFunction(
+                context.config.min_value, context.config.max_value
+            )
 
         # ParaView scalar bar is always hidden - using custom HTML colorbar instead
-
-        (v_text, V_info) = self.get_var_info(var, context.state.computed_average)
-        text = Text(registrationName=f"Text{var}")
-        text.Text = v_text
-        context.state.var_text_proxy = text
-        textrep = Show(text, rview, "TextSourceRepresentation")
-        textrep.WindowLocation = "Upper Right Corner"
-        textrep.FontFamily = "Times"
-
-        info = Text(registrationName=f"Info{var}")
-        info.Text = V_info
-        context.state.var_info_proxy = info
-        textrep = Show(info, rview, "TextSourceRepresentation")
-        textrep.WindowLocation = "Upper Left Corner"
-        textrep.FontFamily = "Times"
 
         # Update common sources to all render views
 
@@ -357,15 +323,21 @@ class ViewManager:
         self.state.varmax[index] = context.config.max_value
         self.state.uselogscale[index] = context.config.use_log_scale
         self.state.override_range[index] = context.config.override_range
+        self.state.invert[index] = context.config.invert_colors
         # Mark arrays as dirty to ensure UI updates
         self.state.dirty("varcolor")
         self.state.dirty("varmin")
         self.state.dirty("varmax")
         self.state.dirty("uselogscale")
         self.state.dirty("override_range")
+        self.state.dirty("invert")
 
     def generate_colorbar_image(self, index):
-        """Generate colorbar image for a variable at given index"""
+        """Generate colorbar image for a variable at given index.
+
+        This is a read-only operation that captures the current state of the
+        color transfer function without modifying it.
+        """
         if index >= len(self.state.variables):
             return
 
@@ -374,42 +346,24 @@ class ViewManager:
         if context is None:
             return
 
-        # Get the ParaView color transfer function
+        # Get the current ParaView color transfer function - already in correct state
         coltrfunc = GetColorTransferFunction(var)
 
-        # Store current state
-        current_use_log = coltrfunc.UseLogScale
-
-        # Reset to linear scale and original range for image generation
-        if current_use_log:
-            coltrfunc.MapControlPointsToLinearSpace()
-            coltrfunc.UseLogScale = 0
-
-        # Apply the colormap preset to get clean colors
-        coltrfunc.ApplyPreset(context.config.colormap, True)
-
-        # Generate the colorbar image with only inversion applied
+        # Generate the colorbar image from current state
         try:
+            # Note: We pass log_scale=False because the colorbar image should
+            # always show linear color gradients. The log scale affects data mapping,
+            # not the color gradient display.
             image_data = build_colorbar_image(
                 coltrfunc,
-                log_scale=False,  # Always False for image generation
-                invert=context.config.invert_colors,
+                log_scale=False,
+                invert=False,  # Inversion is already applied to coltrfunc
             )
-            # Update state with the new image without context manager to avoid recursive flush
+            # Update state with the new image
             self.state.colorbar_images[index] = image_data
             self.state.dirty("colorbar_images")
         except Exception as e:
             print(f"Error generating colorbar image for {var}: {e}")
-        finally:
-            # Restore the log scale state if it was enabled
-            if current_use_log:
-                coltrfunc.MapControlPointsToLogSpace()
-                coltrfunc.UseLogScale = 1
-            # Restore the range if it was modified
-            if context.config.override_range:
-                coltrfunc.RescaleTransferFunction(
-                    context.config.min_value, context.config.max_value
-                )
 
     def reset_camera(self, **kwargs):
         for widget in self.widgets:
@@ -546,7 +500,6 @@ class ViewManager:
             context: ViewContext = self.registry.get_view(var)
             if context is not None:
                 view = context.state.view_proxy
-                context.state.computed_average = varavg
                 if view is None:
                     view = CreateRenderView()
                     view.UseColorPaletteForBackground = 0
@@ -557,7 +510,7 @@ class ViewManager:
                     context.config.max_value = varrange[1]
                     self.configure_new_view(var, context, self.source.views)
                 else:
-                    self.refresh_view_display(var, context)
+                    self.refresh_view_display(context)
             else:
                 view = CreateRenderView()
                 # Preserve override flag if context already exists
@@ -585,7 +538,6 @@ class ViewManager:
                 )
                 view_state = ViewState(
                     view_proxy=view,
-                    computed_average=varavg,
                 )
                 context = ViewContext(config, view_state, index)
                 view.UseColorPaletteForBackground = 0
@@ -593,6 +545,9 @@ class ViewManager:
                 self.registry.register_view(var, context)
                 self.configure_new_view(var, context, self.source.views)
             context.index = index
+            # Set the computed average directly in trame state
+            self.state.varaverage[index] = varavg
+            self.state.dirty("varaverage")
             self.sync_color_config_to_state(index, context)
             self.generate_colorbar_image(index)
 
