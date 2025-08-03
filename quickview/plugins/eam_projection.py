@@ -283,14 +283,23 @@ class EAMProject(VTKPythonAlgorithmBase):
         x = flat[0::3] - 180.0 if self.translate else flat[0::3]
         y = flat[1::3]
 
-        latlon = Proj(init="epsg:4326")
-        if self.project == 1:
-            proj = Proj(proj="robin")
-        elif self.project == 2:
-            proj = Proj(proj="moll")
+        try:
+            # Use proj4 string for WGS84 instead of EPSG code to avoid database dependency
+            latlon = Proj(proj="latlong", datum="WGS84")
+            if self.project == 1:
+                proj = Proj(proj="robin")
+            elif self.project == 2:
+                proj = Proj(proj="moll")
+            else:
+                # Should not reach here, but return without transformation
+                return 1
 
-        xformer = Transformer.from_proj(latlon, proj)
-        res = xformer.transform(x, y)
+            xformer = Transformer.from_proj(latlon, proj, always_xy=True)
+            res = xformer.transform(x, y)
+        except Exception as e:
+            print(f"Projection error: {e}")
+            # If projection fails, return without modifying coordinates
+            return 1
         flat[0::3] = np.array(res[0])
         flat[1::3] = np.array(res[1])
 
