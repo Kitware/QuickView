@@ -31,6 +31,11 @@ from quickview.view_manager import ViewManager
 
 from paraview.simple import ImportPresets, GetLookupTableNames
 
+from paraview.modules import vtkRemotingCore as rc
+
+rc.vtkProcessModule.GetProcessModule().UpdateProcessType(
+    rc.vtkProcessModule.PROCESS_BATCH, 0
+)
 
 # -----------------------------------------------------------------------------
 # trame setup

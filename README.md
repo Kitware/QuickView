@@ -115,6 +115,8 @@ including:
 - [Control Panel Guide](docs/userguide/control_panel.md) - Interface overview
 - [Viewport Customization](docs/userguide/viewport.md) - Working with multiple
   variables
+- [Data Requirements](docs/data-requirements.md) - NetCDF file format and
+  required variables
 
 ## About
 

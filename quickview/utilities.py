@@ -156,3 +156,29 @@ def build_colorbar_image(paraview_lut, log_scale=False, invert=False):
 
     # Convert to image
     return vtk_lut_to_image(vtk_lut)
+
+
+def get_cached_colorbar_image(colormap_name, inverted=False):
+    """
+    Get a cached colorbar image for a given colormap.
+
+    Parameters:
+    -----------
+    colormap_name : str
+        Name of the colormap (e.g., "Cool to Warm", "Rainbow Desaturated")
+    inverted : bool
+        Whether to get the inverted version
+
+    Returns:
+    --------
+    str
+        Base64-encoded PNG image as a data URI, or empty string if not found
+    """
+    # Import the cache (will be added after running generate_colorbar_cache.py)
+    from quickview.colorbar_cache import COLORBAR_CACHE
+
+    if colormap_name in COLORBAR_CACHE:
+        variant = "inverted" if inverted else "normal"
+        return COLORBAR_CACHE[colormap_name].get(variant, "")
+
+    return ""
