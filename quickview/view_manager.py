@@ -18,7 +18,7 @@ from paraview.simple import (
 )
 
 from quickview.pipeline import EAMVisSource
-from quickview.utilities import build_colorbar_image
+from quickview.utilities import get_cached_colorbar_image
 from typing import Dict, List, Optional
 
 
@@ -335,8 +335,8 @@ class ViewManager:
     def generate_colorbar_image(self, index):
         """Generate colorbar image for a variable at given index.
 
-        This is a read-only operation that captures the current state of the
-        color transfer function without modifying it.
+        This uses the cached colorbar images based on the colormap name
+        and invert status.
         """
         if index >= len(self.state.variables):
             return
@@ -346,24 +346,16 @@ class ViewManager:
         if context is None:
             return
 
-        # Get the current ParaView color transfer function - already in correct state
-        coltrfunc = GetColorTransferFunction(var)
-
-        # Generate the colorbar image from current state
+        # Get cached colorbar image based on colormap and invert status
         try:
-            # Note: We pass log_scale=False because the colorbar image should
-            # always show linear color gradients. The log scale affects data mapping,
-            # not the color gradient display.
-            image_data = build_colorbar_image(
-                coltrfunc,
-                log_scale=False,
-                invert=False,  # Inversion is already applied to coltrfunc
+            image_data = get_cached_colorbar_image(
+                context.config.colormap, context.config.invert_colors
             )
-            # Update state with the new image
+            # Update state with the cached image
             self.state.colorbar_images[index] = image_data
             self.state.dirty("colorbar_images")
         except Exception as e:
-            print(f"Error generating colorbar image for {var}: {e}")
+            print(f"Error getting cached colorbar image for {var}: {e}")
 
     def reset_camera(self, **kwargs):
         for widget in self.widgets:
@@ -406,14 +398,29 @@ class ViewManager:
             data = self.source.views["atmosphere_data"]
             vtkdata = sm.Fetch(data)
         vardata = vtkdata.GetCellData().GetArray(var)
-        area = np.array(vtkdata.GetCellData().GetArray("area"))
-        if np.isnan(vardata).any():
-            mask = ~np.isnan(vardata)
-            if not np.any(mask):
-                return np.nan  # all values are NaN
-            vardata = np.array(vardata)[mask]
-            area = np.array(area)[mask]
-        return np.average(vardata, weights=area)
+
+        # Check if area variable exists
+        area_array = vtkdata.GetCellData().GetArray("area")
+
+        if area_array is not None:
+            # Area-weighted averaging
+            area = np.array(area_array)
+            if np.isnan(vardata).any():
+                mask = ~np.isnan(vardata)
+                if not np.any(mask):
+                    return np.nan  # all values are NaN
+                vardata = np.array(vardata)[mask]
+                area = np.array(area)[mask]
+            return np.average(vardata, weights=area)
+        else:
+            # Simple arithmetic averaging
+            vardata = np.array(vardata)
+            if np.isnan(vardata).any():
+                mask = ~np.isnan(vardata)
+                if not np.any(mask):
+                    return np.nan  # all values are NaN
+                vardata = vardata[mask]
+            return np.mean(vardata)
 
     def compute_range(self, var, vtkdata=None):
         if vtkdata is None:
@@ -595,14 +602,14 @@ class ViewManager:
         context: ViewContext = self.registry.get_view(var)
 
         context.config.colormap = value
-        # Generate new colorbar image BEFORE applying any transformations
-        self.generate_colorbar_image(index)
-        # Now apply the preset with current transformations
+        # Apply the preset
         coltrfunc.ApplyPreset(context.config.colormap, True)
         # Reapply inversion if it was enabled
         if context.config.invert_colors:
             coltrfunc.InvertTransferFunction()
 
+        # Generate new colorbar image with updated colormap
+        self.generate_colorbar_image(index)
         # Sync all color configuration changes back to state
         self.sync_color_config_to_state(index, context)
         self.render_view_by_index(index)
@@ -643,10 +650,10 @@ class ViewManager:
         self.sync_color_config_to_state(index, context)
         self.render_view_by_index(index)
 
-    def update_scalar_bars(self, event):
+    def update_scalar_bars(self, event=None):
         # Always hide ParaView scalar bars - using custom HTML colorbar
         # The HTML colorbar is always visible, no toggle needed
-        for var, context in self.registry.items():
+        for _, context in self.registry.items():
             view = context.state.view_proxy
             context.state.data_representation.SetScalarBarVisibility(view, False)
         self.render_all_views()
@@ -662,8 +669,7 @@ class ViewManager:
         # Update color transfer function
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
-        # Generate new colorbar image with updated range
-        self.generate_colorbar_image(index)
+        # Note: colorbar image doesn't change with range, only data mapping changes
         self.render_view_by_index(index)
 
     def revert_to_auto_color_range(self, index):
@@ -680,8 +686,7 @@ class ViewManager:
         context.state.data_representation.RescaleTransferFunctionToDataRange(
             False, True
         )
-        # Generate new colorbar image with updated range
-        self.generate_colorbar_image(index)
+        # Note: colorbar image doesn't change with range, only data mapping changes
         self.render_all_views()
 
     def zoom_in(self, index=0):

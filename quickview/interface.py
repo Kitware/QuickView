@@ -18,6 +18,7 @@ from trame_server.core import Server
 
 from quickview.pipeline import EAMVisSource
 
+from quickview import __version__ as version
 from quickview.ui.slice_selection import SliceSelection
 from quickview.ui.projection_selection import ProjectionSelection
 from quickview.ui.variable_selection import VariableSelection
@@ -30,6 +31,11 @@ from quickview.view_manager import ViewManager
 
 from paraview.simple import ImportPresets, GetLookupTableNames
 
+from paraview.modules import vtkRemotingCore as rc
+
+rc.vtkProcessModule.GetProcessModule().UpdateProcessType(
+    rc.vtkProcessModule.PROCESS_BATCH, 0
+)
 
 # -----------------------------------------------------------------------------
 # trame setup
@@ -596,7 +602,7 @@ class EAMApp:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
                 # layout.footer.clear()
-                layout.title.set_text("EAM QuickView v1.0")
+                layout.title.set_text(f"QuickView {version}")
 
                 with layout.toolbar as toolbar:
                     Toolbar(

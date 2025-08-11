@@ -51,6 +51,9 @@ To learn more about the installation of EAM QuickView, checkout the
 To learn more about using EAM QuickView, checkout the
 [brief overview.](tutorials/eamapp.md)
 
+For information about data file requirements and supported formats, see the
+[data requirements documentation](data-requirements.md)
+
 ## Point of Contact
 
 The lead developer of EAM QuickView is

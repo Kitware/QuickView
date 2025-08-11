@@ -219,13 +219,13 @@ class EAMVisSource:
             self.interfaces = data_wrapped.FieldData["ilev"].tolist()
 
             self.surface_vars = list(
-                np.asarray(self.data.GetProperty("a2DVariablesInfo"))[::2]
+                np.asarray(self.data.GetProperty("SurfaceVariablesInfo"))[::2]
             )
             self.midpoint_vars = list(
-                np.asarray(self.data.GetProperty("a3DMiddleLayerVariablesInfo"))[::2]
+                np.asarray(self.data.GetProperty("MidpointVariablesInfo"))[::2]
             )
             self.interface_vars = list(
-                np.asarray(self.data.GetProperty("a3DInterfaceLayerVariablesInfo"))[::2]
+                np.asarray(self.data.GetProperty("InterfaceVariablesInfo"))[::2]
             )
 
             tk = GetTimeKeeper()
@@ -311,9 +311,9 @@ class EAMVisSource:
     def LoadVariables(self, surf, mid, intf):
         if not self.valid:
             return
-        self.data.a2DVariables = surf
-        self.data.a3DMiddleLayerVariables = mid
-        self.data.a3DInterfaceLayerVariables = intf
+        self.data.SurfaceVariables = surf
+        self.data.MidpointVariables = mid
+        self.data.InterfaceVariables = intf
         self.vars["surface"] = surf
         self.vars["midpoint"] = mid
         self.vars["interface"] = intf
