@@ -180,8 +180,13 @@ class EAMVisSource:
         self.views["continents"] = OutputPort(cont_proj, 0)
         self.views["grid_lines"] = OutputPort(grid_proj, 0)
 
-    def Update(self, data_file, conn_file, midpoint=0, interface=0):
-        if self.data_file == data_file and self.conn_file == conn_file:
+    def Update(self, data_file, conn_file, midpoint=0, interface=0, force_reload=False):
+        # Check if we need to reload
+        if (
+            not force_reload
+            and self.data_file == data_file
+            and self.conn_file == conn_file
+        ):
             return self.valid
 
         self.data_file = data_file
@@ -227,6 +232,7 @@ class EAMVisSource:
             self.interface_vars = list(
                 np.asarray(self.data.GetProperty("InterfaceVariablesInfo"))[::2]
             )
+
 
             tk = GetTimeKeeper()
             self.timestamps = np.array(tk.TimestepValues).tolist()

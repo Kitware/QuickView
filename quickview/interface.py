@@ -357,9 +357,11 @@ class EAMApp:
     def load_data(self):
         with self.state as state:
             # Update returns True/False for validity
+            # force_reload=True since user explicitly clicked Load Files button
             is_valid = self.source.Update(
                 data_file=self.state.data_file,
                 conn_file=self.state.conn_file,
+                force_reload=True,
             )
             state.pipeline_valid = is_valid
 

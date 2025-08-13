@@ -453,6 +453,12 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         if self._DataFileName is None:
             return
         vardata = self._get_var_dataset()
+        
+        # Clear existing selection arrays BEFORE adding new ones
+        self._surface_selection.RemoveAllArrays()
+        self._midpoint_selection.RemoveAllArrays()
+        self._interface_selection.RemoveAllArrays()
+        
         for name, info in vardata.variables.items():
             dims = set(info.dimensions)
             if not (dims == dims1 or dims == dims2 or dims == dims3m or dims == dims3i):
@@ -471,15 +477,13 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             elif varmeta.type == VarType._3Di:
                 self._interface_vars.append(varmeta)
                 self._interface_selection.AddArray(name)
-            try:
-                fillval = info.getncattr("_FillValue")
-                varmeta.fillval = fillval
-            except Exception:
-                pass
+        
         self._surface_selection.DisableAllArrays()
         self._interface_selection.DisableAllArrays()
         self._midpoint_selection.DisableAllArrays()
 
+        # Clear old timestamps before adding new ones
+        self._timeSteps.clear()
         timesteps = vardata["time"][:].data.flatten()
         self._timeSteps.extend(timesteps)
 
