@@ -233,6 +233,7 @@ class EAMVisSource:
                 np.asarray(self.data.GetProperty("InterfaceVariablesInfo"))[::2]
             )
 
+
             tk = GetTimeKeeper()
             self.timestamps = np.array(tk.TimestepValues).tolist()
             tk.Time = tk.TimestepValues[0]
