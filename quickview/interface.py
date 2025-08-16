@@ -751,17 +751,6 @@ class EAMApp:
                                     )
                                     client.ClientTriggers(
                                         beforeDestroy="trigger('view_gc', [vref])",
-                                        # mounted="""
-                                        #        $nextTick(() => setTimeout(() => trigger('resetview', [
-                                        #            idx,
-                                        #            {
-                                        #              width: Math.floor($refs[vref].vtkContainer.getBoundingClientRect().width),
-                                        #              height: Math.floor($refs[vref].vtkContainer.getBoundingClientRect().height)
-                                        #            }
-                                        #        ]), 500))
-                                        #        """,
-                                        # mounted="$nextTick(() => setTimeout(() => console.log($refs[vref].vtkContainer.getBoundingClientRect()), 500))",
-                                        # mounted="$nextTick(() => setTimeout(() => $refs[vref].render(), 500))",
                                         # mounted=(self.viewmanager.reset_specific_view, '''[idx,
                                         #         {width: $refs[vref].vtkContainer.getBoundingClientRect().width,
                                         #         height: $refs[vref].vtkContainer.getBoundingClientRect().height}]

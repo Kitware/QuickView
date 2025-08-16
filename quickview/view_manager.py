@@ -249,6 +249,9 @@ class ViewManager:
                 context.config.max_value = range[1]
             self.sync_color_config_to_state(context.index, context)
             self.generate_colorbar_image(context.index)
+            # Fit objects optimally after geometry changes
+            if context.state.view_proxy:
+                self.fit_to_viewport(context.state.view_proxy)
 
     def refresh_view_display(self, context: ViewContext):
         if not context.config.override_range:
@@ -357,29 +360,133 @@ class ViewManager:
         except Exception as e:
             print(f"Error getting cached colorbar image for {var}: {e}")
 
+    def calculate_parallel_scale(self, view, margin=1.05):
+        """
+        Calculate optimal ParallelScale for a view based on GridProj bounds.
+        
+        Args:
+            view: The render view to calculate scale for
+            margin: Margin factor (1.05 = 5% margin around objects)
+            
+        Returns:
+            Optimal parallel scale value, or None if calculation fails
+        """
+        from paraview.simple import UpdatePipeline, FindSource
+        
+        try:
+            # Ensure pipeline is up to date
+            UpdatePipeline()
+            
+            # Get GridProj bounds - it encompasses the full map extent
+            grid_source = FindSource("GridProj")
+            if not grid_source:
+                return None
+            
+            bounds = grid_source.GetDataInformation().GetBounds()
+            if not bounds or bounds[0] > bounds[1]:
+                return None
+            
+            # Calculate data dimensions
+            width = bounds[1] - bounds[0]
+            height = bounds[3] - bounds[2]
+            
+            if width <= 0 or height <= 0:
+                return None
+            
+            # Get viewport dimensions
+            view_size = view.ViewSize
+            if view_size[0] <= 0 or view_size[1] <= 0:
+                return None
+                
+            viewport_aspect = view_size[0] / view_size[1]
+            data_aspect = width / height
+            
+            # Calculate optimal parallel scale
+            if data_aspect > viewport_aspect:
+                # Data is wider than viewport - fit to width
+                parallel_scale = (width / (2.0 * viewport_aspect)) * margin
+            else:
+                # Data is taller than viewport - fit to height
+                parallel_scale = (height / 2.0) * margin
+                
+            return parallel_scale
+            
+        except Exception as e:
+            print(f"Error calculating parallel scale: {e}")
+            return None
+    
+    def fit_to_viewport(self, view, margin=1.05):
+        """
+        Dynamically calculate and set optimal ParallelScale to fit objects in viewport.
+        
+        Args:
+            view: The render view to fit
+            margin: Margin factor (1.05 = 5% margin around objects)
+        """
+        from paraview.simple import SetActiveView, FindSource
+        
+        try:
+            # Set this as the active view to ensure camera operations work correctly
+            SetActiveView(view)
+            
+            # Calculate the optimal parallel scale
+            parallel_scale = self.calculate_parallel_scale(view, margin)
+            if parallel_scale is None:
+                return
+            
+            # Get GridProj bounds for centering the camera
+            grid_source = FindSource("GridProj")
+            if not grid_source:
+                return
+                
+            combined_bounds = grid_source.GetDataInformation().GetBounds()
+            if not combined_bounds:
+                return
+            
+            # Get the view's camera directly
+            camera = view.GetActiveCamera()
+            camera.SetParallelProjection(True)
+            camera.SetParallelScale(parallel_scale)
+            
+            # Center camera on data
+            center = [
+                (combined_bounds[0] + combined_bounds[1]) / 2,
+                (combined_bounds[2] + combined_bounds[3]) / 2,
+                (combined_bounds[4] + combined_bounds[5]) / 2
+            ]
+            camera.SetFocalPoint(*center)
+            
+            # For 2D projections, position camera perpendicular to XY plane
+            camera_pos = [center[0], center[1], center[2] + 1000]
+            camera.SetPosition(*camera_pos)
+            camera.SetViewUp(0, 1, 0)
+            
+            # Apply the camera settings to the view
+            view.CameraParallelScale = parallel_scale
+            
+        except Exception as e:
+            print(f"Error in fit_to_viewport: {e}")
+            # Fallback to simple reset if our calculation fails
+            try:
+                from paraview.simple import ResetCamera
+                ResetCamera(view)
+            except:
+                pass
     def reset_camera(self, **kwargs):
-        for widget in self.widgets:
-            widget.reset_camera()
+        """Reset camera for all views to optimally fit objects."""
+        for i, widget in enumerate(self.widgets):
+            if i < len(self.state.variables):
+                var = self.state.variables[i]
+                context = self.registry.get_view(var)
+                if context and context.state.view_proxy:
+                    self.fit_to_viewport(context.state.view_proxy)
+        self.render_all_views()
 
     def render_all_views(self, **kwargs):
         for widget in self.widgets:
             widget.update()
 
     def render_view_by_index(self, index):
-        self.widgets[index].update()
-
-    @trigger("resetview")
-    async def resize_and_refresh_view(self, index, sizeinfo=None):
-        if sizeinfo is not None:
-            var = self.state.variables[index]
-            context: ViewContext = self.registry.get_view(var)
-            height = int(sizeinfo["height"])
-            width = int(sizeinfo["width"])
-            context.state.view_proxy.ViewSize = (width, height)
-            Render(context.state.view_proxy)
-        import asyncio
-
-        await asyncio.sleep(0.01)
         self.widgets[index].update()
 
     @trigger("view_gc")
@@ -573,9 +680,11 @@ class ViewManager:
             sWidgets.append(widget.ref_name)
             # Use index as identifier to maintain compatibility with grid expectations
             layout.append({"x": x, "y": y, "w": wdt, "h": hgt, "i": index})
-
+            
         for var in to_delete:
             self.registry.remove_view(var)
+
+        view0.CameraParallelScale = 100
 
         self.state.views = sWidgets
         self.state.layout = layout
