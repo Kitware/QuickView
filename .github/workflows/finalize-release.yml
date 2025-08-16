@@ -26,6 +26,8 @@ jobs:
         with:
           ref: release
           lfs: true
+          fetch-depth: 0 # Fetch all history for changelog generation
+          fetch-tags: true # Explicitly fetch all tags
 
       - name: Get version from files
         run: |
@@ -91,57 +93,67 @@ jobs:
 
       - name: Generate comprehensive release notes
         run: |
-          # Check if we have any commits
-          if ! git rev-parse HEAD >/dev/null 2>&1; then
-            echo "No commits found"
-            CHANGELOG="- Initial release"
-            PREV_TAG=""
-          else
-            # Get previous release tag (check if any tags exist first)
-            if git tag -l | grep -q .; then
-              PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || echo "")
-            else
-              PREV_TAG=""
-            fi
+          # Fetch all tags from all branches to ensure we have complete history
+          git fetch --all --tags
 
-            # Generate changelog
-            if [ -z "$PREV_TAG" ]; then
-              # No previous tags, get all commits except the version bump
-              if git rev-parse HEAD~1 >/dev/null 2>&1; then
-                CHANGELOG=$(git log --oneline --pretty=format:"- %s" HEAD~1)
-              else
-                CHANGELOG="- Initial release"
-              fi
+          # Get all tags sorted by version
+          ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
+          echo "All tags found: $ALL_TAGS"
+
+          # Get the current tag (the one we're creating)
+          CURRENT_TAG="${{ env.APP_TAG }}"
+
+          # Find the previous tag (excluding the current one if it exists)
+          PREV_TAG=""
+          for tag in $ALL_TAGS; do
+            if [ "$tag" != "$CURRENT_TAG" ]; then
+              PREV_TAG=$tag
+              break
+            fi
+          done
+
+          echo "Previous tag: ${PREV_TAG:-none}"
+          echo "Current tag: $CURRENT_TAG"
+
+          # Generate changelog
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found, including all commits"
+            # For first release, get all commits
+            CHANGELOG=$(git log --oneline --pretty=format:"- %s" --reverse HEAD 2>/dev/null || echo "- Initial release")
+          else
+            echo "Generating changelog from $PREV_TAG to $CURRENT_TAG"
+            # Since tags are on master, get commits between tags
+            # Use the current tag if it exists, otherwise use HEAD
+            if git rev-parse "$CURRENT_TAG" >/dev/null 2>&1; then
+              CHANGELOG=$(git log --oneline --pretty=format:"- %s" ${PREV_TAG}..${CURRENT_TAG} 2>/dev/null || echo "- Release updates")
             else
-              # Get commits since last tag
-              CHANGELOG=$(git log --oneline --pretty=format:"- %s" ${PREV_TAG}..HEAD~1 2>/dev/null || echo "- Release updates")
+              CHANGELOG=$(git log --oneline --pretty=format:"- %s" ${PREV_TAG}..HEAD 2>/dev/null || echo "- Release updates")
             fi
           fi
+
+          # Filter out version bump commits and merge commits
+          CHANGELOG=$(echo "$CHANGELOG" | grep -v "^- Bump version:" | grep -v "^- Merge" | grep -v "^- \[pre-commit\]" || true)
+
+          # If changelog is empty, use a default message
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Release updates"
+          fi
+
+          echo "Generated changelog:"
+          echo "$CHANGELOG"
 
           cat > release_notes.md << EOF
           ## What's New in v${{ env.VERSION }}
 
-          ${CHANGELOG:-"- Initial release"}
+          $CHANGELOG
 
           ## Downloads
 
           This release includes distributables for the following platforms:
 
           ### macOS
-          - **Apple Silicon (M1/M2/M3)**: Download the \`aarch64-apple-darwin\` version
-          - **Intel Macs**: Download the \`x86_64-apple-darwin\` version
-
-          ## Installation Instructions
-
-          ### macOS
-          1. Download the appropriate \`.dmg\` file for your Mac architecture
-          2. Open the downloaded \`.dmg\` file
-          3. Drag the app to your Applications folder
-          4. Launch the app from Applications
-
-          ## System Requirements
-
-          - **macOS**: 10.15 (Catalina) or later
+          - **Apple Silicon (M1/M2/M3)**: Download the \`aarch64\` version
+          - **Intel Macs**: Download the \`x64\` version
 
           ## Support
 
