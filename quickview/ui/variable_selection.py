@@ -70,7 +70,6 @@ class VariableSelection(CollapsableSection):
                             with html.Template(v_slot_activator="{ on, attrs }"):
                                 with v2.VBtn(
                                     click=(on_clear),
-                                    color="primary",
                                     depressed=True,
                                     small=True,
                                     v_bind="attrs",

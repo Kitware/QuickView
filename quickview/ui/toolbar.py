@@ -116,6 +116,7 @@ class Toolbar:
             v2.VBtn(
                 "Load Variables",
                 classes="ma-2",
+                color="primary",
                 dense=True,
                 # flat=True,
                 tonal=True,

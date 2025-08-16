@@ -47,19 +47,37 @@ noncvd = [
         "value": "Rainbow Desaturated",
     },
     {
-        "text": "Cool to Warm",
-        "value": "Cool to Warm",
-    },
-    {
-        "text": "Jet",
-        "value": "Jet",
-    },
-    {
         "text": "Yellow-Gray-Blue",
         "value": "Yellow - Gray - Blue",
     },
+    {
+        "text": "Blue Orange (div.)",
+        "value": "Blue Orange (divergent)",
+    },
+    {
+        "text": "Cool to Warm (Ext.)",
+        "value": "Cool to Warm (Extended)",
+    },
+    {
+        "text": "Black-Body Rad.",
+        "value": "Black-Body Radiation",
+    },
+    {
+        "text": "Blue-Green-Orange",
+        "value": "Blue - Green - Orange",
+    },
 ]
-cvd = []
+
+cvd = [
+    {
+        "text": "Inferno (matplotlib)",
+        "value": "Inferno (matplotlib)",
+    },
+    {
+        "text": "Viridis (matplotlib)",
+        "value": "Viridis (matplotlib)",
+    },
+]
 
 save_state_keys = [
     # Data files
@@ -376,6 +394,28 @@ class EAMApp:
                 state.midpoints = []
                 state.interfaces = []
 
+    def get_default_colormap(self):
+        """
+        Determine the default colormap based on availability.
+        Returns 'Batlow' if CVD colormaps are available,
+        'Cool to Warm (Extended)' for non-CVD, or falls back to first available.
+        """
+        if cvd:  # CVD colormaps are available
+            # Look for Batlow in current colormaps
+            for cmap in self.state.colormaps:
+                if cmap["value"].lower() == "batlow":
+                    return cmap["value"]
+        else:  # Only non-CVD colormaps available
+            # Look for Cool to Warm (Extended)
+            for cmap in self.state.colormaps:
+                if cmap["value"] == "Cool to Warm (Extended)":
+                    return cmap["value"]
+
+        # Fallback to first available colormap
+        return (
+            self.state.colormaps[0]["value"] if self.state.colormaps else "Cool to Warm"
+        )
+
     def load_variables(self, use_cached_layout=False):
         surf = []
         mid = []
@@ -405,7 +445,7 @@ class EAMApp:
         # Tracking variables to control camera and color properties
         with self.state as state:
             state.variables = vars
-            state.varcolor = [state.colormaps[0]["value"]] * len(vars)
+            state.varcolor = [self.get_default_colormap()] * len(vars)
             state.uselogscale = [False] * len(vars)
             state.invert = [False] * len(vars)
             state.varmin = [np.nan] * len(vars)
@@ -733,7 +773,7 @@ class EAMApp:
                                     )
                                     # Top-left info: time and level info
                                     with html.Div(
-                                        style="position: absolute; top: 8px; left: 8px; padding: 4px 8px; background-color: rgba(0, 0, 0, 0.7); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2;",
+                                        style="position: absolute; top: 8px; left: 8px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.1); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2;",
                                         classes="drag-ignore font-monospace",
                                     ):
                                         # Show time
@@ -758,7 +798,7 @@ class EAMApp:
                                         )
                                     # Top-right info: variable name and average
                                     with html.Div(
-                                        style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; background-color: rgba(0, 0, 0, 0.7); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2; text-align: right;",
+                                        style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.1); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2; text-align: right;",
                                         classes="drag-ignore font-monospace",
                                     ):
                                         # Variable name
@@ -799,8 +839,8 @@ class EAMApp:
                                                 "{{ "
                                                 "varmin[idx] !== null && !isNaN(varmin[idx]) ? ("
                                                 "uselogscale[idx] && varmin[idx] > 0 ? "
-                                                "'10^(' + Math.log10(varmin[idx]).toFixed(2) + ')' : "
-                                                "varmin[idx].toExponential(3)"
+                                                "'10^(' + Math.log10(varmin[idx]).toFixed(1) + ')' : "
+                                                "varmin[idx].toExponential(1)"
                                                 ") : 'Auto' "
                                                 "}}"
                                             ),
@@ -857,8 +897,8 @@ class EAMApp:
                                                 "{{ "
                                                 "varmax[idx] !== null && !isNaN(varmax[idx]) ? ("
                                                 "uselogscale[idx] && varmax[idx] > 0 ? "
-                                                "'10^(' + Math.log10(varmax[idx]).toFixed(2) + ')' : "
-                                                "varmax[idx].toExponential(3)"
+                                                "'10^(' + Math.log10(varmax[idx]).toFixed(1) + ')' : "
+                                                "varmax[idx].toExponential(1)"
                                                 ") : 'Auto' "
                                                 "}}"
                                             ),
