@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "QuickView",
-    "version": "0.1.10"
+    "version": "0.1.11"
   },
   "tauri": {
     "allowlist": {
@@ -51,7 +51,7 @@
       },
       "resources": ["server"],
       "shortDescription": "",
-      "targets": ["appimage", "nsis", "msi", "app", "dmg"],
+      "targets": ["dmg"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

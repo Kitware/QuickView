@@ -1,3 +1,0 @@
-#!/bin/bash
-
-export PATH=/home/local/KHQ/abhi.yenpure/repositories/eam/paraview-eam/install/bin:$PATH

@@ -18,33 +18,49 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from paraview.simple import GetColorTransferFunction, ImportPresets, GetLookupTableNames
 from quickview.utilities import build_colorbar_image
 
-# Define the colormaps to cache (matching interface.py)
 noncvd = [
     {
         "text": "Rainbow Desat.",
         "value": "Rainbow Desaturated",
     },
     {
-        "text": "Cool to Warm",
-        "value": "Cool to Warm",
-    },
-    {
-        "text": "Jet",
-        "value": "Jet",
-    },
-    {
         "text": "Yellow-Gray-Blue",
         "value": "Yellow - Gray - Blue",
     },
+    {
+        "text": "Blue Orange (div.)",
+        "value": "Blue Orange (divergent)",
+    },
+    {
+        "text": "Cool to Warm (Ext.)",
+        "value": "Cool to Warm (Extended)",
+    },
+    {
+        "text": "Black-Body Rad.",
+        "value": "Black-Body Radiation",
+    },
+    {
+        "text": "Blue-Green-Orange",
+        "value": "Blue - Green - Orange",
+    },
 ]
 
-# CVD-friendly colormaps will be loaded from XML files
-cvd = []
+cvd = [
+    {
+        "text": "Inferno (matplotlib)",
+        "value": "Inferno (matplotlib)",
+    },
+    {
+        "text": "Viridis (matplotlib)",
+        "value": "Viridis (matplotlib)",
+    },
+]
 
 # Load CVD presets from XML files
 try:
     existing = GetLookupTableNames()
-    presdir = os.path.join(os.path.dirname(__file__), "quickview", "presets")
+    presdir = os.path.join(os.path.dirname(__file__), "../quickview", "presets")
+    print(presdir)
     presets = os.listdir(path=presdir)
     for preset in presets:
         prespath = os.path.abspath(os.path.join(presdir, preset))
@@ -58,6 +74,8 @@ except Exception as e:
 
 # Combine all colormaps
 all_colormaps = cvd + noncvd
+
+print(cvd)
 
 print("# Auto-generated colorbar cache")
 print("# Generated using generate_colorbar_cache.py")

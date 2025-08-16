@@ -3,141 +3,82 @@
 [![Test](https://github.com/ayenpure/QuickView/actions/workflows/test.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/test.yml)
 [![Package and Release](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml)
 
-**QuickView** is an interactive visualization tool designed specifically for
-atmospheric scientists working with E3SM (Energy Exascale Earth System Model)
-data. Built on ParaView and Trame, it provides an intuitive interface for
-exploring atmospheric simulation outputs without the steep learning curve of
-general-purpose visualization tools.
+**QuickView** is an interactive visualization tool for atmospheric scientists working with E3SM (Energy Exascale Earth System Model) data. It provides an intuitive interface for exploring atmospheric simulation outputs without the steep learning curve of general-purpose visualization tools.
 
 ![quickview](docs/images/main.png)
 
-## Why QuickView?
+## Quick Start
 
-Traditional visualization tools like ParaView and VisIt, while powerful, often
-require significant time investment to master their complex interfaces and may
-lack atmospheric science-specific features out of the box. QuickView addresses
-these challenges by:
+### Prerequisites
+- Python 3.13+
+- ParaView 5.13.3+ (installed via conda)
 
-- **Reducing the learning curve** - Atmospheric scientists can start visualizing
-  their data immediately
-- **Eliminating "last-mile" effort** - No need to write custom scripts or
-  plugins for common tasks
-- **Accelerating insights** - Focus on science, not software configuration
-- **Building on proven technology** - Leverages ParaView's robust data
-  processing with a tailored interface
-
-## Installation
-
-### Using Conda (Recommended)
-
-1. Create and activate a conda environment:
+### Installation
 
 ```bash
-conda env create -f quickview-env.yml
-conda activate quickview
-```
-
-2. Install QuickView:
-
-```bash
-pip install .
-```
-
-### Requirements
-
-- Python 3.13
-- ParaView 5.13.3 (installed automatically with conda environment)
-- Trame and other dependencies (installed automatically)
-
-## Getting the Code
-
-### Clone from GitHub
-
-```bash
+# Clone the repository
 git clone https://github.com/ayenpure/QuickView.git
 cd QuickView
+
+# Set up conda environment
+conda env create -f quickview-env.yml
+conda activate quickview
+
+# Install QuickView
+pip install -e .
 ```
 
-### Download as Archive
+### Running QuickView
 
 ```bash
-wget https://github.com/ayenpure/QuickView/archive/main.tar.gz
-tar -xvzf main.tar.gz
-cd QuickView-main
+# With sample data
+quickview --data data/aerosol_F2010.eam.h0.2014-12.nc
+
+# With your own data
+quickview --data /path/to/your/data.nc --conn /path/to/connectivity.nc
 ```
 
-## Running the Application
-
-To run QuickView with a data file:
-
-```bash
-python -m quickview.app --data data/aerosol_F2010.eam.h0.2014-12.nc
-```
-
-### Command Line Options
-
-- `--data`: Path to the NetCDF data file (required)
-- `--conn`: Path to the connectivity file (optional)
-- `--port`: Server port (default: 8080)
-- `--host`: Server host (default: localhost)
-
-### Example with Custom Files
-
-```bash
-python -m quickview.app --data /path/to/your/data.nc --conn /path/to/your/connectivity.nc
-```
-
-The application will start a Trame web server. Open your browser and navigate
-to:
-
-```
-http://localhost:8080
-```
-
-## Sample Data
-
-The repository includes sample data files in the `data/` directory for testing:
-
-- `aerosol_F2010.eam.h0.2014-12.nc` - Sample atmospheric data
-- Default connectivity file is automatically loaded
-
-## Development
-
-For development setup and contribution guidelines, please see
-[CONTRIBUTING.md](CONTRIBUTING.md).
+The application starts a web server at `http://localhost:8080`
 
 ## Documentation
 
-Comprehensive documentation is available in the [docs/](docs/) directory,
-including:
+- **[Installation Guide](docs/setup/requirements.md)** - Detailed setup instructions
+- **[User Guide](docs/userguide/launch.md)** - How to use QuickView
+- **[Data Requirements](docs/data-requirements.md)** - NetCDF file format specifications
+- **[Control Panel Reference](docs/userguide/control_panel.md)** - UI components and features
 
-- [User Guide](docs/userguide/launch.md) - Detailed usage instructions
-- [Control Panel Guide](docs/userguide/control_panel.md) - Interface overview
-- [Viewport Customization](docs/userguide/viewport.md) - Working with multiple
-  variables
-- [Data Requirements](docs/data-requirements.md) - NetCDF file format and
-  required variables
+## Key Features
+
+- Clean, minimalist interface tailored for atmospheric modeling
+- Multi-variable visualization with drag-and-drop layout
+- Geographic projections (Plate Carrée, Robinson, etc.)
+- Persistent sessions - pick up where you left off
+- Support for EAM v2, v3, and upcoming v4 data formats
+
+## Development
+
+See [CLAUDE.md](CLAUDE.md) for development setup and architecture details.
+
+```bash
+# Run linter
+ruff check quickview/
+
+# Run tests
+python -m quickview.app --help
+
+# Bump version
+bumpversion patch
+```
 
 ## About
 
-QuickView is developed by [Kitware, Inc.](https://www.kitware.com/) in
-collaboration with
-[Pacific Northwest National Laboratory](https://www.pnnl.gov/). It is supported
-by the U.S. Department of Energy's
-[Biological and Environmental Research (BER)](https://www.energy.gov/science/ber/biological-and-environmental-research)
-and
-[Advanced Scientific Computing Research (ASCR)](https://www.energy.gov/science/ascr/advanced-scientific-computing-research)
-programs via the
-[Scientific Discovery through Advanced Computing (SciDAC)](https://www.scidac.gov/)
-program.
+QuickView is developed by [Kitware, Inc.](https://www.kitware.com/) in collaboration with [Pacific Northwest National Laboratory](https://www.pnnl.gov/), supported by the U.S. Department of Energy's [BER](https://www.energy.gov/science/ber/biological-and-environmental-research) and [ASCR](https://www.energy.gov/science/ascr/advanced-scientific-computing-research) programs via [SciDAC](https://www.scidac.gov/).
 
 ### Contributors
 
 - **Lead Developer**: Abhishek Yenpure (Kitware, Inc.)
-- **Key Contributors**: Berk Geveci, Sebastien Jourdain (Kitware, Inc.); Hui
-  Wan, Kai Zhang (PNNL)
+- **Key Contributors**: Berk Geveci, Sebastien Jourdain (Kitware, Inc.); Hui Wan, Kai Zhang (PNNL)
 
 ## License
 
-This project is licensed under the Apache Software License - see the
-[LICENSE](LICENSE) file for details.
+Apache Software License - see [LICENSE](LICENSE) file for details.

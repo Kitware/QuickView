@@ -116,6 +116,7 @@ class Toolbar:
             v2.VBtn(
                 "Load Variables",
                 classes="ma-2",
+                color="primary",
                 dense=True,
                 # flat=True,
                 tonal=True,
@@ -213,6 +214,7 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-file-check")
                     html.Span("Load Files")
+                """
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
                         with v2.VBtn(
@@ -226,6 +228,7 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-swap-horizontal")
                     html.Span("Replace Files")
+                """
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(
