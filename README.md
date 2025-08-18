@@ -9,36 +9,15 @@
 
 ## Quick Start
 
-### Prerequisites
-- Python 3.13+
-- ParaView 5.13.3+ (installed via conda)
-
 ### Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/ayenpure/QuickView.git
-cd QuickView
+Download the latest release from the [releases page](https://github.com/ayenpure/QuickView/releases):
 
-# Set up conda environment
-conda env create -f quickview-env.yml
-conda activate quickview
+- **macOS**: `QuickView-{version}.dmg` - Double-click to install
+- **Linux**: Coming soon
+- **Windows**: Coming soon
 
-# Install QuickView
-pip install -e .
-```
-
-### Running QuickView
-
-```bash
-# With sample data
-quickview --data data/aerosol_F2010.eam.h0.2014-12.nc
-
-# With your own data
-quickview --data /path/to/your/data.nc --conn /path/to/connectivity.nc
-```
-
-The application starts a web server at `http://localhost:8080`
+Pre-built binaries include all dependencies - no Python or ParaView required.
 
 ## Documentation
 
@@ -57,8 +36,32 @@ The application starts a web server at `http://localhost:8080`
 
 ## Development
 
-See [CLAUDE.md](CLAUDE.md) for development setup and architecture details.
+### Python Development Installation
+```bash
+# Clone the repository
+git clone https://github.com/ayenpure/QuickView.git
+cd QuickView
 
+# Set up conda environment
+conda env create -f quickview-env.yml
+conda activate quickview
+
+# Install QuickView
+pip install -e .
+```
+
+### Running from Source
+
+```bash
+python -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc
+
+# Launch server only (no browser popup)
+python --server -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc
+```
+
+The application starts a web server at `http://localhost:8080`
+
+### Development Utilities
 ```bash
 # Run linter
 ruff check quickview/
