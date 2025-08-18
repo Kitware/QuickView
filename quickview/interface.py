@@ -25,9 +25,9 @@ from quickview.ui.variable_selection import VariableSelection
 from quickview.ui.view_settings import ViewProperties, ViewControls
 from quickview.ui.toolbar import Toolbar
 
-# Build color cache here
-from quickview.view_manager import build_color_information
-from quickview.view_manager import ViewManager, ViewContext
+# Import view management components
+from quickview.view_manager import ViewManager
+from quickview.utils.state import ViewContext, build_color_information
 
 from paraview.simple import ImportPresets, GetLookupTableNames
 
