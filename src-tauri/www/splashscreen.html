@@ -3,39 +3,45 @@
   <head>
     <title>Splashscreen</title>
     <style>
-      body {
+      * {
         margin: 0;
-        background-color: #444;
-      }
-
-      .splashscreen-container {
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        padding: 40px 20px;
+        padding: 0;
         box-sizing: border-box;
       }
 
+      body {
+        background-color: #444;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      /* Container fills the entire 400x200 window */
+      .splashscreen-container {
+        width: 400px;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 10px;
+        background-color: #444;
+      }
+
+      /* Top section with logos - maximized for space */
       .logos-container {
-        width: 90%;
-        max-width: 700px;
-        flex: 1 1 auto;
-        min-height: 200px;
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 60px;
+        gap: 30px;
+        height: 110px;
       }
 
       .logo {
         background-position: center;
         background-repeat: no-repeat;
         background-size: contain;
-        height: 150px;
-        width: 250px;
+        height: 100px;
+        width: 150px;
       }
 
       .logo-kitware {
@@ -46,66 +52,43 @@
         background-image: url("PNNL.png");
       }
 
-      .loading-container {
-        width: 70%;
-        max-width: 500px;
-        min-width: 250px;
+      /* Bottom section with loading indicator - compact */
+      .loading-section {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 15px;
-        margin-top: 40px;
-        flex-shrink: 0;
-      }
-
-      .caution-text {
-        color: rgba(255, 255, 255, 0.7);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        font-size: 13px;
-        text-align: center;
+        gap: 5px;
         margin-top: 5px;
       }
 
       .loading-text {
         color: #fff;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        font-size: 16px;
-        letter-spacing: 1px;
-        animation: pulse 1.5s ease-in-out infinite;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-bottom: 3px;
+      }
+
+      .loading-bar-container {
+        width: 350px;
+        height: 5px;
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+        overflow: hidden;
       }
 
       .loading-bar {
-        width: 100%;
-        height: 4px;
-        background-color: rgba(255, 255, 255, 0.2);
-        border-radius: 2px;
-        overflow: hidden;
-        position: relative;
-      }
-
-      .loading-progress {
         height: 100%;
+        width: 35%;
         background: linear-gradient(90deg, #0084ff, #00c4ff);
-        border-radius: 2px;
-        position: absolute;
-        animation: shimmer 2s ease-in-out infinite;
+        border-radius: 3px;
+        animation: slide 1.8s ease-in-out infinite;
       }
 
-      @keyframes shimmer {
-        0% {
-          width: 0%;
-          left: 0;
-        }
-        50% {
-          width: 60%;
-          left: 40%;
-        }
-        100% {
-          width: 0%;
-          left: 100%;
-        }
+      .caution-text {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 11px;
+        margin-top: 3px;
       }
 
       @keyframes pulse {
@@ -114,58 +97,16 @@
           opacity: 1;
         }
         50% {
-          opacity: 0.6;
+          opacity: 0.7;
         }
       }
 
-      .loading-dots {
-        display: inline-block;
-        width: 80px;
-        text-align: left;
-      }
-
-      .loading-dots::after {
-        content: "";
-        animation: dots 1.5s steps(4, end) infinite;
-      }
-
-      @keyframes dots {
+      @keyframes slide {
         0% {
-          content: "";
+          transform: translateX(-100%);
         }
-        25% {
-          content: ".";
-        }
-        50% {
-          content: "..";
-        }
-        75% {
-          content: "...";
-        }
-      }
-
-      /* Responsive adjustments for small windows */
-      @media (max-height: 400px) {
-        .splashscreen-container {
-          padding: 20px 10px;
-        }
-
-        .logos-container {
-          min-height: 100px;
-        }
-
-        .logo {
-          height: 100px;
-          width: 180px;
-        }
-
-        .loading-container {
-          margin-top: 20px;
-          gap: 10px;
-        }
-
-        .loading-text {
-          font-size: 14px;
+        100% {
+          transform: translateX(385%);
         }
       }
     </style>
@@ -177,16 +118,13 @@
         <div class="logo logo-kitware"></div>
         <div class="logo logo-pnnl"></div>
       </div>
-      <div class="loading-container">
-        <div class="loading-text">
-          Loading QuickView<span class="loading-dots"></span>
+
+      <div class="loading-section">
+        <div class="loading-text">Loading QuickView</div>
+        <div class="loading-bar-container">
+          <div class="loading-bar"></div>
         </div>
-        <div class="loading-bar">
-          <div class="loading-progress"></div>
-        </div>
-        <div class="caution-text">
-          Note: First time launch may take a few minutes
-        </div>
+        <div class="caution-text">First time launch may take a few minutes</div>
       </div>
     </div>
   </body>

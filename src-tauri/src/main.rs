@@ -15,6 +15,57 @@ fn main() {
       let splashscreen_window = app.get_window("splashscreen").unwrap();
       let main_window = app.get_window("main").unwrap();
 
+      // Enhanced macOS DPI handling
+      #[cfg(target_os = "macos")]
+      {
+        use tauri::LogicalSize;
+
+        // Try to get the current monitor information
+        if let Ok(Some(monitor)) = main_window.current_monitor() {
+          let scale_factor = monitor.scale_factor();
+          println!("Display scale factor: {}", scale_factor);
+
+          // Force devicePixelRatio to 1 in the webview
+          let dpi_script = r#"
+            // Override devicePixelRatio
+            Object.defineProperty(window, 'devicePixelRatio', {
+              get: function() { return 1; },
+              configurable: true
+            });
+
+            // Add CSS to compensate for any remaining scaling
+            const style = document.createElement('style');
+            style.textContent = `
+              html, body {
+                -webkit-text-size-adjust: 100%;
+                -webkit-font-smoothing: antialiased;
+                zoom: 1;
+                transform: scale(1);
+                transform-origin: 0 0;
+              }
+              * {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+              }
+            `;
+            document.head.appendChild(style);
+
+            console.log('DPI override applied, devicePixelRatio:', window.devicePixelRatio);
+          "#;
+
+          // Apply the DPI override script
+          let _ = main_window.eval(dpi_script);
+
+          // If on a high DPI display (Retina), adjust window size for better appearance
+          if scale_factor > 1.5 {
+            // Set a larger logical size that will look crisp
+            let size = LogicalSize::new(1200.0, 800.0);
+            let _ = main_window.set_size(size);
+            println!("Adjusted window size to 1200x800 for Retina display");
+          }
+        }
+      }
+
       let mut env = HashMap::new();
       env.insert("PYTHONUNBUFFERED".to_string(), "1".to_string());
 
@@ -34,17 +85,54 @@ fn main() {
                 let tokens: Vec<&str> = line.split("=").collect();
                 let port_token = tokens[1].to_string();
                 let port = port_token.trim();
-                // println!("window.location.replace(window.location.href + '?sessionURL=ws://localhost:{}/ws')", port);
-                let _ = main_window.eval(&format!("window.location.replace(window.location.href + '?sessionURL=ws://localhost:{}/ws')", port));
+
+                // Navigate and apply DPI settings
+                let navigation_script = format!(
+                  r#"
+                  window.location.replace(window.location.href + '?sessionURL=ws://localhost:{}/ws');
+
+                  // Ensure DPI override persists after navigation
+                  window.addEventListener('load', function() {{
+                    Object.defineProperty(window, 'devicePixelRatio', {{
+                      get: function() {{ return 1; }},
+                      configurable: true
+                    }});
+                    console.log('Post-navigation DPI override applied');
+                  }});
+                  "#,
+                  port
+                );
+
+                let _ = main_window.eval(&navigation_script);
               }
               if line.contains("tauri-client-ready") {
                 task::sleep(Duration::from_secs(2)).await;
+
+                // Apply final DPI settings before showing main window
+                #[cfg(target_os = "macos")]
+                {
+                  let final_dpi_script = r#"
+                    // Final DPI override
+                    Object.defineProperty(window, 'devicePixelRatio', {
+                      get: function() { return 1; },
+                      configurable: true
+                    });
+
+                    // Force a repaint
+                    document.body.style.display = 'none';
+                    document.body.offsetHeight; // Trigger reflow
+                    document.body.style.display = '';
+
+                    console.log('Final devicePixelRatio:', window.devicePixelRatio);
+                  "#;
+                  let _ = main_window.eval(final_dpi_script);
+                }
+
                 splashscreen_window.close().unwrap();
                 main_window.show().unwrap();
               }
             },
             CommandEvent::Stderr(line) => {
-              // Handle stderr output
               println!("Stderr: {}", line);
             },
             CommandEvent::Error(error) => {

@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "QuickView",
-    "version": "0.1.11"
+    "version": "0.1.12"
   },
   "tauri": {
     "allowlist": {
@@ -71,7 +71,8 @@
         "resizable": true,
         "title": "QuickView",
         "width": 800,
-        "visible": false
+        "visible": false,
+        "additionalBrowserArgs": "--force-device-scale-factor=1"
       },
       {
         "label": "splashscreen",
@@ -82,7 +83,8 @@
         "resizable": false,
         "visible": true,
         "alwaysOnTop": true,
-        "url": "splashscreen.html"
+        "url": "splashscreen.html",
+        "additionalBrowserArgs": "--force-device-scale-factor=1"
       }
     ]
   }
