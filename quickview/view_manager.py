@@ -23,7 +23,7 @@ from typing import Dict, List, Optional
 
 
 class ViewRegistry:
-    """Central registry for managing views"""
+    """Central registry for managing views - tracks only currently selected variables"""
 
     def __init__(self):
         self._contexts: Dict[str, "ViewContext"] = {}
@@ -73,47 +73,23 @@ class ViewRegistry:
         return variable in self._contexts
 
 
-class ViewConfiguration:
-    """Mutable configuration for a view - what the user can control"""
-
-    def __init__(
-        self,
-        variable: str,
-        colormap: str,
-        use_log_scale: bool = False,
-        invert_colors: bool = False,
-        min_value: float = None,
-        max_value: float = None,
-        override_range: bool = False,
-    ):
-        self.variable = variable
-        self.colormap = colormap
-        self.use_log_scale = use_log_scale
-        self.invert_colors = invert_colors
-        self.min_value = min_value
-        self.max_value = max_value
-        self.override_range = override_range  # True when user manually sets min/max
-
-
-class ViewState:
-    """Runtime state for a view - ParaView objects"""
-
-    def __init__(
-        self,
-        view_proxy=None,
-        data_representation=None,
-    ):
-        self.view_proxy = view_proxy
-        self.data_representation = data_representation
-
-
 class ViewContext:
-    """Complete context for a rendered view combining configuration and state"""
+    """Context storing ParaView objects and persistent configuration"""
 
-    def __init__(self, config: ViewConfiguration, state: ViewState, index: int):
-        self.config = config
-        self.state = state
-        self.index = index
+    def __init__(self, variable: str, index: int):
+        self.variable = variable
+        self.index = index  # Current position in state arrays
+        self.view_proxy = None  # ParaView render view
+        self.data_representation = None  # ParaView data representation
+
+        # Persistent configuration that survives variable selection changes
+        self.colormap = None  # Will persist colormap choice
+        self.use_log_scale = False
+        self.invert_colors = False
+        self.min_value = None  # Computed or manual
+        self.max_value = None  # Computed or manual
+        self.override_range = False  # Track if manually set
+        self.has_been_configured = False  # Track if user has modified settings
 
 
 def apply_projection(projection, point):
@@ -178,40 +154,12 @@ def generate_annotations(long, lat, projection, center):
 
 
 def build_color_information(state: map):
-    vars = state["variables"]
-    colors = state["varcolor"]
-    logscl = state["uselogscale"]
-    invert = state["invert"]
-    varmin = state["varmin"]
-    varmax = state["varmax"]
-    # Get override_range from state if available
-    override_range = state.get("override_range", None)
-    # Store layout from state if available for backward compatibility
-    layout = state.get("layout", None)
-
+    """Simplified function that just returns an empty registry.
+    State arrays already contain all the necessary information."""
     registry = ViewRegistry()
-    for index, var in enumerate(vars):
-        # Use provided override_range if available
-        if override_range is not None and index < len(override_range):
-            override = override_range[index]
-        else:
-            # Legacy behavior for older saved states without override_range
-            override = True
 
-        config = ViewConfiguration(
-            variable=var,
-            colormap=colors[index],
-            use_log_scale=logscl[index],
-            invert_colors=invert[index],
-            min_value=varmin[index],
-            max_value=varmax[index],
-            override_range=override,
-        )
-        view_state = ViewState()
-        context = ViewContext(config, view_state, index)
-        registry.register_view(var, context)
-
-    # Store layout info in registry for later use
+    # Store layout if provided (for backward compatibility)
+    layout = state.get("layout", None)
     if layout:
         registry._saved_layout = [item.copy() for item in layout]
 
@@ -230,6 +178,41 @@ class ViewManager:
         self.to_delete = []
         self.rep_change = False
 
+    def get_color_config(self, index):
+        """Get all color configuration for a variable from state arrays"""
+        state = self.state
+        return {
+            "colormap": state.varcolor[index]
+            if index < len(state.varcolor)
+            else "Cool to Warm",
+            "use_log_scale": state.uselogscale[index]
+            if index < len(state.uselogscale)
+            else False,
+            "invert_colors": state.invert[index]
+            if index < len(state.invert)
+            else False,
+            "min_value": state.varmin[index] if index < len(state.varmin) else None,
+            "max_value": state.varmax[index] if index < len(state.varmax) else None,
+            "override_range": state.override_range[index]
+            if index < len(state.override_range)
+            else False,
+        }
+
+    def should_use_manual_range(self, index):
+        """Check if manual range should be used for a variable"""
+        return (
+            hasattr(self.state, "override_range")
+            and index < len(self.state.override_range)
+            and self.state.override_range[index]
+        )
+
+    def get_color_range(self, var, index):
+        """Get the appropriate color range (manual or computed) for a variable"""
+        if self.should_use_manual_range(index):
+            return (self.state.varmin[index], self.state.varmax[index])
+        else:
+            return self.compute_range(var)
+
     def update_views_for_timestep(self):
         if len(self.registry) == 0:
             return
@@ -240,57 +223,72 @@ class ViewManager:
             # Directly set average in trame state
             self.state.varaverage[context.index] = varavg
             self.state.dirty("varaverage")
-            if not context.config.override_range:
-                context.state.data_representation.RescaleTransferFunctionToDataRange(
+
+            if not context.override_range:
+                context.data_representation.RescaleTransferFunctionToDataRange(
                     False, True
                 )
                 range = self.compute_range(var=var)
-                context.config.min_value = range[0]
-                context.config.max_value = range[1]
-            self.sync_color_config_to_state(context.index, context)
+                # Update both context and state
+                context.min_value = range[0]
+                context.max_value = range[1]
+                self.state.varmin[context.index] = range[0]
+                self.state.varmax[context.index] = range[1]
+                self.state.dirty("varmin")
+                self.state.dirty("varmax")
+
             self.generate_colorbar_image(context.index)
             # Fit objects optimally after geometry changes
-            if context.state.view_proxy:
-                self.fit_to_viewport(context.state.view_proxy)
+            if context.view_proxy:
+                self.fit_to_viewport(context.view_proxy)
 
     def refresh_view_display(self, context: ViewContext):
-        if not context.config.override_range:
-            context.state.data_representation.RescaleTransferFunctionToDataRange(
-                False, True
-            )
-        rview = context.state.view_proxy
+        if not self.should_use_manual_range(context.index):
+            context.data_representation.RescaleTransferFunctionToDataRange(False, True)
 
-        Render(rview)
-        # ResetCamera(rview)
+        if context.view_proxy:
+            Render(context.view_proxy)
+            # ResetCamera(rview)
 
     def configure_new_view(self, var, context: ViewContext, sources):
-        rview = context.state.view_proxy
+        rview = context.view_proxy
 
         # Update unique sources to all render views
         data = sources["atmosphere_data"]
         rep = Show(data, rview)
-        context.state.data_representation = rep
+        context.data_representation = rep
         ColorBy(rep, ("CELLS", var))
+
+        # Use context configuration if available, fallback to state
+        colormap = (
+            context.colormap
+            if context.colormap
+            else (
+                self.state.varcolor[context.index]
+                if context.index < len(self.state.varcolor)
+                else "Cool to Warm"
+            )
+        )
+
         coltrfunc = GetColorTransferFunction(var)
-        coltrfunc.ApplyPreset(context.config.colormap, True)
+        coltrfunc.ApplyPreset(colormap, True)
         coltrfunc.NanOpacity = 0.0
 
         # Apply log scale if configured
-        if context.config.use_log_scale:
+        if context.use_log_scale:
             coltrfunc.MapControlPointsToLogSpace()
             coltrfunc.UseLogScale = 1
 
         # Apply inversion if configured
-        if context.config.invert_colors:
+        if context.invert_colors:
             coltrfunc.InvertTransferFunction()
 
         # Ensure the color transfer function is scaled to the data range
-        if not context.config.override_range:
+        if not context.override_range:
             rep.RescaleTransferFunctionToDataRange(False, True)
         else:
-            coltrfunc.RescaleTransferFunction(
-                context.config.min_value, context.config.max_value
-            )
+            if context.min_value is not None and context.max_value is not None:
+                coltrfunc.RescaleTransferFunction(context.min_value, context.max_value)
 
         # ParaView scalar bar is always hidden - using custom HTML colorbar instead
 
@@ -319,21 +317,7 @@ class ViewManager:
         Render(rview)
         # ResetCamera(rview)
 
-    def sync_color_config_to_state(self, index, context: ViewContext):
-        # Update state arrays directly without context manager to avoid recursive flush
-        self.state.varcolor[index] = context.config.colormap
-        self.state.varmin[index] = context.config.min_value
-        self.state.varmax[index] = context.config.max_value
-        self.state.uselogscale[index] = context.config.use_log_scale
-        self.state.override_range[index] = context.config.override_range
-        self.state.invert[index] = context.config.invert_colors
-        # Mark arrays as dirty to ensure UI updates
-        self.state.dirty("varcolor")
-        self.state.dirty("varmin")
-        self.state.dirty("varmax")
-        self.state.dirty("uselogscale")
-        self.state.dirty("override_range")
-        self.state.dirty("invert")
+    # This function is no longer needed - we work directly with state arrays
 
     def generate_colorbar_image(self, index):
         """Generate colorbar image for a variable at given index.
@@ -349,11 +333,21 @@ class ViewManager:
         if context is None:
             return
 
+        # Use context configuration
+        colormap = (
+            context.colormap
+            if context.colormap
+            else (
+                self.state.varcolor[index]
+                if index < len(self.state.varcolor)
+                else "Cool to Warm"
+            )
+        )
+        invert = context.invert_colors
+
         # Get cached colorbar image based on colormap and invert status
         try:
-            image_data = get_cached_colorbar_image(
-                context.config.colormap, context.config.invert_colors
-            )
+            image_data = get_cached_colorbar_image(colormap, invert)
             # Update state with the cached image
             self.state.colorbar_images[index] = image_data
             self.state.dirty("colorbar_images")
@@ -363,44 +357,44 @@ class ViewManager:
     def calculate_parallel_scale(self, view, margin=1.05):
         """
         Calculate optimal ParallelScale for a view based on GridProj bounds.
-        
+
         Args:
             view: The render view to calculate scale for
             margin: Margin factor (1.05 = 5% margin around objects)
-            
+
         Returns:
             Optimal parallel scale value, or None if calculation fails
         """
         from paraview.simple import UpdatePipeline, FindSource
-        
+
         try:
             # Ensure pipeline is up to date
             UpdatePipeline()
-            
+
             # Get GridProj bounds - it encompasses the full map extent
             grid_source = FindSource("GridProj")
             if not grid_source:
                 return None
-            
+
             bounds = grid_source.GetDataInformation().GetBounds()
             if not bounds or bounds[0] > bounds[1]:
                 return None
-            
+
             # Calculate data dimensions
             width = bounds[1] - bounds[0]
             height = bounds[3] - bounds[2]
-            
+
             if width <= 0 or height <= 0:
                 return None
-            
+
             # Get viewport dimensions
             view_size = view.ViewSize
             if view_size[0] <= 0 or view_size[1] <= 0:
                 return None
-                
+
             viewport_aspect = view_size[0] / view_size[1]
             data_aspect = width / height
-            
+
             # Calculate optimal parallel scale
             if data_aspect > viewport_aspect:
                 # Data is wider than viewport - fit to width
@@ -408,78 +402,80 @@ class ViewManager:
             else:
                 # Data is taller than viewport - fit to height
                 parallel_scale = (height / 2.0) * margin
-                
+
             return parallel_scale
-            
+
         except Exception as e:
             print(f"Error calculating parallel scale: {e}")
             return None
-    
+
     def fit_to_viewport(self, view, margin=1.05):
         """
         Dynamically calculate and set optimal ParallelScale to fit objects in viewport.
-        
+
         Args:
             view: The render view to fit
             margin: Margin factor (1.05 = 5% margin around objects)
         """
         from paraview.simple import SetActiveView, FindSource
-        
+
         try:
             # Set this as the active view to ensure camera operations work correctly
             SetActiveView(view)
-            
+
             # Calculate the optimal parallel scale
             parallel_scale = self.calculate_parallel_scale(view, margin)
             if parallel_scale is None:
                 return
-            
+
             # Get GridProj bounds for centering the camera
             grid_source = FindSource("GridProj")
             if not grid_source:
                 return
-                
+
             combined_bounds = grid_source.GetDataInformation().GetBounds()
             if not combined_bounds:
                 return
-            
+
             # Get the view's camera directly
             camera = view.GetActiveCamera()
             camera.SetParallelProjection(True)
             camera.SetParallelScale(parallel_scale)
-            
+
             # Center camera on data
             center = [
                 (combined_bounds[0] + combined_bounds[1]) / 2,
                 (combined_bounds[2] + combined_bounds[3]) / 2,
-                (combined_bounds[4] + combined_bounds[5]) / 2
+                (combined_bounds[4] + combined_bounds[5]) / 2,
             ]
             camera.SetFocalPoint(*center)
-            
+
             # For 2D projections, position camera perpendicular to XY plane
             camera_pos = [center[0], center[1], center[2] + 1000]
             camera.SetPosition(*camera_pos)
             camera.SetViewUp(0, 1, 0)
-            
+
             # Apply the camera settings to the view
             view.CameraParallelScale = parallel_scale
-            
+
         except Exception as e:
             print(f"Error in fit_to_viewport: {e}")
             # Fallback to simple reset if our calculation fails
             try:
                 from paraview.simple import ResetCamera
+
                 ResetCamera(view)
-            except:
+            except Exception:
                 pass
+
     def reset_camera(self, **kwargs):
         """Reset camera for all views to optimally fit objects."""
         for i, widget in enumerate(self.widgets):
             if i < len(self.state.variables):
                 var = self.state.variables[i]
                 context = self.registry.get_view(var)
-                if context and context.state.view_proxy:
-                    self.fit_to_viewport(context.state.view_proxy)
+                if context and context.view_proxy:
+                    self.fit_to_viewport(context.view_proxy)
         self.render_all_views()
 
     def render_all_views(self, **kwargs):
@@ -554,9 +550,11 @@ class ViewManager:
         rendered = self.registry.get_all_variables()
         to_delete = set(rendered) - set(to_render)
         # Move old variables so they their proxies can be deleted
-        self.to_delete.extend(
-            [self.registry.get_view(x).state.view_proxy for x in to_delete]
-        )
+        self.to_delete.extend([self.registry.get_view(x).view_proxy for x in to_delete])
+
+        # Remove deselected variables from registry to free memory
+        for var in to_delete:
+            self.registry.remove_view(var)
 
         # Get area variable to calculate weighted average
         data = self.source.views["atmosphere_data"]
@@ -613,56 +611,108 @@ class ViewManager:
             view = None
             context: ViewContext = self.registry.get_view(var)
             if context is not None:
-                view = context.state.view_proxy
+                view = context.view_proxy
                 if view is None:
                     view = CreateRenderView()
                     view.UseColorPaletteForBackground = 0
                     view.BackgroundColorMode = "Gradient"
                     view.GetRenderWindow().SetOffScreenRendering(True)
-                    context.state.view_proxy = view
-                    context.config.min_value = varrange[0]
-                    context.config.max_value = varrange[1]
+                    context.view_proxy = view
+
+                    # Update context's index to current position
+                    context.index = index
+
+                    # Sync min/max values
+                    if context.override_range:
+                        # Use context's saved values
+                        self.state.varmin[index] = (
+                            context.min_value
+                            if context.min_value is not None
+                            else varrange[0]
+                        )
+                        self.state.varmax[index] = (
+                            context.max_value
+                            if context.max_value is not None
+                            else varrange[1]
+                        )
+                    else:
+                        # Use computed range and update context
+                        context.min_value = varrange[0]
+                        context.max_value = varrange[1]
+                        self.state.varmin[index] = varrange[0]
+                        self.state.varmax[index] = varrange[1]
+
                     self.configure_new_view(var, context, self.source.views)
                 else:
                     self.refresh_view_display(context)
             else:
                 view = CreateRenderView()
-                # Preserve override flag if context already exists
-                existing_context = self.registry.get_view(var)
-                override = (
-                    existing_context.config.override_range
-                    if existing_context
+                view.UseColorPaletteForBackground = 0
+                view.BackgroundColorMode = "Gradient"
+                view.GetRenderWindow().SetOffScreenRendering(True)
+
+                # Create new context
+                context = ViewContext(var, index)
+                context.view_proxy = view
+
+                # Copy configuration from state arrays (which were already restored in load_variables)
+                context.colormap = (
+                    state.varcolor[index] if index < len(state.varcolor) else None
+                )
+                context.use_log_scale = (
+                    state.uselogscale[index]
+                    if index < len(state.uselogscale)
+                    else False
+                )
+                context.invert_colors = (
+                    state.invert[index] if index < len(state.invert) else False
+                )
+                context.override_range = (
+                    state.override_range[index]
+                    if index < len(state.override_range)
                     else False
                 )
 
-                config = ViewConfiguration(
-                    variable=var,
-                    colormap=state.varcolor[index]
-                    if index < len(state.varcolor)
-                    else state.varcolor[0],
-                    use_log_scale=state.uselogscale[index]
-                    if index < len(state.uselogscale)
-                    else False,
-                    invert_colors=state.invert[index]
-                    if index < len(state.invert)
-                    else False,
-                    min_value=varrange[0],
-                    max_value=varrange[1],
-                    override_range=override,
-                )
-                view_state = ViewState(
-                    view_proxy=view,
-                )
-                context = ViewContext(config, view_state, index)
-                view.UseColorPaletteForBackground = 0
-                view.BackgroundColorMode = "Gradient"
+                # Set min/max based on override flag
+                if context.override_range:
+                    # Use saved min/max from state
+                    context.min_value = (
+                        state.varmin[index]
+                        if index < len(state.varmin)
+                        else varrange[0]
+                    )
+                    context.max_value = (
+                        state.varmax[index]
+                        if index < len(state.varmax)
+                        else varrange[1]
+                    )
+                    self.state.varmin[index] = context.min_value
+                    self.state.varmax[index] = context.max_value
+                else:
+                    # Use computed range
+                    context.min_value = varrange[0]
+                    context.max_value = varrange[1]
+                    self.state.varmin[index] = varrange[0]
+                    self.state.varmax[index] = varrange[1]
+
+                # Mark as configured if it has non-default values
+                if (
+                    context.colormap
+                    or context.use_log_scale
+                    or context.invert_colors
+                    or context.override_range
+                ):
+                    context.has_been_configured = True
+
+                # Register the view
                 self.registry.register_view(var, context)
+
                 self.configure_new_view(var, context, self.source.views)
             context.index = index
             # Set the computed average directly in trame state
             self.state.varaverage[index] = varavg
             self.state.dirty("varaverage")
-            self.sync_color_config_to_state(index, context)
+            # No need to sync - we're already working with state arrays
             self.generate_colorbar_image(index)
 
             if index == 0:
@@ -680,9 +730,6 @@ class ViewManager:
             sWidgets.append(widget.ref_name)
             # Use index as identifier to maintain compatibility with grid expectations
             layout.append({"x": x, "y": y, "w": wdt, "h": hgt, "i": index})
-            
-        for var in to_delete:
-            self.registry.remove_view(var)
 
         view0.CameraParallelScale = 100
 
@@ -707,30 +754,48 @@ class ViewManager:
     def update_colormap(self, index, value):
         """Update the colormap for a variable."""
         var = self.state.variables[index]
-        coltrfunc = GetColorTransferFunction(var)
-        context: ViewContext = self.registry.get_view(var)
+        context = self.registry.get_view(var)
+        if not context:
+            return
 
-        context.config.colormap = value
+        coltrfunc = GetColorTransferFunction(var)
+
+        # Persist to context
+        context.colormap = value
+        context.has_been_configured = True
+
+        # Update state for UI
+        self.state.varcolor[index] = value
+        self.state.dirty("varcolor")
+
         # Apply the preset
-        coltrfunc.ApplyPreset(context.config.colormap, True)
+        coltrfunc.ApplyPreset(value, True)
         # Reapply inversion if it was enabled
-        if context.config.invert_colors:
+        if context.invert_colors:
             coltrfunc.InvertTransferFunction()
 
         # Generate new colorbar image with updated colormap
         self.generate_colorbar_image(index)
-        # Sync all color configuration changes back to state
-        self.sync_color_config_to_state(index, context)
         self.render_view_by_index(index)
 
     def update_log_scale(self, index, value):
         """Update the log scale setting for a variable."""
         var = self.state.variables[index]
-        coltrfunc = GetColorTransferFunction(var)
-        context: ViewContext = self.registry.get_view(var)
+        context = self.registry.get_view(var)
+        if not context:
+            return
 
-        context.config.use_log_scale = value
-        if context.config.use_log_scale:
+        coltrfunc = GetColorTransferFunction(var)
+
+        # Persist to context
+        context.use_log_scale = value
+        context.has_been_configured = True
+
+        # Update state for UI
+        self.state.uselogscale[index] = value
+        self.state.dirty("uselogscale")
+
+        if value:
             coltrfunc.MapControlPointsToLogSpace()
             coltrfunc.UseLogScale = 1
         else:
@@ -740,41 +805,60 @@ class ViewManager:
         # itself doesn't change with log scale - only the data mapping changes.
         # The colorbar always shows a linear color progression.
 
-        # Sync all color configuration changes back to state
-        self.sync_color_config_to_state(index, context)
         self.render_view_by_index(index)
 
     def update_invert_colors(self, index, value):
         """Update the color inversion setting for a variable."""
         var = self.state.variables[index]
-        coltrfunc = GetColorTransferFunction(var)
-        context: ViewContext = self.registry.get_view(var)
+        context = self.registry.get_view(var)
+        if not context:
+            return
 
-        context.config.invert_colors = value
+        coltrfunc = GetColorTransferFunction(var)
+
+        # Persist to context
+        context.invert_colors = value
+        context.has_been_configured = True
+
+        # Update state for UI
+        self.state.invert[index] = value
+        self.state.dirty("invert")
+
         coltrfunc.InvertTransferFunction()
         # Generate new colorbar image when colors are inverted
         self.generate_colorbar_image(index)
 
-        # Sync all color configuration changes back to state
-        self.sync_color_config_to_state(index, context)
         self.render_view_by_index(index)
 
     def update_scalar_bars(self, event=None):
         # Always hide ParaView scalar bars - using custom HTML colorbar
         # The HTML colorbar is always visible, no toggle needed
         for _, context in self.registry.items():
-            view = context.state.view_proxy
-            context.state.data_representation.SetScalarBarVisibility(view, False)
+            view = context.view_proxy
+            if context.data_representation:
+                context.data_representation.SetScalarBarVisibility(view, False)
         self.render_all_views()
 
     def set_manual_color_range(self, index, min, max):
         var = self.state.variables[index]
-        context: ViewContext = self.registry.get_view(var)
-        context.config.override_range = True
-        context.config.min_value = float(min)
-        context.config.max_value = float(max)
-        # Sync all changes back to state
-        self.sync_color_config_to_state(index, context)
+        context = self.registry.get_view(var)
+        if not context:
+            return
+
+        # Persist to context
+        context.override_range = True
+        context.min_value = float(min)
+        context.max_value = float(max)
+        context.has_been_configured = True
+
+        # Update state for UI
+        self.state.override_range[index] = True
+        self.state.varmin[index] = float(min)
+        self.state.varmax[index] = float(max)
+        self.state.dirty("override_range")
+        self.state.dirty("varmin")
+        self.state.dirty("varmax")
+
         # Update color transfer function
         coltrfunc = GetColorTransferFunction(var)
         coltrfunc.RescaleTransferFunction(float(min), float(max))
@@ -786,36 +870,50 @@ class ViewManager:
         # Get colors from main file
         varrange = self.compute_range(var)
         context: ViewContext = self.registry.get_view(var)
-        context.config.override_range = False
-        context.config.min_value = varrange[0]
-        context.config.max_value = varrange[1]
-        # Sync all changes back to state
-        self.sync_color_config_to_state(index, context)
+        if not context:
+            return
+
+        # Persist to context
+        context.override_range = False
+        context.min_value = varrange[0]
+        context.max_value = varrange[1]
+        context.has_been_configured = True
+
+        # Update state for UI
+        self.state.override_range[index] = False
+        self.state.varmin[index] = varrange[0]
+        self.state.varmax[index] = varrange[1]
+        self.state.dirty("override_range")
+        self.state.dirty("varmin")
+        self.state.dirty("varmax")
+
         # Rescale transfer function to data range
-        context.state.data_representation.RescaleTransferFunctionToDataRange(
-            False, True
-        )
+        if context.data_representation:
+            context.data_representation.RescaleTransferFunctionToDataRange(False, True)
         # Note: colorbar image doesn't change with range, only data mapping changes
         self.render_all_views()
 
     def zoom_in(self, index=0):
         var = self.state.variables[index]
         context: ViewContext = self.registry.get_view(var)
-        rview = context.state.view_proxy
-        rview.CameraParallelScale *= 0.95
+        if context and context.view_proxy:
+            context.view_proxy.CameraParallelScale *= 0.95
         self.render_all_views()
 
     def zoom_out(self, index=0):
         var = self.state.variables[index]
         context: ViewContext = self.registry.get_view(var)
-        rview = context.state.view_proxy
-        rview.CameraParallelScale *= 1.05
+        if context and context.view_proxy:
+            context.view_proxy.CameraParallelScale *= 1.05
         self.render_all_views()
 
     def pan_camera(self, dir, factor, index=0):
         var = self.state.variables[index]
         context: ViewContext = self.registry.get_view(var)
-        rview = context.state.view_proxy
+        if not context or not context.view_proxy:
+            return
+
+        rview = context.view_proxy
         extents = self.source.moveextents
         move = (
             (extents[1] - extents[0]) * 0.05,

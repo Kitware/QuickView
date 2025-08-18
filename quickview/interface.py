@@ -27,7 +27,7 @@ from quickview.ui.toolbar import Toolbar
 
 # Build color cache here
 from quickview.view_manager import build_color_information
-from quickview.view_manager import ViewManager
+from quickview.view_manager import ViewManager, ViewContext
 
 from paraview.simple import ImportPresets, GetLookupTableNames
 
@@ -295,7 +295,52 @@ class EAMApp:
         self.midpoint_vars_state = np.array(selection_midpoint)
         self.interface_vars_state = np.array(selection_interface)
 
+        # Build registry and populate with saved configuration
         self.viewmanager.registry = build_color_information(initstate)
+
+        # Sync loaded configuration to contexts
+        if "variables" in initstate:
+            for i, var in enumerate(initstate["variables"]):
+                context = self.viewmanager.registry.get_view(var)
+                if not context:
+                    context = ViewContext(var, i)
+                    self.viewmanager.registry.register_view(var, context)
+
+                # Populate context from loaded state
+                context.colormap = (
+                    initstate.get("varcolor", [])[i]
+                    if i < len(initstate.get("varcolor", []))
+                    else None
+                )
+                context.use_log_scale = (
+                    initstate.get("uselogscale", [])[i]
+                    if i < len(initstate.get("uselogscale", []))
+                    else False
+                )
+                context.invert_colors = (
+                    initstate.get("invert", [])[i]
+                    if i < len(initstate.get("invert", []))
+                    else False
+                )
+                context.min_value = (
+                    initstate.get("varmin", [])[i]
+                    if i < len(initstate.get("varmin", []))
+                    else None
+                )
+                context.max_value = (
+                    initstate.get("varmax", [])[i]
+                    if i < len(initstate.get("varmax", []))
+                    else None
+                )
+                context.override_range = (
+                    initstate.get("override_range", [])[i]
+                    if i < len(initstate.get("override_range", []))
+                    else False
+                )
+                context.has_been_configured = (
+                    True  # Mark as configured since we're loading saved state
+                )
+
         self.load_variables(use_cached_layout=True)
 
     @trigger("layout_changed")
@@ -445,14 +490,37 @@ class EAMApp:
         # Tracking variables to control camera and color properties
         with self.state as state:
             state.variables = vars
-            state.varcolor = [self.get_default_colormap()] * len(vars)
+
+            # Initialize arrays with proper size
+            state.varcolor = [""] * len(vars)
             state.uselogscale = [False] * len(vars)
             state.invert = [False] * len(vars)
-            state.varmin = [np.nan] * len(vars)
-            state.varmax = [np.nan] * len(vars)
+            state.varmin = [0] * len(vars)
+            state.varmax = [1] * len(vars)
             state.override_range = [False] * len(vars)
             state.colorbar_images = [""] * len(vars)  # Initialize empty images
-            state.varaverage = [np.nan] * len(vars)
+            state.varaverage = [0] * len(vars)
+
+            # Check if variables already have contexts (still selected, just updating)
+            # Preserve configuration for variables that remain selected
+            for i, var in enumerate(vars):
+                context = self.viewmanager.registry.get_view(var)
+                if context and context.has_been_configured:
+                    # Variable is still selected, preserve its configuration
+                    state.varcolor[i] = context.colormap or self.get_default_colormap()
+                    state.uselogscale[i] = context.use_log_scale
+                    state.invert[i] = context.invert_colors
+                    state.varmin[i] = (
+                        context.min_value if context.min_value is not None else 0
+                    )
+                    state.varmax[i] = (
+                        context.max_value if context.max_value is not None else 1
+                    )
+                    state.override_range[i] = context.override_range
+                else:
+                    # New variable or was deselected, use defaults
+                    state.varcolor[i] = self.get_default_colormap()
+                    # Other values remain as initialized defaults
 
             # Only use cached layout when explicitly requested (i.e., when loading state)
             layout_to_use = self._cached_layout if use_cached_layout else None
@@ -644,7 +712,7 @@ class EAMApp:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
                 # layout.footer.clear()
-                layout.title.set_text(f"QuickView {version}")
+                layout.title.set_text(f"v{version}")
 
                 with layout.toolbar as toolbar:
                     Toolbar(
@@ -800,7 +868,7 @@ class EAMApp:
                                         html.Div(
                                             (
                                                 "(avg: {{ "
-                                                "varaverage[idx] !== null && !isNaN(varaverage[idx]) ? "
+                                                "varaverage[idx] !== null && varaverage[idx] !== undefined && !isNaN(varaverage[idx]) && typeof varaverage[idx] === 'number' ? "
                                                 "varaverage[idx].toExponential(2) : "
                                                 "'N/A' "
                                                 "}})"
@@ -826,7 +894,7 @@ class EAMApp:
                                         html.Span(
                                             (
                                                 "{{ "
-                                                "varmin[idx] !== null && !isNaN(varmin[idx]) ? ("
+                                                "varmin[idx] !== null && varmin[idx] !== undefined && !isNaN(varmin[idx]) && typeof varmin[idx] === 'number' ? ("
                                                 "uselogscale[idx] && varmin[idx] > 0 ? "
                                                 "'10^(' + Math.log10(varmin[idx]).toFixed(1) + ')' : "
                                                 "varmin[idx].toExponential(1)"
@@ -875,7 +943,7 @@ class EAMApp:
                                                     "Math.log10(varmin[idx]) + "
                                                     "(Math.log10(varmax[idx]) - Math.log10(varmin[idx])) * probe_location[2]"
                                                     ").toFixed(2) + ')' : "
-                                                    "(varmin[idx] + (varmax[idx] - varmin[idx]) * probe_location[2]).toExponential(3)"
+                                                    "((varmin[idx] || 0) + ((varmax[idx] || 1) - (varmin[idx] || 0)) * probe_location[2]).toExponential(3)"
                                                     ") : '' "
                                                     "}}"
                                                 ),
@@ -884,7 +952,7 @@ class EAMApp:
                                         html.Span(
                                             (
                                                 "{{ "
-                                                "varmax[idx] !== null && !isNaN(varmax[idx]) ? ("
+                                                "varmax[idx] !== null && varmax[idx] !== undefined && !isNaN(varmax[idx]) && typeof varmax[idx] === 'number' ? ("
                                                 "uselogscale[idx] && varmax[idx] > 0 ? "
                                                 "'10^(' + Math.log10(varmax[idx]).toFixed(1) + ')' : "
                                                 "varmax[idx].toExponential(1)"

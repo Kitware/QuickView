@@ -51,7 +51,7 @@
       },
       "resources": ["server"],
       "shortDescription": "",
-      "targets": ["dmg"],
+      "targets": ["app", "dmg"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
@@ -65,14 +65,14 @@
       "active": false
     },
     "windows": [
- {
+      {
         "fullscreen": false,
         "height": 600,
         "resizable": true,
         "title": "QuickView",
         "width": 800,
         "visible": false,
-        "additionalBrowserArgs": "--force-device-scale-factor=1 --disable-features=VizDisplayCompositor,TranslateUI"
+        "additionalBrowserArgs": "--force-device-scale-factor=1"
       },
       {
         "label": "splashscreen",
@@ -84,7 +84,7 @@
         "visible": true,
         "alwaysOnTop": true,
         "url": "splashscreen.html",
-        "additionalBrowserArgs": "--force-device-scale-factor=1 --disable-features=VizDisplayCompositor,TranslateUI"
+        "additionalBrowserArgs": "--force-device-scale-factor=1"
       }
     ]
   }
