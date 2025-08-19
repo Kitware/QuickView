@@ -21,6 +21,8 @@ without requiring a steep learning curve.
 
 - [Installation and launch for end users](docs/setup/for_end_users.md)
 - [Installation and launch for app developers](docs/setup/for_app_developers.md)
+- Download connectivity files from [Zenodo](https://zenodo.org/records/16895849)
+  and read more about them [here](docs/userguide/connectivity.md)
 
 ## Data
 

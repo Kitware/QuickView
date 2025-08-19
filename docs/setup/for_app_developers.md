@@ -1,4 +1,4 @@
-# Installation and Usage for App Developers
+# Installation and Launch for App Developers
 
 At version 1.0, QuickView is expected to be installed and used from a personal computer with the data files also being local. Future versions will support the server-client model allowing access to remote data files.
 
