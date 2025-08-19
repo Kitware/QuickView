@@ -19,48 +19,10 @@ without requiring a steep learning curve.
 
 ## Quick Start
 
-- [Installation and launch for end users](docs/setup/for_end_users.md)
-- [Installation and launch for app developers](docs/setup/for_app_developers.md)
-- Download connectivity files from [Zenodo](https://zenodo.org/records/16895849)
-  and read more about them [here](docs/userguide/connectivity.md)
-
-## Data
-
-QuickView works with E3SM Atmosphere Model (EAM) output files in NetCDF format.
-Sample data files and their corresponding connectivity files are available at
-[Zenodo](https://zenodo.org/records/16895849).
-
-### Data Files
-
-QuickView supports EAM output files from different model versions:
-
-- **EAM Version 2**: Standard atmospheric simulation outputs (e.g.,
-  `EAMv2_ne30pg2_F2010.eam.h0.nc`)
-- **EAM Version 4 (interim)**: Newer format outputs (e.g.,
-  `EAMxx_ne4pg2_202407.nc`)
-
-These files contain atmospheric variables such as temperature, pressure, wind
-fields, and other model diagnostics on finite-volume physics grids.
-
-### Connectivity Files
-
-Each data file requires a corresponding connectivity file that describes the
-horizontal grid structure:
-
-- Connectivity files follow the naming pattern:
-  `connectivity_{resolution}_TEMPEST.scrip.nc`
-- These files are generated using TempestRemap and contain grid topology
-  information
-- **Important**: The connectivity file resolution must match the data file
-  resolution for proper visualization
-
-For example:
-
-- Data file: `EAMv2_ne30pg2_F2010.eam.h0.nc`
-- Connectivity file: `connectivity_ne30pg2_TEMPEST.scrip.nc`
-
-Both files use the same `ne30pg2` grid resolution and must be loaded together
-for the application to function correctly.
+- Installation and launch for [end users](docs/setup/for_end_users.md)
+  and [app developers](docs/setup/for_app_developers.md)
+- Download sample simulation output and connectivity files from
+  [Zenodo](https://zenodo.org/records/16895849)
 
 ## Documentation
 
