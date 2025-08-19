@@ -15,11 +15,16 @@ gives users intuitive access to the powerful visualization capabilities of
 [ParaView](https://www.paraview.org/)  
 without requiring a steep learning curve.
 
-![quickview](docs/images/main.png)
+## Key Features
+
+- Intuitive, minimalist interface tailored for atmospheric modeling
+- Multi-variable visualization with drag-and-drop layout
+- Persistent sessions - pick up where you left off
+- Support for EAM v2, v3, and upcoming v4 data formats
 
 ## Quick Start
 
-- Installation and launch for [end users](docs/setup/for_end_users.md)
+- Install and launch for [end users](docs/setup/for_end_users.md)
   and [app developers](docs/setup/for_app_developers.md)
 - Download sample simulation output and connectivity files from
   [Zenodo](https://zenodo.org/records/16895849)
@@ -34,64 +39,15 @@ without requiring a steep learning curve.
 - **[Control Panel Reference](docs/userguide/control_panel.md)** - UI components
   and features
 
-## Key Features
-
-- Clean, minimalist interface tailored for atmospheric modeling
-- Multi-variable visualization with drag-and-drop layout
-- Geographic projections (Plate Carrée, Robinson, etc.)
-- Persistent sessions - pick up where you left off
-- Support for EAM v2, v3, and upcoming v4 data formats
-
-## Development
-
-### Python Development Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/ayenpure/QuickView.git
-cd QuickView
-
-# Set up conda environment
-conda env create -f quickview-env.yml
-conda activate quickview
-
-# Install QuickView
-pip install -e .
-```
-
-### Running from Source
-
-```bash
-python -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc
-
-# Launch server only (no browser popup)
-python --server -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc
-```
-
-The application starts a web server at `http://localhost:8080`
-
-### Development Utilities
-
-```bash
-# Run linter
-ruff check quickview/
-
-# Run tests
-python -m quickview.app --help
-
-# Bump version
-bumpversion patch
-```
-
 ## About
 
 QuickView is developed by [Kitware, Inc.](https://www.kitware.com/) in
 collaboration with
 [Pacific Northwest National Laboratory](https://www.pnnl.gov/), supported by the
 U.S. Department of Energy's
-[BER](https://www.energy.gov/science/ber/biological-and-environmental-research)
-and
 [ASCR](https://www.energy.gov/science/ascr/advanced-scientific-computing-research)
+and
+[BER](https://www.energy.gov/science/ber/biological-and-environmental-research)
 programs via [SciDAC](https://www.scidac.gov/).
 
 ### Contributors
