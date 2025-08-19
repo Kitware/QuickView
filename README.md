@@ -3,10 +3,17 @@
 [![Test](https://github.com/ayenpure/QuickView/actions/workflows/test.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/test.yml)
 [![Package and Release](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml)
 
-**QuickView** is an interactive visualization tool for atmospheric scientists
-working with E3SM (Energy Exascale Earth System Model) data. It provides an
-intuitive interface for exploring atmospheric simulation outputs without the
-steep learning curve of general-purpose visualization tools.
+**EAM QuickView** is an interactive visualization tool
+tailored for scientists working with the atmospheric component of the
+[Energy Exascale Earth System Model](https://e3sm.org/) (EAM, 
+[Rasch et al., 2019](https://doi.org/10.1029/2019MS001629);
+[Golaz et al., 2022](https://doi.org/10.1029/2022MS003156);
+[Donahue et al., 2024](10.1029/2024MS004314)).
+The Graphical User Interface (GUI) built with Python and
+powered by [Trame](https://www.kitware.com/trame/)
+gives users intuitive access to the powerful visualization capabilities of
+[ParaView](https://www.paraview.org/)  
+without requiring a steep learning curve.
 
 ![quickview](docs/images/main.png)
 
