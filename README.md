@@ -19,16 +19,8 @@ without requiring a steep learning curve.
 
 ## Quick Start
 
-### Installation
-
-Download the latest release from the
-[releases page](https://github.com/ayenpure/QuickView/releases):
-
-- **macOS**: `QuickView-{version}.dmg` - Double-click to install
-- **Linux**: Coming soon
-- **Windows**: Coming soon
-
-Pre-built binaries include all dependencies - no Python or ParaView required.
+- [Installation and launch for end users](docs/setup/installation_for_end_users.md)
+- [Installation and launch for app developers](docs/setup/installation_for_app_developers.md)
 
 ## Data
 
