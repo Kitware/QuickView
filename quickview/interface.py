@@ -25,9 +25,9 @@ from quickview.ui.variable_selection import VariableSelection
 from quickview.ui.view_settings import ViewProperties, ViewControls
 from quickview.ui.toolbar import Toolbar
 
-# Build color cache here
-from quickview.view_manager import build_color_information
-from quickview.view_manager import ViewManager, ViewContext
+# Import view management components
+from quickview.view_manager import ViewManager
+from quickview.utils.state import ViewContext, build_color_information
 
 from paraview.simple import ImportPresets, GetLookupTableNames
 
@@ -144,6 +144,7 @@ class EAMApp:
 
         self.workdir = workdir
         self.server = server
+
         pvWidgets.initialize(server)
 
         self.source = source
@@ -712,7 +713,21 @@ class EAMApp:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
                 # layout.footer.clear()
-                layout.title.set_text(f"v{version}")
+                layout.title.clear()
+                with layout.title:
+                    with html.Div(
+                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",
+                    ):
+                        (
+                            html.Img(
+                                src="https://raw.githubusercontent.com/ayenpure/QuickView/master/app-icon.png",
+                                style="height: 32px; width: 32px; border-radius: 4px; margin-bottom: 2px;",
+                            ),
+                        )
+                        html.Span(
+                            f"v{version}",
+                            style="font-size: 12px; color: rgba(0, 0, 0, 0.8); font-weight: 700; letter-spacing: 0.3px; line-height: 1;",
+                        )
 
                 with layout.toolbar as toolbar:
                     Toolbar(

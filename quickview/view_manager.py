@@ -1,14 +1,10 @@
-import math
-import numpy as np
 import paraview.servermanager as sm
 
 from trame.widgets import paraview as pvWidgets
 from trame.decorators import TrameApp, trigger
-from pyproj import Proj, Transformer
 
 from paraview.simple import (
     Delete,
-    Text,
     Show,
     CreateRenderView,
     ColorBy,
@@ -18,152 +14,46 @@ from paraview.simple import (
 )
 
 from quickview.pipeline import EAMVisSource
-from quickview.utilities import get_cached_colorbar_image
-from typing import Dict, List, Optional
+from quickview.utils.color import get_cached_colorbar_image
+from quickview.utils.geometry import generate_annotations as generate_map_annotations
+from quickview.utils.math import (
+    calculate_weighted_average,
+    calculate_aspect_ratio_scale,
+    calculate_data_center,
+)
+from quickview.utils.state import ViewContext, ViewRegistry
+
+# Constants for camera and display
+LABEL_OFFSET_FACTOR = 0.075  # Factor for offsetting labels from map edge
+CAMERA_Z_OFFSET = 1000  # Z-axis offset for 2D camera positioning
+ZOOM_IN_FACTOR = 0.95  # Scale factor for zooming in
+ZOOM_OUT_FACTOR = 1.05  # Scale factor for zooming out
+DEFAULT_MARGIN = 1.05  # Default margin for viewport fitting (5% margin)
+GRATICULE_INTERVAL = 30  # Default interval for map graticule in degrees
+PAN_OFFSET_RATIO = 0.05  # Ratio of extent to use for pan offset (5%)
+
+# Grid layout constants
+DEFAULT_GRID_COLUMNS = 3  # Number of columns in default grid layout
+DEFAULT_GRID_WIDTH = 4  # Default width of grid items
+DEFAULT_GRID_HEIGHT = 3  # Default height of grid items
 
 
-class ViewRegistry:
-    """Central registry for managing views - tracks only currently selected variables"""
-
-    def __init__(self):
-        self._contexts: Dict[str, "ViewContext"] = {}
-        self._view_order: List[str] = []
-
-    def register_view(self, variable: str, context: "ViewContext"):
-        """Register a new view or update existing one"""
-        self._contexts[variable] = context
-        if variable not in self._view_order:
-            self._view_order.append(variable)
-
-    def get_view(self, variable: str) -> Optional["ViewContext"]:
-        """Get view context for a variable"""
-        return self._contexts.get(variable)
-
-    def remove_view(self, variable: str):
-        """Remove a view from the registry"""
-        if variable in self._contexts:
-            del self._contexts[variable]
-            self._view_order.remove(variable)
-
-    def get_ordered_views(self) -> List["ViewContext"]:
-        """Get all views in order they were added"""
-        return [
-            self._contexts[var] for var in self._view_order if var in self._contexts
-        ]
-
-    def get_all_variables(self) -> List[str]:
-        """Get all registered variable names"""
-        return list(self._contexts.keys())
-
-    def items(self):
-        """Iterate over variable-context pairs"""
-        return self._contexts.items()
-
-    def clear(self):
-        """Clear all registered views"""
-        self._contexts.clear()
-        self._view_order.clear()
-
-    def __len__(self):
-        """Get number of registered views"""
-        return len(self._contexts)
-
-    def __contains__(self, variable: str):
-        """Check if a variable is registered"""
-        return variable in self._contexts
-
-
-class ViewContext:
-    """Context storing ParaView objects and persistent configuration"""
-
-    def __init__(self, variable: str, index: int):
-        self.variable = variable
-        self.index = index  # Current position in state arrays
-        self.view_proxy = None  # ParaView render view
-        self.data_representation = None  # ParaView data representation
-
-        # Persistent configuration that survives variable selection changes
-        self.colormap = None  # Will persist colormap choice
-        self.use_log_scale = False
-        self.invert_colors = False
-        self.min_value = None  # Computed or manual
-        self.max_value = None  # Computed or manual
-        self.override_range = False  # Track if manually set
-        self.has_been_configured = False  # Track if user has modified settings
-
-
-def apply_projection(projection, point):
-    if projection is None:
-        return point
-    else:
-        new = projection.transform(point[0] - 180, point[1])
-        return [new[0], new[1], 1.0]
+# ViewRegistry and ViewContext classes have been moved to view_state.py
 
 
 def generate_annotations(long, lat, projection, center):
-    texts = []
-    interval = 30
-    llon = long[0]
-    hlon = long[1]
-    llat = lat[0]
-    hlat = lat[1]
-
-    llon = math.floor(llon / interval) * interval
-    hlon = math.ceil(hlon / interval) * interval
-
-    llat = math.floor(llat / interval) * interval
-    hlat = math.ceil(hlat / interval) * interval
-
-    lonx = np.arange(llon, hlon + interval, interval)
-    laty = np.arange(llat, hlat + interval, interval)
-
-    from functools import partial
-
-    proj = partial(apply_projection, None)
-    if projection != "Cyl. Equidistant":
-        latlon = Proj(init="epsg:4326")
-        if projection == "Robinson":
-            proj = Proj(proj="robin")
-        elif projection == "Mollweide":
-            proj = Proj(proj="moll")
-        xformer = Transformer.from_proj(latlon, proj)
-        proj = partial(apply_projection, xformer)
-
-    for x in lonx:
-        lon = x - center
-        pos = lon
-        if lon > 180:
-            pos = -180 + (lon % 180)
-        elif lon < -180:
-            pos = 180 - (abs(lon) % 180)
-        txt = str(x)
-        if pos == 180:
-            continue
-        text = Text(registrationName=f"text{x}")
-        text.Text = txt
-        pos = proj([pos, hlat, 1.0])
-        texts.append((text, pos))
-    for y in laty:
-        text = Text(registrationName=f"text{y}")
-        text.Text = str(y)
-        pos = proj([hlon, y, 1.0])
-        pos[0] += pos[0] * 0.075
-        texts.append((text, pos))
-
-    return texts
+    """Generate map annotations using geo_utils."""
+    return generate_map_annotations(
+        long,
+        lat,
+        projection,
+        center,
+        interval=GRATICULE_INTERVAL,
+        label_offset_factor=LABEL_OFFSET_FACTOR,
+    )
 
 
-def build_color_information(state: map):
-    """Simplified function that just returns an empty registry.
-    State arrays already contain all the necessary information."""
-    registry = ViewRegistry()
-
-    # Store layout if provided (for backward compatibility)
-    layout = state.get("layout", None)
-    if layout:
-        registry._saved_layout = [item.copy() for item in layout]
-
-    return registry
+# build_color_information has been moved to view_state.py
 
 
 @TrameApp()
@@ -354,7 +244,7 @@ class ViewManager:
         except Exception as e:
             print(f"Error getting cached colorbar image for {var}: {e}")
 
-    def calculate_parallel_scale(self, view, margin=1.05):
+    def calculate_parallel_scale(self, view, margin=DEFAULT_MARGIN):
         """
         Calculate optimal ParallelScale for a view based on GridProj bounds.
 
@@ -380,36 +270,15 @@ class ViewManager:
             if not bounds or bounds[0] > bounds[1]:
                 return None
 
-            # Calculate data dimensions
-            width = bounds[1] - bounds[0]
-            height = bounds[3] - bounds[2]
-
-            if width <= 0 or height <= 0:
-                return None
-
-            # Get viewport dimensions
+            # Use the utility function for calculation
             view_size = view.ViewSize
-            if view_size[0] <= 0 or view_size[1] <= 0:
-                return None
-
-            viewport_aspect = view_size[0] / view_size[1]
-            data_aspect = width / height
-
-            # Calculate optimal parallel scale
-            if data_aspect > viewport_aspect:
-                # Data is wider than viewport - fit to width
-                parallel_scale = (width / (2.0 * viewport_aspect)) * margin
-            else:
-                # Data is taller than viewport - fit to height
-                parallel_scale = (height / 2.0) * margin
-
-            return parallel_scale
+            return calculate_aspect_ratio_scale(bounds, view_size, margin)
 
         except Exception as e:
             print(f"Error calculating parallel scale: {e}")
             return None
 
-    def fit_to_viewport(self, view, margin=1.05):
+    def fit_to_viewport(self, view, margin=DEFAULT_MARGIN):
         """
         Dynamically calculate and set optimal ParallelScale to fit objects in viewport.
 
@@ -442,16 +311,12 @@ class ViewManager:
             camera.SetParallelProjection(True)
             camera.SetParallelScale(parallel_scale)
 
-            # Center camera on data
-            center = [
-                (combined_bounds[0] + combined_bounds[1]) / 2,
-                (combined_bounds[2] + combined_bounds[3]) / 2,
-                (combined_bounds[4] + combined_bounds[5]) / 2,
-            ]
+            # Center camera on data using utility function
+            center = calculate_data_center(combined_bounds)
             camera.SetFocalPoint(*center)
 
             # For 2D projections, position camera perpendicular to XY plane
-            camera_pos = [center[0], center[1], center[2] + 1000]
+            camera_pos = [center[0], center[1], center[2] + CAMERA_Z_OFFSET]
             camera.SetPosition(*camera_pos)
             camera.SetViewUp(0, 1, 0)
 
@@ -502,28 +367,11 @@ class ViewManager:
             vtkdata = sm.Fetch(data)
         vardata = vtkdata.GetCellData().GetArray(var)
 
-        # Check if area variable exists
+        # Check if area variable exists for weighted averaging
         area_array = vtkdata.GetCellData().GetArray("area")
 
-        if area_array is not None:
-            # Area-weighted averaging
-            area = np.array(area_array)
-            if np.isnan(vardata).any():
-                mask = ~np.isnan(vardata)
-                if not np.any(mask):
-                    return np.nan  # all values are NaN
-                vardata = np.array(vardata)[mask]
-                area = np.array(area)[mask]
-            return np.average(vardata, weights=area)
-        else:
-            # Simple arithmetic averaging
-            vardata = np.array(vardata)
-            if np.isnan(vardata).any():
-                mask = ~np.isnan(vardata)
-                if not np.any(mask):
-                    return np.nan  # all values are NaN
-                vardata = vardata[mask]
-            return np.mean(vardata)
+        # Use utility function for calculation
+        return calculate_weighted_average(vardata, area_array)
 
     def compute_range(self, var, vtkdata=None):
         if vtkdata is None:
@@ -599,11 +447,11 @@ class ViewManager:
                 wdt = pos["w"]
                 hgt = pos["h"]
             else:
-                # Default grid position (3 columns)
-                x = int(index % 3) * 4
-                y = int(index / 3) * 3
-                wdt = 4
-                hgt = 3
+                # Default grid position
+                x = int(index % DEFAULT_GRID_COLUMNS) * DEFAULT_GRID_WIDTH
+                y = int(index / DEFAULT_GRID_COLUMNS) * DEFAULT_GRID_HEIGHT
+                wdt = DEFAULT_GRID_WIDTH
+                hgt = DEFAULT_GRID_HEIGHT
 
             varrange = self.compute_range(var, vtkdata=vtkdata)
             varavg = self.compute_average(var, vtkdata=vtkdata)
@@ -655,7 +503,7 @@ class ViewManager:
                 context = ViewContext(var, index)
                 context.view_proxy = view
 
-                # Copy configuration from state arrays (which were already restored in load_variables)
+                # Copy configuration from state arrays (already restored)
                 context.colormap = (
                     state.varcolor[index] if index < len(state.varcolor) else None
                 )
@@ -897,14 +745,14 @@ class ViewManager:
         var = self.state.variables[index]
         context: ViewContext = self.registry.get_view(var)
         if context and context.view_proxy:
-            context.view_proxy.CameraParallelScale *= 0.95
+            context.view_proxy.CameraParallelScale *= ZOOM_IN_FACTOR
         self.render_all_views()
 
     def zoom_out(self, index=0):
         var = self.state.variables[index]
         context: ViewContext = self.registry.get_view(var)
         if context and context.view_proxy:
-            context.view_proxy.CameraParallelScale *= 1.05
+            context.view_proxy.CameraParallelScale *= ZOOM_OUT_FACTOR
         self.render_all_views()
 
     def pan_camera(self, dir, factor, index=0):
@@ -916,9 +764,9 @@ class ViewManager:
         rview = context.view_proxy
         extents = self.source.moveextents
         move = (
-            (extents[1] - extents[0]) * 0.05,
-            (extents[3] - extents[2]) * 0.05,
-            (extents[5] - extents[4]) * 0.05,
+            (extents[1] - extents[0]) * PAN_OFFSET_RATIO,
+            (extents[3] - extents[2]) * PAN_OFFSET_RATIO,
+            (extents[5] - extents[4]) * PAN_OFFSET_RATIO,
         )
 
         pos = rview.CameraPosition
