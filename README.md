@@ -19,8 +19,8 @@ without requiring a steep learning curve.
 
 ## Quick Start
 
-- [Installation and launch for end users](docs/setup/installation_for_end_users.md)
-- [Installation and launch for app developers](docs/setup/installation_for_app_developers.md)
+- [Installation and launch for end users](docs/setup/for_end_users.md)
+- [Installation and launch for app developers](docs/setup/for_app_developers.md)
 
 ## Data
 
