@@ -1,11 +1,12 @@
-# Key reminders for using EAM QuickView
+# Key Reminders for Using EAM QuickView
 
-- EAM QuickView can be [launched](launch.md) in two ways: from simulation data
-  (for starting a new visualization) or from a state file (for resuming an
-  analysis).
+- EAM QuickView can be used in two modes:
+  a new-viz mode (for starting a new visualization) or
+  a resume mode (for resuming an analysis).
+  Further details can be found in the [Toolbar description](toolbar.md).
 
-- Regardless of which way of launch is used, a
-  [connectivity file](connectivity.md) is needed together with the simulation
+- Regardless of which mode is used, a
+  [connectivity file](connectivity.md) is needed in addition to the simulation
   data file.
 
 - Most buttons, sliders, and selection boxes in the GUI apply their effects
@@ -14,7 +15,8 @@
   or after the selection is changed, the user must click the `LOAD VARIABLES`
   button in the [toolbar](toolbar.md) for the new selection to take effect.
 
-- In the current version, after the `LOAD VARIABLES` button is clicked, some of
+- In the current version, after the `LOAD VARIABLES` button is clicked or
+  after some visualization settings are changed, some (or all) of
   the variables showing up in the [viewport](viewport.md) might exhibit a
   display issue, e.g., erroneously showing the same color or a few color stripes
   over the entire globe or region. This can be remedied by clicking the refresh
