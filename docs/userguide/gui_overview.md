@@ -16,4 +16,4 @@ screen shot.
    the user, and control some properties for coloring and scalar mapping of the
    data.
 
-4. [Camera action widget]()
+4. [Camera action widget](camera.md)
