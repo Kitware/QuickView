@@ -1,5 +1,18 @@
 # Launching the QuickView app
 
+## Getting Data Files
+
+Before launching QuickView, you'll need E3SM data files. Sample data files are
+available at [Zenodo](https://zenodo.org/records/16895849). Each data file
+requires a corresponding connectivity file with matching grid resolution. For
+example:
+
+- Data file: `EAMv2_ne30pg2_F2010.eam.h0.nc`
+- Connectivity file: `connectivity_ne30pg2_TEMPEST.scrip.nc`
+
+See the [Data Requirements](../data-requirements.md) documentation for detailed
+information about file formats and available datasets.
+
 ## Usage
 
 Following successful configuration of the application, i.e., satisfying the

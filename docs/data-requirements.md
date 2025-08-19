@@ -10,6 +10,37 @@ QuickView requires two NetCDF files:
 1. **Data File** - Contains the atmospheric variables and time-varying data
 2. **Connectivity File** - Contains the mesh geometry and grid structure
 
+## Obtaining Sample Data
+
+Sample E3SM Atmosphere Model (EAM) data files and their corresponding
+connectivity files are available at
+[Zenodo](https://zenodo.org/records/16895849). The dataset includes:
+
+### Available Data Files
+
+- **EAM Version 2 outputs**:
+  - `EAMv2_ne120pg2_F2010_spinup.eam.h0.nc` (525.3 MB)
+  - `EAMv2_ne30pg2_F2010_aermic.eam.h0.nc` (498.3 MB)
+  - `EAMv2_ne30pg2_F2010_cld.eam.h0.nc` (745.5 MB)
+- **EAM Version 4 (interim) outputs**:
+  - `EAMxx_ne4pg2_202407.nc` (13.2 MB)
+
+### Available Connectivity Files
+
+- `connectivity_ne120pg2_TEMPEST.scrip.nc` (31.8 MB)
+- `connectivity_ne30pg2_TEMPEST.scrip.nc` (2.0 MB)
+- `connectivity_ne4pg2_TEMPEST.scrip.nc` (48.8 kB)
+
+### Important: File Correspondence
+
+**The connectivity file resolution must match the data file resolution for
+proper visualization.** For example:
+
+- Data file: `EAMv2_ne30pg2_F2010.eam.h0.nc`
+- Connectivity file: `connectivity_ne30pg2_TEMPEST.scrip.nc`
+
+Both files use the same `ne30pg2` grid resolution and must be loaded together.
+
 ## Required Dimensions
 
 The following dimensions must be present in the data files:
