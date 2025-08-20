@@ -17,12 +17,14 @@ class Toolbar:
         with self.state:
             response = await self.ctrl.open("Open Data File")
             self.state.data_file = response
+            self.state.pipeline_valid = False
 
     @task
     async def select_connectivity_file(self):
         with self.state:
             response = await self.ctrl.open("Open Connectivity File")
             self.state.conn_file = response
+            self.state.pipeline_valid = False
 
     @task
     async def export_state(self):
@@ -209,6 +211,7 @@ class Toolbar:
                             flat=True,
                             small=True,
                             click=load_data,
+                            color="!pipeline_valid ? 'primary' : 'secondary'",
                             v_bind="attrs",
                             v_on="on",
                         ):

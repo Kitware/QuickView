@@ -63,6 +63,18 @@ class ViewManager:
         self.to_delete = []
         self.rep_change = False
 
+        # Register state change listener for pipeline_valid
+        self.state.change("pipeline_valid")(self._on_pipeline_valid_change)
+
+    def _on_pipeline_valid_change(self, pipeline_valid, **kwargs):
+        """Clear view registry when pipeline becomes invalid."""
+        if not pipeline_valid:
+            # Clear all views and variables from registry
+            self.registry.clear()
+            # Clear widgets and colors tracking
+            self.widgets = []
+            self.colors = []
+
     def get_color_config(self, index):
         """Get all color configuration for a variable from state arrays"""
         state = self.state

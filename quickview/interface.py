@@ -202,9 +202,6 @@ class EAMApp:
         # Removed cmaps initialization - now handled by toolbar toggle buttons
         state.layout = []
         state.variables = []
-        state.ccardscolor = [None] * len(
-            source.surface_vars + source.interface_vars + source.midpoint_vars
-        )
         state.varcolor = []
         state.uselogscale = []
         state.invert = []
