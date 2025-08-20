@@ -18,22 +18,17 @@ and [this description](https://e3sm.atlassian.net/wiki/spaces/DOC/pages/87257911
 
 ## Download
 
-A small collection of connectivity files can be downloaded from [Zenodo](https://zenodo.org/records/16895849).
+A collection of connectivity files can be found on [Zenodo](https://doi.org/10.5281/zenodo.16908567).
 
 ## Generation
 
-Users can also generate connectivity files with the [`TempestRemap`](https://github.com/ClimateGlobalChange/tempestremap) tool using [this script](https://github.com/mt5555/remap-ncl/blob/master/makeSE.sh) shared by Mark A. Taylor at Sandia National Laboratories. (`TempestRemap` can be installed following the instructions at [https://github.com/ClimateGlobalChange/tempestremap](https://github.com/ClimateGlobalChange/tempestremap), and it is also available as a part of the [`E3SM-Unified`](https://github.com/E3SM-Project/e3sm-unified) conda environment.)
-
-For example, the command
-
-```
-./makeSE.sh 30
-```
-
-will generate serveral different files for the `ne30pg2` grid, including, e.g.,
-
-- `TEMEPST_NE30pg2.g`  (Exodus format),
-- `TEMPEST_ne30pg2.scrip.nc` (SCRIP format).
+Users can also generate connectivity files with the
+[`TempestRemap`](https://github.com/ClimateGlobalChange/tempestremap) tool
+using commands documented [here](https://e3sm.atlassian.net/wiki/spaces/DOC/pages/872579110/Running+E3SM+on+New+Atmosphere+Grids#2A.-Generate-control-volume-mesh-files-for-E3SM-v2-%22pg2%22-grids).
+`TempestRemap` can be installed following the instructions at
+[https://github.com/ClimateGlobalChange/tempestremap](https://github.com/ClimateGlobalChange/tempestremap);
+it is also available as a part of the
+[`E3SM-Unified`](https://github.com/E3SM-Project/e3sm-unified) conda environment.)
 
 EAM QuickView uses the SCRIP format.
 
