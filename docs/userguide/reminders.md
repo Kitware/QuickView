@@ -8,7 +8,7 @@
 - Regardless of which mode is used, a
   [connectivity file](connectivity.md) is needed in addition to the simulation
   data file. Further details can be found on the documentation pages
-  describing the [connectivity file](connectivity.md) and the
+  describing the [connectivity files](connectivity.md) and the
   [toolbar](toolbar.md).
 
 - Most buttons, sliders, and selection boxes in the GUI apply their effects
