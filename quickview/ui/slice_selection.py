@@ -235,11 +235,15 @@ class SliceSelection(CollapsableSection):
         tstamp = self.state.tstamp
         long = self.state.cliplong
         lat = self.state.cliplat
+
         self.source.UpdateLev(lev, ilev)
         self.source.UpdateTimeStep(tstamp)
         self.source.ApplyClipping(long, lat)
         self.source.UpdatePipeline()
+
+        # update_views_for_timestep will handle fitting and rendering
         self.views.update_views_for_timestep()
+        # Render once after all updates
         self.views.render_all_views()
 
     def on_click_advance_middle(self, diff):

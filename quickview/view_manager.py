@@ -16,16 +16,11 @@ from paraview.simple import (
 from quickview.pipeline import EAMVisSource
 from quickview.utils.color import get_cached_colorbar_image
 from quickview.utils.geometry import generate_annotations as generate_map_annotations
-from quickview.utils.math import (
-    calculate_weighted_average,
-    calculate_aspect_ratio_scale,
-    calculate_data_center,
-)
+from quickview.utils.math import calculate_weighted_average
 from quickview.utils.state import ViewContext, ViewRegistry
 
 # Constants for camera and display
 LABEL_OFFSET_FACTOR = 0.075  # Factor for offsetting labels from map edge
-CAMERA_Z_OFFSET = 1000  # Z-axis offset for 2D camera positioning
 ZOOM_IN_FACTOR = 0.95  # Scale factor for zooming in
 ZOOM_OUT_FACTOR = 1.05  # Scale factor for zooming out
 DEFAULT_MARGIN = 1.05  # Default margin for viewport fitting (5% margin)
@@ -103,10 +98,18 @@ class ViewManager:
         else:
             return self.compute_range(var)
 
-    def update_views_for_timestep(self):
+    def update_views_for_timestep(self, fit_viewport=True):
+        """Update views for timestep changes.
+
+        Args:
+            fit_viewport: Whether to fit viewport after update (default True).
+                         Set to False to avoid redundant fits when caller will do it.
+        """
         if len(self.registry) == 0:
             return
         data = sm.Fetch(self.source.views["atmosphere_data"])
+
+        first_view = None
 
         for var, context in self.registry.items():
             varavg = self.compute_average(var, vtkdata=data)
@@ -128,9 +131,14 @@ class ViewManager:
                 self.state.dirty("varmax")
 
             self.generate_colorbar_image(context.index)
-            # Fit objects optimally after geometry changes
-            if context.view_proxy:
-                self.fit_to_viewport(context.view_proxy)
+
+            # Track the first view for camera fitting
+            if first_view is None and context.view_proxy:
+                first_view = context.view_proxy
+
+        # Only fit the first view since cameras are linked
+        if fit_viewport and first_view:
+            self.fit_to_viewport(first_view)
 
     def refresh_view_display(self, context: ViewContext):
         if not self.should_use_manual_range(context.index):
@@ -204,8 +212,8 @@ class ViewManager:
         rep.SetScalarBarVisibility(rview, False)
         rview.CameraParallelProjection = 1
 
+        # Skip individual fit - will be handled by view0 after all views are created
         Render(rview)
-        # ResetCamera(rview)
 
     # This function is no longer needed - we work directly with state arrays
 
@@ -244,103 +252,33 @@ class ViewManager:
         except Exception as e:
             print(f"Error getting cached colorbar image for {var}: {e}")
 
-    def calculate_parallel_scale(self, view, margin=DEFAULT_MARGIN):
+    def fit_to_viewport(self, view, margin=DEFAULT_MARGIN, use_largest_viewport=False):
         """
-        Calculate optimal ParallelScale for a view based on GridProj bounds.
-
-        Args:
-            view: The render view to calculate scale for
-            margin: Margin factor (1.05 = 5% margin around objects)
-
-        Returns:
-            Optimal parallel scale value, or None if calculation fails
-        """
-        from paraview.simple import UpdatePipeline, FindSource
-
-        try:
-            # Ensure pipeline is up to date
-            UpdatePipeline()
-
-            # Get GridProj bounds - it encompasses the full map extent
-            grid_source = FindSource("GridProj")
-            if not grid_source:
-                return None
-
-            bounds = grid_source.GetDataInformation().GetBounds()
-            if not bounds or bounds[0] > bounds[1]:
-                return None
-
-            # Use the utility function for calculation
-            view_size = view.ViewSize
-            return calculate_aspect_ratio_scale(bounds, view_size, margin)
-
-        except Exception as e:
-            print(f"Error calculating parallel scale: {e}")
-            return None
-
-    def fit_to_viewport(self, view, margin=DEFAULT_MARGIN):
-        """
-        Dynamically calculate and set optimal ParallelScale to fit objects in viewport.
+        Reset camera to fit objects in viewport.
 
         Args:
             view: The render view to fit
-            margin: Margin factor (1.05 = 5% margin around objects)
+            margin: Not used (kept for compatibility)
+            use_largest_viewport: Not used (kept for compatibility)
         """
-        from paraview.simple import SetActiveView, FindSource
+        from paraview.simple import SetActiveView
 
         try:
-            # Set this as the active view to ensure camera operations work correctly
+            # Set this view as active and reset camera
             SetActiveView(view)
-
-            # Calculate the optimal parallel scale
-            parallel_scale = self.calculate_parallel_scale(view, margin)
-            if parallel_scale is None:
-                return
-
-            # Get GridProj bounds for centering the camera
-            grid_source = FindSource("GridProj")
-            if not grid_source:
-                return
-
-            combined_bounds = grid_source.GetDataInformation().GetBounds()
-            if not combined_bounds:
-                return
-
-            # Get the view's camera directly
-            camera = view.GetActiveCamera()
-            camera.SetParallelProjection(True)
-            camera.SetParallelScale(parallel_scale)
-
-            # Center camera on data using utility function
-            center = calculate_data_center(combined_bounds)
-            camera.SetFocalPoint(*center)
-
-            # For 2D projections, position camera perpendicular to XY plane
-            camera_pos = [center[0], center[1], center[2] + CAMERA_Z_OFFSET]
-            camera.SetPosition(*camera_pos)
-            camera.SetViewUp(0, 1, 0)
-
-            # Apply the camera settings to the view
-            view.CameraParallelScale = parallel_scale
+            view.ResetCamera(True, 0.9)
 
         except Exception as e:
             print(f"Error in fit_to_viewport: {e}")
-            # Fallback to simple reset if our calculation fails
-            try:
-                from paraview.simple import ResetCamera
-
-                ResetCamera(view)
-            except Exception:
-                pass
 
     def reset_camera(self, **kwargs):
         """Reset camera for all views to optimally fit objects."""
-        for i, widget in enumerate(self.widgets):
-            if i < len(self.state.variables):
-                var = self.state.variables[i]
-                context = self.registry.get_view(var)
-                if context and context.view_proxy:
-                    self.fit_to_viewport(context.view_proxy)
+        # Only reset the first view since cameras are linked
+        if len(self.widgets) > 0 and len(self.state.variables) > 0:
+            var = self.state.variables[0]
+            context = self.registry.get_view(var)
+            if context and context.view_proxy:
+                self.fit_to_viewport(context.view_proxy)
         self.render_all_views()
 
     def render_all_views(self, **kwargs):
@@ -493,6 +431,7 @@ class ViewManager:
                     self.configure_new_view(var, context, self.source.views)
                 else:
                     self.refresh_view_display(context)
+                    # Skip individual viewport fitting - will be done once for view0
             else:
                 view = CreateRenderView()
                 view.UseColorPaletteForBackground = 0
@@ -579,23 +518,24 @@ class ViewManager:
             # Use index as identifier to maintain compatibility with grid expectations
             layout.append({"x": x, "y": y, "w": wdt, "h": hgt, "i": index})
 
-        view0.CameraParallelScale = 100
+        # Only fit view0 since all cameras are linked
+        if view0 is not None:
+            self.fit_to_viewport(view0)
 
         self.state.views = sWidgets
         self.state.layout = layout
         self.state.dirty("views")
         self.state.dirty("layout")
-        # from trame.app import asynchronous
-        # asynchronous.create_task(self.flushViews())
+
+        # Single render after all updates
+        self.render_all_views()
 
     """
     async def flushViews(self):
         await self.server.network_completion
-        print("Flushing views")
         self.render_all_views()
         import asyncio
         await asyncio.sleep(1)
-        print("Resetting views after sleep")
         self.render_all_views()
     """
 

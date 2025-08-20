@@ -45,5 +45,7 @@ class ProjectionSelection(CollapsableSection):
         projection = self.state.projection
         self.source.UpdateProjection(projection)
         self.source.UpdatePipeline()
-        self.views.update_views_for_timestep()
+        # For projection changes, we need to fit viewports to new bounds
+        self.views.update_views_for_timestep(fit_viewport=True)
+        # Render once after all updates
         self.views.render_all_views()
