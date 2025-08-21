@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Union
 
 from trame.app import get_server
-from trame.decorators import TrameApp, life_cycle, trigger
+from trame.decorators import TrameApp, life_cycle, trigger, change
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame.widgets import vuetify as v2, html, client
@@ -243,6 +243,15 @@ class EAMApp:
     @life_cycle.client_connected
     def _tauri_show(self, **_):
         os.write(1, "tauri-client-ready\n".encode())
+
+    @change("pipeline_valid")
+    def _on_change_pipeline_valid(self, pipeline_valid, **kwargs):
+        if not pipeline_valid:
+            source = self.source
+            state = self.state
+            state.surface_vars_state = [False] * len(source.surface_vars)
+            state.midpoint_vars_state = [False] * len(source.midpoint_vars)
+            state.interface_vars_state = [False] * len(source.interface_vars)
 
     def init_app_configuration(self):
         source = self.source
