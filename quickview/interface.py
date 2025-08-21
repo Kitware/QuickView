@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import numpy as np
 import xml.etree.ElementTree as ET
 
@@ -36,6 +37,23 @@ from paraview.modules import vtkRemotingCore as rc
 rc.vtkProcessModule.GetProcessModule().UpdateProcessType(
     rc.vtkProcessModule.PROCESS_BATCH, 0
 )
+
+# -----------------------------------------------------------------------------
+# Load logo image as base64
+# -----------------------------------------------------------------------------
+
+
+def get_logo_base64():
+    """Load the QuickView logo as base64 encoded string."""
+    logo_path = Path(__file__).parent / "assets" / "quick-view-text.png"
+    if logo_path.exists():
+        with open(logo_path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
+    return ""  # Return empty string if logo not found
+
+
+# Cache the logo at module load time
+LOGO_BASE64 = get_logo_base64()
 
 # -----------------------------------------------------------------------------
 # trame setup
@@ -727,8 +745,8 @@ class EAMApp:
                     ):
                         (
                             html.Img(
-                                src="https://raw.githubusercontent.com/ayenpure/QuickView/master/app-icon.png",
-                                style="height: 32px; width: 32px; border-radius: 4px; margin-bottom: 2px;",
+                                src=f"data:image/png;base64,{LOGO_BASE64}",
+                                style="height: 40px; width: 80px; border-radius: 4px; margin-bottom: 2px;",
                             ),
                         )
                         html.Span(
