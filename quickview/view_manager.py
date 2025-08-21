@@ -58,7 +58,6 @@ class ViewManager:
         self.source = source
         self.state = state
         self.widgets = []
-        self.colors = []
         self.registry = ViewRegistry()  # Central registry for view management
         self.to_delete = []
         self.rep_change = False
@@ -72,8 +71,10 @@ class ViewManager:
             # Clear all views and variables from registry
             self.registry.clear()
             # Clear widgets and colors tracking
-            self.widgets = []
-            self.colors = []
+            del self.state.views[:]
+            del self.state.layout[:]
+            self.state.dirty("views")
+            self.state.dirty("layout")
 
     def get_color_config(self, index):
         """Get all color configuration for a variable from state arrays"""
@@ -336,11 +337,14 @@ class ViewManager:
         source = self.source
         long = state.cliplong
         lat = state.cliplat
+        tstamp = state.tstamp
+        time = 0.0 if len(self.state.timesteps) == 0 else self.state.timesteps[tstamp]
+
         source.UpdateLev(self.state.midpoint, self.state.interface)
         source.ApplyClipping(long, lat)
         source.UpdateCenter(self.state.center)
         source.UpdateProjection(self.state.projection)
-        source.UpdatePipeline()
+        source.UpdatePipeline(time)
         surface_vars = source.vars.get("surface", [])
         midpoint_vars = source.vars.get("midpoint", [])
         interface_vars = source.vars.get("interface", [])

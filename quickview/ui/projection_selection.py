@@ -44,7 +44,9 @@ class ProjectionSelection(CollapsableSection):
     def update_pipeline_interactive(self, **kwargs):
         projection = self.state.projection
         self.source.UpdateProjection(projection)
-        self.source.UpdatePipeline()
+        tstamp = self.state.tstamp
+        time = 0.0 if len(self.state.timesteps) == 0 else self.state.timesteps[tstamp]
+        self.source.UpdatePipeline(time)
         # For projection changes, we need to fit viewports to new bounds
         self.views.update_views_for_timestep(fit_viewport=True)
         # Render once after all updates

@@ -416,26 +416,27 @@ class EAMApp:
         self.update_state_from_config(from_state)
 
     def load_data(self):
-        with self.state as state:
-            # Update returns True/False for validity
-            # force_reload=True since user explicitly clicked Load Files button
-            is_valid = self.source.Update(
-                data_file=self.state.data_file,
-                conn_file=self.state.conn_file,
-                force_reload=True,
-            )
-            state.pipeline_valid = is_valid
+        state = self.state
+        # Update returns True/False for validity
+        # force_reload=True since user explicitly clicked Load Files button
+        is_valid = self.source.Update(
+            data_file=self.state.data_file,
+            conn_file=self.state.conn_file,
+            force_reload=True,
+        )
 
-            # Update state based on pipeline validity
-            if is_valid:
-                self.update_state_from_source()
-                self.init_app_configuration()
-            else:
-                # Keep the defaults that were set in __init__
-                # but ensure arrays are empty if pipeline failed
-                state.timesteps = []
-                state.midpoints = []
-                state.interfaces = []
+        # Update state based on pipeline validity
+        if is_valid:
+            self.update_state_from_source()
+            self.init_app_configuration()
+        else:
+            # Keep the defaults that were set in __init__
+            # but ensure arrays are empty if pipeline failed
+            state.timesteps = []
+            state.midpoints = []
+            state.interfaces = []
+
+        state.pipeline_valid = is_valid
 
     def get_default_colormap(self):
         """
@@ -486,39 +487,39 @@ class EAMApp:
         vars = surf + mid + intf
 
         # Tracking variables to control camera and color properties
-        with self.state as state:
-            state.variables = vars
+        state = self.state
+        state.variables = vars
 
-            # Initialize arrays with proper size
-            state.varcolor = [""] * len(vars)
-            state.uselogscale = [False] * len(vars)
-            state.invert = [False] * len(vars)
-            state.varmin = [0] * len(vars)
-            state.varmax = [1] * len(vars)
-            state.override_range = [False] * len(vars)
-            state.colorbar_images = [""] * len(vars)  # Initialize empty images
-            state.varaverage = [0] * len(vars)
+        # Initialize arrays with proper size
+        state.varcolor = [""] * len(vars)
+        state.uselogscale = [False] * len(vars)
+        state.invert = [False] * len(vars)
+        state.varmin = [0] * len(vars)
+        state.varmax = [1] * len(vars)
+        state.override_range = [False] * len(vars)
+        state.colorbar_images = [""] * len(vars)  # Initialize empty images
+        state.varaverage = [0] * len(vars)
 
-            # Check if variables already have contexts (still selected, just updating)
-            # Preserve configuration for variables that remain selected
-            for i, var in enumerate(vars):
-                context = self.viewmanager.registry.get_view(var)
-                if context and context.has_been_configured:
-                    # Variable is still selected, preserve its configuration
-                    state.varcolor[i] = context.colormap or self.get_default_colormap()
-                    state.uselogscale[i] = context.use_log_scale
-                    state.invert[i] = context.invert_colors
-                    state.varmin[i] = (
-                        context.min_value if context.min_value is not None else 0
-                    )
-                    state.varmax[i] = (
-                        context.max_value if context.max_value is not None else 1
-                    )
-                    state.override_range[i] = context.override_range
-                else:
-                    # New variable or was deselected, use defaults
-                    state.varcolor[i] = self.get_default_colormap()
-                    # Other values remain as initialized defaults
+        # Check if variables already have contexts (still selected, just updating)
+        # Preserve configuration for variables that remain selected
+        for i, var in enumerate(vars):
+            context = self.viewmanager.registry.get_view(var)
+            if context and context.has_been_configured:
+                # Variable is still selected, preserve its configuration
+                state.varcolor[i] = context.colormap or self.get_default_colormap()
+                state.uselogscale[i] = context.use_log_scale
+                state.invert[i] = context.invert_colors
+                state.varmin[i] = (
+                    context.min_value if context.min_value is not None else 0
+                )
+                state.varmax[i] = (
+                    context.max_value if context.max_value is not None else 1
+                )
+                state.override_range[i] = context.override_range
+            else:
+                # New variable or was deselected, use defaults
+                state.varcolor[i] = self.get_default_colormap()
+                # Other values remain as initialized defaults
 
             # Only use cached layout when explicitly requested (i.e., when loading state)
             layout_to_use = self._cached_layout if use_cached_layout else None

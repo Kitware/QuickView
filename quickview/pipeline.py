@@ -5,7 +5,6 @@ import os
 
 from paraview.simple import (
     FindSource,
-    GetTimeKeeper,
     LoadPlugin,
     OutputPort,
     Contour,
@@ -148,22 +147,18 @@ class EAMVisSource:
         if not self.valid:
             return
 
-        time = self.timestamps[t_index]
-        tk = GetTimeKeeper()
-        tk.Time = time
-
-    def UpdatePipeline(self):
+    def UpdatePipeline(self, time=0.0):
         if not self.valid:
             return
 
         atmos_proj = FindSource("AtmosProj")
         if atmos_proj:
-            atmos_proj.UpdatePipeline()
+            atmos_proj.UpdatePipeline(time)
         self.moveextents = atmos_proj.GetDataInformation().GetBounds()
 
         cont_proj = FindSource("ContProj")
         if cont_proj:
-            cont_proj.UpdatePipeline()
+            cont_proj.UpdatePipeline(time)
 
         atmos_extract = FindSource("AtmosExtract")
         bounds = atmos_extract.GetDataInformation().GetBounds()
@@ -174,7 +169,7 @@ class EAMVisSource:
             grid_gen.LatitudeRange = [bounds[2], bounds[3]]
         grid_proj = FindSource("GridProj")
         if grid_proj:
-            grid_proj.UpdatePipeline()
+            grid_proj.UpdatePipeline(time)
 
         self.views["atmosphere_data"] = OutputPort(atmos_proj, 0)
         self.views["continents"] = OutputPort(cont_proj, 0)
@@ -211,7 +206,8 @@ class EAMVisSource:
             self.observer.clear()
 
         try:
-            self.data.UpdatePipeline()
+            # Update pipeline and force view refresh
+            self.data.UpdatePipeline(time=0.0)
             if self.observer.error_occurred:
                 raise RuntimeError(
                     "Error occurred in UpdatePipeline. "
@@ -232,10 +228,21 @@ class EAMVisSource:
             self.interface_vars = list(
                 np.asarray(self.data.GetProperty("InterfaceVariablesInfo"))[::2]
             )
-
-            tk = GetTimeKeeper()
-            self.timestamps = np.array(tk.TimestepValues).tolist()
-            tk.Time = tk.TimestepValues[0]
+            # Ensure TimestepValues is always a list
+            timestep_values = self.data.TimestepValues
+            if isinstance(timestep_values, (list, tuple)):
+                self.timestamps = list(timestep_values)
+            elif hasattr(timestep_values, "__iter__") and not isinstance(
+                timestep_values, str
+            ):
+                # Handle numpy arrays or other iterables
+                self.timestamps = list(timestep_values)
+            else:
+                # Single value - wrap in a list
+                self.timestamps = (
+                    [timestep_values] if timestep_values is not None else []
+                )
+            print(self.timestamps)
 
             # Step 1: Extract and transform atmospheric data
             atmos_extract = EAMTransformAndExtract(
