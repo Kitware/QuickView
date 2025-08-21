@@ -51,7 +51,7 @@
       },
       "resources": ["server"],
       "shortDescription": "",
-      "targets": ["app", "dmg"],
+      "targets": ["dmg"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
