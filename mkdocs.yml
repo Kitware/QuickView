@@ -11,6 +11,7 @@ nav:
   - User's Guide:
       - Key Reminders:      userguide/reminders.md
       - Connectivity Files: userguide/connectivity.md
+      - Data File Format:   userguide/data_requirements.md
       - GUI Overview:       userguide/gui_overview.md
       - Toolbar:            userguide/toolbar.md
       - Control Panel:      userguide/control_panel.md
@@ -19,3 +20,8 @@ nav:
   - Plans: future.md
 markdown_extensions:
   - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - md_in_html
+  - pymdownx.blocks.caption
