@@ -1,5 +1,5 @@
 
-![toolbar](../images/tool-bar.png)
+![toolbar](../images/toolbar.png)
 
 The toolbar located at the top of the GUI contains UI elements (buttons
 and text boxes) that control global features of the current
@@ -12,7 +12,7 @@ then introduce the other elements.
 ----
 ## New-viz mode: starting a new visualization
 
-![connectivity and data file buttons](../images/tool-bar_conn_and_data_load.png)
+![connectivity and data file buttons](../images/toolbar_conn_and_data_load.png)
 
 To start a new analysis/visualization, the user needs to specify
 a [connecitivy file](connectivity.md) and
@@ -42,7 +42,7 @@ have not been parsed correctly. Possible reasons for the error are:
 ----
 ## Resume mode: pick up where you left off
 
-![state save and load](../images/tool-bar_state_save_and_load.png)
+![state save and load](../images/toolbar_state_save_and_load.png)
 
 The current state of the visualization can be saved—and reloaded later to
 resume the analysis—using the `Save State` and `Load State` icons shown above.
@@ -59,7 +59,7 @@ file is loaded in the app.
 ----
 ## Other elements of the toolbar
 
-![toolbar misc](../images/tool-bar_misc.png)
+![toolbar misc](../images/toolbar_misc.png)
 
 1. The hamburger icon hides or shows the [control panel](control_panel.md).
 1. The `LOAD VARIABLES` button, when clicked, executes the action of loading
