@@ -211,7 +211,7 @@ class Toolbar:
                             flat=True,
                             small=True,
                             click=load_data,
-                            color="!pipeline_valid ? 'primary' : 'secondary'",
+                            color=("!pipeline_valid ? 'primary' : 'secondary'",),
                             v_bind="attrs",
                             v_on="on",
                         ):
