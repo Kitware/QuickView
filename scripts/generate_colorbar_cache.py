@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from paraview.simple import GetColorTransferFunction, ImportPresets, GetLookupTableNames
-from quickview.utilities import build_colorbar_image
+from quickview.utils.color import build_colorbar_image
 
 noncvd = [
     {

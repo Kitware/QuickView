@@ -235,11 +235,12 @@ class SliceSelection(CollapsableSection):
         tstamp = self.state.tstamp
         long = self.state.cliplong
         lat = self.state.cliplat
+        time = 0.0 if len(self.state.timesteps) == 0 else self.state.timesteps[tstamp]
 
         self.source.UpdateLev(lev, ilev)
         self.source.UpdateTimeStep(tstamp)
         self.source.ApplyClipping(long, lat)
-        self.source.UpdatePipeline()
+        self.source.UpdatePipeline(time)
 
         # update_views_for_timestep will handle fitting and rendering
         self.views.update_views_for_timestep()

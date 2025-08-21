@@ -62,7 +62,7 @@ class ViewRegistry:
 
 class ViewContext:
     """Context storing ParaView objects and persistent configuration.
-    
+
     This class is critical for maintaining user configuration across
     variable selection/deselection cycles. It stores both the ParaView
     rendering objects and the user's chosen visualization settings.
@@ -86,13 +86,13 @@ class ViewContext:
 
 def build_color_information(state: Dict) -> ViewRegistry:
     """Build a ViewRegistry from saved state information.
-    
+
     This function is used for backward compatibility with saved states.
     It creates an empty registry and preserves layout information if present.
-    
+
     Args:
         state: Dictionary containing saved state with optional 'layout' key
-        
+
     Returns:
         ViewRegistry: A new registry instance with saved layout if available
     """
