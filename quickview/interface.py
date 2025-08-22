@@ -439,7 +439,9 @@ class EAMApp:
 
         # Fallback to first available colormap
         return (
-            self.state.colormaps[0]["value"] if self.state.colormaps else "Cool to Warm"
+            self.state.colormaps[0]["value"]
+            if self.state.colormaps
+            else "Cool to Warm (Extended)"
         )
 
     def load_variables(self, use_cached_layout=False):
@@ -471,7 +473,7 @@ class EAMApp:
         # Tracking variables to control camera and color properties
         with self.state as state:
             state.variables = vars
-            state.varcolor = self.get_default_colormap()
+            state.varcolor = [self.get_default_colormap()] * len(vars)
             state.uselogscale = [False] * len(vars)
             state.invert = [False] * len(vars)
             state.varmin = [np.nan] * len(vars)
