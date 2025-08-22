@@ -1,6 +1,6 @@
 # Graphical User Interface (GUI)
 
-EAM QuickView's GUI contains the four main components summarized below.
+EAM QuickView's GUI contains the three main components summarized below.
 Detailed descriptions can be found on the linked pages.
 
 1. The [toolbar](toolbar.md) located at the top of the GUI
@@ -16,11 +16,10 @@ Detailed descriptions can be found on the linked pages.
    on the left end of the [toolbar](toolbar.md).
 
 3. The [viewport](view_port.md) displays one or more variables for
-   the user. For each variable, the colormap, contour level etc.
+   the user. For each variable, the colormap, value ranges etc.
    can be adjusted individually using the associated gear icon.
-
-4. The [camera action widget](camera.md) located in the bottom right
-   corner of the viewport are used for centrally adjusting all views
+   The viewport also contains a camera widget in its bottom-right
+   corner, which can be used to centrally adjusting all views
    in the viewport, i.e., zooming in or out, or moving the displayed
    images with respect to the GUI. 
 

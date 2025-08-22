@@ -16,7 +16,6 @@ nav:
       - Toolbar:            userguide/toolbar.md
       - Control Panel:      userguide/control_panel.md
       - Viewport:           userguide/viewport.md
-      - Camera Widget:      userguide/camera.md
   - Plans: future.md
 markdown_extensions:
   - attr_list
