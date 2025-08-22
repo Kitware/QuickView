@@ -473,14 +473,46 @@ class EAMApp:
         # Tracking variables to control camera and color properties
         with self.state as state:
             state.variables = vars
-            state.varcolor = [self.get_default_colormap()] * len(vars)
-            state.uselogscale = [False] * len(vars)
-            state.invert = [False] * len(vars)
-            state.varmin = [np.nan] * len(vars)
-            state.varmax = [np.nan] * len(vars)
-            state.override_range = [False] * len(vars)
-            state.colorbar_images = [""] * len(vars)  # Initialize empty images
-            state.varaverage = [np.nan] * len(vars)
+
+            # When loading from cached state, preserve existing color values
+            # Otherwise, initialize with defaults
+            if not use_cached_layout:
+                state.varcolor = [self.get_default_colormap()] * len(vars)
+                state.uselogscale = [False] * len(vars)
+                state.invert = [False] * len(vars)
+                state.varmin = [np.nan] * len(vars)
+                state.varmax = [np.nan] * len(vars)
+                state.override_range = [False] * len(vars)
+                state.colorbar_images = [""] * len(vars)  # Initialize empty images
+                state.varaverage = [np.nan] * len(vars)
+            else:
+                # Preserve loaded values but ensure arrays match variable count
+                # Extend or trim arrays to match new variable count if needed
+                current_len = (
+                    len(state.varcolor)
+                    if hasattr(state, "varcolor") and state.varcolor
+                    else 0
+                )
+                if current_len != len(vars):
+                    # If array lengths don't match, extend with defaults or trim
+                    default_colormap = self.get_default_colormap()
+                    state.varcolor = (state.varcolor + [default_colormap] * len(vars))[
+                        : len(vars)
+                    ]
+                    state.uselogscale = (state.uselogscale + [False] * len(vars))[
+                        : len(vars)
+                    ]
+                    state.invert = (state.invert + [False] * len(vars))[: len(vars)]
+                    state.varmin = (state.varmin + [np.nan] * len(vars))[: len(vars)]
+                    state.varmax = (state.varmax + [np.nan] * len(vars))[: len(vars)]
+                    state.override_range = (state.override_range + [False] * len(vars))[
+                        : len(vars)
+                    ]
+                    state.varaverage = (state.varaverage + [np.nan] * len(vars))[
+                        : len(vars)
+                    ]
+                # Always reset colorbar images as they need to be regenerated
+                state.colorbar_images = [""] * len(vars)
 
             # Only use cached layout when explicitly requested (i.e., when loading state)
             layout_to_use = self._cached_layout if use_cached_layout else None

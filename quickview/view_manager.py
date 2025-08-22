@@ -456,11 +456,74 @@ class ViewManager:
                     view.BackgroundColorMode = "Gradient"
                     view.GetRenderWindow().SetOffScreenRendering(True)
                     context.state.view_proxy = view
-                    context.config.min_value = varrange[0]
-                    context.config.max_value = varrange[1]
+                    # Use loaded color range if override is enabled and values are valid
+                    if (
+                        index < len(state.override_range)
+                        and state.override_range[index]
+                        and index < len(state.varmin)
+                        and index < len(state.varmax)
+                        and not (
+                            state.varmin[index] != state.varmin[index]
+                        )  # Check for NaN
+                        and not (state.varmax[index] != state.varmax[index])
+                    ):  # Check for NaN
+                        context.config.min_value = state.varmin[index]
+                        context.config.max_value = state.varmax[index]
+                        context.config.override_range = True
+                    else:
+                        context.config.min_value = varrange[0]
+                        context.config.max_value = varrange[1]
                     self.configure_new_view(var, context, self.source.views)
                 else:
+                    # Update context with all loaded color settings
+                    # Update colormap if available
+                    if index < len(state.varcolor):
+                        context.config.colormap = state.varcolor[index]
+                    # Update log scale setting if available
+                    if index < len(state.uselogscale):
+                        context.config.use_log_scale = state.uselogscale[index]
+                    # Update invert colors setting if available
+                    if index < len(state.invert):
+                        context.config.invert_colors = state.invert[index]
+
+                    # Update color range if override is enabled and values are valid
+                    if (
+                        index < len(state.override_range)
+                        and state.override_range[index]
+                        and index < len(state.varmin)
+                        and index < len(state.varmax)
+                        and not (
+                            state.varmin[index] != state.varmin[index]
+                        )  # Check for NaN
+                        and not (state.varmax[index] != state.varmax[index])
+                    ):  # Check for NaN
+                        context.config.min_value = state.varmin[index]
+                        context.config.max_value = state.varmax[index]
+                        context.config.override_range = True
+
+                    # Apply all the loaded color settings to the transfer function
+                    coltrfunc = GetColorTransferFunction(var)
+                    # Apply colormap
+                    coltrfunc.ApplyPreset(context.config.colormap, True)
+                    # Apply log scale
+                    if context.config.use_log_scale:
+                        coltrfunc.MapControlPointsToLogSpace()
+                        coltrfunc.UseLogScale = 1
+                    else:
+                        coltrfunc.UseLogScale = 0
+                    # Apply invert colors
+                    if context.config.invert_colors:
+                        coltrfunc.InvertTransferFunction()
+                    # Apply color range if overridden
+                    if context.config.override_range:
+                        coltrfunc.RescaleTransferFunction(
+                            context.config.min_value, context.config.max_value
+                        )
+
                     self.refresh_view_display(context)
+                    # Sync the updated color configuration back to state and regenerate colorbar
+                    self.sync_color_config_to_state(index, context)
+                    self.generate_colorbar_image(index)
             else:
                 view = CreateRenderView()
                 # Preserve override flag if context already exists
@@ -468,8 +531,27 @@ class ViewManager:
                 override = (
                     existing_context.config.override_range
                     if existing_context
-                    else False
+                    else (
+                        index < len(state.override_range)
+                        and state.override_range[index]
+                    )
                 )
+
+                # Use loaded color range if override is enabled and values are valid
+                if (
+                    override
+                    and index < len(state.varmin)
+                    and index < len(state.varmax)
+                    and not (
+                        state.varmin[index] != state.varmin[index]
+                    )  # Check for NaN
+                    and not (state.varmax[index] != state.varmax[index])
+                ):  # Check for NaN
+                    min_val = state.varmin[index]
+                    max_val = state.varmax[index]
+                else:
+                    min_val = varrange[0]
+                    max_val = varrange[1]
 
                 config = ViewConfiguration(
                     variable=var,
@@ -482,8 +564,8 @@ class ViewManager:
                     invert_colors=state.invert[index]
                     if index < len(state.invert)
                     else False,
-                    min_value=varrange[0],
-                    max_value=varrange[1],
+                    min_value=min_val,
+                    max_value=max_val,
                     override_range=override,
                 )
                 view_state = ViewState(
@@ -494,6 +576,14 @@ class ViewManager:
                 view.BackgroundColorMode = "Gradient"
                 self.registry.register_view(var, context)
                 self.configure_new_view(var, context, self.source.views)
+
+            # Apply manual color range if override is enabled
+            if context.config.override_range:
+                coltrfunc = GetColorTransferFunction(var)
+                coltrfunc.RescaleTransferFunction(
+                    context.config.min_value, context.config.max_value
+                )
+
             context.index = index
             # Set the computed average directly in trame state
             self.state.varaverage[index] = varavg
