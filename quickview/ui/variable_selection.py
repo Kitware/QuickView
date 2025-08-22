@@ -37,6 +37,14 @@ class SelectionList(v2.VContainer):
 
 @TrameApp()
 class VariableSelection(CollapsableSection):
+    _next_id = 0
+
+    @classmethod
+    def next_id(cls):
+        """Get the next unique ID for the scalar bar."""
+        cls._next_id += 1
+        return f"var_select_{cls._next_id}"
+
     def __init__(
         self,
         title=None,
@@ -48,13 +56,17 @@ class VariableSelection(CollapsableSection):
         on_update=None,
     ):
         super().__init__(title=title, var_name=panel_name)
+
+        ns = self.next_id()
+        self.__search_var = f"{ns}_search"
+
         with self.content:
             # Search and controls section
             with v2.VCard(flat=True, elevation=0, classes="pa-2 mb-1"):
                 with v2.VRow(classes="align-center", no_gutters=True):
                     with v2.VCol(cols=9, classes="pr-1"):
                         v2.VTextField(
-                            v_model=("variableSearchQuery", ""),
+                            v_model=(self.__search_var, ""),
                             prepend_inner_icon="mdi-magnify",
                             label="Search variables",
                             placeholder="Type to filter...",
@@ -69,7 +81,7 @@ class VariableSelection(CollapsableSection):
                         with v2.VTooltip(bottom=True):
                             with html.Template(v_slot_activator="{ on, attrs }"):
                                 with v2.VBtn(
-                                    click=(on_clear),
+                                    click=(on_clear, f"['{self.__search_var}']"),
                                     depressed=True,
                                     small=True,
                                     v_bind="attrs",

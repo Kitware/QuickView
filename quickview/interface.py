@@ -713,19 +713,28 @@ class EAMApp:
             ].tolist()
             self.state.dirty("interface_vars_state")
 
-    def clear_surface_vars(self):
-        self.state.surface_vars_state = [False] * len(self.state.surface_vars_state)
-        self.surface_vars_state = np.array([False] * len(self.surface_vars_state))
+    def clear_surface_vars(self, clear_var_name):
+        self.state[clear_var_name] = ""
+        self.ind_surface = None
+        self.state.surface_vars = self.source.surface_vars
+        self.state.surface_vars_state = [False] * len(self.source.surface_vars)
+        self.surface_vars_state = np.array([False] * len(self.source.surface_vars))
         self.state.dirty("surface_vars_state")
 
-    def clear_midpoint_vars(self):
-        self.state.midpoint_vars_state = [False] * len(self.state.midpoint_vars_state)
-        self.midpoint_vars_state = np.array([False] * len(self.midpoint_vars_state))
+    def clear_midpoint_vars(self, clear_var_name):
+        self.state[clear_var_name] = ""
+        self.ind_midpoint = None
+        self.state.midpoint_vars = self.source.midpoint_vars
+        self.state.midpoint_vars_state = [False] * len(self.source.midpoint_vars)
+        self.midpoint_vars_state = np.array([False] * len(self.source.midpoint_vars))
         self.state.dirty("midpoint_vars_state")
 
-    def clear_interface_vars(self):
-        self.state.interface_vars_state = [False] * len(self.state.interface_vars_state)
-        self.interface_vars_state = np.array([False] * len(self.interface_vars_state))
+    def clear_interface_vars(self, clear_var_name):
+        self.state[clear_var_name] = ""
+        self.ind_interface = None
+        self.state.interface_vars = self.source.interface_vars
+        self.state.interface_vars_state = [False] * len(self.source.interface_vars)
+        self.interface_vars_state = np.array([False] * len(self.source.interface_vars))
         self.state.dirty("interface_vars_state")
 
     def start(self, **kwargs):
