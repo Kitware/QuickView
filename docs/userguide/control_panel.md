@@ -1,5 +1,5 @@
 
-!!! info inline end "Tip"
+!!! tip inline end "Tip"
 
     The control panel can be collapsed or made visible using the hamburger icon
     (three horizontal lines stacked on top of each other ) on the left end of the
@@ -38,7 +38,7 @@ but can be supported upon request
 
 ### Select and load
 
-!!! tip inline end "The `LOAD VARIABLE` button"
+!!! warning inline end "The `LOAD VARIABLE` button"
 
     After a selection of variables is made or changed, the `LOAD VARIABLES`
     button in the [toolbar](toolbar.md) must be clicked in order for the
@@ -76,26 +76,30 @@ in order for these changes to take effect.*
 
 
 -----
-## Data slice
+## Data slice selection
 
+![variable selection sections](../images/slice_selection.png){ width="300", align=right }
 
-The data slice selection allows users to slice and
-   dice data spatio-temporally for analysis
+To keep the QuickView app lightweight and easy to use, we decided to only 
+support color-filled contour plots of the globe or a latitude-longitude box.
+The slice selection portion of the control panel provides a set of sliders
+for the user to select which vertical levels, time levels, and latitude-longitude
+ranges to create contour plots for.
 
-   - a. It allows data slice selection along the dimensions of time, middle and
-     interface layer.
-   - b. It allows users to control the geo-spatial region by controlling the
-     longitude, latitude ranges.
+For the vertical dimensions and the time dimension, the control panel
+also provides buttons for moving to (displaying) the previous or next element
+in a dimension, as well as "play" buttons for cycling over these dimensions.
+If the user clicks on a second "play" button when the app is cycling through
+a first dimension, the the cycling through the first dimension will be paused.
 
-   Users can interactively select the data slice by interacting with the
-   sliders, or using the media buttons to skip-previous, skip-next, or play an
-   animation.
 
 -----
 ## Map Projection
 
-The map projection selection allows users to
-   chose different representation of the data. Currently, it allows for
-   Cylindrical-Equidistant, Robinson, and Mollweide projections. In the future,
-   additional features are planned, e.g. selection of center meridian.
+![variable selection sections](../images/map_projection.png){ width="300", align=right }
+
+QuickView currently provides a very simple map setting submenu
+that contains a few commonly used map projections.
+More projections can be added upon request, and we plan to allow
+the user to choose the center longitude of the map in the near future.
 
