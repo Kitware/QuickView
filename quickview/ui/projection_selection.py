@@ -48,6 +48,6 @@ class ProjectionSelection(CollapsableSection):
         time = 0.0 if len(self.state.timesteps) == 0 else self.state.timesteps[tstamp]
         self.source.UpdatePipeline(time)
         # For projection changes, we need to fit viewports to new bounds
-        self.views.update_views_for_timestep(fit_viewport=True)
+        self.views.update_views_for_timestep()
         # Render once after all updates
         self.views.render_all_views()
