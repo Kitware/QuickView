@@ -521,9 +521,6 @@ class ViewManager:
                         )
 
                     self.refresh_view_display(context)
-                    # Sync the updated color configuration back to state and regenerate colorbar
-                    self.sync_color_config_to_state(index, context)
-                    self.generate_colorbar_image(index)
             else:
                 view = CreateRenderView()
                 # Preserve override flag if context already exists
@@ -620,11 +617,9 @@ class ViewManager:
     """
     async def flushViews(self):
         await self.server.network_completion
-        print("Flushing views")
         self.render_all_views()
         import asyncio
         await asyncio.sleep(1)
-        print("Resetting views after sleep")
         self.render_all_views()
     """
 

@@ -302,12 +302,12 @@ class EAMApp:
 
     def update_state_from_config(self, initstate):
         source = self.source
+        self.state.update(initstate)
+        self.update_available_color_maps()
         with self.state as state:
             state.surface_vars = source.surface_vars
             state.interface_vars = source.interface_vars
             state.midpoint_vars = source.midpoint_vars
-            state.update(initstate)
-
             selection = state.variables
             selection_surface = np.isin(state.surface_vars, selection).tolist()
             selection_midpoint = np.isin(state.midpoint_vars, selection).tolist()
