@@ -199,6 +199,20 @@ class ViewManager:
         self.registry = ViewRegistry()  # Central registry for view management
         self.to_delete = []
 
+        # Register state change listener for pipeline_valid
+        self.state.change("pipeline_valid")(self._on_pipeline_valid_change)
+
+    def _on_pipeline_valid_change(self, pipeline_valid, **kwargs):
+        """Clear view registry when pipeline becomes invalid."""
+        if not pipeline_valid:
+            # Clear all views and variables from registry
+            self.registry.clear()
+            # Clear widgets and colors tracking
+            del self.state.views[:]
+            del self.state.layout[:]
+            self.state.dirty("views")
+            self.state.dirty("layout")
+
     def update_views_for_timestep(self):
         if len(self.registry) == 0:
             return
@@ -378,11 +392,14 @@ class ViewManager:
         source = self.source
         long = state.cliplong
         lat = state.cliplat
+        tstamp = state.tstamp
+        time = 0.0 if len(self.state.timesteps) == 0 else self.state.timesteps[tstamp]
+
         source.UpdateLev(self.state.midpoint, self.state.interface)
         source.ApplyClipping(long, lat)
         source.UpdateCenter(self.state.center)
         source.UpdateProjection(self.state.projection)
-        source.UpdatePipeline()
+        source.UpdatePipeline(time)
         surface_vars = source.vars.get("surface", [])
         midpoint_vars = source.vars.get("midpoint", [])
         interface_vars = source.vars.get("interface", [])
