@@ -3,122 +3,38 @@
 [![Test](https://github.com/ayenpure/QuickView/actions/workflows/test.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/test.yml)
 [![Package and Release](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml/badge.svg)](https://github.com/ayenpure/QuickView/actions/workflows/package-and-release.yml)
 
-**QuickView** is an interactive visualization tool for atmospheric scientists
-working with E3SM (Energy Exascale Earth System Model) data. It provides an
-intuitive interface for exploring atmospheric simulation outputs without the
-steep learning curve of general-purpose visualization tools.
-
-![quickview](docs/images/main.png)
-
-## Quick Start
-
-### Installation
-
-Download the latest release from the
-[releases page](https://github.com/ayenpure/QuickView/releases):
-
-- **macOS**: `QuickView-{version}.dmg` - Double-click to install
-- **Linux**: Coming soon
-- **Windows**: Coming soon
-
-Pre-built binaries include all dependencies - no Python or ParaView required.
-
-## Data
-
-QuickView works with E3SM Atmosphere Model (EAM) output files in NetCDF format.
-Sample data files and their corresponding connectivity files are available at
-[Zenodo](https://zenodo.org/records/16895849).
-
-### Data Files
-
-QuickView supports EAM output files from different model versions:
-
-- **EAM Version 2**: Standard atmospheric simulation outputs (e.g.,
-  `EAMv2_ne30pg2_F2010.eam.h0.nc`)
-- **EAM Version 4 (interim)**: Newer format outputs (e.g.,
-  `EAMxx_ne4pg2_202407.nc`)
-
-These files contain atmospheric variables such as temperature, pressure, wind
-fields, and other model diagnostics on finite-volume physics grids.
-
-### Connectivity Files
-
-Each data file requires a corresponding connectivity file that describes the
-horizontal grid structure:
-
-- Connectivity files follow the naming pattern:
-  `connectivity_{resolution}_TEMPEST.scrip.nc`
-- These files are generated using TempestRemap and contain grid topology
-  information
-- **Important**: The connectivity file resolution must match the data file
-  resolution for proper visualization
-
-For example:
-
-- Data file: `EAMv2_ne30pg2_F2010.eam.h0.nc`
-- Connectivity file: `connectivity_ne30pg2_TEMPEST.scrip.nc`
-
-Both files use the same `ne30pg2` grid resolution and must be loaded together
-for the application to function correctly.
-
-## Documentation
-
-- **[Installation Guide](docs/setup/requirements.md)** - Detailed setup
-  instructions
-- **[User Guide](docs/userguide/launch.md)** - How to use QuickView
-- **[Data Requirements](docs/data-requirements.md)** - NetCDF file format
-  specifications
-- **[Control Panel Reference](docs/userguide/control_panel.md)** - UI components
-  and features
+**EAM QuickView** is an interactive visualization tool
+tailored for scientists working with the atmospheric component of the
+[Energy Exascale Earth System Model (E3SM)](https://e3sm.org/), the
+E3SM Atmosphere Model (EAM). 
+The Graphical User Interface (GUI) built with Python and
+powered by [Trame](https://www.kitware.com/trame/)
+gives users intuitive access to the powerful visualization capabilities of
+[ParaView](https://www.paraview.org/) without requiring a steep learning curve.
 
 ## Key Features
 
-- Clean, minimalist interface tailored for atmospheric modeling
-- Multi-variable visualization with drag-and-drop layout
-- Geographic projections (Plate Carrée, Robinson, etc.)
-- Persistent sessions - pick up where you left off
-- Support for EAM v2, v3, and upcoming v4 data formats
+- Intuitive, minimalist interface tailored for atmospheric modeling.
+- Multi-variable visualization with drag-and-drop layout.
+- Persistent sessions - pick up where you left off.
+- Support for EAM v2, v3, and upcoming v4 output formats.
 
-## Development
+## Quick Start
 
-### Python Development Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/ayenpure/QuickView.git
-cd QuickView
-
-# Set up conda environment
-conda env create -f quickview-env.yml
-conda activate quickview
-
-# Install QuickView
-pip install -e .
-```
-
-### Running from Source
-
-```bash
-python -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc
-
-# Launch server only (no browser popup)
-python --server -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc
-```
-
-The application starts a web server at `http://localhost:8080`
-
-### Development Utilities
-
-```bash
-# Run linter
-ruff check quickview/
-
-# Run tests
-python -m quickview.app --help
-
-# Bump version
-bumpversion patch
-```
+- Install and launch the app for [end users](docs/setup/for_end_users.md)
+  and [app developers](docs/setup/for_app_developers.md).
+- Download connectivity files of EAM's cubed-sphere grids from
+  [Zenodo](https://doi.org/10.5281/zenodo.16908567).
+- Optional: download [sample simulation output](https://zenodo.org/records/16922608)
+  to test the app.
+- For EAMv2 and v3 developers and users: if your simulation data files
+  are *not* the original files written out by the model,
+  i.e., if your files were generated by NCO, CDO, etc.
+  check QuickView's [data format requirements](docs/userguide/data_requirements.md).
+- For EAMxx developers and users: EAMxx's most recent output format
+  updates might not have been accommodated. If your run into issues
+  opening your data files, please contact our
+  [lead developer](https://www.kitware.com/abhishek-yenpure/).
 
 ## About
 
@@ -126,9 +42,9 @@ QuickView is developed by [Kitware, Inc.](https://www.kitware.com/) in
 collaboration with
 [Pacific Northwest National Laboratory](https://www.pnnl.gov/), supported by the
 U.S. Department of Energy's
-[BER](https://www.energy.gov/science/ber/biological-and-environmental-research)
-and
 [ASCR](https://www.energy.gov/science/ascr/advanced-scientific-computing-research)
+and
+[BER](https://www.energy.gov/science/ber/biological-and-environmental-research)
 programs via [SciDAC](https://www.scidac.gov/).
 
 ### Contributors
