@@ -26,9 +26,9 @@ from quickview.ui.variable_selection import VariableSelection
 from quickview.ui.view_settings import ViewProperties, ViewControls
 from quickview.ui.toolbar import Toolbar
 
-# Import view management components
+# Build color cache here
+from quickview.view_manager import build_color_information
 from quickview.view_manager import ViewManager
-from quickview.utils.state import ViewContext, build_color_information
 
 from paraview.simple import ImportPresets, GetLookupTableNames
 
@@ -302,12 +302,12 @@ class EAMApp:
 
     def update_state_from_config(self, initstate):
         source = self.source
+        self.state.update(initstate)
+        self.update_available_color_maps()
         with self.state as state:
             state.surface_vars = source.surface_vars
             state.interface_vars = source.interface_vars
             state.midpoint_vars = source.midpoint_vars
-            state.update(initstate)
-
             selection = state.variables
             selection_surface = np.isin(state.surface_vars, selection).tolist()
             selection_midpoint = np.isin(state.midpoint_vars, selection).tolist()
@@ -320,52 +320,7 @@ class EAMApp:
         self.midpoint_vars_state = np.array(selection_midpoint)
         self.interface_vars_state = np.array(selection_interface)
 
-        # Build registry and populate with saved configuration
         self.viewmanager.registry = build_color_information(initstate)
-
-        # Sync loaded configuration to contexts
-        if "variables" in initstate:
-            for i, var in enumerate(initstate["variables"]):
-                context = self.viewmanager.registry.get_view(var)
-                if not context:
-                    context = ViewContext(var, i)
-                    self.viewmanager.registry.register_view(var, context)
-
-                # Populate context from loaded state
-                context.colormap = (
-                    initstate.get("varcolor", [])[i]
-                    if i < len(initstate.get("varcolor", []))
-                    else None
-                )
-                context.use_log_scale = (
-                    initstate.get("uselogscale", [])[i]
-                    if i < len(initstate.get("uselogscale", []))
-                    else False
-                )
-                context.invert_colors = (
-                    initstate.get("invert", [])[i]
-                    if i < len(initstate.get("invert", []))
-                    else False
-                )
-                context.min_value = (
-                    initstate.get("varmin", [])[i]
-                    if i < len(initstate.get("varmin", []))
-                    else None
-                )
-                context.max_value = (
-                    initstate.get("varmax", [])[i]
-                    if i < len(initstate.get("varmax", []))
-                    else None
-                )
-                context.override_range = (
-                    initstate.get("override_range", [])[i]
-                    if i < len(initstate.get("override_range", []))
-                    else False
-                )
-                context.has_been_configured = (
-                    True  # Mark as configured since we're loading saved state
-                )
-
         self.load_variables(use_cached_layout=True)
 
     @trigger("layout_changed")
@@ -484,7 +439,9 @@ class EAMApp:
 
         # Fallback to first available colormap
         return (
-            self.state.colormaps[0]["value"] if self.state.colormaps else "Cool to Warm"
+            self.state.colormaps[0]["value"]
+            if self.state.colormaps
+            else "Cool to Warm (Extended)"
         )
 
     def load_variables(self, use_cached_layout=False):
@@ -514,39 +471,48 @@ class EAMApp:
         vars = surf + mid + intf
 
         # Tracking variables to control camera and color properties
-        state = self.state
-        state.variables = vars
+        with self.state as state:
+            state.variables = vars
 
-        # Initialize arrays with proper size
-        state.varcolor = [""] * len(vars)
-        state.uselogscale = [False] * len(vars)
-        state.invert = [False] * len(vars)
-        state.varmin = [0] * len(vars)
-        state.varmax = [1] * len(vars)
-        state.override_range = [False] * len(vars)
-        state.colorbar_images = [""] * len(vars)  # Initialize empty images
-        state.varaverage = [0] * len(vars)
-
-        # Check if variables already have contexts (still selected, just updating)
-        # Preserve configuration for variables that remain selected
-        for i, var in enumerate(vars):
-            context = self.viewmanager.registry.get_view(var)
-            if context and context.has_been_configured:
-                # Variable is still selected, preserve its configuration
-                state.varcolor[i] = context.colormap or self.get_default_colormap()
-                state.uselogscale[i] = context.use_log_scale
-                state.invert[i] = context.invert_colors
-                state.varmin[i] = (
-                    context.min_value if context.min_value is not None else 0
-                )
-                state.varmax[i] = (
-                    context.max_value if context.max_value is not None else 1
-                )
-                state.override_range[i] = context.override_range
+            # When loading from cached state, preserve existing color values
+            # Otherwise, initialize with defaults
+            if not use_cached_layout:
+                state.varcolor = [self.get_default_colormap()] * len(vars)
+                state.uselogscale = [False] * len(vars)
+                state.invert = [False] * len(vars)
+                state.varmin = [np.nan] * len(vars)
+                state.varmax = [np.nan] * len(vars)
+                state.override_range = [False] * len(vars)
+                state.colorbar_images = [""] * len(vars)  # Initialize empty images
+                state.varaverage = [np.nan] * len(vars)
             else:
-                # New variable or was deselected, use defaults
-                state.varcolor[i] = self.get_default_colormap()
-                # Other values remain as initialized defaults
+                # Preserve loaded values but ensure arrays match variable count
+                # Extend or trim arrays to match new variable count if needed
+                current_len = (
+                    len(state.varcolor)
+                    if hasattr(state, "varcolor") and state.varcolor
+                    else 0
+                )
+                if current_len != len(vars):
+                    # If array lengths don't match, extend with defaults or trim
+                    default_colormap = self.get_default_colormap()
+                    state.varcolor = (state.varcolor + [default_colormap] * len(vars))[
+                        : len(vars)
+                    ]
+                    state.uselogscale = (state.uselogscale + [False] * len(vars))[
+                        : len(vars)
+                    ]
+                    state.invert = (state.invert + [False] * len(vars))[: len(vars)]
+                    state.varmin = (state.varmin + [np.nan] * len(vars))[: len(vars)]
+                    state.varmax = (state.varmax + [np.nan] * len(vars))[: len(vars)]
+                    state.override_range = (state.override_range + [False] * len(vars))[
+                        : len(vars)
+                    ]
+                    state.varaverage = (state.varaverage + [np.nan] * len(vars))[
+                        : len(vars)
+                    ]
+                # Always reset colorbar images as they need to be regenerated
+                state.colorbar_images = [""] * len(vars)
 
             # Only use cached layout when explicitly requested (i.e., when loading state)
             layout_to_use = self._cached_layout if use_cached_layout else None
@@ -713,19 +679,28 @@ class EAMApp:
             ].tolist()
             self.state.dirty("interface_vars_state")
 
-    def clear_surface_vars(self):
-        self.state.surface_vars_state = [False] * len(self.state.surface_vars_state)
-        self.surface_vars_state = np.array([False] * len(self.surface_vars_state))
+    def clear_surface_vars(self, clear_var_name):
+        self.state[clear_var_name] = ""
+        self.ind_surface = None
+        self.state.surface_vars = self.source.surface_vars
+        self.state.surface_vars_state = [False] * len(self.source.surface_vars)
+        self.surface_vars_state = np.array([False] * len(self.source.surface_vars))
         self.state.dirty("surface_vars_state")
 
-    def clear_midpoint_vars(self):
-        self.state.midpoint_vars_state = [False] * len(self.state.midpoint_vars_state)
-        self.midpoint_vars_state = np.array([False] * len(self.midpoint_vars_state))
+    def clear_midpoint_vars(self, clear_var_name):
+        self.state[clear_var_name] = ""
+        self.ind_midpoint = None
+        self.state.midpoint_vars = self.source.midpoint_vars
+        self.state.midpoint_vars_state = [False] * len(self.source.midpoint_vars)
+        self.midpoint_vars_state = np.array([False] * len(self.source.midpoint_vars))
         self.state.dirty("midpoint_vars_state")
 
-    def clear_interface_vars(self):
-        self.state.interface_vars_state = [False] * len(self.state.interface_vars_state)
-        self.interface_vars_state = np.array([False] * len(self.interface_vars_state))
+    def clear_interface_vars(self, clear_var_name):
+        self.state[clear_var_name] = ""
+        self.ind_interface = None
+        self.state.interface_vars = self.source.interface_vars
+        self.state.interface_vars_state = [False] * len(self.source.interface_vars)
+        self.interface_vars_state = np.array([False] * len(self.source.interface_vars))
         self.state.dirty("interface_vars_state")
 
     def start(self, **kwargs):

@@ -169,27 +169,22 @@ class SliceSelection(CollapsableSection):
 
             with v2.VRow(classes="text-center align-center text-subtitle-1 pt-2 pa-2"):
                 with v2.VCol(cols=3, classes="py-0"):
-                    v2.VTextField(
-                        v_model=("cliplong[0]",),
-                        label="Min",
-                        suffix="°",
-                        classes="py-0",
-                        **style,
+                    html.Div(
+                        "{{ cliplong[0].toFixed(1) }}°",
+                        classes="font-weight-medium text-center",
                     )
                 with v2.VCol(cols=6, classes="py-0"):
                     html.Div("Longitude")
                 with v2.VCol(cols=3, classes="py-0"):
-                    v2.VTextField(
-                        v_model=("cliplong[1]",),
-                        label="Max",
-                        suffix="°",
-                        classes="py-0",
-                        **style,
+                    html.Div(
+                        "{{ cliplong[1].toFixed(1) }}°",
+                        classes="font-weight-medium text-center",
                     )
             v2.VRangeSlider(
                 v_model=("cliplong", [self.source.extents[0], self.source.extents[1]]),
                 min=-180,
                 max=180,
+                step=0.5,
                 color="blue-grey",
                 **style,
                 flat=True,
@@ -200,27 +195,22 @@ class SliceSelection(CollapsableSection):
 
             with v2.VRow(classes="text-center align-center text-subtitle-1 pt-4 px-2"):
                 with v2.VCol(cols=3, classes="py-0"):
-                    v2.VTextField(
-                        v_model=("cliplat[0]",),
-                        label="Min",
-                        suffix="°",
-                        classes="py-0",
-                        **style,
+                    html.Div(
+                        "{{ cliplat[0].toFixed(1) }}°",
+                        classes="font-weight-medium text-center",
                     )
                 with v2.VCol(cols=6, classes="py-0"):
                     html.Div("Latitude")
                 with v2.VCol(cols=3, classes="py-0"):
-                    v2.VTextField(
-                        v_model=("cliplat[1]",),
-                        label="Max",
-                        suffix="°",
-                        classes="py-0",
-                        **style,
+                    html.Div(
+                        "{{ cliplat[1].toFixed(1) }}°",
+                        classes="font-weight-medium text-center",
                     )
             v2.VRangeSlider(
                 v_model=("cliplat", [self.source.extents[2], self.source.extents[3]]),
                 min=-90,
                 max=90,
+                step=0.5,
                 color="blue-grey",
                 **style,
                 flat=True,
