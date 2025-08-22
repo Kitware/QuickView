@@ -1,19 +1,28 @@
 # QuickView Homepage
 
+
 ![eam-quickview-full](../images/eam-quickview-full.png)
+
 
 ## What is QuickView?
 
+!!! info inline end "Useful links"
 
-**EAM QuickView** is an interactive visualization tool
+    - [Repository](https://github.com/ayenpure/QuickView) on GitHub
+    - [Releases page](https://github.com/ayenpure/QuickView/releases/tag/v0.1.14)
+    - [Latest documentation](https://quickview.readthedocs.io/en/latest/)
+    - [Quick start](https://github.com/ayenpure/QuickView?tab=readme-ov-file#quick-start)
+    - Connecitivity file [download](https://zenodo.org/records/16908567)
+    - Sample data [download](https://zenodo.org/records/16922608)
+
+
+**EAM QuickView** is an open-source, interactive visualization tool
 tailored for scientists working with the atmospheric component of the 
-[Energy Exascale Earth System Model](https://e3sm.org/) (EAM,
-[Rasch et al., 2019](https://doi.org/10.1029/2019MS001629);
-[Golaz et al., 2022](https://doi.org/10.1029/2022MS003156); 
-[Donahue et al., 2024](10.1029/2024MS004314)).
+[Energy Exascale Earth System Model (E3SM)](https://e3sm.org/),
+the E3SM Atmosphere Model (EAM).
 The Graphical User Interface (GUI) built with Python and
-powered by [Trame](https://www.kitware.com/trame/) 
-gives users intuitive access to the powerful visualization capabilities of
+powered by [Trame](https://www.kitware.com/trame/) gives users an intuitive
+access to the powerful analysis and visualization capabilities of
 [ParaView](https://www.paraview.org/)
 without requiring a steep learning curve.
 
@@ -49,6 +58,7 @@ multivariate visualization and is currently focused on the EAM model.
 - Supports EAM simulation data from current (EAMv2, v3) and upcoming (v4)
   versions.
 
+ 
 ## Further Reading
 
 EAM QuickView leverages [ParaView](https://www.paraview.org/) for backend data
