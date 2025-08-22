@@ -271,7 +271,7 @@ class EAMAverage(VTKPythonAlgorithmBase):
         self.__Dims = -1
 
     def SetZonalAverage(self, zonal):
-        print("Checked zonal : ", zonal)
+        pass
 
     def RequestData(self, request, inInfo, outInfo):
         global _has_deps

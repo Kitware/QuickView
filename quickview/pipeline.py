@@ -242,7 +242,6 @@ class EAMVisSource:
                 self.timestamps = (
                     [timestep_values] if timestep_values is not None else []
                 )
-            print(self.timestamps)
 
             # Step 1: Extract and transform atmospheric data
             atmos_extract = EAMTransformAndExtract(
