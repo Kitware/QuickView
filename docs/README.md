@@ -4,14 +4,14 @@
 !!! info inline end "Useful Links"
 
     - [Releases (binary download)](https://github.com/ayenpure/QuickView/releases)
-    - [Quick start](#Quick-Start)
+    - Quick start (see this page)
     - [Documentation](https://quickview.readthedocs.io/en/latest/)
     - [Connecitivity file download](https://zenodo.org/records/16908567)
     - [Sample data download](https://zenodo.org/records/16922608)
     - [Repository](https://github.com/ayenpure/QuickView)
     - [Bug reports / feature requests](https://github.com/ayenpure/QuickView/issues)
 
-![EAM QuickView screenshot](../images/eam_quickview_full.png){ width="62%" }
+![EAM QuickView screenshot](images/eam_quickview_full.png){ width="62%" }
 
 ## What is QuickView?
 
