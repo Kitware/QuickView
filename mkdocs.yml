@@ -11,7 +11,7 @@ nav:
   - User's Guide:
       - Key Reminders:      userguide/reminders.md
       - Connectivity Files: userguide/connectivity.md
-      - Data File Format:   userguide/data_requirements.md
+      - Simulation Files:   userguide/data_requirements.md
       - GUI Overview:       userguide/gui_overview.md
       - Toolbar:            userguide/toolbar.md
       - Control Panel:      userguide/control_panel.md
@@ -24,3 +24,8 @@ markdown_extensions:
   - pymdownx.superfences
   - md_in_html
   - pymdownx.blocks.caption
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde

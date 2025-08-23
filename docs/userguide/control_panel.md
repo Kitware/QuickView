@@ -88,7 +88,8 @@ ranges to create contour plots for.
 
 For the vertical dimensions and the time dimension, the control panel
 also provides buttons for moving to (displaying) the previous or next element
-in a dimension, as well as "play" buttons for cycling over these dimensions.
+in a dimension, as well as "play"/"pause" (toggle) buttons for cycling over
+these dimensions or pausing the cycle.
 If the user clicks on a second "play" button when the app is cycling through
 a first dimension, the the cycling through the first dimension will be paused.
 
