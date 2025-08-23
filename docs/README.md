@@ -65,7 +65,7 @@ multivariate visualization and is currently focused on the EAM model.
 
 Please use the [Issues tab on GitHub](https://github.com/ayenpure/QuickView/issues).
 
-## Points of Contact
+## Project Background 
 
 The lead developer of EAM QuickView is
 [Abhishek Yenpure (abhi.yenpure@kitware.com)](https://www.kitware.com/abhishek-yenpure/)
