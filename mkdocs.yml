@@ -5,7 +5,7 @@ plugins:
   - mkdocstrings
 nav:
   - Home: README.md
-  - Installation and Launch:
+  - Install and Launch:
       - For End Users:      setup/for_end_users.md
       - For App Developers: setup/for_app_developers.md
   - User's Guide:
