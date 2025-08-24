@@ -368,6 +368,7 @@ class EAMApp:
         return to_export
 
     def load_state(self, state_file):
+        self.state.pipeline_valid = False
         from_state = json.loads(Path(state_file).read_text())
         data_file = from_state["data_file"]
         conn_file = from_state["conn_file"]
@@ -389,12 +390,14 @@ class EAMApp:
                             "w": item.get("w", 4),
                             "h": item.get("h", 3),
                         }
-        self.source.Update(
+        is_valid = self.source.Update(
             data_file=data_file,
             conn_file=conn_file,
         )
-        self.update_state_from_source()
-        self.update_state_from_config(from_state)
+        if is_valid:
+            self.update_state_from_source()
+            self.update_state_from_config(from_state)
+        self.state.pipeline_valid = is_valid
 
     def load_data(self):
         state = self.state
