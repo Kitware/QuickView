@@ -1,6 +1,6 @@
 # Viewport
 
-![Four views](../images/four_views.png){ width="65%", align=right }
+![Four views](../images/viewport_four_views.png){ width="65%", align=right }
 
 Once the user has selected variables using the [control panel](control_panel.md)
 and clicked the `LOAD VARIABLES` button in the [toolbar](toolbar.md), the app
@@ -19,15 +19,20 @@ average is calculated and displayed.
 -----
 ## Custimizing the viewport
 
-![Six views resized and rearranged](../images/six_variables_rearranged.png){ width="65%", align=right}
+![Many views resized and rearranged](../images/multiview_rearranged.png){ width="40%", align=right}
 
 To help present multiple variables in an informative way, the app allows users
-to rearrange the views via drag-and-drop and resize each view separately by
-clicking and dragging its bottom-right corner. Below is an example with
-rearranged views.
+to
+
+- rearrange the views via ^^drag-and-drop^^, and
+- resize each view separately by ^^clicking and dragging its bottom-right corner^^.
+
+The screenshot on the right shows an example with rearranged views.
 
 Furthermore, if a user saves a state file after these adjustments, they can
-later resume their analysis with the customized arrangement.
+later continue their analysis with the customized arrangement
+by using the app in the resume mode, as described in on the description
+of the [toolbar](toolbar.md).
 
 
 -----
@@ -56,9 +61,9 @@ a button to reset the color mapping to fit the range of values in the data.
     through different data slices in a dimension,
     the colormap will be automatically adjusted for each data slice.
 
-    If the user enters min./max. values in the mini menu and hit the `return` key
-    on the key board, a blue icon with a lock and the text "Manual" will show up
-    above the text box for the max. value, as can be seen in the right example above.
+    If the user specifies min. and/or max. values in the mini menu, a blue icon
+    with a picture of a lock and the text "Manual" will show up above the max.
+    value, as can be seen on the right in the example above.
     After that, when the "play" button in the [control panel](control_panel.md)
     is used to cycle through different data slices in a dimension,
     the colormap will be fixed for the user-specified range.
@@ -77,20 +82,4 @@ a button to reset the color mapping to fit the range of values in the data.
     The [toolbar](toolbar.md) at the top of the GUI includes icons for two colormap
     groups: colorblind-friendly and other. Only the colormaps belonging to the
     selected group (or groups) are shown in the `Color Map` drop-down menu.
-
----
-## Camera widget
-
-
-![camera widget](../images/camera_widget.png){ width="40%", align=right }
-
-Note that the zoom level and centering (i.e., the size and relative position) of
-the displayed variable within each view can also be adjusted.
-These settings are controlled centrally—for all
-views—via the camera widge (see screenshot) located in the bottom-right
-corner of the viewport.
-
-Also recall that the camera refresh button located at the right end of the
-tool bar can be used to reset the size and location of all views
-to the default setting.
 
