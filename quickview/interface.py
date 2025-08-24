@@ -19,7 +19,6 @@ from trame_server.core import Server
 
 from quickview.pipeline import EAMVisSource
 
-from quickview import __version__ as version
 from quickview.ui.slice_selection import SliceSelection
 from quickview.ui.projection_selection import ProjectionSelection
 from quickview.ui.variable_selection import VariableSelection
@@ -712,9 +711,16 @@ class EAMApp:
         if self._ui is None:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
-                # layout.footer.clear()
+                layout.footer.clear()
                 layout.title.clear()
                 with layout.title:
+                    v2.VProgressCircular(
+                        bg_color="rgba(0,0,0,0)",
+                        indeterminate=("trame__busy",),
+                        color="primary",
+                        width=3,
+                    )
+                    """
                     with html.Div(
                         style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",
                     ):
@@ -728,7 +734,7 @@ class EAMApp:
                             f"v{version}",
                             style="font-size: 12px; color: rgba(0, 0, 0, 0.8); font-weight: 700; letter-spacing: 0.3px; line-height: 1;",
                         )
-
+                    """
                 with layout.toolbar as toolbar:
                     Toolbar(
                         toolbar,

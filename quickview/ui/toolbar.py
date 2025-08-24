@@ -220,53 +220,6 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-file-check")
                     html.Span("Load Files")
-                """
-                with v2.VTooltip(bottom=True):
-                    with html.Template(v_slot_activator="{ on, attrs }"):
-                        with v2.VBtn(
-                            icon=True,
-                            dense=True,
-                            flat=True,
-                            small=True,
-                            click=load_data,
-                            v_bind="attrs",
-                            v_on="on",
-                        ):
-                            v2.VIcon("mdi-swap-horizontal")
-                    html.Span("Replace Files")
-                """
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        flat=True,
-                        small=True,
-                        v_bind="attrs",
-                        v_on="on",
-                    ):
-                        v2.VIcon(
-                            v_if="pipeline_valid",
-                            children=["mdi-check-circle-outline"],
-                            color="green",
-                        )
-                        v2.VIcon(
-                            v_if="!pipeline_valid",
-                            children=["mdi-alert-circle-outline"],
-                            color="red",
-                        )
-                with html.Div(v_if="pipeline_valid"):
-                    html.Span("Pipeline Valid")
-                with html.Div(v_if="!pipeline_valid"):
-                    html.Span("Pipeline Invalid")
-
-            v2.VDivider(vertical=True, classes="mx-2")
-            # State management buttons group
-            with v2.VCard(
-                flat=True,
-                classes="d-flex align-center px-2 py-1 mx-1",
-                style="background-color: #f5f5f5; border-radius: 4px; flex-shrink: 0;",
-            ):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
                         with v2.VBtn(
@@ -295,12 +248,30 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-upload")
                     html.Span("Load State")
-            v2.VProgressCircular(
-                bg_color="rgba(0,0,0,0)",
-                indeterminate=("trame__busy",),
-                color="primary",
-                width=3,
-            )
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            flat=True,
+                            small=True,
+                            v_bind="attrs",
+                            v_on="on",
+                        ):
+                            v2.VIcon(
+                                v_if="pipeline_valid",
+                                children=["mdi-check-circle-outline"],
+                                color="green",
+                            )
+                            v2.VIcon(
+                                v_if="!pipeline_valid",
+                                children=["mdi-alert-circle-outline"],
+                                color="red",
+                            )
+                    with html.Div(v_if="pipeline_valid"):
+                        html.Span("Pipeline Valid")
+                    with html.Div(v_if="!pipeline_valid"):
+                        html.Span("Pipeline Invalid")
             v2.VDivider(vertical=True, classes="mx-2")
             ViewControls(
                 zoom=zoom,
