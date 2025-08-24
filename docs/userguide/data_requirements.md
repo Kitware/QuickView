@@ -77,7 +77,8 @@ If `lev` is not present, QuickView attempts to find two 1D variables,
 pressure = (hyam * P0) + (hybm * PS0)
 ```
 
-where P0 = 1000 hPa and PS0 = 1000 Pa.
+where PS0 = 1000 hPa; P0 is read from the data file and set to 1000 hPa
+if not found.
 
 Similarly, for variables defined at layer interfaces, QuickView looks for
 either `ilev` or `hyai` and `hybi` for parsing the vertical dimension.

@@ -50,9 +50,10 @@ To launch the EAM QuickView GUI, simply double-click the app icon in your Applic
 
 !!! tip "Tip: Patience with First launch"
 
-    When a new version of the app is launched on your computer for the
+    When a new version of the app is launched on a computer for the
     first time, a significant amount of dependencies will be identified,
-    downloaded, and installed, which will take about a minute to a few minutes.
+    downloaded, and installed, which will take about a minute to a few minutes
+    and can be affected by the Internet connection.
 
     Subsequent launches should take just a few seconds.
 
