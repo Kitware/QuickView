@@ -6,8 +6,8 @@
     - [Releases (binary download)](https://github.com/ayenpure/QuickView/releases)
     - Quick start (see this page)
     - [Documentation](https://quickview.readthedocs.io/en/latest/)
-    - [Connecitivity file download](https://zenodo.org/records/16908567)
-    - [Sample data download](https://zenodo.org/records/16922608)
+    - [Connecitivity file download](https://zenodo.org/records/16908566)
+    - [Sample data download](https://zenodo.org/records/16922607)
     - [Repository](https://github.com/ayenpure/QuickView)
     - [Bug reports / feature requests](https://github.com/ayenpure/QuickView/issues)
 
@@ -30,9 +30,9 @@ without requiring a steep learning curve.
 
 - Install and launch the app for [end users](setup/for_end_users.md)
   or for [app developers](setup/for_app_developers.md).
-- Download [connectivity files](https://doi.org/10.5281/zenodo.16908567)
+- Download [connectivity files](https://doi.org/10.5281/zenodo.16908566)
   of EAM's cubed-sphere grids from Zenodo.
-- Optional: download [sample simulation output](https://zenodo.org/records/16922608)
+- Optional: download [sample simulation output](https://zenodo.org/records/16922607)
   to test the app.
 - For EAMv2 and v3 developers and users: if your simulation data files
   are *not* the original files written out by the model,

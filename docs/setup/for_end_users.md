@@ -20,7 +20,7 @@ just a few clicks.
    macOS users with Apple Silicon chips should download `QuickView_{version}_aarch64.dmg`,
    and those with Intel chips should download a `*_x64.dmg` file.
 
-2. **Important** for intermediate releases with 3-digit version numbers
+2. **Important** for intermediate releases with three-part version numbers
    (e.g., 1.0.1): After the download, use the following command in Terminal to
    unblock the app for macOS:
    ```
@@ -28,7 +28,7 @@ just a few clicks.
    ```
    Explanation: in order to facilitate frequent iterations between our
    developers on the software and science sides, only major releases with
-   two-digit version numbers like 1.0, 1.1 etc. are signed and notarized using
+   two-part version numbers like 1.0, 1.1 etc. are signed and notarized using
    Kitware's Apple Developer ID.
    Hence the command provided above is needed for intermediate releases,
    so that after download, the macOS Gatekeeper will not block the app.

@@ -24,8 +24,8 @@ gives users intuitive access to the powerful visualization capabilities of
 - Install and launch the app for [end users](docs/setup/for_end_users.md)
   or [app developers](docs/setup/for_app_developers.md).
 - Download connectivity files of EAM's cubed-sphere grids from
-  [Zenodo](https://doi.org/10.5281/zenodo.16908567).
-- Optional: download [sample simulation output](https://zenodo.org/records/16922608)
+  [Zenodo](https://doi.org/10.5281/zenodo.16908566).
+- Optional: download [sample simulation output](https://zenodo.org/records/16922607)
   to test the app.
 - For EAMv2 and v3 developers and users: if your simulation data files
   are *not* the original files written out by the model,

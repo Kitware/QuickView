@@ -3,7 +3,7 @@ QuickView has been developed using EAM's history output
 on the physics grids (`pg2` grids) written by
 EAMv2, v3, and an intermediate version towards v4 (EAMxx).
 Those sample output files can be found on
-[Zenodo](https://zenodo.org/records/16922608).
+[Zenodo](https://zenodo.org/records/16922607).
 
 Developers and users of EAM often use tools like NCO and CDO
 or write their own scripts to calculate time averages

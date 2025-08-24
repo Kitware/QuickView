@@ -4,7 +4,7 @@
 !!! tip inline end "Tip: Connecitivity File Download"
 
     A collection of connectivity files can be found on
-    [Zenodo](https://doi.org/10.5281/zenodo.16908567).
+    [Zenodo](https://doi.org/10.5281/zenodo.16908566).
     The archive is continuously updated as more users inform us
     about the grids their data files use.
 
