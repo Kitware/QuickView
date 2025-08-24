@@ -469,7 +469,11 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                 fillval = info.getncattr("_FillValue")
                 varmeta.fillval = fillval
             except Exception:
-                pass
+                try:
+                    fillval = info.getncattr("missing_value")
+                    varmeta.fillval = fillval
+                except Exception:
+                    pass
         self._surface_selection.DisableAllArrays()
         self._interface_selection.DisableAllArrays()
         self._midpoint_selection.DisableAllArrays()
