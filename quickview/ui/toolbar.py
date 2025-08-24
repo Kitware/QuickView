@@ -106,11 +106,6 @@ class Toolbar:
         self._load_state = load_state
         self._update_available_color_maps = update_available_color_maps
 
-        # Initialize toggle states
-        with self.state:
-            self.state.use_cvd_colors = False
-            self.state.use_standard_colors = True
-
         # Set initial color maps based on default toggle states
         self._update_color_maps()
 

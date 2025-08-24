@@ -201,6 +201,14 @@ class ViewManager:
         # Register state change listener for pipeline_valid
         self.state.change("pipeline_valid")(self._on_pipeline_valid_change)
 
+    def get_default_colormap(self):
+        """Get default colormap from interface or fallback"""
+        # Try to get from the server's interface instance
+        if self.state.use_cvd_colors:
+            return "batlow"
+        # Fallback to a reasonable default
+        return "Cool to Warm (Extended)"
+
     def _on_pipeline_valid_change(self, pipeline_valid, **kwargs):
         """Clear view registry when pipeline becomes invalid."""
         if not pipeline_valid:
@@ -477,114 +485,37 @@ class ViewManager:
                     view.BackgroundColorMode = "Gradient"
                     view.GetRenderWindow().SetOffScreenRendering(True)
                     context.state.view_proxy = view
-                    # Use loaded color range if override is enabled and values are valid
-                    if (
-                        index < len(state.override_range)
-                        and state.override_range[index]
-                        and index < len(state.varmin)
-                        and index < len(state.varmax)
-                        and not (
-                            state.varmin[index] != state.varmin[index]
-                        )  # Check for NaN
-                        and not (state.varmax[index] != state.varmax[index])
-                    ):  # Check for NaN
-                        context.config.min_value = state.varmin[index]
-                        context.config.max_value = state.varmax[index]
-                        context.config.override_range = True
-                    else:
+                    # First time creating view for this context
+                    # Context already has its configuration from previous sessions
+                    # Just update range if not overridden (critical requirement)
+                    if not context.config.override_range:
                         context.config.min_value = varrange[0]
                         context.config.max_value = varrange[1]
                     self.configure_new_view(var, context, self.source.views)
                 else:
-                    # Update context with all loaded color settings
-                    # Update colormap if available
-                    if index < len(state.varcolor):
-                        context.config.colormap = state.varcolor[index]
-                    # Update log scale setting if available
-                    if index < len(state.uselogscale):
-                        context.config.use_log_scale = state.uselogscale[index]
-                    # Update invert colors setting if available
-                    if index < len(state.invert):
-                        context.config.invert_colors = state.invert[index]
+                    # Trust the ViewContext - it's already configured
+                    # Only update the color range if not overridden (critical requirement)
+                    if not context.config.override_range:
+                        context.config.min_value = varrange[0]
+                        context.config.max_value = varrange[1]
 
-                    # Update color range if override is enabled and values are valid
-                    if (
-                        index < len(state.override_range)
-                        and state.override_range[index]
-                        and index < len(state.varmin)
-                        and index < len(state.varmax)
-                        and not (
-                            state.varmin[index] != state.varmin[index]
-                        )  # Check for NaN
-                        and not (state.varmax[index] != state.varmax[index])
-                    ):  # Check for NaN
-                        context.config.min_value = state.varmin[index]
-                        context.config.max_value = state.varmax[index]
-                        context.config.override_range = True
-
-                    # Apply all the loaded color settings to the transfer function
-                    coltrfunc = GetColorTransferFunction(var)
-                    # Apply colormap
-                    coltrfunc.ApplyPreset(context.config.colormap, True)
-                    # Apply log scale
-                    if context.config.use_log_scale:
-                        coltrfunc.MapControlPointsToLogSpace()
-                        coltrfunc.UseLogScale = 1
-                    else:
-                        coltrfunc.UseLogScale = 0
-                    # Apply invert colors
-                    if context.config.invert_colors:
-                        coltrfunc.InvertTransferFunction()
-                    # Apply color range if overridden
-                    if context.config.override_range:
-                        coltrfunc.RescaleTransferFunction(
-                            context.config.min_value, context.config.max_value
-                        )
-
+                    # Only refresh the display, don't change configuration
                     self.refresh_view_display(context)
             else:
+                # Creating a completely new ViewContext
                 view = CreateRenderView()
-                # Preserve override flag if context already exists
-                existing_context = self.registry.get_view(var)
-                override = (
-                    existing_context.config.override_range
-                    if existing_context
-                    else (
-                        index < len(state.override_range)
-                        and state.override_range[index]
-                    )
-                )
 
-                # Use loaded color range if override is enabled and values are valid
-                if (
-                    override
-                    and index < len(state.varmin)
-                    and index < len(state.varmax)
-                    and not (
-                        state.varmin[index] != state.varmin[index]
-                    )  # Check for NaN
-                    and not (state.varmax[index] != state.varmax[index])
-                ):  # Check for NaN
-                    min_val = state.varmin[index]
-                    max_val = state.varmax[index]
-                else:
-                    min_val = varrange[0]
-                    max_val = varrange[1]
+                # Use defaults for new variables
+                default_colormap = self.get_default_colormap()
 
                 config = ViewConfiguration(
                     variable=var,
-                    colormap=state.varcolor[index]
-                    if index < len(state.varcolor)
-                    else state.varcolor[0],
-                    use_log_scale=state.uselogscale[index]
-                    if index < len(state.uselogscale)
-                    else False,
-                    invert_colors=state.invert[index]
-                    if index < len(state.invert)
-                    else False,
-                    min_value=min_val,
-                    max_value=max_val,
-                    override_range=override,
+                    colormap=default_colormap,
+                    use_log_scale=False,  # Default
+                    invert_colors=False,  # Default
+                    min_value=varrange[0],  # Always use current data range
+                    max_value=varrange[1],
+                    override_range=False,  # Default to auto-range
                 )
                 view_state = ViewState(
                     view_proxy=view,
