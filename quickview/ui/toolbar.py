@@ -1,5 +1,6 @@
 from trame.decorators import TrameApp, task
 from trame.widgets import html, vuetify2 as v2
+from quickview.ui.view_settings import ViewControls
 
 try:
     from trame.widgets import tauri
@@ -88,6 +89,8 @@ class Toolbar:
         load_variables=None,
         update_available_color_maps=None,
         generate_state=None,
+        zoom=None,
+        move=None,
         **kwargs,
     ):
         self.server = server
@@ -299,6 +302,11 @@ class Toolbar:
                 width=3,
             )
             v2.VDivider(vertical=True, classes="mx-2")
+            ViewControls(
+                zoom=zoom,
+                move=move,
+                style="flex-shrink: 0;",
+            )
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(

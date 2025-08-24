@@ -126,9 +126,15 @@ class ViewProperties(v2.VMenu):
 @TrameApp()
 class ViewControls(v2.VCard):
     def __init__(self, zoom=None, move=None, **kwargs):
+        # Merge any incoming style with our default style
+        default_style = "background-color: #f5f5f5; border-radius: 4px;"
+        incoming_style = kwargs.pop("style", "")
+        merged_style = f"{default_style} {incoming_style}".strip()
+
         super().__init__(
-            classes="overflow-hidden pa-0 ma-2",
-            rounded="lg",
+            flat=True,
+            classes="d-flex align-center px-2 py-1 mx-1",
+            style=merged_style,
             **kwargs,
         )
         with self:
@@ -145,55 +151,63 @@ class ViewControls(v2.VCard):
                     v2.VIcon("mdi-camera")
             style = dict(dense=True, hide_details=True)
             """
-            style = dict(
+            btn_style = dict(
                 icon=True,
                 flat=True,
                 outlined=False,
                 density="compact",
                 hide_details=True,
-                height="30px",
-                width="30px",
+                height="28px",
+                width="28px",
+                classes="ma-0",
             )
-            with v2.VCardText(classes="pa-0", style="opacity: 80%"):
+
+            with v2.VCardText(classes="pa-1", style="opacity: 85%"):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
                         with html.Div(
                             v_bind="attrs",
                             v_on="on",
+                            classes="d-flex flex-column",
+                            style="gap: 2px;",
                         ):
-                            with v2.VBtn(
-                                **style,
-                                click=(zoom, "['in']"),
+                            # First row: Up, Left, Zoom In
+                            with html.Div(
+                                classes="d-flex justify-center", style="gap: 2px;"
                             ):
-                                v2.VIcon("mdi-magnify-plus", large=True)
-                            v2.VDivider(vertical=True)
-                            with v2.VBtn(
-                                **style,
-                                click=(zoom, "['out']"),
+                                with v2.VBtn(
+                                    **btn_style,
+                                    click=(move, "['up']"),
+                                ):
+                                    v2.VIcon("mdi-arrow-up-thick", size="18")
+                                with v2.VBtn(
+                                    **btn_style,
+                                    click=(move, "['left']"),
+                                ):
+                                    v2.VIcon("mdi-arrow-left-thick", size="18")
+                                with v2.VBtn(
+                                    **btn_style,
+                                    click=(zoom, "['in']"),
+                                ):
+                                    v2.VIcon("mdi-magnify-plus", size="18")
+
+                            # Second row: Down, Right, Zoom Out
+                            with html.Div(
+                                classes="d-flex justify-center", style="gap: 2px;"
                             ):
-                                v2.VIcon("mdi-magnify-minus", large=True)
-                            v2.VDivider(vertical=True)
-                            with v2.VBtn(
-                                **style,
-                                click=(move, "['up']"),
-                            ):
-                                v2.VIcon("mdi-arrow-up-thick", large=True)
-                            v2.VDivider(vertical=True)
-                            with v2.VBtn(
-                                **style,
-                                click=(move, "['down']"),
-                            ):
-                                v2.VIcon("mdi-arrow-down-thick", large=True)
-                            v2.VDivider(vertical=True)
-                            with v2.VBtn(
-                                **style,
-                                click=(move, "['left']"),
-                            ):
-                                v2.VIcon("mdi-arrow-left-thick", large=True)
-                            v2.VDivider(vertical=True)
-                            with v2.VBtn(
-                                **style,
-                                click=(move, "['right']"),
-                            ):
-                                v2.VIcon("mdi-arrow-right-thick", large=True)
-                    html.Span("View Camera Controls")
+                                with v2.VBtn(
+                                    **btn_style,
+                                    click=(move, "['down']"),
+                                ):
+                                    v2.VIcon("mdi-arrow-down-thick", size="18")
+                                with v2.VBtn(
+                                    **btn_style,
+                                    click=(move, "['right']"),
+                                ):
+                                    v2.VIcon("mdi-arrow-right-thick", size="18")
+                                with v2.VBtn(
+                                    **btn_style,
+                                    click=(zoom, "['out']"),
+                                ):
+                                    v2.VIcon("mdi-magnify-minus", size="18")
+                    html.Span("View Camera Controls", classes="text-caption mt-1")

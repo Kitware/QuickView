@@ -99,7 +99,7 @@ def FindSpecialVariable(data, lev, hya, hyb):
     if len(_hyai) != len(_hybi):
         raise Exception("Unmatched pair of hya and hyb variables found")
 
-    p0 = EAMConstants.P0
+    p0 = data["P0"][:].item() if "P0" in var else EAMConstants.P0
     ps0 = EAMConstants.PS0
 
     if len(_hyai) == 1:

@@ -23,7 +23,7 @@ from quickview import __version__ as version
 from quickview.ui.slice_selection import SliceSelection
 from quickview.ui.projection_selection import ProjectionSelection
 from quickview.ui.variable_selection import VariableSelection
-from quickview.ui.view_settings import ViewProperties, ViewControls
+from quickview.ui.view_settings import ViewProperties
 from quickview.ui.toolbar import Toolbar
 
 # Build color cache here
@@ -738,22 +738,9 @@ class EAMApp:
                         load_variables=self.load_variables,
                         update_available_color_maps=self.update_available_color_maps,
                         generate_state=self.generate_state,
+                        zoom=self.zoom,
+                        move=self.pan_camera,
                     )
-
-                card_style = """
-                    position: fixed;
-                    bottom: 1rem;
-                    right: 1rem;
-                    height: 2.4rem;
-                    z-index: 2;
-                    display: flex;
-                    align-items: center;
-                """
-                ViewControls(
-                    zoom=self.zoom,
-                    move=self.pan_camera,
-                    style=card_style,
-                )
 
                 with layout.drawer as drawer:
                     drawer.width = 400
