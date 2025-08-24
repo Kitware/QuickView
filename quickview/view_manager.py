@@ -11,7 +11,6 @@ from paraview.simple import (
     GetColorTransferFunction,
     AddCameraLink,
     Render,
-    GetActiveView,
 )
 
 from quickview.pipeline import EAMVisSource
@@ -218,6 +217,7 @@ class ViewManager:
             return
         data = sm.Fetch(self.source.views["atmosphere_data"])
 
+        first_view = None
         for var, context in self.registry.items():
             varavg = self.compute_average(var, vtkdata=data)
             # Directly set average in trame state
@@ -233,8 +233,12 @@ class ViewManager:
             self.sync_color_config_to_state(context.index, context)
             self.generate_colorbar_image(context.index)
 
-            view = GetActiveView()
-            view.ResetCamera(True, 0.9)
+            # Track the first view for camera fitting
+            if first_view is None and context.state.view_proxy:
+                first_view = context.state.view_proxy
+
+        if first_view is not None:
+            first_view.ResetCamera(True, 0.9)
 
     def refresh_view_display(self, context: ViewContext):
         if not context.config.override_range:

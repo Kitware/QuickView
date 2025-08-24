@@ -292,6 +292,12 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-upload")
                     html.Span("Load State")
+            v2.VProgressCircular(
+                bg_color="rgba(0,0,0,0)",
+                indeterminate=("trame__busy",),
+                color="primary",
+                width=3,
+            )
             v2.VDivider(vertical=True, classes="mx-2")
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):

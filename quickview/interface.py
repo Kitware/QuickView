@@ -721,7 +721,7 @@ class EAMApp:
                         (
                             html.Img(
                                 src=f"data:image/png;base64,{LOGO_BASE64}",
-                                style="height: 40px; width: 80px; border-radius: 4px; margin-bottom: 2px;",
+                                style="height: 30px; width: 60px; border-radius: 4px; margin-bottom: 2px;",
                             ),
                         )
                         html.Span(
