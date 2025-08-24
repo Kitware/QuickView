@@ -112,6 +112,15 @@ class Toolbar:
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
             toolbar.style = "overflow-x: auto; overflow-y: hidden;"
+            with html.Div(
+                style="min-width: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;"
+            ):
+                v2.VProgressCircular(
+                    bg_color="rgba(0,0,0,0)",
+                    indeterminate=("trame__busy",),
+                    color="primary",
+                    size=24,
+                )
             v2.VDivider(vertical=True, classes="mx-2")
             v2.VBtn(
                 "Load Variables",

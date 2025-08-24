@@ -314,6 +314,7 @@ class EAMApp:
             state.surface_vars_state = selection_surface
             state.midpoint_vars_state = selection_midpoint
             state.interface_vars_state = selection_interface
+        self.update_available_color_maps()
         self.surface_vars_state = np.array(selection_surface)
         self.midpoint_vars_state = np.array(selection_midpoint)
         self.interface_vars_state = np.array(selection_interface)
@@ -717,28 +718,21 @@ class EAMApp:
             with self._ui as layout:
                 layout.footer.clear()
                 layout.title.clear()
-                with layout.title:
-                    v2.VProgressCircular(
-                        bg_color="rgba(0,0,0,0)",
-                        indeterminate=("trame__busy",),
-                        color="primary",
-                        width=3,
+                """
+                with html.Div(
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",
+                ):
+                    (
+                        html.Img(
+                            src=f"data:image/png;base64,{LOGO_BASE64}",
+                            style="height: 30px; width: 60px; border-radius: 4px; margin-bottom: 2px;",
+                        ),
                     )
-                    """
-                    with html.Div(
-                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",
-                    ):
-                        (
-                            html.Img(
-                                src=f"data:image/png;base64,{LOGO_BASE64}",
-                                style="height: 30px; width: 60px; border-radius: 4px; margin-bottom: 2px;",
-                            ),
-                        )
-                        html.Span(
-                            f"v{version}",
-                            style="font-size: 12px; color: rgba(0, 0, 0, 0.8); font-weight: 700; letter-spacing: 0.3px; line-height: 1;",
-                        )
-                    """
+                    html.Span(
+                        f"v{version}",
+                        style="font-size: 12px; color: rgba(0, 0, 0, 0.8); font-weight: 700; letter-spacing: 0.3px; line-height: 1;",
+                    )
+                """
                 with layout.toolbar as toolbar:
                     Toolbar(
                         toolbar,
