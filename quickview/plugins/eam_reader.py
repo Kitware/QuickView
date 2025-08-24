@@ -349,36 +349,24 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
     def _load_2d_variable(self, vardata, varmeta, timeInd):
         """Load 2D variable data with optimized operations."""
         # Get data without unnecessary copy
-        data = vardata[varmeta.name][timeInd]
-        # Reshape instead of flatten to avoid copy when possible
-        data = data.reshape(-1)
-        # Create a copy only if we need to modify values
-        if varmeta.fillval is not None:
-            data = data.copy()  # Only copy when needed
-            mask = data == varmeta.fillval
-            data[mask] = np.nan
+        data = vardata[varmeta.name][:].data[timeInd].flatten()
+        data = np.where(data == varmeta.fillval, np.nan, data)
         return data
 
     def _load_3d_slice(self, vardata, varmeta, timeInd, start_idx, end_idx):
         """Load a slice of 3D variable data with optimized operations."""
         # Load full 3D data for time step
-        data = vardata[varmeta.name][timeInd]
-
-        if varmeta.transpose:
-            # Only transpose if needed
-            data = data.T
-
-        # Reshape to 2D (levels, ncells) and extract slice
-        data_reshaped = data.reshape(data.shape[0], -1)
-        slice_data = data_reshaped.flat[start_idx:end_idx]
-
-        # Create a copy for fill value replacement
-        if varmeta.fillval is not None:
-            slice_data = slice_data.copy()
-            mask = slice_data == varmeta.fillval
-            slice_data[mask] = np.nan
-
-        return slice_data
+        if not varmeta.transpose:
+            data = vardata[varmeta.name][:].data[timeInd].flatten()[start_idx:end_idx]
+        else:
+            data = (
+                vardata[varmeta.name][:]
+                .data[timeInd]
+                .transpose()
+                .flatten()[start_idx:end_idx]
+            )
+        data = np.where(data == varmeta.fillval, np.nan, data)
+        return data
 
     def _get_enabled_arrays(self, var_list, selection_obj):
         """Get list of enabled variable names from selection object."""
@@ -477,7 +465,11 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
             elif varmeta.type == VarType._3Di:
                 self._interface_vars.append(varmeta)
                 self._interface_selection.AddArray(name)
-
+            try:
+                fillval = info.getncattr("_FillValue")
+                varmeta.fillval = fillval
+            except Exception:
+                pass
         self._surface_selection.DisableAllArrays()
         self._interface_selection.DisableAllArrays()
         self._midpoint_selection.DisableAllArrays()
