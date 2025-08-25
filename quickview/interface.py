@@ -19,11 +19,10 @@ from trame_server.core import Server
 
 from quickview.pipeline import EAMVisSource
 
-from quickview import __version__ as version
 from quickview.ui.slice_selection import SliceSelection
 from quickview.ui.projection_selection import ProjectionSelection
 from quickview.ui.variable_selection import VariableSelection
-from quickview.ui.view_settings import ViewProperties, ViewControls
+from quickview.ui.view_settings import ViewProperties
 from quickview.ui.toolbar import Toolbar
 
 # Build color cache here
@@ -303,7 +302,7 @@ class EAMApp:
     def update_state_from_config(self, initstate):
         source = self.source
         self.state.update(initstate)
-        self.update_available_color_maps()
+
         with self.state as state:
             state.surface_vars = source.surface_vars
             state.interface_vars = source.interface_vars
@@ -315,7 +314,7 @@ class EAMApp:
             state.surface_vars_state = selection_surface
             state.midpoint_vars_state = selection_midpoint
             state.interface_vars_state = selection_interface
-
+        self.update_available_color_maps()
         self.surface_vars_state = np.array(selection_surface)
         self.midpoint_vars_state = np.array(selection_midpoint)
         self.interface_vars_state = np.array(selection_interface)
@@ -369,6 +368,7 @@ class EAMApp:
         return to_export
 
     def load_state(self, state_file):
+        self.state.pipeline_valid = False
         from_state = json.loads(Path(state_file).read_text())
         data_file = from_state["data_file"]
         conn_file = from_state["conn_file"]
@@ -390,12 +390,14 @@ class EAMApp:
                             "w": item.get("w", 4),
                             "h": item.get("h", 3),
                         }
-        self.source.Update(
+        is_valid = self.source.Update(
             data_file=data_file,
             conn_file=conn_file,
         )
-        self.update_state_from_source()
-        self.update_state_from_config(from_state)
+        if is_valid:
+            self.update_state_from_source()
+            self.update_state_from_config(from_state)
+        self.state.pipeline_valid = is_valid
 
     def load_data(self):
         state = self.state
@@ -474,10 +476,11 @@ class EAMApp:
         with self.state as state:
             state.variables = vars
 
-            # When loading from cached state, preserve existing color values
-            # Otherwise, initialize with defaults
+            # Initialize arrays that are always needed regardless of cache status
+            # Color configuration arrays will be populated by ViewContext via sync_color_config_to_state
             if not use_cached_layout:
-                state.varcolor = [self.get_default_colormap()] * len(vars)
+                # Initialize empty arrays - ViewContext will populate them through sync
+                state.varcolor = [""] * len(vars)
                 state.uselogscale = [False] * len(vars)
                 state.invert = [False] * len(vars)
                 state.varmin = [np.nan] * len(vars)
@@ -494,11 +497,9 @@ class EAMApp:
                     else 0
                 )
                 if current_len != len(vars):
-                    # If array lengths don't match, extend with defaults or trim
-                    default_colormap = self.get_default_colormap()
-                    state.varcolor = (state.varcolor + [default_colormap] * len(vars))[
-                        : len(vars)
-                    ]
+                    # If array lengths don't match, extend with empty strings or trim
+                    # ViewContext will populate correct values through sync
+                    state.varcolor = (state.varcolor + [""] * len(vars))[: len(vars)]
                     state.uselogscale = (state.uselogscale + [False] * len(vars))[
                         : len(vars)
                     ]
@@ -703,6 +704,9 @@ class EAMApp:
         self.interface_vars_state = np.array([False] * len(self.source.interface_vars))
         self.state.dirty("interface_vars_state")
 
+    def close_view(self, index):
+        print("Requested close view for ", index)
+
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
         self.ui.server.start(**kwargs)
@@ -712,23 +716,23 @@ class EAMApp:
         if self._ui is None:
             self._ui = SinglePageWithDrawerLayout(self.server)
             with self._ui as layout:
-                # layout.footer.clear()
+                layout.footer.clear()
                 layout.title.clear()
-                with layout.title:
-                    with html.Div(
-                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",
-                    ):
-                        (
-                            html.Img(
-                                src=f"data:image/png;base64,{LOGO_BASE64}",
-                                style="height: 30px; width: 60px; border-radius: 4px; margin-bottom: 2px;",
-                            ),
-                        )
-                        html.Span(
-                            f"v{version}",
-                            style="font-size: 12px; color: rgba(0, 0, 0, 0.8); font-weight: 700; letter-spacing: 0.3px; line-height: 1;",
-                        )
-
+                """
+                with html.Div(
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",
+                ):
+                    (
+                        html.Img(
+                            src=f"data:image/png;base64,{LOGO_BASE64}",
+                            style="height: 30px; width: 60px; border-radius: 4px; margin-bottom: 2px;",
+                        ),
+                    )
+                    html.Span(
+                        f"v{version}",
+                        style="font-size: 12px; color: rgba(0, 0, 0, 0.8); font-weight: 700; letter-spacing: 0.3px; line-height: 1;",
+                    )
+                """
                 with layout.toolbar as toolbar:
                     Toolbar(
                         toolbar,
@@ -738,22 +742,9 @@ class EAMApp:
                         load_variables=self.load_variables,
                         update_available_color_maps=self.update_available_color_maps,
                         generate_state=self.generate_state,
+                        zoom=self.zoom,
+                        move=self.pan_camera,
                     )
-
-                card_style = """
-                    position: fixed;
-                    bottom: 1rem;
-                    right: 1rem;
-                    height: 2.4rem;
-                    z-index: 2;
-                    display: flex;
-                    align-items: center;
-                """
-                ViewControls(
-                    zoom=self.zoom,
-                    move=self.pan_camera,
-                    style=card_style,
-                )
 
                 with layout.drawer as drawer:
                     drawer.width = 400
@@ -843,34 +834,9 @@ class EAMApp:
                                     html.Div(
                                         style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
                                     )
-                                    # Top-left info: time and level info
+                                    # Top-left info: time, level, variable name and average
                                     with html.Div(
                                         style="position: absolute; top: 8px; left: 8px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.1); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2;",
-                                        classes="drag-ignore font-monospace",
-                                    ):
-                                        # Show time
-                                        html.Div(
-                                            "t = {{ tstamp }}",
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                        # Show level for midpoint variables
-                                        html.Div(
-                                            v_if="midpoint_vars.includes(variables[idx])",
-                                            children="k = {{ midpoint }}",
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                        # Show level for interface variables
-                                        html.Div(
-                                            v_if="interface_vars.includes(variables[idx])",
-                                            children="k = {{ interface }}",
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                    # Top-right info: variable name and average
-                                    with html.Div(
-                                        style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.1); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2; text-align: right;",
                                         classes="drag-ignore font-monospace",
                                     ):
                                         # Variable name
@@ -888,6 +854,26 @@ class EAMApp:
                                                 "'N/A' "
                                                 "}})"
                                             ),
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
+                                        # Show time
+                                        html.Div(
+                                            "t = {{ tstamp }}",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
+                                        # Show level for midpoint variables
+                                        html.Div(
+                                            v_if="midpoint_vars.includes(variables[idx])",
+                                            children="k = {{ midpoint }}",
+                                            style="color: white;",
+                                            classes="font-weight-medium",
+                                        )
+                                        # Show level for interface variables
+                                        html.Div(
+                                            v_if="interface_vars.includes(variables[idx])",
+                                            children="k = {{ interface }}",
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )
@@ -977,5 +963,11 @@ class EAMApp:
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )
+                                # with v2.VBtn(
+                                #    icon=True,
+                                #    style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
+                                #    click=(self.close_view, "[idx]"),
+                                # ):
+                                #    v2.VIcon("mdi-close")
 
         return self._ui

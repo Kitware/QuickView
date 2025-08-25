@@ -1,5 +1,6 @@
 from trame.decorators import TrameApp, task
 from trame.widgets import html, vuetify2 as v2
+from quickview.ui.view_settings import ViewControls
 
 try:
     from trame.widgets import tauri
@@ -88,6 +89,8 @@ class Toolbar:
         load_variables=None,
         update_available_color_maps=None,
         generate_state=None,
+        zoom=None,
+        move=None,
         **kwargs,
     ):
         self.server = server
@@ -103,17 +106,21 @@ class Toolbar:
         self._load_state = load_state
         self._update_available_color_maps = update_available_color_maps
 
-        # Initialize toggle states
-        with self.state:
-            self.state.use_cvd_colors = False
-            self.state.use_standard_colors = True
-
         # Set initial color maps based on default toggle states
         self._update_color_maps()
 
         with layout_toolbar as toolbar:
             toolbar.density = "compact"
             toolbar.style = "overflow-x: auto; overflow-y: hidden;"
+            with html.Div(
+                style="min-width: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;"
+            ):
+                v2.VProgressCircular(
+                    bg_color="rgba(0,0,0,0)",
+                    indeterminate=("trame__busy",),
+                    color="primary",
+                    size=24,
+                )
             v2.VDivider(vertical=True, classes="mx-2")
             v2.VBtn(
                 "Load Variables",
@@ -217,53 +224,6 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-file-check")
                     html.Span("Load Files")
-                """
-                with v2.VTooltip(bottom=True):
-                    with html.Template(v_slot_activator="{ on, attrs }"):
-                        with v2.VBtn(
-                            icon=True,
-                            dense=True,
-                            flat=True,
-                            small=True,
-                            click=load_data,
-                            v_bind="attrs",
-                            v_on="on",
-                        ):
-                            v2.VIcon("mdi-swap-horizontal")
-                    html.Span("Replace Files")
-                """
-            with v2.VTooltip(bottom=True):
-                with html.Template(v_slot_activator="{ on, attrs }"):
-                    with v2.VBtn(
-                        icon=True,
-                        dense=True,
-                        flat=True,
-                        small=True,
-                        v_bind="attrs",
-                        v_on="on",
-                    ):
-                        v2.VIcon(
-                            v_if="pipeline_valid",
-                            children=["mdi-check-circle-outline"],
-                            color="green",
-                        )
-                        v2.VIcon(
-                            v_if="!pipeline_valid",
-                            children=["mdi-alert-circle-outline"],
-                            color="red",
-                        )
-                with html.Div(v_if="pipeline_valid"):
-                    html.Span("Pipeline Valid")
-                with html.Div(v_if="!pipeline_valid"):
-                    html.Span("Pipeline Invalid")
-
-            v2.VDivider(vertical=True, classes="mx-2")
-            # State management buttons group
-            with v2.VCard(
-                flat=True,
-                classes="d-flex align-center px-2 py-1 mx-1",
-                style="background-color: #f5f5f5; border-radius: 4px; flex-shrink: 0;",
-            ):
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
                         with v2.VBtn(
@@ -292,13 +252,36 @@ class Toolbar:
                         ):
                             v2.VIcon("mdi-upload")
                     html.Span("Load State")
-            v2.VProgressCircular(
-                bg_color="rgba(0,0,0,0)",
-                indeterminate=("trame__busy",),
-                color="primary",
-                width=3,
-            )
+                with v2.VTooltip(bottom=True):
+                    with html.Template(v_slot_activator="{ on, attrs }"):
+                        with v2.VBtn(
+                            icon=True,
+                            dense=True,
+                            flat=True,
+                            small=True,
+                            v_bind="attrs",
+                            v_on="on",
+                        ):
+                            v2.VIcon(
+                                v_if="pipeline_valid",
+                                children=["mdi-check-circle-outline"],
+                                color="green",
+                            )
+                            v2.VIcon(
+                                v_if="!pipeline_valid",
+                                children=["mdi-alert-circle-outline"],
+                                color="red",
+                            )
+                    with html.Div(v_if="pipeline_valid"):
+                        html.Span("Pipeline Valid")
+                    with html.Div(v_if="!pipeline_valid"):
+                        html.Span("Pipeline Invalid")
             v2.VDivider(vertical=True, classes="mx-2")
+            ViewControls(
+                zoom=zoom,
+                move=move,
+                style="flex-shrink: 0;",
+            )
             with v2.VTooltip(bottom=True):
                 with html.Template(v_slot_activator="{ on, attrs }"):
                     with v2.VBtn(
