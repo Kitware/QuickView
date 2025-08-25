@@ -16,14 +16,13 @@
 ## What is QuickView?
 
 **EAM QuickView** is an open-source, interactive visualization tool
-tailored for scientists working with the atmospheric component of the 
+designed for scientists working with the atmospheric component of the
 [Energy Exascale Earth System Model (E3SM)](https://e3sm.org/),
-the E3SM Atmosphere Model (EAM).
-The Graphical User Interface (GUI) built with Python and
-powered by [Trame](https://www.kitware.com/trame/) gives users an intuitive
-access to the powerful analysis and visualization capabilities of
-[ParaView](https://www.paraview.org/)
-without requiring a steep learning curve.
+known as the E3SM Atmosphere Model (EAM).
+Its Python- and [Trame](https://www.kitware.com/trame/)-based
+Graphical User Interface (GUI) provides
+intuitive access to [ParaView](https://www.paraview.org/)'s
+powerful analysis and visualization capabilities, without the steep learning curve.
 
 ---
 ## Quick Start
