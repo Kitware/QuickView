@@ -19,18 +19,17 @@
 
     Most buttons, sliders, and selection boxes in the GUI apply their effects
     immediately upon user interaction. The only exception is the variable
-    selection: after variables are chosen for the first time following file load
+    selection: After variables are chosen for the first time following file load
     or after the selection is changed, the user ^^must^^ click the `LOAD VARIABLES`
     button in the [toolbar](toolbar.md) for the new selection to take effect.
      
 !!! tip "Tip: Viewport Layout"
 
-    The QuickView app is designed to present multiple variables simultaneously in
-    an informative way. Users can ^^rearrange^^ the individual views
-    (i.e., global or regional maps of different variables) in the
-    [viewport](viewport.md) ^^via drag-and-drop^^,
-    and ^^resize^^ each view separately ^^by clicking and dragging
-    its bottom-right corner^^.
+    The QuickView app is designed to present multiple variables simultaneously
+    in an informative way. Users can ^^rearrange^^ the individual views
+    (i.e., contour plots) in the [viewport](viewport.md) via ^^drag-and-drop^^,
+    and ^^resize^^ each view separately by clicking and dragging
+    its ^^bottom-right corner^^.
 
 
     Furthermore, if a user saves a state file after these
@@ -41,9 +40,9 @@
 
     In the current version, after the `LOAD VARIABLES` button is clicked or
     a visualization setting is changed, some (or all) of
-    the images in the [viewport](viewport.md) might exhibit a display issue, e.g.,
+    the views in the [viewport](viewport.md) may exhibit display issues, e.g.,
     erroneously showing the same color or a few color stripes over the entire
     globe or region. This can be remedied by clicking the camera reset
-    button at the right end of the [toolbar](toolbar.md), and we are working on
-    resolving the issue for future versions.
+    button at the right end of the [toolbar](toolbar.md). We are working on
+    solving the display problem for future versions.
 
