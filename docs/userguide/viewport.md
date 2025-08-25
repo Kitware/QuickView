@@ -1,49 +1,85 @@
 # Viewport
 
+![Four views](../images/viewport_four_views.png){ width="50%", align=right }
+
 Once the user has selected variables using the [control panel](control_panel.md)
 and clicked the `LOAD VARIABLES` button in the [toolbar](toolbar.md), the app
-will show each variable in its own frame (which we refer to as a "view") inside
-the viewport. Below is an example showing six views.
+will show each variable in its own little frame (which we refer to as a "view") inside
+the viewport. On the right is an example showing four views.
 
-At the top of each view, the variable name is shown in the top-left corner
-together with the area-weighted global average on that vertical level. Indices
-of the vertical level and time being displayed are indicated in the top-right
-corner of each view.
+Within each view, the variable name is noted together with
+the indices of the vertical level (if applicable) and time slice being displayed,
+and the area-weighted global average on that vertical level.
+If the "area" variable is not present in the data file, then the arithmetic
+average is calculated and displayed.
 
-![Six views in default layout](../images/six_variables_default.png){width="600"}
 
+-----
 ## Custimizing the viewport
 
+![Many views resized and rearranged](../images/viewport_many_views_rearranged.png){ width="50%", align=right}
+
 To help present multiple variables in an informative way, the app allows users
-to rearrange the views via drag-and-drop and resize each view separately by
-clicking and dragging its bottom-right corner. Below is an example with
-rearranged views.
+to
+
+- rearrange the views via ^^drag-and-drop^^, and
+- resize each view separately by clicking and dragging its
+  ^^bottom-right corner^^.
+
+The screenshot on the right shows an example with rearranged views.
 
 Furthermore, if a user saves a state file after these adjustments, they can
-later resume their analysis with the customized arrangement.
+later continue their analysis with the customized layout
+by using the app in the resume mode, as described in on the description
+of the [toolbar](toolbar.md).
 
-![Six views resized and rearranged](../images/six_variables_rearranged.png){width="700"}
 
+-----
 ## Custimizing individual views
 
 Each view can be further customized individually by clicking on the gear button
 in the bottom-left corner of the view. The click brings up a mini menu as shown
-in the example below.
-
-_[Hui's note from 4/30/2025: the title of the colorbar reads "Component". Is
-this a bug? We'd like the title to show the variable name; or we could remove
-the title.]_
-
-![Mini menu for custimizing a view](../images/mini-menu.png){width="400"}
+in the examples below.
 
 The mini menu contains options to control various properties of the view:
+a dropdown menu for colormap selection,
+checkboxes to turn on/off logarithmic scale and to invert/restore the color sequence,
+text boxes for changing the minimum and maximum values for color mapping, and
+a button to reset the color mapping to fit the value range of data slice.
 
-- A dropdown menu for color map selection.
-- Checkboxes to turn on/off logarithmic scale and invert color map.
-- Text boxes for changing the minimum and maximum values for color mapping.
-- A button to reset the color mapping to fit the range of values in the data.
+![gear menu with auto range](../images/viewport_gear_menu_range_auto.png){ width="48%"}
+![gear menu with manual range](../images/viewport_gear_menu_range_manual.png){width="48%"}
 
-Note that the zoom level and centering (i.e., the size and relative position) of
-the displayed variable within each view, as well as the visibility of the color
-bar, can also be adjusted. These settings are controlled centrally—for all
-views—via buttons in the [toolbar](toolbar.md) near the top of the GUI.
+!!! tip "Tip: Automatic or Fixed Colormap Ranges"
+
+
+    By default, the app will automatically span the colormap over the range of values
+    of the current time slice and vertical level. The maximum and minimum values can be found
+    in the mini menu, as seen in the left example shown above.
+    When the "play" button in the [control panel](control_panel.md) is used to cycle
+    through different data slices,
+    the colormap is automatically re-adjusted to fit the data range of each slice.
+
+    If the user specifies maximum and/or minimum values in the mini menu, a blue icon
+    with a picture of a lock and the text "Manual" will appear above the maximum
+    value, as can be seen on the right in the example shown above.
+    In such a case, when the "play" button in the [control panel](control_panel.md)
+    is used to cycle through different data slices,
+    the colormap will be fixed to the user-specified range.
+
+
+!!! tip "Tip: Field Value Lookup in Colorbar"
+
+    ![colorbar hover over](../images/colorbar_hover_over.png){ width="55%", align=right }
+
+    If the user hovers their cursor over a colorbar, the corresponding field
+    value will be displayed, as shown by the example here.
+
+
+!!! tip "Tip: Colormap Groups"
+
+    The [toolbar](toolbar.md) at the top of the GUI includes icons for two colormap
+    groups: colorblind-friendly and other. Only the colormaps belonging to the
+    selected group (or groups) are shown in the `Color Map` drop-down menu
+    brought up by the gear button.
+
