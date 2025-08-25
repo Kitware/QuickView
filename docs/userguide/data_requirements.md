@@ -1,185 +1,108 @@
-# QuickView Data File Requirements
 
-This document describes the NetCDF file format and variable requirements for
-QuickView to properly read and visualize E3SM atmospheric data.
+QuickView has been developed using EAM's history output
+on the physics grids (`pg2` grids) written by
+EAMv2, v3, and an intermediate version towards v4 (EAMxx).
+Those sample output files can be found on
+[Zenodo](https://zenodo.org/records/16922607).
 
-## Overview
+Developers and users of EAM often use tools like NCO and CDO
+or write their own scripts to calculate time averages
+and/or select a subset of variables from the original model output.
+For those use cases, we clarify below the features of the data format
+that QuickView expects in order to
+properly read and visualize the simulation data.
 
-QuickView requires two NetCDF files:
+!!! tip "Tip: Consistency Between Simulation File and Connecitivity File"
 
-1. **Data File** - Contains the atmospheric variables and time-varying data
-2. **Connectivity File** - Contains the mesh geometry and grid structure
+    One of the repeatedly encountered causes of error when loading files
+    in QuickView
+    is that the grid described by the connecitivity file does not match
+    the grid in the simulation data file.
+    If the `Load Files` button in the [toolbar](toolbar.md) has been clicked
+    but the status icon continues to show a red circle with an exclamation mark
+    after many seconds of time, the first thing we suggest
+    checking is whether the two specified files correspond to the same grid.
 
-## Obtaining Sample Data
+!!! warning "Caution: Newer EAMxx Output Files"
 
-Sample E3SM Atmosphere Model (EAM) data files and their corresponding
-connectivity files are available at
-[Zenodo](https://zenodo.org/records/16895849). The dataset includes:
+    The EAMxx output file that QuickView has been tested for
+    was generated in late 2024. As EAMxx further evolves and its output
+    format changes, QuickView might need to be updated accordingly.
+    If the user encounters such a case, we recommend reaching out to our lead developer
+    [(abhi.yenpure@kitware.com)](https://www.kitware.com/abhishek-yenpure/)
+    or using the [Issue tab on GitHub](https://github.com/ayenpure/QuickView/issues)
+    to start a discussion.
 
-### Available Data Files
+----
+## Overview 
 
-- **EAM Version 2 outputs**:
-  - `EAMv2_ne120pg2_F2010_spinup.eam.h0.nc` (525.3 MB)
-  - `EAMv2_ne30pg2_F2010_aermic.eam.h0.nc` (498.3 MB)
-  - `EAMv2_ne30pg2_F2010_cld.eam.h0.nc` (745.5 MB)
-- **EAM Version 4 (interim) outputs**:
-  - `EAMxx_ne4pg2_202407.nc` (13.2 MB)
+The ParaView Reader behind the QuickView GUI detects and categorizes variables
+based on their dimensions.
+Variables with dimensions not matching the expected patterns are ignored.
 
-### Available Connectivity Files
+----
+## 2D variables
 
-- `connectivity_ne120pg2_TEMPEST.scrip.nc` (31.8 MB)
-- `connectivity_ne30pg2_TEMPEST.scrip.nc` (2.0 MB)
-- `connectivity_ne4pg2_TEMPEST.scrip.nc` (48.8 kB)
+QuickView recognizes variables with—and only with—the
+^^dimensions `time` and `ncol`^^ as 2D variables,
+i.e., physical quantities varying with latitude and
+longitude but without a vertical dimension.
+These are referred to as "surface variables" in the
+[control panel](control_panel.md).
+For these variables, the only required ^^coordinate variable^^ is ^^`time`^^.
+Grid information, including latitude and longitude, are obtained
+from the [connecitivity file](connecitivity.md).
 
-### Important: File Correspondence
+If an `area` variable with the dimension `ncol` is also present,
+this variable is used for calculating the area-weighted horizontal averages
+displayed in the [viewport](viewport.md).
+If the `area` variable is not present, then an arithmetic average
+is calculated and displayed.
 
-**The connectivity file resolution must match the data file resolution for
-proper visualization.** For example:
+----
+## 3D variables
 
-- Data file: `EAMv2_ne30pg2_F2010.eam.h0.nc`
-- Connectivity file: `connectivity_ne30pg2_TEMPEST.scrip.nc`
+If a variables has not only `time` and `ncol` but also a vertical dimension,
+QuickView expects the dimension to be named ^^`lev`^^ for variables defined at
+layer midpoints and ^^`ilev`^^ for variables defined at layer interfaces.
 
-Both files use the same `ne30pg2` grid resolution and must be loaded together.
-
-## Required Dimensions
-
-The following dimensions must be present in the data files:
-
-### In Data File:
-
-- `time` - Time dimension for temporal data
-- `ncol` - Number of columns (horizontal grid points)
-- `lev` - Number of vertical levels at layer midpoints
-- `ilev` - Number of vertical levels at layer interfaces
-
-### In Connectivity File:
-
-- `grid_size` or `ncol` - Total number of grid cells
-
-## Required Variables
-
-### 1. Coordinate Variables
-
-#### Latitude and Longitude (Required)
-
-The connectivity file must contain corner coordinates for grid cells:
-
-- **Variables containing `corner_lat`** - Latitude coordinates of cell corners
-- **Variables containing `corner_lon`** - Longitude coordinates of cell corners
-
-These are used to construct the unstructured grid geometry.
-
-#### Vertical Coordinate Variables
-
-For proper vertical level display, the data file should contain either:
-
-**Option A: Direct level values**
-
-- `lev` - Pressure levels at layer midpoints (hPa)
-- `ilev` - Pressure levels at layer interfaces (hPa)
-
-**Option B: Hybrid coordinate coefficients** If `lev` and `ilev` are not
-directly provided, they will be computed from:
-
-- Variables containing `hyam` - Hybrid A coefficient at layer midpoints
-- Variables containing `hybm` - Hybrid B coefficient at layer midpoints
-- Variables containing `hyai` - Hybrid A coefficient at layer interfaces
-- Variables containing `hybi` - Hybrid B coefficient at layer interfaces
-
-The pressure levels are computed as:
+For variables defined at layer midpoints, in order for the `Slice Selection`
+section of the [control panel](control_panel.md) to work properly,
+the simulation data
+file needs to contain a 1D coordinate variable named `lev`,
+the values of which are interpreted as pressure in hPa.
+If `lev` is not present, QuickView attempts to find two 1D variables,
+`hyam` and `hybm`, of that dimension size, from which QuickView calculates
+`lev` using
 
 ```
-pressure = (hyam * P0) + (hybm * PS0)
+lev = (hyam * P0) + (hybm * PS0)
 ```
 
-where P0 = 100000 Pa (reference pressure) and PS0 = 100000 Pa (surface
-pressure).
+where PS0 = 1000 hPa; P0 is read from the data file and set to 1000 hPa
+if not found.
 
-### 2. Time Variable (Required)
+Similarly, for variables defined at layer interfaces, QuickView looks for
+either `ilev` or `hyai` and `hybi` for parsing the vertical dimension.
 
-- `time` - Time coordinate variable containing timestamps for each time step
 
-### 3. Area Variable (Optional but Recommended)
+----
+## Variable with more dimensions 
 
-- Variable containing `area` in its name - Grid cell areas used for computing
-  area-weighted averages
-  - If not present, simple arithmetic averaging will be used instead
+QuickView currently only visualizes the variables types discussed above.
+For variables that have extra dimensions in addition to `time`, `ncol`,
+and `lev` or `ilev`, for example aggregated tracer arrays or
+[COSP](https://climatedataguide.ucar.edu/climate-data/cosp-cloud-feedback-model-intercomparison-project-cfmip-observation-simulator-package)-related variables,
+support can be provided if there is sufficient
+interest from the users. Please contact our lead developer
+[(abhi.yenpure@kitware.com)](https://www.kitware.com/abhishek-yenpure/)
+for a discussion.
 
-## Variable Types Supported
 
-QuickView categorizes variables based on their dimensions:
+----
+## Missing values
 
-### 1D Variables (Info Variables)
+If a variable has an attribute named `missing_value` or `_FillValue`,
+the value is converted to NaN and ignored
+in the calculation of global averages and for the visualization.
 
-- Dimensions: `(ncol)`
-- Example: `area`
-- These are typically time-invariant grid properties
-
-### 2D Variables (Surface Variables)
-
-- Dimensions: `(time, ncol)`
-- Example: `TS` (surface temperature), `PS` (surface pressure)
-- These represent surface or column-integrated quantities
-
-### 3D Midpoint Variables
-
-- Dimensions: `(time, lev, ncol)` or `(time, ncol, lev)`
-- Example: `T` (temperature), `U` (zonal wind), `Q` (specific humidity)
-- These are defined at layer midpoints
-
-### 3D Interface Variables
-
-- Dimensions: `(time, ilev, ncol)` or `(time, ncol, ilev)`
-- Example: `OMEGA` (vertical velocity)
-- These are defined at layer interfaces
-
-## Variable Attributes
-
-### Fill Values
-
-Variables should include the `_FillValue` attribute to indicate missing or
-undefined data. QuickView will convert these to NaN values for proper handling.
-
-## Example Data Structure
-
-### Data File Structure:
-
-```
-dimensions:
-    time = 12 ;
-    ncol = 48602 ;
-    lev = 72 ;
-    ilev = 73 ;
-
-variables:
-    double time(time) ;
-    double T(time, lev, ncol) ;
-        T:_FillValue = 9.96920996838687e+36 ;
-    double TS(time, ncol) ;
-        TS:_FillValue = 9.96920996838687e+36 ;
-    double hyam(lev) ;
-    double hybm(lev) ;
-    double hyai(ilev) ;
-    double hybi(ilev) ;
-```
-
-### Connectivity File Structure:
-
-```
-dimensions:
-    grid_size = 48602 ;
-    grid_corners = 4 ;
-
-variables:
-    double grid_corner_lat(grid_size, grid_corners) ;
-    double grid_corner_lon(grid_size, grid_corners) ;
-```
-
-## Notes
-
-1. The reader automatically detects and categorizes variables based on their
-   dimensions
-2. Variables with dimensions not matching the expected patterns are ignored
-3. The reader caches geometry and special variables for performance
-4. Time interpolation is handled automatically when requesting specific time
-   steps

@@ -368,6 +368,8 @@ class EAMApp:
         return to_export
 
     def load_state(self, state_file):
+        self._on_change_pipeline_valid(False)
+        self.viewmanager._on_change_pipeline_valid(False)
         self.state.pipeline_valid = False
         from_state = json.loads(Path(state_file).read_text())
         data_file = from_state["data_file"]
@@ -399,7 +401,11 @@ class EAMApp:
             self.update_state_from_config(from_state)
         self.state.pipeline_valid = is_valid
 
+        self.ctrl.view_reset_camera()
+
     def load_data(self):
+        self._on_change_pipeline_valid(False)
+        self.viewmanager._on_change_pipeline_valid(False)
         state = self.state
         # Update returns True/False for validity
         # force_reload=True since user explicitly clicked Load Files button
@@ -560,6 +566,7 @@ class EAMApp:
             else:
                 # Fallback to standard colors if nothing is selected
                 state.colormaps = noncvd
+            state.colormaps.sort(key=lambda x: x["text"])
 
     def set_manual_color_range(self, index, type, value):
         # Get current values from state to handle min/max independently

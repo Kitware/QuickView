@@ -1,37 +1,109 @@
-## The Control Panel
 
-![control-panel](../images/control-panel.png){ width="400" }
+!!! tip inline end "Tip"
 
-The control panel lets users control the context of visual analysis for the
-data, i.e, it allows the users to select the time, middle and interface layers,
-and the variables for analysis, among other operations. The panel can be divided
-into three main parts
+    The control panel can be collapsed or made visible using the hamburger icon
+    (three horizontal lines stacked on top of each other ) on the left end of the
+    [toolbar](toolbar.md).
 
-1. **Data Slice Selection** The data slice selection allows users to slice and
-   dice data spatio-temporally for analysis
+# Control Panel
 
-   - a. It allows data slice selection along the dimensions of time, middle and
-     interface layer.
-   - b. It allows users to control the geo-spatial region by controlling the
-     longitude, latitude ranges.
+The control panel allows users to select variables from the simulation
+data file as well the spatial and temporal ranges of data to visualize,
+as explained below.
 
-   Users can interactively select the data slice by interacting with the
-   sliders, or using the media buttons to skip-previous, skip-next, or play an
-   animation.
 
-2. **Map Projection Selection** The map projection selection allows users to
-   chose different representation of the data. Currently, it allows for
-   Cylindrical-Equidistant, Robinson, and Mollweide projections. In the future,
-   additional features are planned, e.g. selection of center meridian.
+-----
+##  Variable selection
 
-3. **Variable Selections**
 
-   ![variable-select](../images/variable-select.png){ width="400" }
 
-   The variable selections allow users to control variables of interest for
-   analysis. The variables are separated into three types -- the 2D (surface)
-   variables, middle layer variables, and interface layer variables. Users can
-   select and unselect the variables and to render the views, click the
-   `Load Variables` button located in the tool bar. The reason for not making
-   the views appear dynamically post variable selections is to allow for stable
-   and better application behavior.
+###  Variable categories
+
+![variable selection sections](../images/control_panel_variable_selection.png){ width="240", align=right }
+
+EAM's simulation output files typically contain many variables
+corresponding to physical quantities with spatial coverages over the
+entire globe.
+
+- Some of those variables may not have a vertical dimension;
+  these are referred to as "surface variables" in our app.
+- Some of those variables have "lev" or "ilev" as the vertical
+  dimension; these are referred to as "variables at layer midpoints"
+  and "variables at layer interfaces", respectively.
+
+The three variable categories each have their own collapsible
+submenu in the control panel, as shown in the screenshot here.
+Variables of other dimension sizes are currently igored by the app
+but can be supported upon request.
+
+
+### Select and load
+
+!!! warning inline end "The `LOAD VARIABLE` button"
+
+    After a selection of variables is made or changed, the `LOAD VARIABLES`
+    button in the [toolbar](toolbar.md) must be clicked in order for the
+    (new) selection to take effect.
+    In contrast, all other buttons, sliders, and text boxes
+    apply their effects immediately upon user interaction.
+
+After a simulation data file and a connectivity have been loaded and
+the status icon in the [toolbar](toolbar.md) has turned into a green
+circle with a check mark,
+the variable selection submenu of each variable category,
+if expanded, will show a list of variables that have been recognized
+by the app, as shown in the screenshot above.
+Checking the boxes to the left of the variable names
+*and then clicking the* `LOAD VARIABLES` *button in the toolbar*
+will render contour plots in the [viewport](viewport.md).
+
+### Variable search
+
+EAM output files often contain a large number of variables,
+resulting in long lists in the varaible selection submenus.
+In such cases, the user can hover their cursor over the list
+and then scroll up and down to review the full list.
+
+Typing a string in the `Search variables` box and then hitting
+the `return` key on the keyboard will
+replace the full variable list by a filtered list.
+
+Clicking the `CLEAR` button in the submenu will unselect all
+variables in the category.
+
+*Here, we emphasize again that any changes in variable selection needs to be
+followed by a click on the `LOAD VARIABLES` button in the [toolbar](toolbar.md)
+in order for these changes to take effect.*
+
+
+
+-----
+## Data slice selection
+
+![variable selection sections](../images/control_panel_slice_selection.png){ width="240", align=right }
+
+To keep the QuickView app lightweight and easy to use, we decided to only 
+support color-filled contour plots of the globe or a latitude-longitude box.
+The slice selection portion of the control panel provides a set of sliders
+for the user to select which vertical levels, time levels, and latitude-longitude
+ranges to create contour plots for.
+
+For the vertical dimensions and the time dimension, the control panel
+also provides buttons for moving to (displaying) the previous or next element
+in the dimension, as well as "play"/"pause" (toggle) buttons for cycling over
+these dimensions or pausing the cycle.
+If the user clicks on a second "play" button when the app is cycling through
+a first dimension, then the cycling in the first dimension will be paused.
+
+
+-----
+## Map Projection
+
+![variable selection sections](../images/control_panel_map_projection.png){ width="240", align=right }
+
+QuickView currently provides a very simple map setting submenu
+that contains a few commonly used map projections.
+More projections can be added upon request.
+In the near future, the center longitude of the map
+will become customizable.
+

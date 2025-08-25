@@ -1,11 +1,15 @@
-# Installation and Launch for App Developers
+# Install and Launch for App Developers
 
-At version 1.0, QuickView is expected to be installed and used from a personal computer with the data files also being local. Future versions will support the server-client model allowing access to remote data files.
+At version 1.0, QuickView is expected to be installed and used from
+a personal computer with the data files also being local.
+Future versions will support the server-client model allowing access
+to remote data.
 
-Releases so far have focused on MacOS. Support for Linux and Windows systems can be provided upon request.
+Releases so far have focused on macOS. Support for
+more systems will be added in the near [future](../future.md).
 
 ----
-## Cloning the repo
+## Clone the repo
 
 ```
 git clone https://github.com/ayenpure/QuickView.git
@@ -13,7 +17,7 @@ cd QuickView
 ```
 
 ----
-## Installing basic requirements
+## Install basic requirements
 
 ```
 # Set up conda environment
@@ -35,7 +39,7 @@ distributed with the ParaView binaries. The `pvpython` binary is present in the
 `/Applications/ParaView-5.13.0.app/Contents/bin/pvpython`
 
 ----
-## Launching the app from command line
+## Launch the app from command line
 
 To launch the EAM QuickView GUI in its dedicated window, use
 ```

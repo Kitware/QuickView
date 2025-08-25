@@ -1,7 +1,7 @@
 import paraview.servermanager as sm
 
 from trame.widgets import paraview as pvWidgets
-from trame.decorators import TrameApp, trigger
+from trame.decorators import TrameApp, trigger, change
 
 from paraview.simple import (
     Delete,
@@ -198,9 +198,6 @@ class ViewManager:
         self.registry = ViewRegistry()  # Central registry for view management
         self.to_delete = []
 
-        # Register state change listener for pipeline_valid
-        self.state.change("pipeline_valid")(self._on_pipeline_valid_change)
-
     def get_default_colormap(self):
         """Get default colormap from interface or fallback"""
         # Try to get from the server's interface instance
@@ -209,9 +206,11 @@ class ViewManager:
         # Fallback to a reasonable default
         return "Cool to Warm (Extended)"
 
-    def _on_pipeline_valid_change(self, pipeline_valid, **kwargs):
+    @change("pipeline_valid")
+    def _on_change_pipeline_valid(self, pipeline_valid, **kwargs):
         """Clear view registry when pipeline becomes invalid."""
         if not pipeline_valid:
+            print("Clearing registry")
             # Clear all views and variables from registry
             self.registry.clear()
             # Clear widgets and colors tracking
