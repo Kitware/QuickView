@@ -7,18 +7,19 @@
 
 # Control Panel
 
-The control panel allows users to select variables from the data file
-as well the spatial and temporal ranges of data to visualize,
+The control panel allows users to select variables from the simulation
+data file as well the spatial and temporal ranges of data to visualize,
 as explained below.
 
 
 -----
 ##  Variable selection
 
-![variable selection sections](../images/variable_selection.png){ width="300", align=right }
 
 
 ###  Variable categories
+
+![variable selection sections](../images/control_panel_variable_selection.png){ width="240", align=right }
 
 EAM's simulation output files typically contain many variables
 corresponding to physical quantities with spatial coverages over the
@@ -30,10 +31,10 @@ entire globe.
   dimension; these are referred to as "variables at layer midpoints"
   and "variables at layer interfaces", respectively.
 
-These three categories of variables each have their own collapsible
+The three variable categories each have their own collapsible
 submenu in the control panel, as shown in the screenshot here.
 Variables of other dimension sizes are currently igored by the app
-but can be supported upon request
+but can be supported upon request.
 
 
 ### Select and load
@@ -51,7 +52,8 @@ the status icon in the [toolbar](toolbar.md) has turned into a green
 circle with a check mark,
 the variable selection submenu of each variable category,
 if expanded, will show a list of variables that have been recognized
-by the app. Checking the boxes to the left of the variable names
+by the app, as shown in the screenshot above.
+Checking the boxes to the left of the variable names
 *and then clicking the* `LOAD VARIABLES` *button in the toolbar*
 will render contour plots in the [viewport](viewport.md).
 
@@ -78,7 +80,7 @@ in order for these changes to take effect.*
 -----
 ## Data slice selection
 
-![variable selection sections](../images/slice_selection.png){ width="300", align=right }
+![variable selection sections](../images/control_panel_slice_selection.png){ width="240", align=right }
 
 To keep the QuickView app lightweight and easy to use, we decided to only 
 support color-filled contour plots of the globe or a latitude-longitude box.
@@ -88,19 +90,20 @@ ranges to create contour plots for.
 
 For the vertical dimensions and the time dimension, the control panel
 also provides buttons for moving to (displaying) the previous or next element
-in a dimension, as well as "play"/"pause" (toggle) buttons for cycling over
+in the dimension, as well as "play"/"pause" (toggle) buttons for cycling over
 these dimensions or pausing the cycle.
 If the user clicks on a second "play" button when the app is cycling through
-a first dimension, the the cycling through the first dimension will be paused.
+a first dimension, then the cycling in the first dimension will be paused.
 
 
 -----
 ## Map Projection
 
-![variable selection sections](../images/map_projection.png){ width="300", align=right }
+![variable selection sections](../images/control_panel_map_projection.png){ width="240", align=right }
 
 QuickView currently provides a very simple map setting submenu
 that contains a few commonly used map projections.
-More projections can be added upon request, and we plan to allow
-the user to choose the center longitude of the map in the near future.
+More projections can be added upon request.
+In the near future, the center longitude of the map
+will become customizable.
 
