@@ -37,7 +37,7 @@ with just a few steps, as described below.
    drag the QuickView icon into the Applications folder.
 
 
-!!! tip "Tip: no need to worry about dependencies"
+!!! tip "Tip: No Worries about Dependencies"
 
     The pre-built binaries include the dependencies required to
     start the app locally. Any additional dependencies for data processing
@@ -48,7 +48,7 @@ with just a few steps, as described below.
 
 To launch the EAM QuickView GUI, simply double-click the app icon in the Applications folder.
 
-!!! tip "Tip: patience with the first launch"
+!!! tip "Tip: Patience with the First Launch"
 
     On the first launch of a new app version, required dependencies are
     downloaded and installed. This may take a minute or more, depending
