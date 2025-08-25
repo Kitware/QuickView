@@ -20,17 +20,17 @@ just a few clicks.
    macOS users with Apple Silicon chips should download `QuickView_{version}_aarch64.dmg`,
    and those with Intel chips should download a `*_x64.dmg` file.
 
-2. **Important** for intermediate releases with three-part version numbers
-   (e.g., 1.0.1): After the download, use the following command in Terminal to
+2. **Important:** After the download, use the following command in Terminal to
    unblock the app for macOS:
    ```
    xattr -d com.apple.quarantine <your_filename>.dmg
    ```
    Explanation: in order to facilitate frequent iterations between our
-   developers on the software and science sides, only major releases with
-   two-part version numbers like 1.0, 1.1 etc. are signed and notarized using
-   Kitware's Apple Developer ID.
-   Hence the command provided above is needed for intermediate releases,
+   developers on the software and science sides, disk images are
+   built and made public using GitHub's automated release process
+   rather than being manually built and then signed at Kitware.
+   Hence the `.dmg` files on the GitHub releases page have not been
+   signed using an Apple Developer ID, and the command provided above is needed,
    so that after download, the macOS Gatekeeper will not block the app.
 
 3. Double-click the downloaded `.dmg` file. In the pop-up window,
@@ -39,21 +39,18 @@ just a few clicks.
 
 !!! tip "Tip: No Need to Worry about Dependencies"
 
-    The pre-built binaries include all dependencies needed to start the app
-    on a local computer. Additional dependencies needed for data processing
-    and visualization are downloaded and installed automatically when the app is launched for the first time.
+    The pre-built binaries include the dependencies required to
+    start the app locally. Any additional dependencies for data processing
+    and visualization are downloaded and installed automatically on the first launch.
 
 ---
 # Launch
 
-To launch the EAM QuickView GUI, simply double-click the app icon in your Applications folder.
+To launch the EAM QuickView GUI, simply double-click the app icon in the Applications folder.
 
-!!! tip "Tip: Patience with First launch"
+!!! tip "Tip: Patience with the First Launch"
 
-    When a new version of the app is launched on a computer for the
-    first time, a significant amount of dependencies will be identified,
-    downloaded, and installed, which will take about a minute to a few minutes
-    and can be affected by the Internet connection.
-
-    Subsequent launches should take just a few seconds.
+    On the first launch of a new app version, required dependencies are
+    downloaded and installed. This may take a minute or more, depending
+    on the Internet connection. Subsequent launches typically take only a few seconds.
 
