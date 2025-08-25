@@ -4,20 +4,20 @@
 At version 1.0, QuickView is expected to be installed and used from
 a personal computer with the data files also being local.
 Future versions will support the server-client model allowing access
-to remote data files.
+to remote data.
 
-Releases so far have focused on macOS. We plan to add support for
-more systems in the near [future](../future.md).
+Releases so far have focused on macOS. Support for
+more systems will be added in the near [future](../future.md).
 
 ---
 # Install
 
-For end users, we provide pre-built binaries that can be installed using
-just a few clicks.
+For end users, pre-built binaries are available and can be installed
+with just a few steps, as described below.
 
-1. Download the latest binary from the
+1. Download a pre-built binary from the
    [releases page](https://github.com/ayenpure/QuickView/releases/).
-   macOS users with Apple Silicon chips should download `QuickView_{version}_aarch64.dmg`,
+   macOS users with Apple Silicon chips should download a `*_aarch64.dmg`,
    and those with Intel chips should download a `*_x64.dmg` file.
 
 2. **Important:** After the download, use the following command in Terminal to
@@ -25,7 +25,7 @@ just a few clicks.
    ```
    xattr -d com.apple.quarantine <your_filename>.dmg
    ```
-   Explanation: in order to facilitate frequent iterations between our
+   Explanation: In order to facilitate frequent iterations between our
    developers on the software and science sides, disk images are
    built and made public using GitHub's automated release process
    rather than being manually built and then signed at Kitware.
@@ -37,7 +37,7 @@ just a few clicks.
    drag the QuickView icon into the Applications folder.
 
 
-!!! tip "Tip: No Need to Worry about Dependencies"
+!!! tip "Tip: no need to worry about dependencies"
 
     The pre-built binaries include the dependencies required to
     start the app locally. Any additional dependencies for data processing
@@ -48,7 +48,7 @@ just a few clicks.
 
 To launch the EAM QuickView GUI, simply double-click the app icon in the Applications folder.
 
-!!! tip "Tip: Patience with the First Launch"
+!!! tip "Tip: patience with the first launch"
 
     On the first launch of a new app version, required dependencies are
     downloaded and installed. This may take a minute or more, depending

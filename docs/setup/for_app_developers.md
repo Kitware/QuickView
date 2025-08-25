@@ -3,10 +3,10 @@
 At version 1.0, QuickView is expected to be installed and used from
 a personal computer with the data files also being local.
 Future versions will support the server-client model allowing access
-to remote data files.
+to remote data.
 
-Releases so far have focused on macOS. We plan to add support for
-more systems in the near [future](../future.md).
+Releases so far have focused on macOS. Support for
+more systems will be added in the near [future](../future.md).
 
 ----
 ## Clone the repo
