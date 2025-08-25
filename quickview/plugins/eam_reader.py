@@ -92,10 +92,8 @@ def FindSpecialVariable(data, lev, hya, hyb):
         lev = data[lev][:].flatten()
         return lev
 
-    from numpy.core.defchararray import find
-
-    _hyai = var[find(var, hya) != -1]
-    _hybi = var[find(var, hyb) != -1]
+    _hyai = [v for v in var if hya in v]
+    _hybi = [v for v in var if hyb in v]
     if len(_hyai) != len(_hybi):
         raise Exception("Unmatched pair of hya and hyb variables found")
 

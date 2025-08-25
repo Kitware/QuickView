@@ -192,7 +192,7 @@ class Toolbar:
                             v_bind="attrs",
                             v_on="on",
                         )
-                    html.Span("SCRIP or TEMPEST connectivity/mesh file (.nc)")
+                    html.Span("Connectivity file (SCRIP format .nc file)")
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
                         v2.VTextField(
@@ -209,7 +209,7 @@ class Toolbar:
                             v_bind="attrs",
                             v_on="on",
                         )
-                    html.Span("E3SM/EAM atmospheric data file (.nc)")
+                    html.Span("EAM simulation output (.nc file)")
                 with v2.VTooltip(bottom=True):
                     with html.Template(v_slot_activator="{ on, attrs }"):
                         with v2.VBtn(
