@@ -324,21 +324,21 @@ class EAMApp:
 
     @trigger("layout_changed")
     def on_layout_changed_trigger(self, layout, **kwargs):
-        """Cache layout changes to ensure they are properly saved"""
+        # There should always be a 1:1 correspondence
+        # between the layout and the variables
+        assert len(layout) == len(self.state.variables)
         # Cache the layout data with variable names as keys for easier lookup
         self._cached_layout = {}
-        if layout and hasattr(self.state, "variables"):
-            for item in layout:
-                if isinstance(item, dict) and "i" in item:
-                    idx = item["i"]
-                    if idx < len(self.state.variables):
-                        var_name = self.state.variables[idx]
-                        self._cached_layout[var_name] = {
-                            "x": item.get("x", 0),
-                            "y": item.get("y", 0),
-                            "w": item.get("w", 4),
-                            "h": item.get("h", 3),
-                        }
+        for idx, item in enumerate(layout):
+            if idx < len(self.state.variables):
+                var_name = self.state.variables[idx]
+                self._cached_layout[var_name] = {
+                    "i": idx,
+                    "x": item.get("x", 0),
+                    "y": item.get("y", 0),
+                    "w": item.get("w", 4),
+                    "h": item.get("h", 3),
+                }
 
     def generate_state(self):
         # Force state synchronization
@@ -421,7 +421,7 @@ class EAMApp:
             self.init_app_configuration()
         else:
             # Keep the defaults that were set in __init__
-            # but ensure arrays are empty if pipeline failed
+            # but ensure arrays are empty if pipeline
             state.timesteps = []
             state.midpoints = []
             state.interfaces = []
@@ -477,10 +477,12 @@ class EAMApp:
         self.source.LoadVariables(surf, mid, intf)
 
         vars = surf + mid + intf
+        varorigin = [0] * len(surf) + [1] * len(mid) + [2] * len(intf)
 
         # Tracking variables to control camera and color properties
         with self.state as state:
             state.variables = vars
+            state.varorigin = varorigin
 
             # Initialize arrays that are always needed regardless of cache status
             # Color configuration arrays will be populated by ViewContext via sync_color_config_to_state
@@ -712,7 +714,30 @@ class EAMApp:
         self.state.dirty("interface_vars_state")
 
     def close_view(self, index):
-        print("Requested close view for ", index)
+        var = self.state.variables.pop(index)
+        self._cached_layout.pop(var)
+        self.state.dirty("variables")
+        self.viewmanager.close_view(var, index, self._cached_layout)
+        with self.state as state:
+            origin = state.varorigin[index]
+            # Find variable to unselect from the UI
+            if origin == 0:
+                # Find and clear surface display
+                if var in state.surface_vars:
+                    var_index = state.surface_vars.index(var)
+                    self.update_surface_var_selection(var_index, False)
+            elif origin == 1:
+                # Find and clear midpoints display
+                # Find and clear surface display
+                if var in state.midpoint_vars:
+                    var_index = state.midpoint_vars.index(var)
+                    self.update_midpoint_var_selection(var_index, False)
+            elif origin == 2:
+                # Find and clear interface display
+                # Find and clear surface display
+                if var in state.interface_vars:
+                    var_index = state.interface_vars.index(var)
+                    self.update_interface_var_selection(var_index, False)
 
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
@@ -970,11 +995,11 @@ class EAMApp:
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )
-                                # with v2.VBtn(
-                                #    icon=True,
-                                #    style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
-                                #    click=(self.close_view, "[idx]"),
-                                # ):
-                                #    v2.VIcon("mdi-close")
+                                with v2.VBtn(
+                                    icon=True,
+                                    style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
+                                    click=(self.close_view, "[idx]"),
+                                ):
+                                    v2.VIcon("mdi-close")
 
         return self._ui

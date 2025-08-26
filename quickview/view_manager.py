@@ -219,6 +219,37 @@ class ViewManager:
             self.state.dirty("views")
             self.state.dirty("layout")
 
+    def close_view(self, var, index, layout_cache):
+        # Clear cache and remove layout and widget entry
+        with self.state as state:
+            self.registry.remove_view(var)
+            state.varcolor.pop(index)
+            state.varmin.pop(index)
+            state.varmax.pop(index)
+            state.uselogscale.pop(index)
+            state.override_range.pop(index)
+            state.invert.pop(index)
+            state.views.pop(index)
+            state.colorbar_images.pop(index)
+
+        # Rebuild layout
+        new_layout = []
+        vars = self.state.variables
+        for var in vars:
+            cache = layout_cache[var]
+            new_layout.append(cache)
+        self.state.layout = new_layout
+
+        self.state.dirty("varcolor")
+        self.state.dirty("varmin")
+        self.state.dirty("varmax")
+        self.state.dirty("uselogscale")
+        self.state.dirty("override_range")
+        self.state.dirty("invert")
+        self.state.dirty("layout")
+        self.state.dirty("views")
+        self.state.dirty("colorbar_images")
+
     def update_views_for_timestep(self):
         if len(self.registry) == 0:
             return
@@ -226,9 +257,10 @@ class ViewManager:
 
         first_view = None
         for var, context in self.registry.items():
+            index = self.state.variables.index(var)
             varavg = self.compute_average(var, vtkdata=data)
             # Directly set average in trame state
-            self.state.varaverage[context.index] = varavg
+            self.state.varaverage[index] = varavg
             self.state.dirty("varaverage")
             if not context.config.override_range:
                 context.state.data_representation.RescaleTransferFunctionToDataRange(
@@ -237,8 +269,8 @@ class ViewManager:
                 range = self.compute_range(var=var)
                 context.config.min_value = range[0]
                 context.config.max_value = range[1]
-            self.sync_color_config_to_state(context.index, context)
-            self.generate_colorbar_image(context.index)
+            self.sync_color_config_to_state(index, context)
+            self.generate_colorbar_image(index)
 
             # Track the first view for camera fitting
             if first_view is None and context.state.view_proxy:
@@ -562,17 +594,6 @@ class ViewManager:
         self.state.layout = layout
         self.state.dirty("views")
         self.state.dirty("layout")
-        # from trame.app import asynchronous
-        # asynchronous.create_task(self.flushViews())
-
-    """
-    async def flushViews(self):
-        await self.server.network_completion
-        self.render_all_views()
-        import asyncio
-        await asyncio.sleep(1)
-        self.render_all_views()
-    """
 
     def update_colormap(self, index, value):
         """Update the colormap for a variable."""
