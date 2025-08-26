@@ -23,7 +23,8 @@ def calculate_weighted_average(
         The (weighted) average, handling NaN values
     """
     data = np.array(data_array)
-
+    weights = np.array(weights)
+    print(data, weights)
     # Handle NaN values
     if np.isnan(data).any():
         mask = ~np.isnan(data)
@@ -31,12 +32,12 @@ def calculate_weighted_average(
             return np.nan  # all values are NaN
         data = data[mask]
         if weights is not None:
-            weights = np.array(weights)[mask]
+            weights = weights[mask]
 
     if weights is not None:
-        return np.average(data, weights=weights)
+        return float(np.average(data, weights=weights))
     else:
-        return np.mean(data)
+        return float(np.mean(data))
 
 
 def calculate_data_range(bounds: List[float]) -> Tuple[float, float, float]:
