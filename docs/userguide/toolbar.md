@@ -136,7 +136,7 @@ from [PareView](https://www.paraview.org/).
 
 
 
-![camera actions](../images/camera_actions.png){ width="25%", align=right }
+![camera actions](../images/toolbar_camera_actions.png){ width="25%", align=right }
 
 **Camera Actions**:
 A set of buttons are provided to simultaneously adjust all views
