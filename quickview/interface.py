@@ -7,8 +7,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Union
 
-from trame.app import get_server
-from trame.decorators import TrameApp, life_cycle, trigger, change
+from trame.app import TrameApp
+from trame.decorators import life_cycle, trigger, change
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame.widgets import vuetify as v2, html, client
@@ -143,8 +143,7 @@ except Exception as e:
     print("Error loading presets :", e)
 
 
-@TrameApp()
-class EAMApp:
+class EAMApp(TrameApp):
     def __init__(
         self,
         source: EAMVisSource = None,
@@ -152,23 +151,18 @@ class EAMApp:
         initstate: dict = None,
         workdir: Union[str, Path] = None,
     ) -> None:
-        server = get_server(initserver, client_type="vue2")
-        state = server.state
-        ctrl = server.controller
+        super().__init__(initserver, client_type="vue2")
 
         self._ui = None
         self._cached_layout = {}  # Cache for layout positions by variable name
 
-        self.workdir = workdir
-        self.server = server
-
-        pvWidgets.initialize(server)
+        pvWidgets.initialize(self.server)
 
         self.source = source
-        self.viewmanager = ViewManager(source, server, state)
+        self.viewmanager = ViewManager(source, self.server, self.state)
 
+        state = self.state
         # Load state variables from the source object
-
         state.data_file = source.data_file if source.data_file else ""
         state.conn_file = source.conn_file if source.conn_file else ""
 
@@ -231,10 +225,12 @@ class EAMApp:
         state.probe_enabled = False
         state.probe_location = []  # Default probe
 
+        ctrl = self.ctrl
         ctrl.view_update = self.viewmanager.render_all_views
         ctrl.view_reset_camera = self.viewmanager.reset_camera
         ctrl.on_server_ready.add(ctrl.view_update)
-        server.trigger_name(ctrl.view_reset_camera)
+
+        self.server.trigger_name(ctrl.view_reset_camera)
 
         state.colormaps = noncvd
 
@@ -827,7 +823,7 @@ class EAMApp:
 
                 with layout.content:
                     with grid.GridLayout(
-                        layout=("layout"),
+                        layout=("layout",),
                         col_num=12,
                         row_height=100,
                         is_draggable=True,

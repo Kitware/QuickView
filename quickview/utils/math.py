@@ -24,7 +24,6 @@ def calculate_weighted_average(
     """
     data = np.array(data_array)
     weights = np.array(weights)
-    print(data, weights)
     # Handle NaN values
     if np.isnan(data).any():
         mask = ~np.isnan(data)
