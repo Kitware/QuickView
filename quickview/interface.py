@@ -7,8 +7,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Union
 
-from trame.app import get_server
-from trame.decorators import TrameApp, life_cycle, trigger, change
+from trame.app import TrameApp
+from trame.decorators import life_cycle, trigger, change
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
 from trame.widgets import vuetify as v2, html, client
@@ -143,8 +143,7 @@ except Exception as e:
     print("Error loading presets :", e)
 
 
-@TrameApp()
-class EAMApp:
+class EAMApp(TrameApp):
     def __init__(
         self,
         source: EAMVisSource = None,
@@ -152,23 +151,18 @@ class EAMApp:
         initstate: dict = None,
         workdir: Union[str, Path] = None,
     ) -> None:
-        server = get_server(initserver, client_type="vue2")
-        state = server.state
-        ctrl = server.controller
+        super().__init__(initserver, client_type="vue2")
 
         self._ui = None
         self._cached_layout = {}  # Cache for layout positions by variable name
 
-        self.workdir = workdir
-        self.server = server
-
-        pvWidgets.initialize(server)
+        pvWidgets.initialize(self.server)
 
         self.source = source
-        self.viewmanager = ViewManager(source, server, state)
+        self.viewmanager = ViewManager(source, self.server, self.state)
 
+        state = self.state
         # Load state variables from the source object
-
         state.data_file = source.data_file if source.data_file else ""
         state.conn_file = source.conn_file if source.conn_file else ""
 
@@ -231,10 +225,12 @@ class EAMApp:
         state.probe_enabled = False
         state.probe_location = []  # Default probe
 
+        ctrl = self.ctrl
         ctrl.view_update = self.viewmanager.render_all_views
         ctrl.view_reset_camera = self.viewmanager.reset_camera
         ctrl.on_server_ready.add(ctrl.view_update)
-        server.trigger_name(ctrl.view_reset_camera)
+
+        self.server.trigger_name(ctrl.view_reset_camera)
 
         state.colormaps = noncvd
 
@@ -324,21 +320,21 @@ class EAMApp:
 
     @trigger("layout_changed")
     def on_layout_changed_trigger(self, layout, **kwargs):
-        """Cache layout changes to ensure they are properly saved"""
+        # There should always be a 1:1 correspondence
+        # between the layout and the variables
+        assert len(layout) == len(self.state.variables)
         # Cache the layout data with variable names as keys for easier lookup
         self._cached_layout = {}
-        if layout and hasattr(self.state, "variables"):
-            for item in layout:
-                if isinstance(item, dict) and "i" in item:
-                    idx = item["i"]
-                    if idx < len(self.state.variables):
-                        var_name = self.state.variables[idx]
-                        self._cached_layout[var_name] = {
-                            "x": item.get("x", 0),
-                            "y": item.get("y", 0),
-                            "w": item.get("w", 4),
-                            "h": item.get("h", 3),
-                        }
+        for idx, item in enumerate(layout):
+            if idx < len(self.state.variables):
+                var_name = self.state.variables[idx]
+                self._cached_layout[var_name] = {
+                    "i": idx,
+                    "x": item.get("x", 0),
+                    "y": item.get("y", 0),
+                    "w": item.get("w", 4),
+                    "h": item.get("h", 3),
+                }
 
     def generate_state(self):
         # Force state synchronization
@@ -421,7 +417,7 @@ class EAMApp:
             self.init_app_configuration()
         else:
             # Keep the defaults that were set in __init__
-            # but ensure arrays are empty if pipeline failed
+            # but ensure arrays are empty if pipeline
             state.timesteps = []
             state.midpoints = []
             state.interfaces = []
@@ -477,10 +473,12 @@ class EAMApp:
         self.source.LoadVariables(surf, mid, intf)
 
         vars = surf + mid + intf
+        varorigin = [0] * len(surf) + [1] * len(mid) + [2] * len(intf)
 
         # Tracking variables to control camera and color properties
         with self.state as state:
             state.variables = vars
+            state.varorigin = varorigin
 
             # Initialize arrays that are always needed regardless of cache status
             # Color configuration arrays will be populated by ViewContext via sync_color_config_to_state
@@ -595,31 +593,34 @@ class EAMApp:
             self.viewmanager.pan_camera(0, 0)
 
     def update_surface_var_selection(self, index, event):
-        self.state.surface_vars_state[index] = event
-        self.state.dirty("surface_vars_state")
+        with self.state as state:
+            state.surface_vars_state[index] = event
         if self.ind_surface is not None:
             ind = self.ind_surface[index]
             self.surface_vars_state[ind] = event
         else:
             self.surface_vars_state[index] = event
+        self.state.dirty("surface_vars_state")
 
     def update_midpoint_var_selection(self, index, event):
-        self.state.midpoint_vars_state[index] = event
-        self.state.dirty("midpoint_vars_state")
+        with self.state as state:
+            state.midpoint_vars_state[index] = event
         if self.ind_midpoint is not None:
             ind = self.ind_midpoint[index]
             self.midpoint_vars_state[ind] = event
         else:
             self.midpoint_vars_state[index] = event
+        self.state.dirty("midpoint_vars_state")
 
     def update_interface_var_selection(self, index, event):
-        self.state.interface_vars_state[index] = event
-        self.state.dirty("interface_vars_state")
+        with self.state as state:
+            state.interface_vars_state[index] = event
         if self.ind_interface is not None:
             ind = self.ind_interface[index]
             self.interface_vars_state[ind] = event
         else:
             self.interface_vars_state[index] = event
+        self.state.dirty("interface_vars_state")
 
     def search_surface_vars(self, search: str):
         if search is None or len(search) == 0:
@@ -712,7 +713,30 @@ class EAMApp:
         self.state.dirty("interface_vars_state")
 
     def close_view(self, index):
-        print("Requested close view for ", index)
+        var = self.state.variables.pop(index)
+        origin = self.state.varorigin.pop(index)
+        self._cached_layout.pop(var)
+        self.state.dirty("variables")
+        self.state.dirty("varorigin")
+        self.viewmanager.close_view(var, index, self._cached_layout)
+        state = self.state
+
+        # Find variable to unselect from the UI
+        if origin == 0:
+            # Find and clear surface display
+            if var in state.surface_vars:
+                var_index = state.surface_vars.index(var)
+                self.update_surface_var_selection(var_index, False)
+        elif origin == 1:
+            # Find and clear midpoints display
+            if var in state.midpoint_vars:
+                var_index = state.midpoint_vars.index(var)
+                self.update_midpoint_var_selection(var_index, False)
+        elif origin == 2:
+            # Find and clear interface display
+            if var in state.interface_vars:
+                var_index = state.interface_vars.index(var)
+                self.update_interface_var_selection(var_index, False)
 
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
@@ -802,14 +826,14 @@ class EAMApp:
 
                 with layout.content:
                     with grid.GridLayout(
-                        layout=("layout"),
+                        layout=("layout",),
                         col_num=12,
                         row_height=100,
                         is_draggable=True,
                         is_resizable=True,
                         vertical_compact=True,
                         layout_updated="layout = $event; trigger('layout_changed', [$event])",
-                    ):
+                    ) as self.grid:
                         with grid.GridItem(
                             v_for="vref, idx in views",
                             key="vref",
@@ -970,11 +994,11 @@ class EAMApp:
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )
-                                # with v2.VBtn(
-                                #    icon=True,
-                                #    style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
-                                #    click=(self.close_view, "[idx]"),
-                                # ):
-                                #    v2.VIcon("mdi-close")
+                                with v2.VBtn(
+                                    icon=True,
+                                    style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
+                                    click=(self.close_view, "[idx]"),
+                                ):
+                                    v2.VIcon("mdi-close")
 
         return self._ui
