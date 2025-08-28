@@ -593,31 +593,34 @@ class EAMApp(TrameApp):
             self.viewmanager.pan_camera(0, 0)
 
     def update_surface_var_selection(self, index, event):
-        self.state.surface_vars_state[index] = event
-        self.state.dirty("surface_vars_state")
+        with self.state as state:
+            state.surface_vars_state[index] = event
         if self.ind_surface is not None:
             ind = self.ind_surface[index]
             self.surface_vars_state[ind] = event
         else:
             self.surface_vars_state[index] = event
+        self.state.dirty("surface_vars_state")
 
     def update_midpoint_var_selection(self, index, event):
-        self.state.midpoint_vars_state[index] = event
-        self.state.dirty("midpoint_vars_state")
+        with self.state as state:
+            state.midpoint_vars_state[index] = event
         if self.ind_midpoint is not None:
             ind = self.ind_midpoint[index]
             self.midpoint_vars_state[ind] = event
         else:
             self.midpoint_vars_state[index] = event
+        self.state.dirty("midpoint_vars_state")
 
     def update_interface_var_selection(self, index, event):
-        self.state.interface_vars_state[index] = event
-        self.state.dirty("interface_vars_state")
+        with self.state as state:
+            state.interface_vars_state[index] = event
         if self.ind_interface is not None:
             ind = self.ind_interface[index]
             self.interface_vars_state[ind] = event
         else:
             self.interface_vars_state[index] = event
+        self.state.dirty("interface_vars_state")
 
     def search_surface_vars(self, search: str):
         if search is None or len(search) == 0:
@@ -711,29 +714,29 @@ class EAMApp(TrameApp):
 
     def close_view(self, index):
         var = self.state.variables.pop(index)
+        origin = self.state.varorigin.pop(index)
         self._cached_layout.pop(var)
         self.state.dirty("variables")
+        self.state.dirty("varorigin")
         self.viewmanager.close_view(var, index, self._cached_layout)
-        with self.state as state:
-            origin = state.varorigin[index]
-            # Find variable to unselect from the UI
-            if origin == 0:
-                # Find and clear surface display
-                if var in state.surface_vars:
-                    var_index = state.surface_vars.index(var)
-                    self.update_surface_var_selection(var_index, False)
-            elif origin == 1:
-                # Find and clear midpoints display
-                # Find and clear surface display
-                if var in state.midpoint_vars:
-                    var_index = state.midpoint_vars.index(var)
-                    self.update_midpoint_var_selection(var_index, False)
-            elif origin == 2:
-                # Find and clear interface display
-                # Find and clear surface display
-                if var in state.interface_vars:
-                    var_index = state.interface_vars.index(var)
-                    self.update_interface_var_selection(var_index, False)
+        state = self.state
+
+        # Find variable to unselect from the UI
+        if origin == 0:
+            # Find and clear surface display
+            if var in state.surface_vars:
+                var_index = state.surface_vars.index(var)
+                self.update_surface_var_selection(var_index, False)
+        elif origin == 1:
+            # Find and clear midpoints display
+            if var in state.midpoint_vars:
+                var_index = state.midpoint_vars.index(var)
+                self.update_midpoint_var_selection(var_index, False)
+        elif origin == 2:
+            # Find and clear interface display
+            if var in state.interface_vars:
+                var_index = state.interface_vars.index(var)
+                self.update_interface_var_selection(var_index, False)
 
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
@@ -830,7 +833,7 @@ class EAMApp(TrameApp):
                         is_resizable=True,
                         vertical_compact=True,
                         layout_updated="layout = $event; trigger('layout_changed', [$event])",
-                    ):
+                    ) as self.grid:
                         with grid.GridItem(
                             v_for="vref, idx in views",
                             key="vref",
