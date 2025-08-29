@@ -29,16 +29,6 @@ pip install -e .
 ```
 
 ----
-## Additional requirements
-
-Additional requirements for the app are satisfied once the app is launched
-for the very first time using Python virtual environments `venv`. An additional
-step for the use is to provide the path to ParaView's Python client that is
-distributed with the ParaView binaries. The `pvpython` binary is present in the
-`bin` directory of ParaView, on macOS the path is something like
-`/Applications/ParaView-5.13.0.app/Contents/bin/pvpython`
-
-----
 ## Launch the app from command line
 
 To launch the EAM QuickView GUI in its dedicated window, use
