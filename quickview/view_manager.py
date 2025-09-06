@@ -219,7 +219,7 @@ class ViewManager:
             self.state.dirty("views")
             self.state.dirty("layout")
 
-    def close_view(self, var, index, layout_cache):
+    def close_view(self, var, index, layout_cache: map):
         # Clear cache and remove layout and widget entry
         with self.state as state:
             self.registry.remove_view(var)
@@ -229,16 +229,7 @@ class ViewManager:
             state.uselogscale.pop(index)
             state.override_range.pop(index)
             state.invert.pop(index)
-            state.views.pop(index)
             state.colorbar_images.pop(index)
-
-        # Rebuild layout
-        new_layout = []
-        vars = self.state.variables
-        for var in vars:
-            cache = layout_cache[var]
-            new_layout.append(cache)
-        self.state.layout = new_layout
 
         self.state.dirty("varcolor")
         self.state.dirty("varmin")
@@ -246,9 +237,8 @@ class ViewManager:
         self.state.dirty("uselogscale")
         self.state.dirty("override_range")
         self.state.dirty("invert")
-        self.state.dirty("layout")
-        self.state.dirty("views")
         self.state.dirty("colorbar_images")
+        self.rebuild_visualization_layout(layout_cache, False)
 
     def update_views_for_timestep(self):
         if len(self.registry) == 0:
@@ -429,7 +419,7 @@ class ViewManager:
         vardata = vtkdata.GetCellData().GetArray(var)
         return vardata.GetRange()
 
-    def rebuild_visualization_layout(self, cached_layout=None):
+    def rebuild_visualization_layout(self, cached_layout=None, update_pipeline=True):
         self.widgets.clear()
         state = self.state
         source = self.source
@@ -438,15 +428,14 @@ class ViewManager:
         tstamp = state.tstamp
         time = 0.0 if len(self.state.timesteps) == 0 else self.state.timesteps[tstamp]
 
-        source.UpdateLev(self.state.midpoint, self.state.interface)
-        source.ApplyClipping(long, lat)
-        source.UpdateCenter(self.state.center)
-        source.UpdateProjection(self.state.projection)
-        source.UpdatePipeline(time)
-        surface_vars = source.vars.get("surface", [])
-        midpoint_vars = source.vars.get("midpoint", [])
-        interface_vars = source.vars.get("interface", [])
-        to_render = surface_vars + midpoint_vars + interface_vars
+        if update_pipeline:
+            source.UpdateLev(self.state.midpoint, self.state.interface)
+            source.ApplyClipping(long, lat)
+            source.UpdateCenter(self.state.center)
+            source.UpdateProjection(self.state.projection)
+            source.UpdatePipeline(time)
+
+        to_render = self.state.variables
         rendered = self.registry.get_all_variables()
         to_delete = set(rendered) - set(to_render)
         # Move old variables so they their proxies can be deleted
