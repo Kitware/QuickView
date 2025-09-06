@@ -712,6 +712,50 @@ class EAMApp(TrameApp):
         self.interface_vars_state = np.array([False] * len(self.source.interface_vars))
         self.state.dirty("interface_vars_state")
 
+    @trigger("save_screenshot")
+    def save_screenshot(self, index):
+        """Generate and return screenshot data for download."""
+        from datetime import datetime
+        from paraview.simple import SaveScreenshot
+        import tempfile
+        import os
+
+        # Get the variable name and view
+        var = self.state.variables[index]
+        context = self.viewmanager.registry.get_view(var)
+        if context is None or context.state.view_proxy is None:
+            print(f"No view found for variable {var}")
+            return None
+
+        view = context.state.view_proxy
+
+        # Generate filename with timestamp for state
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"quickview_{var}_{timestamp}.png"
+
+        # Create temporary file for screenshot
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
+            tmp_path = tmp_file.name
+
+        try:
+            # Save screenshot to temp file
+            SaveScreenshot(tmp_path, view, ImageResolution=[1920, 1080])
+
+            # Read the screenshot and return as attachment
+            with open(tmp_path, "rb") as f:
+                screenshot_bytes = f.read()
+
+            # Store filename in state for the download button to use
+            self.state.screenshot_filename = filename
+
+            # Return the binary data as an attachment
+            return self.server.protocol.addAttachment(screenshot_bytes)
+
+        finally:
+            # Clean up temp file
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
     def close_view(self, index):
         var = self.state.variables.pop(index)
         origin = self.state.varorigin.pop(index)
@@ -994,6 +1038,12 @@ class EAMApp(TrameApp):
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )
+                                with v2.VBtn(
+                                    icon=True,
+                                    style="position: absolute; top: 8px; right: 24px; padding: 4px 8px; z-index: 2; color: white;",
+                                    click="utils.download(`quickview_${variables[idx]}_${Date.now()}.png`, trigger('save_screenshot', [idx]), 'image/png')",
+                                ):
+                                    v2.VIcon("mdi-file-download")
                                 with v2.VBtn(
                                     icon=True,
                                     style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
