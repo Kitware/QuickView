@@ -717,8 +717,14 @@ class EAMApp(TrameApp):
         """Generate and return screenshot data for download."""
         from datetime import datetime
         from paraview.simple import SaveScreenshot
+        from quickview.utils.color import (
+            create_horizontal_annotated_colorbar,
+            add_metadata_annotations,
+        )
+        from PIL import Image
         import tempfile
         import os
+        import io
 
         # Get the variable name and view
         var = self.state.variables[index]
@@ -733,23 +739,91 @@ class EAMApp(TrameApp):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"quickview_{var}_{timestamp}.png"
 
-        # Create temporary file for screenshot
+        # Create temporary files
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
             tmp_path = tmp_file.name
 
         try:
-            # Save screenshot to temp file
-            SaveScreenshot(tmp_path, view, ImageResolution=[1920, 1080])
+            # Save main screenshot to temp file
+            SaveScreenshot(tmp_path, view)  # , ImageResolution=[800, 600])
 
-            # Read the screenshot and return as attachment
-            with open(tmp_path, "rb") as f:
-                screenshot_bytes = f.read()
+            # Read the screenshot
+            main_image = Image.open(tmp_path)
+
+            # Get colormap info from state
+            colormap_name = self.state.varcolor[index]
+            inverted = self.state.invert[index]
+
+            # Get min/max values from state
+            min_val = self.state.varmin[index]
+            max_val = self.state.varmax[index]
+            use_log = self.state.uselogscale[index]
+
+            # Add margins around the main image to prevent edge clipping
+            margin = 20  # Margin around the screenshot
+            main_with_margins = Image.new(
+                "RGB",
+                (main_image.width + 2 * margin, main_image.height + 2 * margin),
+                "black",
+            )
+            main_with_margins.paste(main_image, (margin, margin))
+
+            # Prepare metadata for annotations
+            metadata = {
+                "variable_name": var,
+                "average": self.state.varaverage[index]
+                if index < len(self.state.varaverage)
+                else None,
+                "timestep": self.state.tstamp,
+            }
+
+            # Check if this is a midpoint or interface variable
+            if var in self.state.midpoint_vars:
+                metadata["level"] = self.state.midpoint
+                metadata["level_type"] = "midpoint"
+            elif var in self.state.interface_vars:
+                metadata["level"] = self.state.interface
+                metadata["level_type"] = "interface"
+
+            # Add metadata annotations to the main image with margins
+            annotated_main = add_metadata_annotations(
+                main_with_margins, metadata, font_size=16
+            )
+
+            # Create horizontal annotated colorbar using cached images
+            # Use optimized height for better space efficiency
+            colorbar_height = 90 if use_log else 60
+            colorbar_image = create_horizontal_annotated_colorbar(
+                colormap_name,
+                inverted,
+                min_val,
+                max_val,
+                width=annotated_main.width,  # Match main image width (including margins)
+                height=colorbar_height,
+                num_ticks=7,
+                use_log_scale=use_log,
+            )
+
+            # Create composite image with annotated screenshot and horizontal colorbar at bottom
+            composite_height = annotated_main.height + colorbar_image.height
+            composite = Image.new(
+                "RGB", (annotated_main.width, composite_height), "black"
+            )
+
+            # Paste annotated main image and colorbar
+            composite.paste(annotated_main, (0, 0))
+            composite.paste(colorbar_image, (0, annotated_main.height))
+
+            # Save composite to bytes
+            output = io.BytesIO()
+            composite.save(output, format="PNG")
+            composite_bytes = output.getvalue()
 
             # Store filename in state for the download button to use
             self.state.screenshot_filename = filename
 
             # Return the binary data as an attachment
-            return self.server.protocol.addAttachment(screenshot_bytes)
+            return self.server.protocol.addAttachment(composite_bytes)
 
         finally:
             # Clean up temp file
@@ -1038,17 +1112,43 @@ class EAMApp(TrameApp):
                                             style="color: white;",
                                             classes="font-weight-medium",
                                         )
-                                with v2.VBtn(
-                                    icon=True,
-                                    style="position: absolute; top: 8px; right: 24px; padding: 4px 8px; z-index: 2; color: white;",
-                                    click="utils.download(`quickview_${variables[idx]}_${Date.now()}.png`, trigger('save_screenshot', [idx]), 'image/png')",
+                                # Action buttons container (download and close)
+                                with html.Div(
+                                    style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 2;",
+                                    classes="drag-ignore",
                                 ):
-                                    v2.VIcon("mdi-file-download")
-                                with v2.VBtn(
-                                    icon=True,
-                                    style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
-                                    click=(self.close_view, "[idx]"),
-                                ):
-                                    v2.VIcon("mdi-close")
+                                    # Download screenshot button with tooltip
+                                    with v2.VTooltip(bottom=True):
+                                        with html.Template(
+                                            v_slot_activator="{ on, attrs }"
+                                        ):
+                                            with v2.VBtn(
+                                                icon=True,
+                                                style="color: white; background-color: rgba(255, 255, 255, 0.1);",
+                                                click="utils.download(`quickview_${variables[idx]}_${Date.now()}.png`, trigger('save_screenshot', [idx]), 'image/png')",
+                                                classes="ma-0",
+                                                v_bind="attrs",
+                                                v_on="on",
+                                            ):
+                                                v2.VIcon(
+                                                    "mdi-file-download", small=True
+                                                )
+                                        html.Span("Save Screenshot")
+
+                                    # Close view button with tooltip
+                                    with v2.VTooltip(bottom=True):
+                                        with html.Template(
+                                            v_slot_activator="{ on, attrs }"
+                                        ):
+                                            with v2.VBtn(
+                                                icon=True,
+                                                style="color: white; background-color: rgba(255, 255, 255, 0.1);",
+                                                click=(self.close_view, "[idx]"),
+                                                classes="ma-0",
+                                                v_bind="attrs",
+                                                v_on="on",
+                                            ):
+                                                v2.VIcon("mdi-close", small=True)
+                                        html.Span("Close View")
 
         return self._ui

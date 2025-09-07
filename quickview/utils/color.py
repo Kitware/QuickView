@@ -110,7 +110,7 @@ def vtk_lut_to_image(lut, samples=255):
     writer = vtkPNGWriter()
     writer.WriteToMemoryOn()
     writer.SetInputData(imgData)
-    writer.SetCompressionLevel(6)
+    writer.SetCompressionLevel(1)
     writer.Write()
 
     writer.GetResult()
@@ -166,6 +166,327 @@ def get_cached_colorbar_image(colormap_name, inverted=False):
         return COLORBAR_CACHE[colormap_name].get(variant, "")
 
     return ""
+
+
+def create_horizontal_annotated_colorbar(
+    colormap_name,
+    inverted,
+    min_val,
+    max_val,
+    width=500,
+    height=80,
+    num_ticks=7,
+    use_log_scale=False,
+):
+    """
+    Create a horizontal annotated colorbar using cached colorbar images.
+
+    Parameters:
+    -----------
+    colormap_name : str
+        Name of the colormap
+    inverted : bool
+        Whether colors are inverted
+    min_val : float
+        Minimum value for the colorbar
+    max_val : float
+        Maximum value for the colorbar
+    width : int
+        Width of the colorbar image (default: 500)
+    height : int
+        Height of the colorbar including labels (default: 80)
+    num_ticks : int
+        Number of tick marks (default: 7)
+    use_log_scale : bool
+        Whether to use logarithmic spacing for labels
+
+    Returns:
+    --------
+    PIL.Image
+        Annotated colorbar image
+    """
+    from PIL import Image, ImageDraw, ImageFont
+    import base64
+    import io
+    import math
+
+    # Add margins to prevent label clipping
+    margin = 50  # Left and right margins for text
+    colorbar_width = width - 2 * margin
+
+    # Get cached colorbar data URI
+    colorbar_data = get_cached_colorbar_image(colormap_name, inverted)
+    if not colorbar_data:
+        # Create a fallback gray gradient if colormap not found
+        colorbar_img = Image.new("RGB", (colorbar_width, 20), (128, 128, 128))
+    else:
+        # Extract base64 data from data URI
+        base64_data = colorbar_data.split(",")[1]
+        img_data = base64.b64decode(base64_data)
+        colorbar_img = Image.open(io.BytesIO(img_data))
+        # Resize to desired width while maintaining aspect
+        colorbar_img = colorbar_img.resize((colorbar_width, 20), Image.LANCZOS)
+
+    # Create new image with space for labels
+    annotated = Image.new("RGB", (width, height), (0, 0, 0))
+
+    # Position colorbar more efficiently
+    if use_log_scale:
+        # For log scale with alternating labels, position near the middle but optimize space
+        colorbar_y_position = 35  # Leave 35px above for upper labels
+    else:
+        colorbar_y_position = 5  # Small padding at top for linear scale
+
+    annotated.paste(colorbar_img, (margin, colorbar_y_position))
+
+    draw = ImageDraw.Draw(annotated)
+
+    # Load font - try more legible fonts first with smaller size for compactness
+    try:
+        # Try Liberation Sans for better legibility (not monospace for tighter spacing)
+        font = ImageFont.truetype(
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 10
+        )
+    except (OSError, IOError):
+        try:
+            # Try DejaVu Sans
+            font = ImageFont.truetype(
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10
+            )
+        except (OSError, IOError):
+            try:
+                # Fallback to Arial if available
+                font = ImageFont.truetype(
+                    "/usr/share/fonts/truetype/msttcorefonts/arial.ttf", 10
+                )
+            except (OSError, IOError):
+                # Last resort - default font
+                font = ImageFont.load_default()
+
+    # Calculate tick positions and values
+    if use_log_scale and min_val > 0:
+        # For log scale: generate log-spaced values but position them correctly on linear gradient
+        log_min = math.log10(min_val)
+        log_max = math.log10(max_val)
+        log_positions = [
+            log_min + i * (log_max - log_min) / (num_ticks - 1)
+            for i in range(num_ticks)
+        ]
+        tick_values = [10**pos for pos in log_positions]
+
+        # Calculate where these log values should appear on the linear gradient
+        # Map each log value to its linear position in the min_val to max_val range
+        tick_positions = [(val - min_val) / (max_val - min_val) for val in tick_values]
+    else:
+        # Linear spacing
+        tick_values = [
+            min_val + i * (max_val - min_val) / (num_ticks - 1)
+            for i in range(num_ticks)
+        ]
+        # For linear scale, positions are evenly spaced
+        tick_positions = [i / (num_ticks - 1) for i in range(num_ticks)]
+
+    # Draw ticks and labels
+
+    for tick_index, (value, position) in enumerate(zip(tick_values, tick_positions)):
+        # Calculate position within the colorbar area using the calculated position
+        x_pos = margin + int(position * (colorbar_width - 1))
+
+        # Draw tick mark relative to colorbar position
+        tick_top = colorbar_y_position + 20  # Bottom of colorbar
+        tick_bottom = tick_top + 3  # Shorter 3px tick for more compact design
+        draw.line(
+            [(x_pos, tick_top), (x_pos, tick_bottom)], fill=(255, 255, 255), width=1
+        )
+
+        # Format label - use shorter format for log scale to reduce overlap
+        if use_log_scale:
+            if abs(value) < 0.01 or abs(value) > 10000:
+                label = f"{value:.1e}"  # Shorter scientific notation
+            else:
+                label = f"{value:.3g}"  # General format, shorter
+        elif abs(value) < 0.01 or abs(value) > 10000:
+            label = f"{value:.2e}"
+        elif abs(value) < 1:
+            label = f"{value:.4f}"
+        elif abs(value) < 10:
+            label = f"{value:.2f}"
+        else:
+            label = f"{value:.1f}"
+
+        if use_log_scale:
+            # For log scale, use alternating up/down positioning with 90-degree rotated text
+            # First, measure the text to create appropriately sized temp image
+            bbox = draw.textbbox((0, 0), label, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+
+            # Create temp image with some padding
+            temp_img = Image.new(
+                "RGBA", (text_width + 10, text_height + 10), (0, 0, 0, 0)
+            )
+            temp_draw = ImageDraw.Draw(temp_img)
+
+            # Draw text with small padding
+            temp_draw.text((5, 5), label, fill=(255, 255, 255), font=font)
+
+            # Rotate the text 90 degrees (vertical)
+            rotated_text = temp_img.rotate(90, expand=True)
+
+            # Alternate positioning: even indices below, odd indices above
+            text_x = x_pos - rotated_text.width // 2  # Center under tick
+
+            if tick_index % 2 == 0:
+                # Even index: position below the colorbar
+                text_y = tick_bottom + 1  # Tighter spacing below tick marks
+            else:
+                # Odd index: position above the colorbar
+                text_y = (
+                    colorbar_y_position - rotated_text.height - 1
+                )  # Tighter spacing above
+
+            # Ensure text stays within bounds
+            text_x = max(0, min(text_x, width - rotated_text.width))
+            # Don't clamp Y for now to see where labels are going
+
+            # Paste the rotated text onto the main image
+            if rotated_text.mode != "RGBA":
+                rotated_text = rotated_text.convert("RGBA")
+            annotated.paste(rotated_text, (text_x, text_y), rotated_text)
+        else:
+            # For linear scale, use horizontal text as before
+            bbox = draw.textbbox((0, 0), label, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_x = x_pos - text_width // 2
+
+            # Clamp text position to stay within margins
+            text_x = max(5, min(text_x, width - text_width - 5))
+
+            # Position text below the tick marks with tighter spacing
+            text_y = tick_bottom + 3
+            draw.text((text_x, text_y), label, fill=(255, 255, 255), font=font)
+
+    return annotated
+
+
+def add_metadata_annotations(image, metadata, font_size=14):
+    """
+    Add metadata annotations to an image (e.g., timestep, average, level).
+
+    Parameters:
+    -----------
+    image : PIL.Image
+        The image to annotate
+    metadata : dict
+        Metadata dictionary containing:
+        - variable_name: str
+        - average: float
+        - timestep: int
+        - level: int or None (for midpoint/interface variables)
+        - level_type: str ('midpoint' or 'interface') or None
+    font_size : int
+        Font size for the annotations
+
+    Returns:
+    --------
+    PIL.Image
+        Annotated image
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    # Create a copy to avoid modifying the original
+    annotated = image.copy()
+    draw = ImageDraw.Draw(annotated)
+
+    # Try to load a good font, fall back to default if not available
+    try:
+        # Try to load a monospace font for better alignment
+        font = ImageFont.truetype(
+            "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf", font_size
+        )
+    except (OSError, IOError):
+        try:
+            # Try DejaVu Sans Mono as alternative
+            font = ImageFont.truetype(
+                "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", font_size
+            )
+        except (OSError, IOError):
+            # Fall back to default font
+            font = ImageFont.load_default()
+
+    # Prepare metadata text lines
+    lines = []
+
+    # Variable name
+    if "variable_name" in metadata and metadata["variable_name"]:
+        lines.append(metadata["variable_name"])
+
+    # Average value
+    if "average" in metadata and metadata["average"] is not None:
+        if isinstance(metadata["average"], (int, float)):
+            # Format in scientific notation
+            lines.append(f"(avg: {metadata['average']:.2e})")
+        else:
+            lines.append("(avg: N/A)")
+
+    # Time step
+    if "timestep" in metadata:
+        lines.append(f"t = {metadata['timestep']}")
+
+    # Level (for midpoint/interface variables)
+    if "level" in metadata and metadata["level"] is not None:
+        if "level_type" in metadata:
+            if metadata["level_type"] == "midpoint":
+                lines.append(f"k = {metadata['level']} (midpoint)")
+            elif metadata["level_type"] == "interface":
+                lines.append(f"k = {metadata['level']} (interface)")
+            else:
+                lines.append(f"k = {metadata['level']}")
+        else:
+            lines.append(f"k = {metadata['level']}")
+
+    # Calculate text positioning
+    x_offset = 10
+    y_offset = 10
+    line_height = font_size + 4
+
+    # Draw semi-transparent background for better text visibility
+    if lines:
+        # Calculate background size
+        max_width = 0
+        for line in lines:
+            bbox = draw.textbbox((0, 0), line, font=font)
+            text_width = bbox[2] - bbox[0]
+            max_width = max(max_width, text_width)
+
+        background_width = max_width + 20
+        background_height = len(lines) * line_height + 10
+
+        # Draw semi-transparent background rectangle
+        background = Image.new("RGBA", annotated.size, (0, 0, 0, 0))
+        background_draw = ImageDraw.Draw(background)
+        background_draw.rectangle(
+            [
+                (x_offset - 5, y_offset - 5),
+                (x_offset + background_width, y_offset + background_height),
+            ],
+            fill=(0, 0, 0, 128),  # Semi-transparent black
+        )
+
+        # Composite the background onto the image
+        annotated = Image.alpha_composite(
+            annotated.convert("RGBA"), background
+        ).convert("RGB")
+
+        # Redraw on the composited image
+        draw = ImageDraw.Draw(annotated)
+
+    # Draw text lines
+    for i, line in enumerate(lines):
+        y_position = y_offset + i * line_height
+        draw.text((x_offset, y_position), line, fill=(255, 255, 255), font=font)
+
+    return annotated
 
 
 # Auto-generated colorbar cache

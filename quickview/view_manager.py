@@ -230,6 +230,7 @@ class ViewManager:
             state.override_range.pop(index)
             state.invert.pop(index)
             state.colorbar_images.pop(index)
+            self.widgets.pop(index)
 
         self.state.dirty("varcolor")
         self.state.dirty("varmin")
@@ -238,7 +239,7 @@ class ViewManager:
         self.state.dirty("override_range")
         self.state.dirty("invert")
         self.state.dirty("colorbar_images")
-        self.rebuild_visualization_layout(layout_cache, False)
+        self.rebuild_after_close(layout_cache)
 
     def update_views_for_timestep(self):
         if len(self.registry) == 0:
@@ -419,6 +420,64 @@ class ViewManager:
         vardata = vtkdata.GetCellData().GetArray(var)
         return vardata.GetRange()
 
+    def rebuild_after_close(self, cached_layout=None):
+        to_render = self.state.variables
+        rendered = self.registry.get_all_variables()
+        to_delete = set(rendered) - set(to_render)
+        # Move old variables so they their proxies can be deleted
+        self.to_delete.extend(
+            [self.registry.get_view(x).state.view_proxy for x in to_delete]
+        )
+
+        layout_map = cached_layout if cached_layout else {}
+
+        del self.state.views[:]
+        del self.state.layout[:]
+        del self.widgets[:]
+        sWidgets = []
+        layout = []
+        wdt = 4
+        hgt = 3
+
+        for index, var in enumerate(to_render):
+            # Check if we have saved position for this variable
+            if var in layout_map:
+                # Use saved position
+                pos = layout_map[var]
+                x = pos["x"]
+                y = pos["y"]
+                wdt = pos["w"]
+                hgt = pos["h"]
+            else:
+                # Default grid position (3 columns)
+                x = int(index % 3) * 4
+                y = int(index / 3) * 3
+                wdt = 4
+                hgt = 3
+
+            context: ViewContext = self.registry.get_view(var)
+            view = context.state.view_proxy
+            context.index = index
+            widget = pvWidgets.VtkRemoteView(
+                view,
+                interactive_ratio=1,
+                classes="pa-0 drag_ignore",
+                style="width: 100%; height: 100%;",
+                trame_server=self.server,
+            )
+            self.widgets.append(widget)
+            sWidgets.append(widget.ref_name)
+            # Use index as identifier to maintain compatibility with grid expectations
+            layout.append({"x": x, "y": y, "w": wdt, "h": hgt, "i": index})
+
+        for var in to_delete:
+            self.registry.remove_view(var)
+
+        self.state.views = sWidgets
+        self.state.layout = layout
+        self.state.dirty("views")
+        self.state.dirty("layout")
+
     def rebuild_visualization_layout(self, cached_layout=None, update_pipeline=True):
         self.widgets.clear()
         state = self.state
@@ -501,6 +560,7 @@ class ViewManager:
                 view = context.state.view_proxy
                 if view is None:
                     view = CreateRenderView()
+                    view.OrientationAxesVisibility = 0
                     view.UseColorPaletteForBackground = 0
                     view.BackgroundColorMode = "Gradient"
                     view.GetRenderWindow().SetOffScreenRendering(True)
