@@ -162,6 +162,7 @@ class EAMApp(TrameApp):
         self.viewmanager = ViewManager(source, self.server, self.state)
 
         state = self.state
+        state.tauri_avail = False
         # Load state variables from the source object
         state.data_file = source.data_file if source.data_file else ""
         state.conn_file = source.conn_file if source.conn_file else ""
@@ -857,6 +858,10 @@ class EAMApp(TrameApp):
             with self._ui as layout:
                 layout.footer.clear()
                 layout.title.clear()
+                client.ClientTriggers(
+                    mounted="tauri_avail = window.__TAURI__ !== undefined;"
+                )
+
                 """
                 with html.Div(
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",

@@ -15,17 +15,23 @@ import json
 class Toolbar:
     @task
     async def select_data_file(self):
-        with self.state:
-            response = await self.ctrl.open("Open Data File")
-            self.state.data_file = response
-            self.state.pipeline_valid = False
+        with self.state as state:
+            if state.tauri_avail:
+                response = await self.ctrl.open("Open Data File")
+                self.state.data_file = response
+                self.state.pipeline_valid = False
+            else:
+                print("Tauri unavailable")
 
     @task
     async def select_connectivity_file(self):
-        with self.state:
-            response = await self.ctrl.open("Open Connectivity File")
-            self.state.conn_file = response
-            self.state.pipeline_valid = False
+        with self.state as state:
+            if state.tauri_avail:
+                response = await self.ctrl.open("Open Connectivity File")
+                self.state.conn_file = response
+                self.state.pipeline_valid = False
+            else:
+                print("Tauri unavailable")
 
     @task
     async def export_state(self):
@@ -36,19 +42,25 @@ class Toolbar:
 
         if self._generate_state is not None:
             config = self._generate_state()
-        with self.state:
-            response = await self.ctrl.save("Export State")
-            export_path = response
-            with open(export_path, "w") as file:
-                json.dump(config, file, indent=4)
+        with self.state as state:
+            if state.tauri_avail:
+                response = await self.ctrl.save("Export State")
+                export_path = response
+                with open(export_path, "w") as file:
+                    json.dump(config, file, indent=4)
+            else:
+                print("Tauri unavailable")
 
     @task
     async def import_state(self):
-        with self.state:
-            response = await self.ctrl.open("Import State", filter=["json"])
-            import_path = response
-            if self._load_state is not None:
-                self._load_state(import_path)
+        with self.state as state:
+            if state.tauri_avail:
+                response = await self.ctrl.open("Import State", filter=["json"])
+                import_path = response
+                if self._load_state is not None:
+                    self._load_state(import_path)
+            else:
+                print("Tauri unavailable")
 
     @property
     def state(self):
