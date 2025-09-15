@@ -717,9 +717,10 @@ class EAMApp(TrameApp):
         """Generate and return screenshot data for download."""
         from datetime import datetime
         from paraview.simple import SaveScreenshot
+        from paraview.simple import GetColorTransferFunction
         from quickview.utils.color import (
-            create_horizontal_annotated_colorbar,
-            add_metadata_annotations,
+            create_vertical_scalar_bar,
+            get_lut_from_color_transfer_function,
         )
         from PIL import Image
         import tempfile
@@ -747,72 +748,61 @@ class EAMApp(TrameApp):
             # Save main screenshot to temp file
             SaveScreenshot(tmp_path, view)  # , ImageResolution=[800, 600])
 
-            # Read the screenshot
+            # Read the original screenshot from ParaView
             main_image = Image.open(tmp_path)
 
-            # Get colormap info from state
-            colormap_name = self.state.varcolor[index]
-            inverted = self.state.invert[index]
-
-            # Get min/max values from state
-            min_val = self.state.varmin[index]
-            max_val = self.state.varmax[index]
+            # Get log scale setting for label formatting
             use_log = self.state.uselogscale[index]
 
-            # Add margins around the main image to prevent edge clipping
-            margin = 20  # Margin around the screenshot
-            main_with_margins = Image.new(
-                "RGB",
-                (main_image.width + 2 * margin, main_image.height + 2 * margin),
-                "black",
-            )
-            main_with_margins.paste(main_image, (margin, margin))
+            # Create vertical scalar bar configuration
+            class ScalarBarConfig:
+                def __init__(self):
+                    self.scalar_bar_num_labels = 7
+                    self.scalar_bar_title = None  # Could set to var name if desired
+                    self.scalar_bar_title_font_size = 14
+                    self.scalar_bar_label_font_size = 12
+                    if use_log:
+                        self.scalar_bar_label_format = "%.1e"
+                    else:
+                        self.scalar_bar_label_format = "%.2f"
 
-            # Prepare metadata for annotations
-            metadata = {
-                "variable_name": var,
-                "average": self.state.varaverage[index]
-                if index < len(self.state.varaverage)
-                else None,
-                "timestep": self.state.tstamp,
-            }
+            # Get the actual ParaView color transfer function being used for this variable
+            # This ensures we get the exact colormap that's displayed in the view
+            paraview_lut = GetColorTransferFunction(var)
 
-            # Check if this is a midpoint or interface variable
-            if var in self.state.midpoint_vars:
-                metadata["level"] = self.state.midpoint
-                metadata["level_type"] = "midpoint"
-            elif var in self.state.interface_vars:
-                metadata["level"] = self.state.interface
-                metadata["level_type"] = "interface"
+            # The color transfer function is already configured with the correct
+            # colormap, inversion, log scale, and range from the view, so we don't
+            # need to modify it - just use it as is
 
-            # Add metadata annotations to the main image with margins
-            annotated_main = add_metadata_annotations(
-                main_with_margins, metadata, font_size=16
-            )
+            # Convert to VTK lookup table
+            vtk_lut = get_lut_from_color_transfer_function(paraview_lut, num_colors=256)
 
-            # Create horizontal annotated colorbar using cached images
-            # Use optimized height for better space efficiency
-            colorbar_height = 90 if use_log else 60
-            colorbar_image = create_horizontal_annotated_colorbar(
-                colormap_name,
-                inverted,
-                min_val,
-                max_val,
-                width=annotated_main.width,  # Match main image width (including margins)
-                height=colorbar_height,
-                num_ticks=7,
-                use_log_scale=use_log,
+            # Create config
+            config = ScalarBarConfig()
+            config.scalar_bar_title = var
+            # Calculate colorbar width as 10% of main image width
+            colorbar_width = int(main_image.width * 0.15)
+
+            # Create vertical scalar bar with same height as main image
+            colorbar_image = create_vertical_scalar_bar(
+                vtk_lut, colorbar_width, main_image.height, config
             )
 
-            # Create composite image with annotated screenshot and horizontal colorbar at bottom
-            composite_height = annotated_main.height + colorbar_image.height
+            # Create extended image by combining original screenshot with scalar bar
+            # No artificial backgrounds - just extend the original image
+            composite_width = main_image.width + colorbar_image.width
             composite = Image.new(
-                "RGB", (annotated_main.width, composite_height), "black"
+                main_image.mode,  # Use same mode as original image
+                (composite_width, main_image.height),
+                color=(255, 255, 255)
+                if main_image.mode == "RGB"
+                else (255, 255, 255, 255),
             )
 
-            # Paste annotated main image and colorbar
-            composite.paste(annotated_main, (0, 0))
-            composite.paste(colorbar_image, (0, annotated_main.height))
+            # Paste original screenshot and vertical colorbar
+            composite.paste(main_image, (0, 0))
+            # Paste the colorbar with gradient background (no alpha mask needed)
+            composite.paste(colorbar_image, (main_image.width, 0))
 
             # Save composite to bytes
             output = io.BytesIO()

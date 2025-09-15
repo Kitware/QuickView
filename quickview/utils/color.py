@@ -6,10 +6,18 @@ and colorbar generation.
 """
 
 import base64
+import io
 import numpy as np
+from PIL import Image
 from vtkmodules.vtkCommonCore import vtkUnsignedCharArray, vtkLookupTable
 from vtkmodules.vtkCommonDataModel import vtkImageData
 from vtkmodules.vtkIOImage import vtkPNGWriter
+from vtkmodules.vtkRenderingCore import (
+    vtkRenderer,
+    vtkRenderWindow,
+    vtkWindowToImageFilter,
+)
+from vtkmodules.vtkRenderingAnnotation import vtkScalarBarActor
 
 
 def get_lut_from_color_transfer_function(paraview_lut, num_colors=256):
@@ -168,205 +176,110 @@ def get_cached_colorbar_image(colormap_name, inverted=False):
     return ""
 
 
-def create_horizontal_annotated_colorbar(
-    colormap_name,
-    inverted,
-    min_val,
-    max_val,
-    width=500,
-    height=80,
-    num_ticks=7,
-    use_log_scale=False,
-):
-    """
-    Create a horizontal annotated colorbar using cached colorbar images.
+def create_vertical_scalar_bar(vtk_lut, width, height, config):
+    """Create a vertical scalar bar image using VTK's ScalarBarActor.
 
     Parameters:
     -----------
-    colormap_name : str
-        Name of the colormap
-    inverted : bool
-        Whether colors are inverted
-    min_val : float
-        Minimum value for the colorbar
-    max_val : float
-        Maximum value for the colorbar
+    vtk_lut : vtkLookupTable
+        The VTK lookup table for colors
     width : int
-        Width of the colorbar image (default: 500)
+        Width of the scalar bar image
     height : int
-        Height of the colorbar including labels (default: 80)
-    num_ticks : int
-        Number of tick marks (default: 7)
-    use_log_scale : bool
-        Whether to use logarithmic spacing for labels
+        Height of the scalar bar image (should match main image height)
+    config : object
+        Configuration object with scalar bar settings
 
     Returns:
     --------
     PIL.Image
-        Annotated colorbar image
+        Vertical scalar bar image with gradient background
     """
-    from PIL import Image, ImageDraw, ImageFont
-    import base64
-    import io
-    import math
+    # Create a renderer and render window
+    renderer = vtkRenderer()
+    # Set gradient background from (0, 0, 42) at top to (84, 89, 109) at bottom
+    # Note: VTK uses bottom color first for gradient
+    renderer.SetBackground(84 / 255.0, 89 / 255.0, 109 / 255.0)  # Bottom color
+    renderer.SetBackground2(0 / 255.0, 0 / 255.0, 42 / 255.0)  # Top color
+    renderer.SetGradientBackground(True)
 
-    # Add margins to prevent label clipping
-    margin = 50  # Left and right margins for text
-    colorbar_width = width - 2 * margin
+    # Use actual panel dimensions for render window
+    window_width = width
+    window_height = height
 
-    # Get cached colorbar data URI
-    colorbar_data = get_cached_colorbar_image(colormap_name, inverted)
-    if not colorbar_data:
-        # Create a fallback gray gradient if colormap not found
-        colorbar_img = Image.new("RGB", (colorbar_width, 20), (128, 128, 128))
-    else:
-        # Extract base64 data from data URI
-        base64_data = colorbar_data.split(",")[1]
-        img_data = base64.b64decode(base64_data)
-        colorbar_img = Image.open(io.BytesIO(img_data))
-        # Resize to desired width while maintaining aspect
-        colorbar_img = colorbar_img.resize((colorbar_width, 20), Image.LANCZOS)
+    render_window = vtkRenderWindow()
+    render_window.SetSize(window_width, window_height)
+    render_window.SetOffScreenRendering(1)
+    render_window.AddRenderer(renderer)
 
-    # Create new image with space for labels
-    annotated = Image.new("RGB", (width, height), (0, 0, 0))
+    # Create scalar bar actor
+    scalar_bar = vtkScalarBarActor()
+    scalar_bar.SetLookupTable(vtk_lut)
+    scalar_bar.SetNumberOfLabels(config.scalar_bar_num_labels)
 
-    # Position colorbar more efficiently
-    if use_log_scale:
-        # For log scale with alternating labels, position near the middle but optimize space
-        colorbar_y_position = 35  # Leave 35px above for upper labels
-    else:
-        colorbar_y_position = 5  # Small padding at top for linear scale
+    # Set orientation to vertical
+    scalar_bar.SetOrientationToVertical()
 
-    annotated.paste(colorbar_img, (margin, colorbar_y_position))
+    # Set title if provided
+    if config.scalar_bar_title:
+        scalar_bar.SetTitle(config.scalar_bar_title)
 
-    draw = ImageDraw.Draw(annotated)
+    # Configure title text properties
+    title_prop = scalar_bar.GetTitleTextProperty()
+    title_prop.SetFontFamilyToArial()
+    title_prop.SetBold(True)
+    title_prop.SetFontSize(config.scalar_bar_title_font_size)
+    title_prop.SetColor(1, 1, 1)  # white title text for visibility on dark background
 
-    # Load font - try more legible fonts first with smaller size for compactness
-    try:
-        # Try Liberation Sans for better legibility (not monospace for tighter spacing)
-        font = ImageFont.truetype(
-            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 10
-        )
-    except (OSError, IOError):
-        try:
-            # Try DejaVu Sans
-            font = ImageFont.truetype(
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10
-            )
-        except (OSError, IOError):
-            try:
-                # Fallback to Arial if available
-                font = ImageFont.truetype(
-                    "/usr/share/fonts/truetype/msttcorefonts/arial.ttf", 10
-                )
-            except (OSError, IOError):
-                # Last resort - default font
-                font = ImageFont.load_default()
+    # Configure label text properties
+    label_prop = scalar_bar.GetLabelTextProperty()
+    label_prop.SetFontFamilyToArial()
+    label_prop.SetBold(False)
+    label_prop.SetFontSize(config.scalar_bar_label_font_size)
+    label_prop.SetColor(1, 1, 1)  # white label text for visibility on dark background
 
-    # Calculate tick positions and values
-    if use_log_scale and min_val > 0:
-        # For log scale: generate log-spaced values but position them correctly on linear gradient
-        log_min = math.log10(min_val)
-        log_max = math.log10(max_val)
-        log_positions = [
-            log_min + i * (log_max - log_min) / (num_ticks - 1)
-            for i in range(num_ticks)
-        ]
-        tick_values = [10**pos for pos in log_positions]
+    # Enable absolute font sizing
+    scalar_bar.UnconstrainedFontSizeOn()
 
-        # Calculate where these log values should appear on the linear gradient
-        # Map each log value to its linear position in the min_val to max_val range
-        tick_positions = [(val - min_val) / (max_val - min_val) for val in tick_values]
-    else:
-        # Linear spacing
-        tick_values = [
-            min_val + i * (max_val - min_val) / (num_ticks - 1)
-            for i in range(num_ticks)
-        ]
-        # For linear scale, positions are evenly spaced
-        tick_positions = [i / (num_ticks - 1) for i in range(num_ticks)]
+    # Set the label format
+    scalar_bar.SetLabelFormat(config.scalar_bar_label_format)
+    # Configure scalar bar dimensions and position
+    # Make the color bar 30% of panel width with room for labels
+    # Leave more margin at top and bottom to prevent bleeding
+    scalar_bar.SetPosition(0.1, 0.1)  # Start at 10% from left, 5% from bottom
+    scalar_bar.SetPosition2(
+        0.9, 0.80
+    )  # Use 90% of window width, 90% height (leaving 10% top margin)
 
-    # Draw ticks and labels
+    # Set the width of the color bar itself to be 30% of the actor width
+    # This gives the color bar proper visual presence
+    scalar_bar.SetBarRatio(0.3)  # Color bar takes 30% of actor width
 
-    for tick_index, (value, position) in enumerate(zip(tick_values, tick_positions)):
-        # Calculate position within the colorbar area using the calculated position
-        x_pos = margin + int(position * (colorbar_width - 1))
+    # Add to renderer
+    renderer.AddActor(scalar_bar)
 
-        # Draw tick mark relative to colorbar position
-        tick_top = colorbar_y_position + 20  # Bottom of colorbar
-        tick_bottom = tick_top + 3  # Shorter 3px tick for more compact design
-        draw.line(
-            [(x_pos, tick_top), (x_pos, tick_bottom)], fill=(255, 255, 255), width=1
-        )
+    # Render the scene
+    render_window.Render()
 
-        # Format label - use shorter format for log scale to reduce overlap
-        if use_log_scale:
-            if abs(value) < 0.01 or abs(value) > 10000:
-                label = f"{value:.1e}"  # Shorter scientific notation
-            else:
-                label = f"{value:.3g}"  # General format, shorter
-        elif abs(value) < 0.01 or abs(value) > 10000:
-            label = f"{value:.2e}"
-        elif abs(value) < 1:
-            label = f"{value:.4f}"
-        elif abs(value) < 10:
-            label = f"{value:.2f}"
-        else:
-            label = f"{value:.1f}"
+    # Convert to image
+    window_to_image = vtkWindowToImageFilter()
+    window_to_image.SetInput(render_window)
+    window_to_image.SetInputBufferTypeToRGBA()
+    window_to_image.Update()
 
-        if use_log_scale:
-            # For log scale, use alternating up/down positioning with 90-degree rotated text
-            # First, measure the text to create appropriately sized temp image
-            bbox = draw.textbbox((0, 0), label, font=font)
-            text_width = bbox[2] - bbox[0]
-            text_height = bbox[3] - bbox[1]
+    # Write to PNG in memory
+    writer = vtkPNGWriter()
+    writer.WriteToMemoryOn()
+    writer.SetInputConnection(window_to_image.GetOutputPort())
+    writer.Write()
 
-            # Create temp image with some padding
-            temp_img = Image.new(
-                "RGBA", (text_width + 10, text_height + 10), (0, 0, 0, 0)
-            )
-            temp_draw = ImageDraw.Draw(temp_img)
+    # Convert to PIL Image
+    png_data = writer.GetResult()
+    img = Image.open(io.BytesIO(bytes(png_data)))
 
-            # Draw text with small padding
-            temp_draw.text((5, 5), label, fill=(255, 255, 255), font=font)
-
-            # Rotate the text 90 degrees (vertical)
-            rotated_text = temp_img.rotate(90, expand=True)
-
-            # Alternate positioning: even indices below, odd indices above
-            text_x = x_pos - rotated_text.width // 2  # Center under tick
-
-            if tick_index % 2 == 0:
-                # Even index: position below the colorbar
-                text_y = tick_bottom + 1  # Tighter spacing below tick marks
-            else:
-                # Odd index: position above the colorbar
-                text_y = (
-                    colorbar_y_position - rotated_text.height - 1
-                )  # Tighter spacing above
-
-            # Ensure text stays within bounds
-            text_x = max(0, min(text_x, width - rotated_text.width))
-            # Don't clamp Y for now to see where labels are going
-
-            # Paste the rotated text onto the main image
-            if rotated_text.mode != "RGBA":
-                rotated_text = rotated_text.convert("RGBA")
-            annotated.paste(rotated_text, (text_x, text_y), rotated_text)
-        else:
-            # For linear scale, use horizontal text as before
-            bbox = draw.textbbox((0, 0), label, font=font)
-            text_width = bbox[2] - bbox[0]
-            text_x = x_pos - text_width // 2
-
-            # Clamp text position to stay within margins
-            text_x = max(5, min(text_x, width - text_width - 5))
-
-            # Position text below the tick marks with tighter spacing
-            text_y = tick_bottom + 3
-            draw.text((text_x, text_y), label, fill=(255, 255, 255), font=font)
-
-    return annotated
+    # Keep the image as is with the gradient background
+    # No need to make anything transparent or crop
+    return img
 
 
 def add_metadata_annotations(image, metadata, font_size=14):
