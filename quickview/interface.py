@@ -693,6 +693,32 @@ class EAMApp(TrameApp):
         self.interface_vars_state = np.array([False] * len(self.source.interface_vars))
         self.state.dirty("interface_vars_state")
 
+    def close_view(self, index):
+        var = self.state.variables.pop(index)
+        origin = self.state.varorigin.pop(index)
+        self._cached_layout.pop(var)
+        self.state.dirty("variables")
+        self.state.dirty("varorigin")
+        self.viewmanager.close_view(var, index, self._cached_layout)
+        state = self.state
+
+        # Find variable to unselect from the UI
+        if origin == 0:
+            # Find and clear surface display
+            if var in state.surface_vars:
+                var_index = state.surface_vars.index(var)
+                self.update_surface_var_selection(var_index, False)
+        elif origin == 1:
+            # Find and clear midpoints display
+            if var in state.midpoint_vars:
+                var_index = state.midpoint_vars.index(var)
+                self.update_midpoint_var_selection(var_index, False)
+        elif origin == 2:
+            # Find and clear interface display
+            if var in state.interface_vars:
+                var_index = state.interface_vars.index(var)
+                self.update_interface_var_selection(var_index, False)
+
     def start(self, **kwargs):
         """Initialize the UI and start the server for GeoTrame."""
         self.ui.server.start(**kwargs)
@@ -799,8 +825,6 @@ class EAMApp(TrameApp):
                     Grid(
                         self.server,
                         self.viewmanager,
-                        self.update_surface_var_selection,
-                        self.update_midpoint_var_selection,
-                        self.update_interface_var_selection,
+                        self.close_view,
                     )
         return self._ui

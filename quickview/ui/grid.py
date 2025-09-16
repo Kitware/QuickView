@@ -118,8 +118,10 @@ class Grid:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
 
+    @trigger("save_screenshot_tauri")
     @task
     async def save_screenshot_tauri(self, index):
+        os.write(1, "Executing Tauri!!!!".encode())
         """Generate screenshot and save to file using Tauri file dialog."""
         # Get the variable name and view
         var = self.state.variables[index]
@@ -233,45 +235,14 @@ class Grid:
     def revert_to_auto_color_range(self, index):
         self.viewmanager.revert_to_auto_color_range(index)
 
-    def close_view(self, index):
-        var = self.state.variables.pop(index)
-        origin = self.state.varorigin.pop(index)
-        self._cached_layout.pop(var)
-        self.state.dirty("variables")
-        self.state.dirty("varorigin")
-        self.viewmanager.close_view(var, index, self._cached_layout)
-        state = self.state
-
-        # Find variable to unselect from the UI
-        if origin == 0:
-            # Find and clear surface display
-            if var in state.surface_vars:
-                var_index = state.surface_vars.index(var)
-                self.update_surface_var_selection(var_index, False)
-        elif origin == 1:
-            # Find and clear midpoints display
-            if var in state.midpoint_vars:
-                var_index = state.midpoint_vars.index(var)
-                self.update_midpoint_var_selection(var_index, False)
-        elif origin == 2:
-            # Find and clear interface display
-            if var in state.interface_vars:
-                var_index = state.interface_vars.index(var)
-                self.update_interface_var_selection(var_index, False)
-
     def __init__(
         self,
         server,
         view_manager=None,
-        update_surface_var_selection=None,
-        update_midpoint_var_selection=None,
-        update_interface_var_selection=None,
+        close_view=None,
     ):
         self.server = server
         self.viewmanager = view_manager
-        self.update_surface_var_selection = update_surface_var_selection
-        self.update_midpoint_var_selection = update_midpoint_var_selection
-        self.update_interface_var_selection = update_interface_var_selection
 
         with grid.GridLayout(
             layout=("layout",),
@@ -465,7 +436,7 @@ class Grid:
                                 with v2.VBtn(
                                     icon=True,
                                     style="color: white; background-color: rgba(255, 255, 255, 0.1);",
-                                    click=(self.close_view, "[idx]"),
+                                    click=(close_view, "[idx]"),
                                     classes="ma-0",
                                     v_bind="attrs",
                                     v_on="on",
