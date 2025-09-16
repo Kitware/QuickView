@@ -155,6 +155,11 @@ jobs:
           - **Apple Silicon (M1/M2/M3)**: Download the \`aarch64\` version
           - **Intel Macs**: Download the \`x64\` version
 
+          Reminder: After download, use the following command in Terminal to unblock the app for macOS
+          ```
+          xattr -d com.apple.quarantine <your_filename>.dmg
+          ```
+
           ## Support
 
           If you encounter any issues:

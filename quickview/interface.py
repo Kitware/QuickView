@@ -11,9 +11,8 @@ from trame.app import TrameApp
 from trame.decorators import life_cycle, trigger, change
 from trame.ui.vuetify import SinglePageWithDrawerLayout
 
-from trame.widgets import vuetify as v2, html, client
+from trame.widgets import vuetify as v2, client
 from trame.widgets import paraview as pvWidgets
-from trame.widgets import grid
 
 from trame_server.core import Server
 
@@ -22,8 +21,8 @@ from quickview.pipeline import EAMVisSource
 from quickview.ui.slice_selection import SliceSelection
 from quickview.ui.projection_selection import ProjectionSelection
 from quickview.ui.variable_selection import VariableSelection
-from quickview.ui.view_settings import ViewProperties
 from quickview.ui.toolbar import Toolbar
+from quickview.ui.grid import Grid
 
 # Build color cache here
 from quickview.view_manager import build_color_information
@@ -32,6 +31,12 @@ from quickview.view_manager import ViewManager
 from paraview.simple import ImportPresets, GetLookupTableNames
 
 from paraview.modules import vtkRemotingCore as rc
+
+try:
+    from trame.widgets import tauri
+except ImportError:
+    # Fallback if tauri is not available
+    tauri = None
 
 rc.vtkProcessModule.GetProcessModule().UpdateProcessType(
     rc.vtkProcessModule.PROCESS_BATCH, 0
@@ -162,6 +167,7 @@ class EAMApp(TrameApp):
         self.viewmanager = ViewManager(source, self.server, self.state)
 
         state = self.state
+        state.tauri_avail = False
         # Load state variables from the source object
         state.data_file = source.data_file if source.data_file else ""
         state.conn_file = source.conn_file if source.conn_file else ""
@@ -537,21 +543,6 @@ class EAMApp(TrameApp):
                                 "h": item.get("h", 3),
                             }
 
-    def update_colormap(self, index, value):
-        """Update the colormap for a variable."""
-        self.viewmanager.update_colormap(index, value)
-
-    def update_log_scale(self, index, value):
-        """Update the log scale setting for a variable."""
-        self.viewmanager.update_log_scale(index, value)
-
-    def update_invert_colors(self, index, value):
-        """Update the color inversion setting for a variable."""
-        self.viewmanager.update_invert_colors(index, value)
-
-    def update_scalar_bars(self, event):
-        self.viewmanager.update_scalar_bars(event)
-
     def update_available_color_maps(self):
         with self.state as state:
             # Directly use the toggle states to determine which colormaps to show
@@ -565,16 +556,6 @@ class EAMApp(TrameApp):
                 # Fallback to standard colors if nothing is selected
                 state.colormaps = noncvd
             state.colormaps.sort(key=lambda x: x["text"])
-
-    def set_manual_color_range(self, index, type, value):
-        # Get current values from state to handle min/max independently
-        min_val = self.state.varmin[index] if type.lower() == "max" else value
-        max_val = self.state.varmax[index] if type.lower() == "min" else value
-        # Delegate to view manager which will update both the view and sync state
-        self.viewmanager.set_manual_color_range(index, min_val, max_val)
-
-    def revert_to_auto_color_range(self, index):
-        self.viewmanager.revert_to_auto_color_range(index)
 
     def zoom(self, type):
         if type.lower() == "in":
@@ -749,6 +730,22 @@ class EAMApp(TrameApp):
             with self._ui as layout:
                 layout.footer.clear()
                 layout.title.clear()
+
+                # Initialize Tauri if available
+                if tauri:
+                    tauri.initialize(self.server)
+                    with tauri.Dialog() as dialog:
+                        self.ctrl.open = dialog.open
+                        self.ctrl.save = dialog.save
+                else:
+                    # Fallback for non-tauri environments
+                    self.ctrl.open = lambda title: None
+                    self.ctrl.save = lambda title: None
+
+                client.ClientTriggers(
+                    mounted="tauri_avail = window.__TAURI__ !== undefined;"
+                )
+
                 """
                 with html.Div(
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px;",
@@ -825,180 +822,9 @@ class EAMApp(TrameApp):
                         )
 
                 with layout.content:
-                    with grid.GridLayout(
-                        layout=("layout",),
-                        col_num=12,
-                        row_height=100,
-                        is_draggable=True,
-                        is_resizable=True,
-                        vertical_compact=True,
-                        layout_updated="layout = $event; trigger('layout_changed', [$event])",
-                    ) as self.grid:
-                        with grid.GridItem(
-                            v_for="vref, idx in views",
-                            key="vref",
-                            v_bind=("layout[idx]",),
-                            style="transition-property: none;",
-                        ):
-                            with v2.VCard(
-                                classes="fill-height", style="overflow: hidden;"
-                            ):
-                                with v2.VCardText(
-                                    style="height: calc(100% - 0.66rem); position: relative;",
-                                    classes="pa-0",
-                                ) as cardcontent:
-                                    # VTK View fills entire space
-                                    cardcontent.add_child(
-                                        """
-                                        <vtk-remote-view :ref="(el) => ($refs[vref] = el)" :viewId="get(`${vref}Id`)" class="pa-0 drag-ignore" style="width: 100%; height: 100%;" interactiveRatio="1" >
-                                        </vtk-remote-view>
-                                        """,
-                                    )
-                                    client.ClientTriggers(
-                                        beforeDestroy="trigger('view_gc', [vref])",
-                                        # mounted=(self.viewmanager.reset_specific_view, '''[idx,
-                                        #         {width: $refs[vref].vtkContainer.getBoundingClientRect().width,
-                                        #         height: $refs[vref].vtkContainer.getBoundingClientRect().height}]
-                                        #         ''')
-                                    )
-                                    # Mask to prevent VTK view from getting scroll/mouse events
-                                    html.Div(
-                                        style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
-                                    )
-                                    # Top-left info: time, level, variable name and average
-                                    with html.Div(
-                                        style="position: absolute; top: 8px; left: 8px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.1); color: white; font-size: 0.875rem; border-radius: 4px; z-index: 2;",
-                                        classes="drag-ignore font-monospace",
-                                    ):
-                                        # Variable name
-                                        html.Div(
-                                            "{{ variables[idx] }}",
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                        # Average value
-                                        html.Div(
-                                            (
-                                                "(avg: {{ "
-                                                "varaverage[idx] !== null && varaverage[idx] !== undefined && !isNaN(varaverage[idx]) && typeof varaverage[idx] === 'number' ? "
-                                                "varaverage[idx].toExponential(2) : "
-                                                "'N/A' "
-                                                "}})"
-                                            ),
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                        # Show time
-                                        html.Div(
-                                            "t = {{ tstamp }}",
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                        # Show level for midpoint variables
-                                        html.Div(
-                                            v_if="midpoint_vars.includes(variables[idx])",
-                                            children="k = {{ midpoint }}",
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                        # Show level for interface variables
-                                        html.Div(
-                                            v_if="interface_vars.includes(variables[idx])",
-                                            children="k = {{ interface }}",
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                    # Colorbar container (horizontal layout at bottom)
-                                    with html.Div(
-                                        style="position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; align-items: center; justify-content: center; padding: 4px 8px 4px 8px; background-color: rgba(255, 255, 255, 0.1); height: 28px; z-index: 3; overflow: visible; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
-                                        classes="drag-ignore",
-                                    ):
-                                        # View Properties button (small icon)
-                                        ViewProperties(
-                                            update_colormap=self.update_colormap,
-                                            update_log_scale=self.update_log_scale,
-                                            update_invert=self.update_invert_colors,
-                                            update_range=self.set_manual_color_range,
-                                            reset=self.revert_to_auto_color_range,
-                                            style="margin-right: 8px; display: flex; align-items: center;",
-                                        )
-                                        # Color min value
-                                        html.Span(
-                                            (
-                                                "{{ "
-                                                "varmin[idx] !== null && varmin[idx] !== undefined && !isNaN(varmin[idx]) && typeof varmin[idx] === 'number' ? ("
-                                                "uselogscale[idx] && varmin[idx] > 0 ? "
-                                                "'10^(' + Math.log10(varmin[idx]).toFixed(1) + ')' : "
-                                                "varmin[idx].toExponential(1)"
-                                                ") : 'Auto' "
-                                                "}}"
-                                            ),
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                        # Colorbar
-                                        with html.Div(
-                                            style="flex: 1; display: flex; align-items: center; margin: 0 8px; height: 0.6rem; position: relative;",
-                                            classes="drag-ignore",
-                                        ):
-                                            # Colorbar image
-                                            html.Img(
-                                                src=(
-                                                    "colorbar_images[idx] || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='",
-                                                    None,
-                                                ),
-                                                style="height: 100%; width: 100%; object-fit: fill;",
-                                                classes="rounded-lg border-thin",
-                                                v_on=(
-                                                    "{"
-                                                    "mousemove: (e) => { "
-                                                    "const rect = e.target.getBoundingClientRect(); "
-                                                    "const x = e.clientX - rect.left; "
-                                                    "const width = rect.width; "
-                                                    "const fraction = Math.max(0, Math.min(1, x / width)); "
-                                                    "probe_location = [x, width, fraction, idx]; "
-                                                    "}, "
-                                                    "mouseenter: () => { probe_enabled = true; }, "
-                                                    "mouseleave: () => { probe_enabled = false; probe_location = null; } "
-                                                    "}"
-                                                ),
-                                            )
-                                            # Probe tooltip (pan3d style - as sibling to colorbar)
-                                            html.Div(
-                                                v_if="probe_enabled && probe_location && probe_location[3] === idx",
-                                                v_bind_style="{position: 'absolute', bottom: '100%', left: probe_location[0] + 'px', transform: 'translateX(-50%)', marginBottom: '0.25rem', backgroundColor: '#000000', color: '#ffffff', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.875rem', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 1000, fontFamily: 'monospace', boxShadow: '0 2px 4px rgba(0,0,0,0.3)'}",
-                                                children=(
-                                                    "{{ "
-                                                    "probe_location && varmin[idx] !== null && varmax[idx] !== null ? ("
-                                                    "uselogscale[idx] && varmin[idx] > 0 && varmax[idx] > 0 ? "
-                                                    "'10^(' + ("
-                                                    "Math.log10(varmin[idx]) + "
-                                                    "(Math.log10(varmax[idx]) - Math.log10(varmin[idx])) * probe_location[2]"
-                                                    ").toFixed(2) + ')' : "
-                                                    "((varmin[idx] || 0) + ((varmax[idx] || 1) - (varmin[idx] || 0)) * probe_location[2]).toExponential(3)"
-                                                    ") : '' "
-                                                    "}}"
-                                                ),
-                                            )
-                                        # Color max value
-                                        html.Span(
-                                            (
-                                                "{{ "
-                                                "varmax[idx] !== null && varmax[idx] !== undefined && !isNaN(varmax[idx]) && typeof varmax[idx] === 'number' ? ("
-                                                "uselogscale[idx] && varmax[idx] > 0 ? "
-                                                "'10^(' + Math.log10(varmax[idx]).toFixed(1) + ')' : "
-                                                "varmax[idx].toExponential(1)"
-                                                ") : 'Auto' "
-                                                "}}"
-                                            ),
-                                            style="color: white;",
-                                            classes="font-weight-medium",
-                                        )
-                                with v2.VBtn(
-                                    icon=True,
-                                    style="position: absolute; top: 8px; right: 8px; padding: 4px 8px; z-index: 2; color: white;",
-                                    click=(self.close_view, "[idx]"),
-                                ):
-                                    v2.VIcon("mdi-close")
-
+                    Grid(
+                        self.server,
+                        self.viewmanager,
+                        self.close_view,
+                    )
         return self._ui

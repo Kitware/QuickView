@@ -6,10 +6,18 @@ and colorbar generation.
 """
 
 import base64
+import io
 import numpy as np
+from PIL import Image
 from vtkmodules.vtkCommonCore import vtkUnsignedCharArray, vtkLookupTable
 from vtkmodules.vtkCommonDataModel import vtkImageData
 from vtkmodules.vtkIOImage import vtkPNGWriter
+from vtkmodules.vtkRenderingCore import (
+    vtkRenderer,
+    vtkRenderWindow,
+    vtkWindowToImageFilter,
+)
+from vtkmodules.vtkRenderingAnnotation import vtkScalarBarActor
 
 
 def get_lut_from_color_transfer_function(paraview_lut, num_colors=256):
@@ -110,7 +118,7 @@ def vtk_lut_to_image(lut, samples=255):
     writer = vtkPNGWriter()
     writer.WriteToMemoryOn()
     writer.SetInputData(imgData)
-    writer.SetCompressionLevel(6)
+    writer.SetCompressionLevel(1)
     writer.Write()
 
     writer.GetResult()
@@ -166,6 +174,232 @@ def get_cached_colorbar_image(colormap_name, inverted=False):
         return COLORBAR_CACHE[colormap_name].get(variant, "")
 
     return ""
+
+
+def create_vertical_scalar_bar(vtk_lut, width, height, config):
+    """Create a vertical scalar bar image using VTK's ScalarBarActor.
+
+    Parameters:
+    -----------
+    vtk_lut : vtkLookupTable
+        The VTK lookup table for colors
+    width : int
+        Width of the scalar bar image
+    height : int
+        Height of the scalar bar image (should match main image height)
+    config : object
+        Configuration object with scalar bar settings
+
+    Returns:
+    --------
+    PIL.Image
+        Vertical scalar bar image with gradient background
+    """
+    # Create a renderer and render window
+    renderer = vtkRenderer()
+    # Set gradient background from (0, 0, 42) at top to (84, 89, 109) at bottom
+    # Note: VTK uses bottom color first for gradient
+    renderer.SetBackground(84 / 255.0, 89 / 255.0, 109 / 255.0)  # Bottom color
+    renderer.SetBackground2(0 / 255.0, 0 / 255.0, 42 / 255.0)  # Top color
+    renderer.SetGradientBackground(True)
+
+    # Use actual panel dimensions for render window
+    window_width = width
+    window_height = height
+
+    render_window = vtkRenderWindow()
+    render_window.SetSize(window_width, window_height)
+    render_window.SetOffScreenRendering(1)
+    render_window.AddRenderer(renderer)
+
+    # Create scalar bar actor
+    scalar_bar = vtkScalarBarActor()
+    scalar_bar.SetLookupTable(vtk_lut)
+    scalar_bar.SetNumberOfLabels(config.scalar_bar_num_labels)
+
+    # Set orientation to vertical
+    scalar_bar.SetOrientationToVertical()
+
+    # Set title if provided
+    if config.scalar_bar_title:
+        scalar_bar.SetTitle(config.scalar_bar_title)
+
+    # Configure title text properties
+    title_prop = scalar_bar.GetTitleTextProperty()
+    title_prop.SetFontFamilyToArial()
+    title_prop.SetBold(True)
+    title_prop.SetFontSize(config.scalar_bar_title_font_size)
+    title_prop.SetColor(1, 1, 1)  # white title text for visibility on dark background
+
+    # Configure label text properties
+    label_prop = scalar_bar.GetLabelTextProperty()
+    label_prop.SetFontFamilyToArial()
+    label_prop.SetBold(False)
+    label_prop.SetFontSize(config.scalar_bar_label_font_size)
+    label_prop.SetColor(1, 1, 1)  # white label text for visibility on dark background
+
+    # Enable absolute font sizing
+    scalar_bar.UnconstrainedFontSizeOn()
+
+    # Set the label format
+    scalar_bar.SetLabelFormat(config.scalar_bar_label_format)
+    # Configure scalar bar dimensions and position
+    # Make the color bar 30% of panel width with room for labels
+    # Leave more margin at top and bottom to prevent bleeding
+    scalar_bar.SetPosition(0.1, 0.1)  # Start at 10% from left, 5% from bottom
+    scalar_bar.SetPosition2(
+        0.9, 0.80
+    )  # Use 90% of window width, 90% height (leaving 10% top margin)
+
+    # Set the width of the color bar itself to be 30% of the actor width
+    # This gives the color bar proper visual presence
+    scalar_bar.SetBarRatio(0.3)  # Color bar takes 30% of actor width
+
+    # Add to renderer
+    renderer.AddActor(scalar_bar)
+
+    # Render the scene
+    render_window.Render()
+
+    # Convert to image
+    window_to_image = vtkWindowToImageFilter()
+    window_to_image.SetInput(render_window)
+    window_to_image.SetInputBufferTypeToRGBA()
+    window_to_image.Update()
+
+    # Write to PNG in memory
+    writer = vtkPNGWriter()
+    writer.WriteToMemoryOn()
+    writer.SetInputConnection(window_to_image.GetOutputPort())
+    writer.Write()
+
+    # Convert to PIL Image
+    png_data = writer.GetResult()
+    img = Image.open(io.BytesIO(bytes(png_data)))
+
+    # Keep the image as is with the gradient background
+    # No need to make anything transparent or crop
+    return img
+
+
+def add_metadata_annotations(image, metadata, font_size=14):
+    """
+    Add metadata annotations to an image (e.g., timestep, average, level).
+
+    Parameters:
+    -----------
+    image : PIL.Image
+        The image to annotate
+    metadata : dict
+        Metadata dictionary containing:
+        - variable_name: str
+        - average: float
+        - timestep: int
+        - level: int or None (for midpoint/interface variables)
+        - level_type: str ('midpoint' or 'interface') or None
+    font_size : int
+        Font size for the annotations
+
+    Returns:
+    --------
+    PIL.Image
+        Annotated image
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    # Create a copy to avoid modifying the original
+    annotated = image.copy()
+    draw = ImageDraw.Draw(annotated)
+
+    # Try to load a good font, fall back to default if not available
+    try:
+        # Try to load a monospace font for better alignment
+        font = ImageFont.truetype(
+            "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf", font_size
+        )
+    except (OSError, IOError):
+        try:
+            # Try DejaVu Sans Mono as alternative
+            font = ImageFont.truetype(
+                "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", font_size
+            )
+        except (OSError, IOError):
+            # Fall back to default font
+            font = ImageFont.load_default()
+
+    # Prepare metadata text lines
+    lines = []
+
+    # Variable name
+    if "variable_name" in metadata and metadata["variable_name"]:
+        lines.append(metadata["variable_name"])
+
+    # Average value
+    if "average" in metadata and metadata["average"] is not None:
+        if isinstance(metadata["average"], (int, float)):
+            # Format in scientific notation
+            lines.append(f"(avg: {metadata['average']:.2e})")
+        else:
+            lines.append("(avg: N/A)")
+
+    # Time step
+    if "timestep" in metadata:
+        lines.append(f"t = {metadata['timestep']}")
+
+    # Level (for midpoint/interface variables)
+    if "level" in metadata and metadata["level"] is not None:
+        if "level_type" in metadata:
+            if metadata["level_type"] == "midpoint":
+                lines.append(f"k = {metadata['level']} (midpoint)")
+            elif metadata["level_type"] == "interface":
+                lines.append(f"k = {metadata['level']} (interface)")
+            else:
+                lines.append(f"k = {metadata['level']}")
+        else:
+            lines.append(f"k = {metadata['level']}")
+
+    # Calculate text positioning
+    x_offset = 10
+    y_offset = 10
+    line_height = font_size + 4
+
+    # Draw semi-transparent background for better text visibility
+    if lines:
+        # Calculate background size
+        max_width = 0
+        for line in lines:
+            bbox = draw.textbbox((0, 0), line, font=font)
+            text_width = bbox[2] - bbox[0]
+            max_width = max(max_width, text_width)
+
+        background_width = max_width + 20
+        background_height = len(lines) * line_height + 10
+
+        # Draw semi-transparent background rectangle
+        background = Image.new("RGBA", annotated.size, (0, 0, 0, 0))
+        background_draw = ImageDraw.Draw(background)
+        background_draw.rectangle(
+            [
+                (x_offset - 5, y_offset - 5),
+                (x_offset + background_width, y_offset + background_height),
+            ],
+            fill=(0, 0, 0, 128),  # Semi-transparent black
+        )
+
+        # Composite the background onto the image
+        annotated = Image.alpha_composite(
+            annotated.convert("RGBA"), background
+        ).convert("RGB")
+
+        # Redraw on the composited image
+        draw = ImageDraw.Draw(annotated)
+
+    # Draw text lines
+    for i, line in enumerate(lines):
+        y_position = y_offset + i * line_height
+        draw.text((x_offset, y_position), line, fill=(255, 255, 255), font=font)
+
+    return annotated
 
 
 # Auto-generated colorbar cache
