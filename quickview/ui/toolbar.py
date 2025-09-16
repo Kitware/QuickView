@@ -2,12 +2,6 @@ from trame.decorators import TrameApp, task
 from trame.widgets import html, vuetify2 as v2
 from quickview.ui.view_settings import ViewControls
 
-try:
-    from trame.widgets import tauri
-except ImportError:
-    # Fallback if tauri is not available
-    tauri = None
-
 import json
 
 
@@ -22,6 +16,18 @@ class Toolbar:
                 self.state.pipeline_valid = False
             else:
                 print("Tauri unavailable")
+
+    def update_colormap(self, index, value):
+        """Update the colormap for a variable."""
+        self.viewmanager.update_colormap(index, value)
+
+    def update_log_scale(self, index, value):
+        """Update the log scale setting for a variable."""
+        self.viewmanager.update_log_scale(index, value)
+
+    def update_invert_colors(self, index, value):
+        """Update the color inversion setting for a variable."""
+        self.viewmanager.update_invert_colors(index, value)
 
     @task
     async def select_connectivity_file(self):
@@ -106,14 +112,7 @@ class Toolbar:
         **kwargs,
     ):
         self.server = server
-        if tauri:
-            with tauri.Dialog() as dialog:
-                self.ctrl.open = dialog.open
-                self.ctrl.save = dialog.save
-        else:
-            # Fallback for non-tauri environments
-            self.ctrl.open = lambda title: None
-            self.ctrl.save = lambda title: None
+
         self._generate_state = generate_state
         self._load_state = load_state
         self._update_available_color_maps = update_available_color_maps
