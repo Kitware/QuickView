@@ -78,7 +78,6 @@ class EAMApp(TrameApp):
             self.ctrl.on_server_reload.add(self._build_ui)
 
         # Data input
-        self.selected_variables = None
         self.state.variables_listing = []
         self.state.toolbar_slider_visibility = []
         self.source = EAMVisSource()
@@ -123,129 +122,197 @@ class EAMApp(TrameApp):
                         select_strategy="independent",
                         v_model_selected=("active_tools", ["load-data"]),
                     ):
-                        with v3.VListItem(
-                            title=("compact_drawer ? null : 'QuickView'",),
-                            classes="text-h6",
-                            click=self.view_manager.reset_camera,
+                        with v3.VTooltip(
+                            text="Reset camera", disabled=("!compact_drawer",)
                         ):
-                            with v3.Template(raw_attrs=["#prepend"]):
-                                v3.VAvatar(image=ASSETS.icon, size=24, classes="me-4")
-                            v3.VProgressCircular(
-                                color="primary",
-                                indeterminate=True,
-                                v_show="trame__busy",
-                                v_if="compact_drawer",
-                                style="position: absolute !important;left: 50%;top: 50%; transform: translate(-50%, -50%);",
-                            )
-                            v3.VProgressLinear(
-                                v_else=True,
-                                color="primary",
-                                indeterminate=True,
-                                v_show="trame__busy",
-                                absolute=True,
-                                style="top:90%;width:100%;",
-                            )
-                        v3.VListItem(
-                            prepend_icon="mdi-file-document-outline",
-                            value="load-data",
-                            title=("compact_drawer ? null : 'File loading'",),
-                        )
-                        v3.VListItem(
-                            prepend_icon="mdi-list-status",
-                            value="select-fields",
-                            disabled=("variables_listing.length === 0",),
-                            title=("compact_drawer ? null : 'Fields selection'",),
-                        )
-                        with v3.VListItem(
-                            prepend_icon="mdi-earth",
-                            title=("compact_drawer ? null : 'Map Projection'",),
+                            with v3.Template(v_slot_activator="{ props }"):
+                                with v3.VListItem(
+                                    v_bind="props",
+                                    title=("compact_drawer ? null : 'QuickView'",),
+                                    classes="text-h6",
+                                    click=self.view_manager.reset_camera,
+                                ):
+                                    with v3.Template(raw_attrs=["#prepend"]):
+                                        v3.VAvatar(
+                                            image=ASSETS.icon, size=24, classes="me-4"
+                                        )
+                                    v3.VProgressCircular(
+                                        color="primary",
+                                        indeterminate=True,
+                                        v_show="trame__busy",
+                                        v_if="compact_drawer",
+                                        style="position: absolute !important;left: 50%;top: 50%; transform: translate(-50%, -50%);",
+                                    )
+                                    v3.VProgressLinear(
+                                        v_else=True,
+                                        color="primary",
+                                        indeterminate=True,
+                                        v_show="trame__busy",
+                                        absolute=True,
+                                        style="top:90%;width:100%;",
+                                    )
+                        with v3.VTooltip(
+                            text="File loading", disabled=("!compact_drawer",)
                         ):
-                            with v3.VMenu(
-                                activator="parent", location="end", offset=10
-                            ):
-                                v3.VList(
-                                    mandatory=True,
-                                    v_model_selected=(
-                                        "projection",
-                                        ["Cyl. Equidistant"],
-                                    ),
-                                    density="compact",
-                                    items=(
-                                        "projections",
-                                        [
-                                            {
-                                                "title": "Cylindrical Equidistant",
-                                                "value": "Cyl. Equidistant",
-                                            },
-                                            {"title": "Robinson", "value": "Robinson"},
-                                            {
-                                                "title": "Mollweide",
-                                                "value": "Mollweide",
-                                            },
-                                        ],
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-file-document-outline",
+                                    value="load-data",
+                                    title=("compact_drawer ? null : 'File loading'",),
+                                )
+                        with v3.VTooltip(
+                            text="Fields selection", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-list-status",
+                                    value="select-fields",
+                                    disabled=("variables_listing.length === 0",),
+                                    title=(
+                                        "compact_drawer ? null : 'Fields selection'",
                                     ),
                                 )
-                        v3.VListItem(
-                            prepend_icon="mdi-collage",
-                            value="adjust-layout",
-                            title=("compact_drawer ? null : 'Layout management'",),
-                        )
-                        v3.VListItem(
-                            prepend_icon="mdi-crop",
-                            value="adjust-databounds",
-                            title=("compact_drawer ? null : 'Lat/Long cropping'",),
-                        )
-                        v3.VListItem(
-                            prepend_icon="mdi-tune-variant",
-                            value="select-slice-time",
-                            title=("compact_drawer ? null : 'Slice selection'",),
-                        )
-                        v3.VListItem(
-                            prepend_icon="mdi-movie-open-cog-outline",
-                            value="animation-controls",
-                            title=("compact_drawer ? null : 'Animation controls'",),
-                        )
-                        v3.VListItem(
-                            prepend_icon="mdi-folder-arrow-left-right-outline",
-                            value="import-export",
-                            title=("compact_drawer ? null : 'State Import/Export'",),
-                        )
 
-                        # v3.VListItem(
-                        #     prepend_icon="mdi-compass-rose",
-                        #     value="reset-camera",
-                        #     disabled=True,
-                        # )
-                        # v3.VListItem(
-                        #     prepend_icon="mdi-cog",
-                        #     value="settings",
-                        #     disabled=True,
-                        # )
+                        with v3.VTooltip(
+                            text="State Import/Export", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-folder-arrow-left-right-outline",
+                                    value="import-export",
+                                    title=(
+                                        "compact_drawer ? null : 'State Import/Export'",
+                                    ),
+                                )
 
-                        # v3.VListItem(
-                        #     prepend_icon="mdi-earth-box",
-                        #     value="projection-box",
-                        #     disabled=True,
-                        # )
+                        with v3.VTooltip(
+                            text="Toggle Help", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-lifebuoy",
+                                    click="compact_drawer = !compact_drawer",
+                                    title=("compact_drawer ? null : 'Toggle Help'",),
+                                )
 
-                    with v3.Template(raw_attrs=["#append"]):
-                        with v3.VList(density="compact", nav=True):
+                        v3.VDivider(classes="my-1")
+
+                        with v3.VTooltip(
+                            text="Map Projection", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                with v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-earth",
+                                    title=("compact_drawer ? null : 'Map Projection'",),
+                                ):
+                                    with v3.VMenu(
+                                        activator="parent", location="end", offset=10
+                                    ):
+                                        v3.VList(
+                                            mandatory=True,
+                                            v_model_selected=(
+                                                "projection",
+                                                ["Cyl. Equidistant"],
+                                            ),
+                                            density="compact",
+                                            items=(
+                                                "projections",
+                                                [
+                                                    {
+                                                        "title": "Cylindrical Equidistant",
+                                                        "value": "Cyl. Equidistant",
+                                                    },
+                                                    {
+                                                        "title": "Robinson",
+                                                        "value": "Robinson",
+                                                    },
+                                                    {
+                                                        "title": "Mollweide",
+                                                        "value": "Mollweide",
+                                                    },
+                                                ],
+                                            ),
+                                        )
+
+                        with v3.VTooltip(
+                            text="Layout management", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-collage",
+                                    value="adjust-layout",
+                                    title=(
+                                        "compact_drawer ? null : 'Layout management'",
+                                    ),
+                                )
+
+                        v3.VDivider(classes="my-1")
+
+                        with v3.VTooltip(
+                            text="Lat/Long cropping", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-crop",
+                                    value="adjust-databounds",
+                                    title=(
+                                        "compact_drawer ? null : 'Lat/Long cropping'",
+                                    ),
+                                )
+
+                        with v3.VTooltip(
+                            text="Slice selection", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-tune-variant",
+                                    value="select-slice-time",
+                                    title=(
+                                        "compact_drawer ? null : 'Slice selection'",
+                                    ),
+                                )
+
+                        with v3.VTooltip(
+                            text="Animation controls", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-movie-open-cog-outline",
+                                    value="animation-controls",
+                                    title=(
+                                        "compact_drawer ? null : 'Animation controls'",
+                                    ),
+                                )
+
+                        if self.server.hot_reload:
+                            v3.VDivider(classes="mt-8 mb-1", color="red")
                             v3.VListItem(
-                                prepend_icon="mdi-lifebuoy",
-                                click="compact_drawer = !compact_drawer",
-                                title=("compact_drawer ? null : 'Toggle Help'",),
+                                prepend_icon="mdi-timer-sand-complete",
+                                click=self.fake_busy,
+                                title=("compact_drawer ? null : 'Trigger busy'",),
                             )
-                            if self.server.hot_reload:
-                                v3.VListItem(
-                                    prepend_icon="mdi-timer-sand-complete",
-                                    click=self.fake_busy,
-                                    title=("compact_drawer ? null : 'Trigger busy'",),
-                                )
-                                v3.VListItem(
-                                    prepend_icon="mdi-database-refresh-outline",
-                                    click=self.ctrl.on_server_reload,
-                                    title=("compact_drawer ? null : 'Refresh UI'",),
-                                )
+                            v3.VListItem(
+                                prepend_icon="mdi-database-refresh-outline",
+                                click=self.ctrl.on_server_reload,
+                                title=("compact_drawer ? null : 'Refresh UI'",),
+                            )
+
+                    # with v3.Template(raw_attrs=["#append"]):
+                    #     with v3.VList(density="compact", nav=True):
+                    #         v3.VListItem(
+                    #             prepend_icon="mdi-lifebuoy",
+                    #             click="compact_drawer = !compact_drawer",
+                    #             title=("compact_drawer ? null : 'Toggle Help'",),
+                    #         )
 
                 with v3.VMain():
                     # load-data
@@ -565,8 +632,10 @@ class EAMApp(TrameApp):
 
     @controller.add_task("file_selection_load")
     async def data_loading_open(self, simulation, connectivity):
-        self.selected_variables = None
+        # Reset state
+        self.state.variables_selected = []
         self.state.variables_loaded = False
+
         await asyncio.sleep(0.1)
         self.source.Update(
             data_file=simulation,
@@ -611,26 +680,33 @@ class EAMApp(TrameApp):
             tool for tool in self.state.active_tools if tool != "load-data"
         ]
 
-    def data_load_variables(self):
+    @property
+    def selected_variables(self):
         vars_per_type = {n: [] for n in "smi"}
         for var in self.state.variables_selected:
             type = var[0]
             name = var[1:]
             vars_per_type[type].append(name)
 
+        print("=> selected_variables", vars_per_type)
+
+        return vars_per_type
+
+    def data_load_variables(self):
+        vars_to_show = self.selected_variables
+
         self.source.LoadVariables(
-            vars_per_type["s"],  # surfaces
-            vars_per_type["m"],  # midpoints
-            vars_per_type["i"],  # interfaces
+            vars_to_show["s"],  # surfaces
+            vars_to_show["m"],  # midpoints
+            vars_to_show["i"],  # interfaces
         )
-        self.selected_variables = vars_per_type
-        self.view_manager.build_auto_layout(vars_per_type)
+        self.view_manager.build_auto_layout(vars_to_show)
 
         # Compute Layer/Time column spread
         n_cols = 1  # time
         toolbar_slider_visibility = []
         for var_type in "mi":
-            if vars_per_type[var_type]:
+            if vars_to_show[var_type]:
                 toolbar_slider_visibility.append(var_type)
                 n_cols += 1
 
@@ -646,10 +722,11 @@ class EAMApp(TrameApp):
 
     @change("col_mode")
     def _on_layout_refresh(self, **_):
-        if self.selected_variables is None:
-            return
-
-        self.view_manager.build_auto_layout(self.selected_variables)
+        vars_to_show = self.selected_variables
+        print("col_mode", vars_to_show)
+        if any(vars_to_show.values()):
+            print("build layout")
+            self.view_manager.build_auto_layout(vars_to_show)
 
     @change("projection")
     async def _on_projection(self, projection, **_):
