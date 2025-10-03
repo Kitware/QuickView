@@ -6,14 +6,15 @@ from pathlib import Path
 
 from trame.app import TrameApp
 from trame.ui.vuetify3 import VAppLayout
-from trame.widgets import vuetify3 as v3, paraview as pvw, client, html
-from trame.decorators import controller
+from trame.widgets import vuetify3 as v3, client, html
+from trame.decorators import controller, change
 
 from quickview.pipeline import EAMVisSource
 from quickview.assets import ASSETS
+from quickview.view_manager2 import ViewManager
 from quickview.components.file_browser import ParaViewFileBrowser
 
-from paraview import simple
+v3.enable_lab()
 
 # -----------------------------------------------------------------------------
 # Externalize
@@ -22,6 +23,22 @@ VAR_HEADERS = [
     {"title": "Name", "align": "start", "key": "name", "sortable": True},
     {"title": "Type", "align": "start", "key": "type", "sortable": True},
 ]
+
+
+def js_var_count(name):
+    return f"variables_selected.filter((v) => v[0] === '{name[0]}').length"
+
+
+def js_var_remove(name):
+    return (
+        f"variables_selected = variables_selected.filter((v) => v[0] !== '{name[0]}')"
+    )
+
+
+def js_var_title(name):
+    return " ".join(["{{", js_var_count(name), "}}", name.capitalize()])
+
+
 # -----------------------------------------------------------------------------
 
 
@@ -60,7 +77,15 @@ class EAMApp(TrameApp):
         if self.server.hot_reload:
             self.ctrl.on_server_reload.add(self._build_ui)
 
+        # Data input
+        self.selected_variables = None
+        self.state.variables_listing = []
+        self.state.toolbar_slider_visibility = []
+        self.source = EAMVisSource()
+        self.app_state = {}
+
         # Helpers
+        self.view_manager = ViewManager(self.server, self.source)
         self.file_browser = ParaViewFileBrowser(
             self.server,
             prefix="pv_files",
@@ -68,10 +93,7 @@ class EAMApp(TrameApp):
             group="",
         )
 
-        # Data input
-        self.state.variables_listing = []
-        self.source = EAMVisSource()
-        self.app_state = {}
+        # Process CLI to pre-load data
         if args.state is not None:
             self.app_state = json.loads(Path(args.state).read_text())
             self.source.Update(
@@ -84,6 +106,10 @@ class EAMApp(TrameApp):
 
         # GUI
         self._build_ui()
+
+    # -------------------------------------------------------------------------
+    # UI definition
+    # -------------------------------------------------------------------------
 
     def _build_ui(self, **_):
         with VAppLayout(self.server, fill_height=True) as self.ui:
@@ -100,6 +126,7 @@ class EAMApp(TrameApp):
                         with v3.VListItem(
                             title=("compact_drawer ? null : 'QuickView'",),
                             classes="text-h6",
+                            click=self.view_manager.reset_camera,
                         ):
                             with v3.Template(raw_attrs=["#prepend"]):
                                 v3.VAvatar(image=ASSETS.icon, size=24, classes="me-4")
@@ -129,6 +156,35 @@ class EAMApp(TrameApp):
                             disabled=("variables_listing.length === 0",),
                             title=("compact_drawer ? null : 'Fields selection'",),
                         )
+                        with v3.VListItem(
+                            prepend_icon="mdi-earth",
+                            title=("compact_drawer ? null : 'Map Projection'",),
+                        ):
+                            with v3.VMenu(
+                                activator="parent", location="end", offset=10
+                            ):
+                                v3.VList(
+                                    mandatory=True,
+                                    v_model_selected=(
+                                        "projection",
+                                        ["Cyl. Equidistant"],
+                                    ),
+                                    density="compact",
+                                    items=(
+                                        "projections",
+                                        [
+                                            {
+                                                "title": "Cylindrical Equidistant",
+                                                "value": "Cyl. Equidistant",
+                                            },
+                                            {"title": "Robinson", "value": "Robinson"},
+                                            {
+                                                "title": "Mollweide",
+                                                "value": "Mollweide",
+                                            },
+                                        ],
+                                    ),
+                                )
                         v3.VListItem(
                             prepend_icon="mdi-collage",
                             value="adjust-layout",
@@ -140,16 +196,15 @@ class EAMApp(TrameApp):
                             title=("compact_drawer ? null : 'Lat/Long cropping'",),
                         )
                         v3.VListItem(
-                            prepend_icon="mdi-earth",
-                            value="projection-sphere",
-                            title=("compact_drawer ? null : 'Map Projection'",),
+                            prepend_icon="mdi-tune-variant",
+                            value="select-slice-time",
+                            title=("compact_drawer ? null : 'Slice selection'",),
                         )
                         v3.VListItem(
                             prepend_icon="mdi-movie-open-cog-outline",
                             value="animation-controls",
                             title=("compact_drawer ? null : 'Animation controls'",),
                         )
-
                         v3.VListItem(
                             prepend_icon="mdi-folder-arrow-left-right-outline",
                             value="import-export",
@@ -192,12 +247,55 @@ class EAMApp(TrameApp):
                                     title=("compact_drawer ? null : 'Refresh UI'",),
                                 )
 
-                with v3.VMain(classes="bg-red"):
+                with v3.VMain():
+                    # load-data
+                    with html.Div(
+                        style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:1000;"
+                    ):
+                        with v3.VDialog(
+                            model_value=("active_tools.includes('load-data')",),
+                            contained=True,
+                            max_width="80vw",
+                            persistent=True,
+                        ):
+                            self.file_browser.ui()
+
                     # Field selection container
                     with v3.VNavigationDrawer(
                         model_value=("active_tools.includes('select-fields')",),
                         width=500,
+                        permanent=True,
                     ):
+                        with v3.VCardActions(key="variables_selected.length"):
+                            for name, color in [
+                                ("surfaces", "success"),
+                                ("interfaces", "info"),
+                                ("midpoints", "warning"),
+                            ]:
+                                v3.VChip(
+                                    js_var_title(name),
+                                    color=color,
+                                    v_show=js_var_count(name),
+                                    size="small",
+                                    closable=True,
+                                    click_close=js_var_remove(name),
+                                )
+
+                            v3.VSpacer()
+                            v3.VBtn(
+                                classes="text-none",
+                                color="primary",
+                                prepend_icon="mdi-database",
+                                text=(
+                                    "`Load ${variables_selected.length} variable${variables_selected.length > 1 ? 's' :''}`",
+                                ),
+                                variant="flat",
+                                disabled=(
+                                    "variables_selected.length === 0 || variables_loaded",
+                                ),
+                                click=self.data_load_variables,
+                            )
+
                         v3.VTextField(
                             v_model=("variables_filter", ""),
                             hide_details=True,
@@ -205,7 +303,7 @@ class EAMApp(TrameApp):
                             placeholder="Filter",
                             density="compact",
                             variant="outlined",
-                            classes="mx-2 mt-2",
+                            classes="mx-2",
                             prepend_inner_icon="mdi-magnify",
                             clearable=True,
                         )
@@ -217,7 +315,9 @@ class EAMApp(TrameApp):
                             fixed_header=True,
                             headers=("variables_headers", VAR_HEADERS),
                             items=("variables_listing", []),
-                            height="calc(100vh - 6.5rem)",
+                            height=(
+                                "`calc(max(100vh, ${Math.floor(main_size?.size?.height || 0)}px) - 6rem)`",
+                            ),
                             style="user-select: none; cursor: pointer;",
                             hover=True,
                             search=("variables_filter", ""),
@@ -225,60 +325,248 @@ class EAMApp(TrameApp):
                             hide_default_footer=True,
                         )
 
-                        with v3.VCardActions(key="variables_selected.length"):
-                            v3.VChip(
-                                "{{ variables_selected.filter((v) => v.at(-1) === 's').length }} Surfaces",
-                                color="success",
-                                v_show="variables_selected.filter((v) => v.at(-1) === 's').length",
-                                size="small",
-                                closable=True,
-                                click_close="variables_selected = variables_selected.filter((v) => v.at(-1) !== 's')",
-                            )
-                            v3.VChip(
-                                "{{ variables_selected.filter((v) => v.at(-1) === 'i').length }} Interfaces",
-                                color="info",
-                                v_show="variables_selected.filter((v) => v.at(-1) === 'i').length",
-                                size="small",
-                                closable=True,
-                                click_close="variables_selected = variables_selected.filter((v) => v.at(-1) !== 'i')",
-                            )
-                            v3.VChip(
-                                "{{ variables_selected.filter((v) => v.at(-1) === 'm').length }} Midpoints",
-                                color="warning",
-                                v_show="variables_selected.filter((v) => v.at(-1) === 'm').length",
-                                size="small",
-                                closable=True,
-                                click_close="variables_selected = variables_selected.filter((v) => v.at(-1) !== 'm')",
-                            )
-                            v3.VSpacer()
-                            v3.VBtn(
-                                classes="text-none",
-                                color="primary",
-                                prepend_icon="mdi-database",
-                                text="Load variables",
-                                variant="flat",
-                                disabled=("variables_selected.length === 0",),
-                            )
+                    with v3.VContainer(classes="h-100 pa-0", fluid=True):
+                        with client.SizeObserver("main_size"):
+                            # Layout control toolbar
+                            with v3.VToolbar(
+                                v_show="active_tools.includes('adjust-layout')",
+                                color="white",
+                                classes="border-b-thin",
+                                density="compact",
+                            ):
+                                v3.VIcon("mdi-collage", classes="px-6 opacity-50")
+                                v3.VLabel("Layout Controls", classes="text-subtitle-2")
+                                v3.VSpacer()
 
-                    with v3.VContainer(classes="h-100", fluid=True):
-                        # load-data
-                        with v3.VDialog(
-                            model_value=("active_tools.includes('load-data')",),
-                            contained=True,
-                            max_width="80vw",
-                            persistent=True,
-                        ):
-                            self.file_browser.ui()
+                                with v3.VRadioGroup(
+                                    classes="d-inline-block",
+                                    hide_details=True,
+                                    inline=True,
+                                    v_model=("col_mode", "auto"),
+                                ):
+                                    v3.VRadio(label="Auto", value="auto")
+                                    v3.VRadio(label="Full width", value="1")
+                                    v3.VRadio(label="2 cols", value="2")
+                                    v3.VRadio(label="3 cols", value="3")
+                                    v3.VRadio(label="4 cols", value="4")
+                                    v3.VRadio(label="6 cols", value="6")
+                                    v3.VRadio(label="12 cols", value="12")
 
-                        # layout content
-                        with html.Div(classes="bg-green h-100"):
-                            v3.VLabel("Hello {{ active_tools }}")
+                                v3.VSpacer()
+                                v3.VSlider(
+                                    v_model=("aspect_ratio", 2),
+                                    prepend_icon="mdi-aspect-ratio",
+                                    min=1,
+                                    max=2,
+                                    step=0.1,
+                                    density="compact",
+                                    hide_details=True,
+                                    style="max-width: 400px;",
+                                    classes="mx-4",
+                                )
+
+                            # Crop selection
+                            with v3.VToolbar(
+                                v_show="active_tools.includes('adjust-databounds')",
+                                color="white",
+                                classes="border-b-thin",
+                            ):
+                                v3.VIcon("mdi-crop", classes="pl-6 opacity-50")
+                                with v3.VRow(classes="ma-0 px-2 align-center"):
+                                    with v3.VCol(cols=6):
+                                        with v3.VRow(classes="mx-2 my-0"):
+                                            v3.VLabel(
+                                                "Longitude", classes="text-subtitle-2"
+                                            )
+                                            v3.VSpacer()
+                                            v3.VLabel(
+                                                "{{ crop_longitude }}",
+                                                classes="text-body-2",
+                                            )
+                                        v3.VRangeSlider(
+                                            v_model=("crop_longitude", [-180, 180]),
+                                            min=-180,
+                                            max=180,
+                                            step=1,
+                                            density="compact",
+                                            hide_details=True,
+                                        )
+                                    with v3.VCol(cols=6):
+                                        with v3.VRow(classes="mx-2 my-0"):
+                                            v3.VLabel(
+                                                "Latitude", classes="text-subtitle-2"
+                                            )
+                                            v3.VSpacer()
+                                            v3.VLabel(
+                                                "{{ crop_latitude }}",
+                                                classes="text-body-2",
+                                            )
+                                        v3.VRangeSlider(
+                                            v_model=("crop_latitude", [-90, 90]),
+                                            min=-90,
+                                            max=90,
+                                            step=1,
+                                            density="compact",
+                                            hide_details=True,
+                                        )
+
+                            # Layer/Time selection
+                            with v3.VToolbar(
+                                v_show="active_tools.includes('select-slice-time')",
+                                color="white",
+                                classes="border-b-thin",
+                            ):
+                                v3.VIcon("mdi-tune-variant", classes="ml-3 opacity-50")
+                                with v3.VRow(
+                                    classes="ma-0 pr-2 align-center", dense=True
+                                ):
+                                    # midpoint layer
+                                    with v3.VCol(
+                                        cols=("toolbar_slider_cols", 4),
+                                        v_show="toolbar_slider_visibility.includes('m')",
+                                    ):
+                                        self.state.setdefault(
+                                            "layer_midpoints_value", 80.50
+                                        )
+                                        with v3.VRow(classes="mx-2 my-0"):
+                                            v3.VLabel(
+                                                "Layer Midpoints",
+                                                classes="text-subtitle-2",
+                                            )
+                                            v3.VSpacer()
+                                            v3.VLabel(
+                                                "{{ layer_midpoints_value }} hPa (k={{layer_midpoints}})",
+                                                classes="text-body-2",
+                                            )
+                                        v3.VSlider(
+                                            v_model=("layer_midpoints", 0),
+                                            min=0,
+                                            max=("layer_midpoints_max", 10),
+                                            step=1,
+                                            density="compact",
+                                            hide_details=True,
+                                        )
+
+                                    # interface layer
+                                    with v3.VCol(
+                                        cols=("toolbar_slider_cols", 4),
+                                        v_show="toolbar_slider_visibility.includes('i')",
+                                    ):
+                                        self.state.setdefault(
+                                            "layer_interfaces_value", 80.50
+                                        )
+                                        with v3.VRow(classes="mx-2 my-0"):
+                                            v3.VLabel(
+                                                "Layer Interfaces",
+                                                classes="text-subtitle-2",
+                                            )
+                                            v3.VSpacer()
+                                            v3.VLabel(
+                                                "{{ layer_interfaces_value }} hPa (k={{layer_interfaces}})",
+                                                classes="text-body-2",
+                                            )
+                                        v3.VSlider(
+                                            v_model=("layer_interfaces", 0),
+                                            min=0,
+                                            max=("layer_interfaces_max", 10),
+                                            step=1,
+                                            density="compact",
+                                            hide_details=True,
+                                        )
+
+                                    # time
+                                    with v3.VCol(cols=("toolbar_slider_cols", 4)):
+                                        self.state.setdefault("time_value", 80.50)
+                                        with v3.VRow(classes="mx-2 my-0"):
+                                            v3.VLabel("Time", classes="text-subtitle-2")
+                                            v3.VSpacer()
+                                            v3.VLabel(
+                                                "{{ time_value }} hPa (t={{time}})",
+                                                classes="text-body-2",
+                                            )
+                                        v3.VSlider(
+                                            v_model=("time", 0),
+                                            min=0,
+                                            max=("time_max", 10),
+                                            step=1,
+                                            density="compact",
+                                            hide_details=True,
+                                        )
+
+                            # Animation
+                            with v3.VToolbar(
+                                v_show="active_tools.includes('animation-controls')",
+                                color="white",
+                                classes="border-b-thin",
+                                density="compact",
+                            ):
+                                v3.VIcon(
+                                    "mdi-movie-open-cog-outline",
+                                    classes="px-6 opacity-50",
+                                )
+                                with v3.VRow(classes="ma-0 px-2 align-center"):
+                                    v3.VSelect(
+                                        v_model=("animation_track", "Time"),
+                                        items=(
+                                            "animation_tracks",
+                                            [
+                                                "Time",
+                                                "Layer Midpoints",
+                                                "Layer Interfaces",
+                                            ],
+                                        ),
+                                        flat=True,
+                                        variant="plain",
+                                        hide_details=True,
+                                        density="compact",
+                                        style="max-width: 200px;",
+                                    )
+                                    v3.VSlider(
+                                        v_model=("animation_step", 1),
+                                        min=0,
+                                        max=("amimation_step_max", 100),
+                                        step=1,
+                                        hide_details=True,
+                                        density="compact",
+                                    )
+                                    v3.VIconBtn(
+                                        icon="mdi-page-first",
+                                        flat=True,
+                                    )
+                                    v3.VIconBtn(
+                                        icon="mdi-chevron-left",
+                                        flat=True,
+                                    )
+                                    v3.VIconBtn(
+                                        icon="mdi-chevron-right",
+                                        flat=True,
+                                    )
+                                    v3.VIconBtn(
+                                        icon="mdi-page-last",
+                                        flat=True,
+                                    )
+                                    v3.VIconBtn(
+                                        icon="mdi-play",
+                                        flat=True,
+                                    )
+                                    v3.VIconBtn(
+                                        icon="mdi-stop",
+                                        flat=True,
+                                    )
+
+                            client.ServerTemplate(name=("active_layout", "auto_layout"))
+
+    # -------------------------------------------------------------------------
+    # Methods connected to UI
+    # -------------------------------------------------------------------------
 
     def fake_busy(self):
         time.sleep(3)
 
     @controller.add_task("file_selection_load")
     async def data_loading_open(self, simulation, connectivity):
+        self.selected_variables = None
+        self.state.variables_loaded = False
         await asyncio.sleep(0.1)
         self.source.Update(
             data_file=simulation,
@@ -301,15 +589,15 @@ class EAMApp(TrameApp):
                 self.state.variables_filter = ""
                 self.state.variables_listing = [
                     *(
-                        {"name": name, "type": "surface", "id": f"{name}s"}
+                        {"name": name, "type": "surface", "id": f"s{name}"}
                         for name in self.source.surface_vars
                     ),
                     *(
-                        {"name": name, "type": "interface", "id": f"{name}i"}
+                        {"name": name, "type": "interface", "id": f"i{name}"}
                         for name in self.source.interface_vars
                     ),
                     *(
-                        {"name": name, "type": "midpoint", "id": f"{name}m"}
+                        {"name": name, "type": "midpoint", "id": f"m{name}"}
                         for name in self.source.midpoint_vars
                     ),
                 ]
@@ -323,7 +611,64 @@ class EAMApp(TrameApp):
             tool for tool in self.state.active_tools if tool != "load-data"
         ]
 
+    def data_load_variables(self):
+        vars_per_type = {n: [] for n in "smi"}
+        for var in self.state.variables_selected:
+            type = var[0]
+            name = var[1:]
+            vars_per_type[type].append(name)
 
+        self.source.LoadVariables(
+            vars_per_type["s"],  # surfaces
+            vars_per_type["m"],  # midpoints
+            vars_per_type["i"],  # interfaces
+        )
+        self.selected_variables = vars_per_type
+        self.view_manager.build_auto_layout(vars_per_type)
+
+        # Compute Layer/Time column spread
+        n_cols = 1  # time
+        toolbar_slider_visibility = []
+        for var_type in "mi":
+            if vars_per_type[var_type]:
+                toolbar_slider_visibility.append(var_type)
+                n_cols += 1
+
+        with self.state:
+            self.state.variables_loaded = True
+            self.state.toolbar_slider_cols = 12 / n_cols if n_cols else 12
+            self.state.toolbar_slider_visibility = toolbar_slider_visibility
+            self.state.dirty("toolbar_slider_visibility")
+
+    @change("variables_selected")
+    def _on_dirty_variable_selection(self, **_):
+        self.state.variables_loaded = False
+
+    @change("col_mode")
+    def _on_layout_refresh(self, **_):
+        if self.selected_variables is None:
+            return
+
+        self.view_manager.build_auto_layout(self.selected_variables)
+
+    @change("projection")
+    async def _on_projection(self, projection, **_):
+        proj_str = projection[0]
+        self.source.UpdateProjection(proj_str)
+        self.source.UpdatePipeline()
+        self.view_manager.reset_camera()
+
+        # Hack to force reset_camera for "cyl mode"
+        # => may not be needed if we switch to rca
+        if " " in proj_str:
+            for _ in range(2):
+                await asyncio.sleep(0.1)
+                self.view_manager.reset_camera()
+
+
+# -------------------------------------------------------------------------
+# Standalone execution
+# -------------------------------------------------------------------------
 def main():
     app = EAMApp()
     app.server.start()
