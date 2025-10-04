@@ -4,15 +4,17 @@ import time
 
 from pathlib import Path
 
-from trame.app import TrameApp
+from trame.app import TrameApp, asynchronous
 from trame.ui.vuetify3 import VAppLayout
 from trame.widgets import vuetify3 as v3, client, html
 from trame.decorators import controller, change
 
+from quickview import __version__ as quickview_version
 from quickview.pipeline import EAMVisSource
 from quickview.assets import ASSETS
 from quickview.view_manager2 import ViewManager
 from quickview.components.file_browser import ParaViewFileBrowser
+from quickview.utils import compute
 
 v3.enable_lab()
 
@@ -23,6 +25,18 @@ VAR_HEADERS = [
     {"title": "Name", "align": "start", "key": "name", "sortable": True},
     {"title": "Type", "align": "start", "key": "type", "sortable": True},
 ]
+
+TRACK_STEPS = {
+    "timestamps": "time_idx",
+    "interfaces": "interface_idx",
+    "midpoints": "midpoint_idx",
+}
+
+TRACK_ENTRIES = {
+    "timestamps": {"title": "Time", "value": "timestamps"},
+    "midpoints": {"title": "Layer Midpoints", "value": "midpoints"},
+    "interfaces": {"title": "Layer Interfaces", "value": "interfaces"},
+}
 
 
 def js_var_count(name):
@@ -77,9 +91,32 @@ class EAMApp(TrameApp):
         if self.server.hot_reload:
             self.ctrl.on_server_reload.add(self._build_ui)
 
+        # Initial UI state
+        self.state.update(
+            {
+                "trame__title": "QuickView",
+                "trame__favicon": ASSETS.icon,
+                "animation_play": False,
+                # All available variables
+                "variables_listing": [],
+                # Selected variables to load
+                "variables_selected": [],
+                # Control 'Load Variables' button availability
+                "variables_loaded": False,
+                # Level controls
+                "midpoint_idx": 0,
+                "midpoints": [],
+                "interface_idx": 0,
+                "interfaces": [],
+                # Time controls
+                "time_idx": 0,
+                "timestamps": [],
+                # Fields summaries
+                "fields_avgs": {},
+            }
+        )
+
         # Data input
-        self.state.variables_listing = []
-        self.state.toolbar_slider_visibility = []
         self.source = EAMVisSource()
         self.app_state = {}
 
@@ -306,13 +343,13 @@ class EAMApp(TrameApp):
                                 title=("compact_drawer ? null : 'Refresh UI'",),
                             )
 
-                    # with v3.Template(raw_attrs=["#append"]):
-                    #     with v3.VList(density="compact", nav=True):
-                    #         v3.VListItem(
-                    #             prepend_icon="mdi-lifebuoy",
-                    #             click="compact_drawer = !compact_drawer",
-                    #             title=("compact_drawer ? null : 'Toggle Help'",),
-                    #         )
+                    # Show version at the bottom
+                    with v3.Template(raw_attrs=["#append"]):
+                        v3.VDivider()
+                        v3.VLabel(
+                            f"{quickview_version}",
+                            classes="text-center text-caption d-block text-wrap",
+                        )
 
                 with v3.VMain():
                     # load-data
@@ -490,11 +527,8 @@ class EAMApp(TrameApp):
                                     # midpoint layer
                                     with v3.VCol(
                                         cols=("toolbar_slider_cols", 4),
-                                        v_show="toolbar_slider_visibility.includes('m')",
+                                        v_show="midpoints.length > 1",
                                     ):
-                                        self.state.setdefault(
-                                            "layer_midpoints_value", 80.50
-                                        )
                                         with v3.VRow(classes="mx-2 my-0"):
                                             v3.VLabel(
                                                 "Layer Midpoints",
@@ -502,13 +536,13 @@ class EAMApp(TrameApp):
                                             )
                                             v3.VSpacer()
                                             v3.VLabel(
-                                                "{{ layer_midpoints_value }} hPa (k={{layer_midpoints}})",
+                                                "{{ parseFloat(midpoints[midpoint_idx] || 0).toFixed(2) }} hPa (k={{ midpoint_idx }})",
                                                 classes="text-body-2",
                                             )
                                         v3.VSlider(
-                                            v_model=("layer_midpoints", 0),
+                                            v_model=("midpoint_idx", 0),
                                             min=0,
-                                            max=("layer_midpoints_max", 10),
+                                            max=("Math.max(0, midpoints.length - 1)",),
                                             step=1,
                                             density="compact",
                                             hide_details=True,
@@ -517,11 +551,8 @@ class EAMApp(TrameApp):
                                     # interface layer
                                     with v3.VCol(
                                         cols=("toolbar_slider_cols", 4),
-                                        v_show="toolbar_slider_visibility.includes('i')",
+                                        v_show="interfaces.length > 1",
                                     ):
-                                        self.state.setdefault(
-                                            "layer_interfaces_value", 80.50
-                                        )
                                         with v3.VRow(classes="mx-2 my-0"):
                                             v3.VLabel(
                                                 "Layer Interfaces",
@@ -529,32 +560,35 @@ class EAMApp(TrameApp):
                                             )
                                             v3.VSpacer()
                                             v3.VLabel(
-                                                "{{ layer_interfaces_value }} hPa (k={{layer_interfaces}})",
+                                                "{{ parseFloat(interfaces[interface_idx] || 0).toFixed(2) }} hPa (k={{interface_idx}})",
                                                 classes="text-body-2",
                                             )
                                         v3.VSlider(
-                                            v_model=("layer_interfaces", 0),
+                                            v_model=("interface_idx", 0),
                                             min=0,
-                                            max=("layer_interfaces_max", 10),
+                                            max=("Math.max(0, interfaces.length - 1)",),
                                             step=1,
                                             density="compact",
                                             hide_details=True,
                                         )
 
                                     # time
-                                    with v3.VCol(cols=("toolbar_slider_cols", 4)):
+                                    with v3.VCol(
+                                        cols=("toolbar_slider_cols", 4),
+                                        v_show="timestamps.length > 1",
+                                    ):
                                         self.state.setdefault("time_value", 80.50)
                                         with v3.VRow(classes="mx-2 my-0"):
                                             v3.VLabel("Time", classes="text-subtitle-2")
                                             v3.VSpacer()
                                             v3.VLabel(
-                                                "{{ time_value }} hPa (t={{time}})",
+                                                "{{ parseFloat(timestamps[time_idx]).toFixed(2) }} (t={{time_idx}})",
                                                 classes="text-body-2",
                                             )
                                         v3.VSlider(
-                                            v_model=("time", 0),
+                                            v_model=("time_idx", 0),
                                             min=0,
-                                            max=("time_max", 10),
+                                            max=("Math.max(0, timestamps.length - 1)",),
                                             step=1,
                                             density="compact",
                                             hide_details=True,
@@ -573,55 +607,82 @@ class EAMApp(TrameApp):
                                 )
                                 with v3.VRow(classes="ma-0 px-2 align-center"):
                                     v3.VSelect(
-                                        v_model=("animation_track", "Time"),
-                                        items=(
-                                            "animation_tracks",
-                                            [
-                                                "Time",
-                                                "Layer Midpoints",
-                                                "Layer Interfaces",
-                                            ],
-                                        ),
+                                        v_model=("animation_track", "timestamps"),
+                                        items=("animation_tracks", []),
                                         flat=True,
                                         variant="plain",
                                         hide_details=True,
                                         density="compact",
-                                        style="max-width: 200px;",
+                                        style="max-width: 10rem;",
                                     )
+                                    v3.VDivider(vertical=True, classes="mx-2")
                                     v3.VSlider(
                                         v_model=("animation_step", 1),
                                         min=0,
-                                        max=("amimation_step_max", 100),
+                                        max=("amimation_step_max", 0),
                                         step=1,
                                         hide_details=True,
                                         density="compact",
+                                        classes="mx-4",
                                     )
+                                    v3.VDivider(vertical=True, classes="mx-2")
                                     v3.VIconBtn(
                                         icon="mdi-page-first",
                                         flat=True,
+                                        disabled=("animation_step === 0",),
+                                        click="animation_step = 0",
                                     )
                                     v3.VIconBtn(
                                         icon="mdi-chevron-left",
                                         flat=True,
+                                        disabled=("animation_step === 0",),
+                                        click="animation_step = Math.max(0, animation_step - 1)",
                                     )
                                     v3.VIconBtn(
                                         icon="mdi-chevron-right",
                                         flat=True,
+                                        disabled=(
+                                            "animation_step === amimation_step_max",
+                                        ),
+                                        click="animation_step = Math.min(amimation_step_max, animation_step + 1)",
                                     )
                                     v3.VIconBtn(
                                         icon="mdi-page-last",
+                                        disabled=(
+                                            "animation_step === amimation_step_max",
+                                        ),
                                         flat=True,
+                                        click="animation_step = amimation_step_max",
                                     )
+                                    v3.VDivider(vertical=True, classes="mx-2")
                                     v3.VIconBtn(
-                                        icon="mdi-play",
+                                        icon=(
+                                            "animation_play ? 'mdi-stop' : 'mdi-play'",
+                                        ),
                                         flat=True,
-                                    )
-                                    v3.VIconBtn(
-                                        icon="mdi-stop",
-                                        flat=True,
+                                        click="animation_play = !animation_play",
                                     )
 
                             client.ServerTemplate(name=("active_layout", "auto_layout"))
+
+    # -------------------------------------------------------------------------
+    # Derived properties
+    # -------------------------------------------------------------------------
+
+    @property
+    def selected_variables(self):
+        vars_per_type = {n: [] for n in "smi"}
+        for var in self.state.variables_selected:
+            type = var[0]
+            name = var[1:]
+            vars_per_type[type].append(name)
+
+        return vars_per_type
+
+    @property
+    def selected_variable_names(self):
+        # Remove var type (first char)
+        return [var[1:] for var in self.state.variables_selected]
 
     # -------------------------------------------------------------------------
     # Methods connected to UI
@@ -635,6 +696,12 @@ class EAMApp(TrameApp):
         # Reset state
         self.state.variables_selected = []
         self.state.variables_loaded = False
+        self.state.midpoint_idx = 0
+        self.state.midpoints = []
+        self.state.interface_idx = 0
+        self.state.interfaces = []
+        self.state.time_idx = 0
+        self.state.timestamps = []
 
         await asyncio.sleep(0.1)
         self.source.Update(
@@ -671,8 +738,24 @@ class EAMApp(TrameApp):
                     ),
                 ]
 
-            # for name in ["timestamps", "midpoints", "interfaces", "surface_vars", "interface_vars", "midpoint_vars", ]:
-            #     print(name, getattr(self.source, name))
+                # Update Layer/Time values and ui layout
+                n_cols = 0
+                available_tracks = []
+                for name in ["midpoints", "interfaces", "timestamps"]:
+                    values = getattr(self.source, name)
+                    self.state[name] = values
+
+                    if len(values) > 1:
+                        n_cols += 1
+                        available_tracks.append(TRACK_ENTRIES[name])
+
+                self.state.toolbar_slider_cols = 12 / n_cols if n_cols else 12
+                self.state.animation_tracks = available_tracks
+                self.state.animation_track = (
+                    self.state.animation_tracks[0]["value"]
+                    if available_tracks
+                    else None
+                )
 
     @controller.set("file_selection_cancel")
     def data_loading_hide(self):
@@ -680,19 +763,8 @@ class EAMApp(TrameApp):
             tool for tool in self.state.active_tools if tool != "load-data"
         ]
 
-    @property
-    def selected_variables(self):
-        vars_per_type = {n: [] for n in "smi"}
-        for var in self.state.variables_selected:
-            type = var[0]
-            name = var[1:]
-            vars_per_type[type].append(name)
-
-        print("=> selected_variables", vars_per_type)
-
-        return vars_per_type
-
     def data_load_variables(self):
+        """Called at 'Load Variables' button click"""
         vars_to_show = self.selected_variables
 
         self.source.LoadVariables(
@@ -700,21 +772,14 @@ class EAMApp(TrameApp):
             vars_to_show["m"],  # midpoints
             vars_to_show["i"],  # interfaces
         )
-        self.view_manager.build_auto_layout(vars_to_show)
 
-        # Compute Layer/Time column spread
-        n_cols = 1  # time
-        toolbar_slider_visibility = []
-        for var_type in "mi":
-            if vars_to_show[var_type]:
-                toolbar_slider_visibility.append(var_type)
-                n_cols += 1
-
+        # Trigger source update + compute avg
         with self.state:
             self.state.variables_loaded = True
-            self.state.toolbar_slider_cols = 12 / n_cols if n_cols else 12
-            self.state.toolbar_slider_visibility = toolbar_slider_visibility
-            self.state.dirty("toolbar_slider_visibility")
+
+        # Update views in layout
+        with self.state:
+            self.view_manager.build_auto_layout(vars_to_show)
 
     @change("variables_selected")
     def _on_dirty_variable_selection(self, **_):
@@ -723,9 +788,7 @@ class EAMApp(TrameApp):
     @change("col_mode")
     def _on_layout_refresh(self, **_):
         vars_to_show = self.selected_variables
-        print("col_mode", vars_to_show)
         if any(vars_to_show.values()):
-            print("build layout")
             self.view_manager.build_auto_layout(vars_to_show)
 
     @change("projection")
@@ -741,6 +804,74 @@ class EAMApp(TrameApp):
             for _ in range(2):
                 await asyncio.sleep(0.1)
                 self.view_manager.reset_camera()
+
+    @change(
+        "variables_loaded",
+        "time_idx",
+        "midpoint_idx",
+        "interface_idx",
+        "crop_longitude",
+        "crop_latitude",
+        "projection",
+    )
+    def _on_time_change(
+        self,
+        variables_loaded,
+        time_idx,
+        timestamps,
+        midpoint_idx,
+        interface_idx,
+        crop_longitude,
+        crop_latitude,
+        projection,
+        **_,
+    ):
+        if not variables_loaded:
+            return
+
+        time_value = timestamps[time_idx] if len(timestamps) else 0.0
+        self.source.UpdateLev(midpoint_idx, interface_idx)
+        self.source.ApplyClipping(crop_longitude, crop_latitude)
+        self.source.UpdateProjection(projection[0])
+        self.source.UpdateTimeStep(time_idx)
+        self.source.UpdatePipeline(time_value)
+        self.view_manager.render()
+
+        # Update avg computation
+        # Get area variable to calculate weighted average
+        data = self.source.views["atmosphere_data"]
+        self.state.fields_avgs = compute.extract_avgs(
+            data, self.selected_variable_names
+        )
+
+    @change("animation_track")
+    def _on_animation_track_change(self, animation_track, **_):
+        self.state.animation_step = 0
+        self.state.amimation_step_max = 0
+
+        if animation_track:
+            self.state.amimation_step_max = len(self.state[animation_track]) - 1
+
+    @change("animation_step")
+    def _on_animation_step(self, animation_track, animation_step, **_):
+        if animation_track:
+            self.state[TRACK_STEPS[animation_track]] = animation_step
+
+    @change("animation_play")
+    def _on_animation_play(self, animation_play, **_):
+        if animation_play:
+            asynchronous.create_task(self._run_animation())
+
+    async def _run_animation(self):
+        with self.state as s:
+            while s.animation_play:
+                await asyncio.sleep(0.1)
+                if s.animation_step < s.amimation_step_max:
+                    with s:
+                        s.animation_step += 1
+                    await self.server.network_completion
+                else:
+                    s.animation_play = False
 
 
 # -------------------------------------------------------------------------
