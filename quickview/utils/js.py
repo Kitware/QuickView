@@ -10,3 +10,7 @@ def var_remove(name):
 
 def var_title(name):
     return " ".join(["{{", var_count(name), "}}", name.capitalize()])
+
+
+def is_active(name):
+    return f"active_tools.includes('{name}')"

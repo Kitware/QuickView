@@ -120,14 +120,6 @@ class VariableView(TrameComponent):
         # GUI
         self._build_ui()
 
-    # def update_order(self, order):
-    #     with self.state:
-    #         self.ctrl.apply_layout()
-
-    # def update_size(self, size):
-    #     with self.state:
-    #         self.ctrl.apply_layout()
-
     def render(self):
         if self.disable_render or not self.ctx.has(self.name):
             return
