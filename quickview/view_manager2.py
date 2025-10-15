@@ -251,7 +251,7 @@ class VariableView(TrameComponent):
                                         v_for="name, idx in config.swap_group",
                                         key="name",
                                         click=(
-                                            self.ctrl.swap_order,
+                                            self.ctrl.swap_variables,
                                             "[config.variable, name]",
                                         ),
                                     )
@@ -482,11 +482,12 @@ class ViewManager(TrameComponent):
 
         self._camera_sync_in_progress = False
 
-    @controller.set("swap_order")
-    def swap_order(self, variable_a, variable_b):
+    @controller.set("swap_variables")
+    def swap_variable(self, variable_a, variable_b):
         config_a = self._active_configs[variable_a]
         config_b = self._active_configs[variable_b]
         config_a.order, config_b.order = config_b.order, config_a.order
+        config_a.size, config_b.size = config_b.size, config_a.size
 
     def apply_size(self, n_cols):
         if not self._last_vars:
