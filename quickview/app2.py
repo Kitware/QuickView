@@ -351,12 +351,6 @@ class EAMApp(TrameApp):
                                 )
 
                         if self.server.hot_reload:
-                            v3.VDivider(classes="mt-8 mb-1", color="red")
-                            v3.VListItem(
-                                prepend_icon="mdi-timer-sand-complete",
-                                click=self.fake_busy,
-                                title=("compact_drawer ? null : 'Trigger busy'",),
-                            )
                             v3.VListItem(
                                 prepend_icon="mdi-database-refresh-outline",
                                 click=self.ctrl.on_server_reload,
@@ -865,7 +859,7 @@ class EAMApp(TrameApp):
         # Load variables
         self.state.variables_selected = state_content["variables-selection"]
         self.state.update(state_content["data-selection"])
-        self.data_load_variables()
+        await self._data_load_variables()
 
         # Update view states
         for view_state in state_content["views"]:
@@ -880,9 +874,6 @@ class EAMApp(TrameApp):
         self.state.active_layout = state_content["layout"]["active"]
         self.state.active_tools = state_content["layout"]["tools"]
         self.state.compact_drawer = not state_content["layout"]["help"]
-
-    def fake_busy(self):
-        time.sleep(3)
 
     @controller.add_task("file_selection_load")
     async def data_loading_open(self, simulation, connectivity):
@@ -957,6 +948,9 @@ class EAMApp(TrameApp):
         ]
 
     def data_load_variables(self):
+        asynchronous.create_task(self._data_load_variables())
+
+    async def _data_load_variables(self):
         """Called at 'Load Variables' button click"""
         vars_to_show = self.selected_variables
 
@@ -969,10 +963,16 @@ class EAMApp(TrameApp):
         # Trigger source update + compute avg
         with self.state:
             self.state.variables_loaded = True
+        await self.server.network_completion
 
         # Update views in layout
         with self.state:
             self.view_manager.build_auto_layout(vars_to_show)
+        await self.server.network_completion
+
+        # Reset camera after yield
+        await asyncio.sleep(0.1)
+        self.view_manager.reset_camera()
 
     @change("variables_selected")
     def _on_dirty_variable_selection(self, **_):
