@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from paraview import simple
 from trame.widgets import vuetify3 as v3, html
-from trame.app import TrameComponent, asynchronous
+from trame.app import TrameComponent
 
 DIRECTORY = dict(icon="mdi-folder", type="directory")
 GROUP = dict(icon="mdi-file-document-multiple-outline", type="group")

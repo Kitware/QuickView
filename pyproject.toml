@@ -43,6 +43,7 @@ quickview = [
 
 [project.scripts]
 quickview = "quickview.app:main"
+quickview2 = "quickview.app2:main"
 
 [tool.ruff.lint.per-file-ignores]
 # Ignore star import issues in ParaView plugins

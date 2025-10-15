@@ -10,7 +10,6 @@ from trame_dataclass.core import StateDataModel
 from paraview import simple
 
 from quickview.utils.color import get_cached_colorbar_image
-from quickview.presets import CUSTOM_PRESETS, PARAVIEW_PRESETS, ALL_PRESETS
 from quickview.utils.color import COLORBAR_CACHE
 
 
