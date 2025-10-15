@@ -247,6 +247,7 @@ class EAMApp(TrameApp):
         self.state.variables_selected = state_content["variables-selection"]
         self.state.update(state_content["data-selection"])
         await self._data_load_variables()
+        self.state.variables_loaded = True
 
         # Update view states
         for view_state in state_content["views"]:
