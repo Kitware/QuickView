@@ -269,14 +269,7 @@ class ParaViewFileBrowser(TrameComponent):
         self.set("state_loading", True)
 
         state_content = json.loads(Path(self.active_path).read_text())
-        coroutine = self.ctrl.import_state(state_content)
-        task = asynchronous.create_task(coroutine)
-
-        def done_loading():
-            with self.state:
-                self.set("state_loading", False)
-
-        task.add_done_callback(done_loading)
+        self.ctrl.import_state(state_content)
 
     def cancel(self):
         self.ctrl.file_selection_cancel()

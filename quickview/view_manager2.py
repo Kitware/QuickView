@@ -240,10 +240,10 @@ class VariableView(TrameComponent):
                                         click="active_layout = 'auto_layout';config.size = 2",
                                     )
                     with html.Div(
-                        classes="text-subtitle-2 pr-2", style="user-select: none;"
-                    ) as el:
-                        # v3.VIcon("mdi-menu-down", size="x-small")
-                        el.add_child(self.variable_name)
+                        self.variable_name,
+                        classes="text-subtitle-2 pr-2",
+                        style="user-select: none;",
+                    ):
                         with v3.VMenu(activator="parent"):
                             with v3.VList(density="compact", style="max-height: 40vh;"):
                                 with self.config.provide_as("config"):
@@ -256,47 +256,6 @@ class VariableView(TrameComponent):
                                             "[config.variable, name]",
                                         ),
                                     )
-
-                                    # with v3.VListGroup(value="size"):
-                                    #     with v3.Template(v_slot_activator="{ props }"):
-                                    #         v3.VListItem(
-                                    #             title="Size controls", v_bind="props"
-                                    #         )
-
-                                    #     v3.VListItem(
-                                    #         "Auto size", click="config.size = 0"
-                                    #     )
-                                    #     v3.VListItem(
-                                    #         "Full width", click="config.size = 12"
-                                    #     )
-                                    #     v3.VListItem(
-                                    #         "Half width", click="config.size = 6"
-                                    #     )
-                                    #     v3.VListItem(
-                                    #         "1/3 width", click="config.size = 4"
-                                    #     )
-                                    #     v3.VListItem(
-                                    #         "1/4 width", click="config.size = 3"
-                                    #     )
-                                    #     v3.VListItem(
-                                    #         "1/6 width", click="config.size = 2"
-                                    #     )
-                                    #     v3.VDivider()
-
-                                    # v3.VDivider()
-
-                                    # with v3.VListItem("Order {{ config.order }}"):
-                                    #     v3.VSpacer()
-                                    #     v3.VIconBtn(
-                                    #         icon="mdi-plus",
-                                    #         size="small",
-                                    #         click="config.order++",
-                                    #     )
-                                    #     v3.VIconBtn(
-                                    #         icon="mdi-minus",
-                                    #         size="small",
-                                    #         click="config.order--",
-                                    #     )
 
                     v3.VSpacer()
                     html.Div(
@@ -326,10 +285,12 @@ class VariableView(TrameComponent):
 
                 with html.Div(
                     style=(
-                        """{
-                                        aspectRatio: active_layout === 'auto_layout' ? aspect_ratio : null,
-                                        height: active_layout !== 'auto_layout' ? 'calc(100% - 2.4rem)' : null,
-                                     }""",
+                        """
+                        {
+                            aspectRatio: active_layout === 'auto_layout' ? aspect_ratio : null,
+                            height: active_layout !== 'auto_layout' ? 'calc(100% - 2.4rem)' : null,
+                        }
+                        """,
                     ),
                 ):
                     pvw.VtkRemoteView(
@@ -344,10 +305,12 @@ class VariableView(TrameComponent):
                         with v3.VMenu(
                             v_model="config.menu",
                             activator="parent",
-                            location="end",
+                            location=(
+                                "active_layout !== 'auto_layout' || config.size == 12 ? 'top' : 'end'",
+                            ),
                             close_on_content_click=False,
                         ):
-                            with v3.VCard():
+                            with v3.VCard(style="max-width: 360px;"):
                                 with v3.VCardItem(classes="pb-0"):
                                     v3.VIconBtn(
                                         icon=(
@@ -437,7 +400,7 @@ class VariableView(TrameComponent):
                                     ):
                                         html.Img(
                                             src=("url",),
-                                            style="width:20rem;height:1rem;",
+                                            style="width:100%;min-width:20rem;height:1rem;",
                                             classes="rounded",
                                         )
                         html.Div(

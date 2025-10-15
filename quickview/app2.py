@@ -1,6 +1,7 @@
 import asyncio
 import json
-import time
+import datetime
+import os
 
 from pathlib import Path
 
@@ -158,212 +159,260 @@ class EAMApp(TrameApp):
         with VAppLayout(self.server, fill_height=True) as self.ui:
             with v3.VLayout():
                 with v3.VNavigationDrawer(
-                    permanent=True, rail=("compact_drawer", True), width=220
+                    permanent=True,
+                    rail=("compact_drawer", True),
+                    width=220,
+                    style="transform: none;",
                 ):
-                    with v3.VList(
-                        density="compact",
-                        nav=True,
-                        select_strategy="independent",
-                        v_model_selected=("active_tools", ["load-data"]),
-                    ):
-                        with v3.VTooltip(
-                            text=f"QuickView {quickview_version}",
-                            disabled=("!compact_drawer",),
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                with v3.VListItem(
-                                    v_bind="props",
-                                    title=(
-                                        f"compact_drawer ? null : 'QuickView {quickview_version}'",
-                                    ),
-                                    classes="text-h6",
-                                ):
-                                    with v3.Template(raw_attrs=["#prepend"]):
-                                        v3.VAvatar(
-                                            image=ASSETS.icon, size=24, classes="me-4"
-                                        )
-                                    v3.VProgressCircular(
-                                        color="primary",
-                                        indeterminate=True,
-                                        v_show="trame__busy",
-                                        v_if="compact_drawer",
-                                        style="position: absolute !important;left: 50%;top: 50%; transform: translate(-50%, -50%);",
-                                    )
-                                    v3.VProgressLinear(
-                                        v_else=True,
-                                        color="primary",
-                                        indeterminate=True,
-                                        v_show="trame__busy",
-                                        absolute=True,
-                                        style="top:90%;width:100%;",
-                                    )
-                        with v3.VTooltip(
-                            text="File loading", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-file-document-outline",
-                                    value="load-data",
-                                    title=("compact_drawer ? null : 'File loading'",),
-                                )
-                        with v3.VTooltip(
-                            text="Fields selection", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-list-status",
-                                    value="select-fields",
-                                    disabled=("variables_listing.length === 0",),
-                                    title=(
-                                        "compact_drawer ? null : 'Fields selection'",
-                                    ),
-                                )
-
-                        with v3.VTooltip(
-                            text="Reset camera", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-crop-free",
-                                    title=("compact_drawer ? null : 'Reset camera'",),
-                                    click=self.view_manager.reset_camera,
-                                )
-
-                        with v3.VTooltip(
-                            text="State Import/Export", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-folder-arrow-left-right-outline",
-                                    value="import-export",
-                                    title=(
-                                        "compact_drawer ? null : 'State Import/Export'",
-                                    ),
-                                )
-
-                        with v3.VTooltip(
-                            text="Toggle Help", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-lifebuoy",
-                                    click="compact_drawer = !compact_drawer",
-                                    title=("compact_drawer ? null : 'Toggle Help'",),
-                                )
-
-                        v3.VDivider(classes="my-1")
-
-                        with v3.VTooltip(
-                            text="Map Projection", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                with v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-earth",
-                                    title=("compact_drawer ? null : 'Map Projection'",),
-                                ):
-                                    with v3.VMenu(
-                                        activator="parent", location="end", offset=10
-                                    ):
-                                        v3.VList(
-                                            mandatory=True,
-                                            v_model_selected=(
-                                                "projection",
-                                                ["Cyl. Equidistant"],
-                                            ),
-                                            density="compact",
-                                            items=(
-                                                "projections",
-                                                [
-                                                    {
-                                                        "title": "Cylindrical Equidistant",
-                                                        "value": "Cyl. Equidistant",
-                                                    },
-                                                    {
-                                                        "title": "Robinson",
-                                                        "value": "Robinson",
-                                                    },
-                                                    {
-                                                        "title": "Mollweide",
-                                                        "value": "Mollweide",
-                                                    },
-                                                ],
-                                            ),
-                                        )
-
-                        with v3.VTooltip(
-                            text="Layout management", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-collage",
-                                    value="adjust-layout",
-                                    title=(
-                                        "compact_drawer ? null : 'Layout management'",
-                                    ),
-                                )
-
-                        v3.VDivider(classes="my-1")
-
-                        with v3.VTooltip(
-                            text="Lat/Long cropping", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-crop",
-                                    value="adjust-databounds",
-                                    title=(
-                                        "compact_drawer ? null : 'Lat/Long cropping'",
-                                    ),
-                                )
-
-                        with v3.VTooltip(
-                            text="Slice selection", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-tune-variant",
-                                    value="select-slice-time",
-                                    title=(
-                                        "compact_drawer ? null : 'Slice selection'",
-                                    ),
-                                )
-
-                        with v3.VTooltip(
-                            text="Animation controls", disabled=("!compact_drawer",)
-                        ):
-                            with v3.Template(v_slot_activator="{ props }"):
-                                v3.VListItem(
-                                    v_bind="props",
-                                    prepend_icon="mdi-movie-open-cog-outline",
-                                    value="animation-controls",
-                                    title=(
-                                        "compact_drawer ? null : 'Animation controls'",
-                                    ),
-                                )
-
-                        if self.server.hot_reload:
-                            v3.VListItem(
-                                prepend_icon="mdi-database-refresh-outline",
-                                click=self.ctrl.on_server_reload,
-                                title=("compact_drawer ? null : 'Refresh UI'",),
-                            )
-
-                    # Show version at the bottom
-                    with v3.Template(raw_attrs=["#append"]):
-                        v3.VDivider()
-                        v3.VLabel(
-                            f"{quickview_version}",
-                            classes="text-center text-caption d-block text-wrap",
+                    with html.Div(
+                        style=(
+                            "`position:fixed;top:0;width:${compact_drawer ? '55' : '219'}px;`",
                         )
+                    ):
+                        with v3.VList(
+                            density="compact",
+                            nav=True,
+                            select_strategy="independent",
+                            v_model_selected=("active_tools", ["load-data"]),
+                        ):
+                            with v3.VTooltip(
+                                text=f"QuickView {quickview_version}",
+                                disabled=("!compact_drawer",),
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    with v3.VListItem(
+                                        v_bind="props",
+                                        title=(
+                                            f"compact_drawer ? null : 'QuickView {quickview_version}'",
+                                        ),
+                                        classes="text-h6",
+                                    ):
+                                        with v3.Template(raw_attrs=["#prepend"]):
+                                            v3.VAvatar(
+                                                image=ASSETS.icon,
+                                                size=24,
+                                                classes="me-4",
+                                            )
+                                        v3.VProgressCircular(
+                                            color="primary",
+                                            indeterminate=True,
+                                            v_show="trame__busy",
+                                            v_if="compact_drawer",
+                                            style="position: absolute !important;left: 50%;top: 50%; transform: translate(-50%, -50%);",
+                                        )
+                                        v3.VProgressLinear(
+                                            v_else=True,
+                                            color="primary",
+                                            indeterminate=True,
+                                            v_show="trame__busy",
+                                            absolute=True,
+                                            style="top:90%;width:100%;",
+                                        )
+                            with v3.VTooltip(
+                                text="File loading", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-file-document-outline",
+                                        value="load-data",
+                                        title=(
+                                            "compact_drawer ? null : 'File loading'",
+                                        ),
+                                    )
+                            with v3.VTooltip(
+                                text="Fields selection", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-list-status",
+                                        value="select-fields",
+                                        disabled=("variables_listing.length === 0",),
+                                        title=(
+                                            "compact_drawer ? null : 'Fields selection'",
+                                        ),
+                                    )
+
+                            with v3.VTooltip(
+                                text="Reset camera", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-crop-free",
+                                        title=(
+                                            "compact_drawer ? null : 'Reset camera'",
+                                        ),
+                                        click=self.view_manager.reset_camera,
+                                    )
+
+                            with v3.VTooltip(
+                                text="State Import/Export",
+                                disabled=("!compact_drawer",),
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    with v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-folder-arrow-left-right-outline",
+                                        title=(
+                                            "compact_drawer ? null : 'State Import/Export'",
+                                        ),
+                                    ):
+                                        with v3.VMenu(
+                                            activator="parent",
+                                            location="end",
+                                            offset=10,
+                                        ):
+                                            with v3.VList(density="compact"):
+                                                v3.VListItem(
+                                                    title="Download state file",
+                                                    prepend_icon="mdi-file-download-outline",
+                                                    click="show_export_dialog=true",
+                                                )
+                                                v3.VListItem(
+                                                    title="Upload state file",
+                                                    prepend_icon="mdi-file-upload-outline",
+                                                    click="utils.get('document').querySelector('#fileUpload').click()",
+                                                )
+
+                                        v3.VFileInput(
+                                            id="fileUpload",
+                                            v_show=False,
+                                            v_model=("upload_state_file", None),
+                                            density="compact",
+                                            prepend_icon=False,
+                                            style="position: absolute;left:-1000px;width:1px;",
+                                        )
+
+                            with v3.VTooltip(
+                                text="Toggle Help", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-lifebuoy",
+                                        click="compact_drawer = !compact_drawer",
+                                        title=(
+                                            "compact_drawer ? null : 'Toggle Help'",
+                                        ),
+                                    )
+
+                            v3.VDivider(classes="my-1")
+
+                            with v3.VTooltip(
+                                text="Map Projection", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    with v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-earth",
+                                        title=(
+                                            "compact_drawer ? null : 'Map Projection'",
+                                        ),
+                                    ):
+                                        with v3.VMenu(
+                                            activator="parent",
+                                            location="end",
+                                            offset=10,
+                                        ):
+                                            v3.VList(
+                                                mandatory=True,
+                                                v_model_selected=(
+                                                    "projection",
+                                                    ["Cyl. Equidistant"],
+                                                ),
+                                                density="compact",
+                                                items=(
+                                                    "projections",
+                                                    [
+                                                        {
+                                                            "title": "Cylindrical Equidistant",
+                                                            "value": "Cyl. Equidistant",
+                                                        },
+                                                        {
+                                                            "title": "Robinson",
+                                                            "value": "Robinson",
+                                                        },
+                                                        {
+                                                            "title": "Mollweide",
+                                                            "value": "Mollweide",
+                                                        },
+                                                    ],
+                                                ),
+                                            )
+
+                            with v3.VTooltip(
+                                text="Layout management", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-collage",
+                                        value="adjust-layout",
+                                        title=(
+                                            "compact_drawer ? null : 'Layout management'",
+                                        ),
+                                    )
+
+                            v3.VDivider(classes="my-1")
+
+                            with v3.VTooltip(
+                                text="Lat/Long cropping", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-crop",
+                                        value="adjust-databounds",
+                                        title=(
+                                            "compact_drawer ? null : 'Lat/Long cropping'",
+                                        ),
+                                    )
+
+                            with v3.VTooltip(
+                                text="Slice selection", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-tune-variant",
+                                        value="select-slice-time",
+                                        title=(
+                                            "compact_drawer ? null : 'Slice selection'",
+                                        ),
+                                    )
+
+                            with v3.VTooltip(
+                                text="Animation controls", disabled=("!compact_drawer",)
+                            ):
+                                with v3.Template(v_slot_activator="{ props }"):
+                                    v3.VListItem(
+                                        v_bind="props",
+                                        prepend_icon="mdi-movie-open-cog-outline",
+                                        value="animation-controls",
+                                        title=(
+                                            "compact_drawer ? null : 'Animation controls'",
+                                        ),
+                                    )
+
+                            if self.server.hot_reload:
+                                v3.VListItem(
+                                    prepend_icon="mdi-database-refresh-outline",
+                                    click=self.ctrl.on_server_reload,
+                                    title=("compact_drawer ? null : 'Refresh UI'",),
+                                )
+
+                        with html.Div(
+                            style=(
+                                "`position:fixed;bottom:0;width:${compact_drawer ? '55' : '219'}px;`",
+                            )
+                        ):
+                            v3.VDivider()
+                            v3.VLabel(
+                                f"{quickview_version}",
+                                classes="text-center text-caption d-block text-wrap",
+                            )
 
                 with v3.VMain():
                     # load-data
@@ -378,390 +427,450 @@ class EAMApp(TrameApp):
                         ):
                             self.file_browser.ui()
 
+                    # download state
+                    with html.Div(
+                        style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:1000;"
+                    ):
+                        with v3.VDialog(
+                            model_value=("show_export_dialog", False),
+                            contained=True,
+                            max_width="80vw",
+                            persistent=True,
+                        ):
+                            with v3.VCard(
+                                title="Download QuickView State file", rounded="lg"
+                            ):
+                                v3.VDivider()
+                                with v3.VCardText():
+                                    with v3.VRow(dense=True):
+                                        with v3.VCol(cols=12):
+                                            html.Label(
+                                                "Filename",
+                                                classes="text-subtitle-1 font-weight-medium mb-2 d-block",
+                                            )
+                                            v3.VTextField(
+                                                v_model=(
+                                                    "download_name",
+                                                    "quickview-state.json",
+                                                ),
+                                                density="comfortable",
+                                                placeholder="Enter the filename to download",
+                                                variant="outlined",
+                                            )
+                                    with v3.VRow(dense=True):
+                                        with v3.VCol(cols=12):
+                                            html.Label(
+                                                "Comments",
+                                                classes="text-subtitle-1 font-weight-medium mb-2 d-block",
+                                            )
+                                            v3.VTextarea(
+                                                v_model=("export_comment", ""),
+                                                density="comfortable",
+                                                placeholder="Remind yourself what that state captures",
+                                                rows="4",
+                                                variant="outlined",
+                                            )
+                                with v3.VCardActions():
+                                    v3.VSpacer()
+                                    v3.VBtn(
+                                        text="Cancel",
+                                        click="show_export_dialog=false",
+                                        classes="text-none",
+                                        variant="flat",
+                                        color="surface",
+                                    )
+                                    v3.VBtn(
+                                        text="Download",
+                                        classes="text-none",
+                                        variant="flat",
+                                        color="primary",
+                                        click="show_export_dialog=false;utils.download(download_name, trigger('download_state'), 'application/json')",
+                                    )
+
                     # Field selection container
                     with v3.VNavigationDrawer(
                         model_value=("active_tools.includes('select-fields')",),
                         width=500,
                         permanent=True,
+                        style=(
+                            "active_tools.includes('select-fields') ? 'transform: none;' : ''",
+                        ),
                     ):
-                        with v3.VCardActions(key="variables_selected.length"):
-                            for name, color in [
-                                ("surfaces", "success"),
-                                ("interfaces", "info"),
-                                ("midpoints", "warning"),
-                            ]:
-                                v3.VChip(
-                                    js_var_title(name),
-                                    color=color,
-                                    v_show=js_var_count(name),
-                                    size="small",
-                                    closable=True,
-                                    click_close=js_var_remove(name),
+                        with html.Div(style="position:fixed;top:0;width: 500px;"):
+                            with v3.VCardActions(key="variables_selected.length"):
+                                for name, color in [
+                                    ("surfaces", "success"),
+                                    ("interfaces", "info"),
+                                    ("midpoints", "warning"),
+                                ]:
+                                    v3.VChip(
+                                        js_var_title(name),
+                                        color=color,
+                                        v_show=js_var_count(name),
+                                        size="small",
+                                        closable=True,
+                                        click_close=js_var_remove(name),
+                                    )
+
+                                v3.VSpacer()
+                                v3.VBtn(
+                                    classes="text-none",
+                                    color="primary",
+                                    prepend_icon="mdi-database",
+                                    text=(
+                                        "`Load ${variables_selected.length} variable${variables_selected.length > 1 ? 's' :''}`",
+                                    ),
+                                    variant="flat",
+                                    disabled=(
+                                        "variables_selected.length === 0 || variables_loaded",
+                                    ),
+                                    click=self.data_load_variables,
                                 )
 
-                            v3.VSpacer()
-                            v3.VBtn(
-                                classes="text-none",
+                            v3.VTextField(
+                                v_model=("variables_filter", ""),
+                                hide_details=True,
                                 color="primary",
-                                prepend_icon="mdi-database",
-                                text=(
-                                    "`Load ${variables_selected.length} variable${variables_selected.length > 1 ? 's' :''}`",
-                                ),
-                                variant="flat",
-                                disabled=(
-                                    "variables_selected.length === 0 || variables_loaded",
-                                ),
-                                click=self.data_load_variables,
+                                placeholder="Filter",
+                                density="compact",
+                                variant="outlined",
+                                classes="mx-2",
+                                prepend_inner_icon="mdi-magnify",
+                                clearable=True,
                             )
-
-                        v3.VTextField(
-                            v_model=("variables_filter", ""),
-                            hide_details=True,
-                            color="primary",
-                            placeholder="Filter",
-                            density="compact",
-                            variant="outlined",
-                            classes="mx-2",
-                            prepend_inner_icon="mdi-magnify",
-                            clearable=True,
-                        )
-                        v3.VDataTable(
-                            v_model=("variables_selected", []),
-                            show_select=True,
-                            item_value="id",
-                            density="compact",
-                            fixed_header=True,
-                            headers=("variables_headers", VAR_HEADERS),
-                            items=("variables_listing", []),
-                            height=(
-                                "`calc(max(100vh, ${Math.floor(main_size?.size?.height || 0)}px) - 6rem)`",
-                            ),
-                            style="user-select: none; cursor: pointer;",
-                            hover=True,
-                            search=("variables_filter", ""),
-                            items_per_page=-1,
-                            hide_default_footer=True,
-                        )
+                            with html.Div(style="margin:1px;"):
+                                v3.VDataTable(
+                                    v_model=("variables_selected", []),
+                                    show_select=True,
+                                    item_value="id",
+                                    density="compact",
+                                    fixed_header=True,
+                                    headers=("variables_headers", VAR_HEADERS),
+                                    items=("variables_listing", []),
+                                    height="calc(100vh - 6rem)",
+                                    style="user-select: none; cursor: pointer;",
+                                    hover=True,
+                                    search=("variables_filter", ""),
+                                    items_per_page=-1,
+                                    hide_default_footer=True,
+                                )
 
                     with v3.VContainer(classes="h-100 pa-0", fluid=True):
                         with client.SizeObserver("main_size"):
-                            # Import/Export toolbar
-                            with v3.VToolbar(
-                                v_show="active_tools.includes('import-export')",
-                                color="white",
-                                classes="border-b-thin",
-                            ):
-                                v3.VIcon(
-                                    "mdi-folder-arrow-left-right-outline",
-                                    classes="px-6 opacity-50",
-                                )
-                                v3.VLabel(
-                                    "Import/Export Controls", classes="text-subtitle-2"
-                                )
-                                v3.VSpacer()
-
-                                v3.VTextField(
-                                    v_model=("download_name", "quickview-state.json"),
-                                    hide_details=True,
-                                    density="compact",
-                                    label="Download state file",
-                                    prepend_inner_icon="mdi-file-download-outline",
-                                    variant="outlined",
-                                    flat=True,
-                                    style="max-width: 250px",
-                                    classes="mx-2",
-                                    click_prependInner="utils.download(download_name, trigger('download_state'), 'application/json')",
-                                )
-
-                                v3.VFileInput(
-                                    v_model=("upload_state_file", None),
-                                    hide_details=True,
-                                    chips=True,
-                                    density="compact",
-                                    label="Import state file",
-                                    prepend_icon=False,
-                                    prepend_inner_icon="mdi-file-upload-outline",
-                                    variant="outlined",
-                                    style="max-width: 250px",
-                                    classes="mx-2",
-                                )
-
-                            # Layout control toolbar
-                            with v3.VToolbar(
+                            # Take space to push content below the fixed overlay
+                            v3.VToolbar(
                                 v_show="active_tools.includes('adjust-layout')",
-                                color="white",
-                                classes="border-b-thin",
                                 density="compact",
-                            ):
-                                v3.VIcon("mdi-collage", classes="px-6 opacity-50")
-                                v3.VLabel("Layout Controls", classes="text-subtitle-2")
-                                v3.VSpacer()
-
-                                v3.VSlider(
-                                    v_model=("aspect_ratio", 2),
-                                    prepend_icon="mdi-aspect-ratio",
-                                    min=1,
-                                    max=2,
-                                    step=0.1,
-                                    density="compact",
-                                    hide_details=True,
-                                    style="max-width: 400px;",
-                                )
-                                v3.VSpacer()
-                                v3.VCheckbox(
-                                    v_model=("layout_grouped", True),
-                                    label=("layout_grouped ? 'Grouped' : 'Uniform'",),
-                                    hide_details=True,
-                                    inset=True,
-                                    false_icon="mdi-apps",
-                                    true_icon="mdi-focus-field",
-                                    density="compact",
-                                )
-
-                                with v3.VBtn(
-                                    "Size",
-                                    classes="text-none mx-4",
-                                    prepend_icon="mdi-view-module",
-                                    append_icon="mdi-menu-down",
-                                ):
-                                    with v3.VMenu(activator="parent"):
-                                        with v3.VList(density="compact"):
-                                            v3.VListItem(
-                                                title="Auto",
-                                                click=(
-                                                    self.view_manager.apply_size,
-                                                    "[0]",
-                                                ),
-                                            )
-                                            v3.VListItem(
-                                                title="Full Width",
-                                                click=(
-                                                    self.view_manager.apply_size,
-                                                    "[1]",
-                                                ),
-                                            )
-                                            v3.VListItem(
-                                                title="2 Columns",
-                                                click=(
-                                                    self.view_manager.apply_size,
-                                                    "[2]",
-                                                ),
-                                            )
-                                            v3.VListItem(
-                                                title="3 Columns",
-                                                click=(
-                                                    self.view_manager.apply_size,
-                                                    "[3]",
-                                                ),
-                                            )
-                                            v3.VListItem(
-                                                title="4 Columns",
-                                                click=(
-                                                    self.view_manager.apply_size,
-                                                    "[4]",
-                                                ),
-                                            )
-                                            v3.VListItem(
-                                                title="6 Columns",
-                                                click=(
-                                                    self.view_manager.apply_size,
-                                                    "[6]",
-                                                ),
-                                            )
-
-                            # Crop selection
-                            with v3.VToolbar(
-                                v_show="active_tools.includes('adjust-databounds')",
-                                color="white",
-                                classes="border-b-thin",
-                            ):
-                                v3.VIcon("mdi-crop", classes="pl-6 opacity-50")
-                                with v3.VRow(classes="ma-0 px-2 align-center"):
-                                    with v3.VCol(cols=6):
-                                        with v3.VRow(classes="mx-2 my-0"):
-                                            v3.VLabel(
-                                                "Longitude", classes="text-subtitle-2"
-                                            )
-                                            v3.VSpacer()
-                                            v3.VLabel(
-                                                "{{ crop_longitude }}",
-                                                classes="text-body-2",
-                                            )
-                                        v3.VRangeSlider(
-                                            v_model=("crop_longitude", [-180, 180]),
-                                            min=-180,
-                                            max=180,
-                                            step=1,
-                                            density="compact",
-                                            hide_details=True,
-                                        )
-                                    with v3.VCol(cols=6):
-                                        with v3.VRow(classes="mx-2 my-0"):
-                                            v3.VLabel(
-                                                "Latitude", classes="text-subtitle-2"
-                                            )
-                                            v3.VSpacer()
-                                            v3.VLabel(
-                                                "{{ crop_latitude }}",
-                                                classes="text-body-2",
-                                            )
-                                        v3.VRangeSlider(
-                                            v_model=("crop_latitude", [-90, 90]),
-                                            min=-90,
-                                            max=90,
-                                            step=1,
-                                            density="compact",
-                                            hide_details=True,
-                                        )
-
-                            # Layer/Time selection
-                            with v3.VToolbar(
-                                v_show="active_tools.includes('select-slice-time')",
-                                color="white",
-                                classes="border-b-thin",
-                            ):
-                                v3.VIcon("mdi-tune-variant", classes="ml-3 opacity-50")
-                                with v3.VRow(
-                                    classes="ma-0 pr-2 align-center", dense=True
-                                ):
-                                    # midpoint layer
-                                    with v3.VCol(
-                                        cols=("toolbar_slider_cols", 4),
-                                        v_show="midpoints.length > 1",
-                                    ):
-                                        with v3.VRow(classes="mx-2 my-0"):
-                                            v3.VLabel(
-                                                "Layer Midpoints",
-                                                classes="text-subtitle-2",
-                                            )
-                                            v3.VSpacer()
-                                            v3.VLabel(
-                                                "{{ parseFloat(midpoints[midpoint_idx] || 0).toFixed(2) }} hPa (k={{ midpoint_idx }})",
-                                                classes="text-body-2",
-                                            )
-                                        v3.VSlider(
-                                            v_model=("midpoint_idx", 0),
-                                            min=0,
-                                            max=("Math.max(0, midpoints.length - 1)",),
-                                            step=1,
-                                            density="compact",
-                                            hide_details=True,
-                                        )
-
-                                    # interface layer
-                                    with v3.VCol(
-                                        cols=("toolbar_slider_cols", 4),
-                                        v_show="interfaces.length > 1",
-                                    ):
-                                        with v3.VRow(classes="mx-2 my-0"):
-                                            v3.VLabel(
-                                                "Layer Interfaces",
-                                                classes="text-subtitle-2",
-                                            )
-                                            v3.VSpacer()
-                                            v3.VLabel(
-                                                "{{ parseFloat(interfaces[interface_idx] || 0).toFixed(2) }} hPa (k={{interface_idx}})",
-                                                classes="text-body-2",
-                                            )
-                                        v3.VSlider(
-                                            v_model=("interface_idx", 0),
-                                            min=0,
-                                            max=("Math.max(0, interfaces.length - 1)",),
-                                            step=1,
-                                            density="compact",
-                                            hide_details=True,
-                                        )
-
-                                    # time
-                                    with v3.VCol(
-                                        cols=("toolbar_slider_cols", 4),
-                                        v_show="timestamps.length > 1",
-                                    ):
-                                        self.state.setdefault("time_value", 80.50)
-                                        with v3.VRow(classes="mx-2 my-0"):
-                                            v3.VLabel("Time", classes="text-subtitle-2")
-                                            v3.VSpacer()
-                                            v3.VLabel(
-                                                "{{ parseFloat(timestamps[time_idx]).toFixed(2) }} (t={{time_idx}})",
-                                                classes="text-body-2",
-                                            )
-                                        v3.VSlider(
-                                            v_model=("time_idx", 0),
-                                            min=0,
-                                            max=("Math.max(0, timestamps.length - 1)",),
-                                            step=1,
-                                            density="compact",
-                                            hide_details=True,
-                                        )
-
-                            # Animation
-                            with v3.VToolbar(
+                            )
+                            v3.VToolbar(
+                                v_show="active_tools.includes('adjust-databounds')"
+                            )
+                            v3.VToolbar(
+                                v_show="active_tools.includes('select-slice-time')"
+                            )
+                            v3.VToolbar(
                                 v_show="active_tools.includes('animation-controls')",
-                                color="white",
-                                classes="border-b-thin",
                                 density="compact",
+                            )
+
+                            # Fixed overlay for toolbars
+                            with html.Div(
+                                style=(
+                                    "`position:fixed;top:0;width:calc(100vw - ${compact_drawer ? '55' : '219'}px);z-index:1;`",
+                                ),
                             ):
-                                v3.VIcon(
-                                    "mdi-movie-open-cog-outline",
-                                    classes="px-6 opacity-50",
-                                )
-                                with v3.VRow(classes="ma-0 px-2 align-center"):
-                                    v3.VSelect(
-                                        v_model=("animation_track", "timestamps"),
-                                        items=("animation_tracks", []),
-                                        flat=True,
-                                        variant="plain",
-                                        hide_details=True,
-                                        density="compact",
-                                        style="max-width: 10rem;",
+                                # Layout control toolbar
+                                with v3.VToolbar(
+                                    v_show="active_tools.includes('adjust-layout')",
+                                    color="white",
+                                    classes="border-b-thin",
+                                    density="compact",
+                                ):
+                                    v3.VIcon("mdi-collage", classes="px-6 opacity-50")
+                                    v3.VLabel(
+                                        "Layout Controls", classes="text-subtitle-2"
                                     )
-                                    v3.VDivider(vertical=True, classes="mx-2")
+                                    v3.VSpacer()
+
                                     v3.VSlider(
-                                        v_model=("animation_step", 1),
-                                        min=0,
-                                        max=("amimation_step_max", 0),
-                                        step=1,
-                                        hide_details=True,
+                                        v_model=("aspect_ratio", 2),
+                                        prepend_icon="mdi-aspect-ratio",
+                                        min=1,
+                                        max=2,
+                                        step=0.1,
                                         density="compact",
-                                        classes="mx-4",
+                                        hide_details=True,
+                                        style="max-width: 400px;",
                                     )
-                                    v3.VDivider(vertical=True, classes="mx-2")
-                                    v3.VIconBtn(
-                                        icon="mdi-page-first",
-                                        flat=True,
-                                        disabled=("animation_step === 0",),
-                                        click="animation_step = 0",
-                                    )
-                                    v3.VIconBtn(
-                                        icon="mdi-chevron-left",
-                                        flat=True,
-                                        disabled=("animation_step === 0",),
-                                        click="animation_step = Math.max(0, animation_step - 1)",
-                                    )
-                                    v3.VIconBtn(
-                                        icon="mdi-chevron-right",
-                                        flat=True,
-                                        disabled=(
-                                            "animation_step === amimation_step_max",
+                                    v3.VSpacer()
+                                    v3.VCheckbox(
+                                        v_model=("layout_grouped", True),
+                                        label=(
+                                            "layout_grouped ? 'Grouped' : 'Uniform'",
                                         ),
-                                        click="animation_step = Math.min(amimation_step_max, animation_step + 1)",
+                                        hide_details=True,
+                                        inset=True,
+                                        false_icon="mdi-apps",
+                                        true_icon="mdi-focus-field",
+                                        density="compact",
                                     )
-                                    v3.VIconBtn(
-                                        icon="mdi-page-last",
-                                        disabled=(
-                                            "animation_step === amimation_step_max",
-                                        ),
-                                        flat=True,
-                                        click="animation_step = amimation_step_max",
+
+                                    with v3.VBtn(
+                                        "Size",
+                                        classes="text-none mx-4",
+                                        prepend_icon="mdi-view-module",
+                                        append_icon="mdi-menu-down",
+                                    ):
+                                        with v3.VMenu(activator="parent"):
+                                            with v3.VList(density="compact"):
+                                                v3.VListItem(
+                                                    title="Auto",
+                                                    click=(
+                                                        self.view_manager.apply_size,
+                                                        "[0]",
+                                                    ),
+                                                )
+                                                v3.VListItem(
+                                                    title="Full Width",
+                                                    click=(
+                                                        self.view_manager.apply_size,
+                                                        "[1]",
+                                                    ),
+                                                )
+                                                v3.VListItem(
+                                                    title="2 Columns",
+                                                    click=(
+                                                        self.view_manager.apply_size,
+                                                        "[2]",
+                                                    ),
+                                                )
+                                                v3.VListItem(
+                                                    title="3 Columns",
+                                                    click=(
+                                                        self.view_manager.apply_size,
+                                                        "[3]",
+                                                    ),
+                                                )
+                                                v3.VListItem(
+                                                    title="4 Columns",
+                                                    click=(
+                                                        self.view_manager.apply_size,
+                                                        "[4]",
+                                                    ),
+                                                )
+                                                v3.VListItem(
+                                                    title="6 Columns",
+                                                    click=(
+                                                        self.view_manager.apply_size,
+                                                        "[6]",
+                                                    ),
+                                                )
+
+                                # Crop selection
+                                with v3.VToolbar(
+                                    v_show="active_tools.includes('adjust-databounds')",
+                                    color="white",
+                                    classes="border-b-thin",
+                                ):
+                                    v3.VIcon("mdi-crop", classes="pl-6 opacity-50")
+                                    with v3.VRow(classes="ma-0 px-2 align-center"):
+                                        with v3.VCol(cols=6):
+                                            with v3.VRow(classes="mx-2 my-0"):
+                                                v3.VLabel(
+                                                    "Longitude",
+                                                    classes="text-subtitle-2",
+                                                )
+                                                v3.VSpacer()
+                                                v3.VLabel(
+                                                    "{{ crop_longitude }}",
+                                                    classes="text-body-2",
+                                                )
+                                            v3.VRangeSlider(
+                                                v_model=("crop_longitude", [-180, 180]),
+                                                min=-180,
+                                                max=180,
+                                                step=1,
+                                                density="compact",
+                                                hide_details=True,
+                                            )
+                                        with v3.VCol(cols=6):
+                                            with v3.VRow(classes="mx-2 my-0"):
+                                                v3.VLabel(
+                                                    "Latitude",
+                                                    classes="text-subtitle-2",
+                                                )
+                                                v3.VSpacer()
+                                                v3.VLabel(
+                                                    "{{ crop_latitude }}",
+                                                    classes="text-body-2",
+                                                )
+                                            v3.VRangeSlider(
+                                                v_model=("crop_latitude", [-90, 90]),
+                                                min=-90,
+                                                max=90,
+                                                step=1,
+                                                density="compact",
+                                                hide_details=True,
+                                            )
+
+                                # Layer/Time selection
+                                with v3.VToolbar(
+                                    v_show="active_tools.includes('select-slice-time')",
+                                    color="white",
+                                    classes="border-b-thin",
+                                ):
+                                    v3.VIcon(
+                                        "mdi-tune-variant", classes="ml-3 opacity-50"
                                     )
-                                    v3.VDivider(vertical=True, classes="mx-2")
-                                    v3.VIconBtn(
-                                        icon=(
-                                            "animation_play ? 'mdi-stop' : 'mdi-play'",
-                                        ),
-                                        flat=True,
-                                        click="animation_play = !animation_play",
+                                    with v3.VRow(
+                                        classes="ma-0 pr-2 align-center", dense=True
+                                    ):
+                                        # midpoint layer
+                                        with v3.VCol(
+                                            cols=("toolbar_slider_cols", 4),
+                                            v_show="midpoints.length > 1",
+                                        ):
+                                            with v3.VRow(classes="mx-2 my-0"):
+                                                v3.VLabel(
+                                                    "Layer Midpoints",
+                                                    classes="text-subtitle-2",
+                                                )
+                                                v3.VSpacer()
+                                                v3.VLabel(
+                                                    "{{ parseFloat(midpoints[midpoint_idx] || 0).toFixed(2) }} hPa (k={{ midpoint_idx }})",
+                                                    classes="text-body-2",
+                                                )
+                                            v3.VSlider(
+                                                v_model=("midpoint_idx", 0),
+                                                min=0,
+                                                max=(
+                                                    "Math.max(0, midpoints.length - 1)",
+                                                ),
+                                                step=1,
+                                                density="compact",
+                                                hide_details=True,
+                                            )
+
+                                        # interface layer
+                                        with v3.VCol(
+                                            cols=("toolbar_slider_cols", 4),
+                                            v_show="interfaces.length > 1",
+                                        ):
+                                            with v3.VRow(classes="mx-2 my-0"):
+                                                v3.VLabel(
+                                                    "Layer Interfaces",
+                                                    classes="text-subtitle-2",
+                                                )
+                                                v3.VSpacer()
+                                                v3.VLabel(
+                                                    "{{ parseFloat(interfaces[interface_idx] || 0).toFixed(2) }} hPa (k={{interface_idx}})",
+                                                    classes="text-body-2",
+                                                )
+                                            v3.VSlider(
+                                                v_model=("interface_idx", 0),
+                                                min=0,
+                                                max=(
+                                                    "Math.max(0, interfaces.length - 1)",
+                                                ),
+                                                step=1,
+                                                density="compact",
+                                                hide_details=True,
+                                            )
+
+                                        # time
+                                        with v3.VCol(
+                                            cols=("toolbar_slider_cols", 4),
+                                            v_show="timestamps.length > 1",
+                                        ):
+                                            self.state.setdefault("time_value", 80.50)
+                                            with v3.VRow(classes="mx-2 my-0"):
+                                                v3.VLabel(
+                                                    "Time", classes="text-subtitle-2"
+                                                )
+                                                v3.VSpacer()
+                                                v3.VLabel(
+                                                    "{{ parseFloat(timestamps[time_idx]).toFixed(2) }} (t={{time_idx}})",
+                                                    classes="text-body-2",
+                                                )
+                                            v3.VSlider(
+                                                v_model=("time_idx", 0),
+                                                min=0,
+                                                max=(
+                                                    "Math.max(0, timestamps.length - 1)",
+                                                ),
+                                                step=1,
+                                                density="compact",
+                                                hide_details=True,
+                                            )
+
+                                # Animation
+                                with v3.VToolbar(
+                                    v_show="active_tools.includes('animation-controls')",
+                                    color="white",
+                                    classes="border-b-thin",
+                                    density="compact",
+                                ):
+                                    v3.VIcon(
+                                        "mdi-movie-open-cog-outline",
+                                        classes="px-6 opacity-50",
                                     )
+                                    with v3.VRow(classes="ma-0 px-2 align-center"):
+                                        v3.VSelect(
+                                            v_model=("animation_track", "timestamps"),
+                                            items=("animation_tracks", []),
+                                            flat=True,
+                                            variant="plain",
+                                            hide_details=True,
+                                            density="compact",
+                                            style="max-width: 10rem;",
+                                        )
+                                        v3.VDivider(vertical=True, classes="mx-2")
+                                        v3.VSlider(
+                                            v_model=("animation_step", 1),
+                                            min=0,
+                                            max=("amimation_step_max", 0),
+                                            step=1,
+                                            hide_details=True,
+                                            density="compact",
+                                            classes="mx-4",
+                                        )
+                                        v3.VDivider(vertical=True, classes="mx-2")
+                                        v3.VIconBtn(
+                                            icon="mdi-page-first",
+                                            flat=True,
+                                            disabled=("animation_step === 0",),
+                                            click="animation_step = 0",
+                                        )
+                                        v3.VIconBtn(
+                                            icon="mdi-chevron-left",
+                                            flat=True,
+                                            disabled=("animation_step === 0",),
+                                            click="animation_step = Math.max(0, animation_step - 1)",
+                                        )
+                                        v3.VIconBtn(
+                                            icon="mdi-chevron-right",
+                                            flat=True,
+                                            disabled=(
+                                                "animation_step === amimation_step_max",
+                                            ),
+                                            click="animation_step = Math.min(amimation_step_max, animation_step + 1)",
+                                        )
+                                        v3.VIconBtn(
+                                            icon="mdi-page-last",
+                                            disabled=(
+                                                "animation_step === amimation_step_max",
+                                            ),
+                                            flat=True,
+                                            click="animation_step = amimation_step_max",
+                                        )
+                                        v3.VDivider(vertical=True, classes="mx-2")
+                                        v3.VIconBtn(
+                                            icon=(
+                                                "animation_play ? 'mdi-stop' : 'mdi-play'",
+                                            ),
+                                            flat=True,
+                                            click="animation_play = !animation_play",
+                                        )
 
                             client.ServerTemplate(name=("active_layout", "auto_layout"))
 
@@ -792,9 +901,16 @@ class EAMApp(TrameApp):
     def download_state(self):
         active_variables = self.selected_variables
         state_content = {}
+        state_content["origin"] = {
+            "user": os.environ.get("USER", os.environ.get("USERNAME")),
+            "created": f"{datetime.datetime.now()}",
+            "comment": self.state.export_comment,
+        }
         state_content["files"] = {
-            "simulation": self.file_browser.get("data_simulation"),
-            "connectivity": self.file_browser.get("data_connectivity"),
+            "simulation": str(Path(self.file_browser.get("data_simulation")).resolve()),
+            "connectivity": str(
+                Path(self.file_browser.get("data_connectivity")).resolve()
+            ),
         }
         state_content["variables-selection"] = self.state.variables_selected
         state_content["layout"] = {
@@ -844,10 +960,13 @@ class EAMApp(TrameApp):
 
         file_proxy = file_upload.ClientFile(upload_state_file)
         state_content = json.loads(file_proxy.content)
-        asynchronous.create_task(self.import_state(state_content))
+        self.import_state(state_content)
 
     @controller.set("import_state")
-    async def import_state(self, state_content):
+    def import_state(self, state_content):
+        asynchronous.create_task(self._import_state(state_content))
+
+    async def _import_state(self, state_content):
         # Files
         self.file_browser.set_data_simulation(state_content["files"]["simulation"])
         self.file_browser.set_data_connectivity(state_content["files"]["connectivity"])
@@ -874,6 +993,10 @@ class EAMApp(TrameApp):
         self.state.active_layout = state_content["layout"]["active"]
         self.state.active_tools = state_content["layout"]["tools"]
         self.state.compact_drawer = not state_content["layout"]["help"]
+
+        # Update filebrowser state
+        with self.state:
+            self.file_browser.set("state_loading", False)
 
     @controller.add_task("file_selection_load")
     async def data_loading_open(self, simulation, connectivity):
