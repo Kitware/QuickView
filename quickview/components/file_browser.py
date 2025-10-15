@@ -1,8 +1,9 @@
+import json
 import re
 from pathlib import Path
 from paraview import simple
 from trame.widgets import vuetify3 as v3, html
-from trame.app import TrameComponent
+from trame.app import TrameComponent, asynchronous
 
 DIRECTORY = dict(icon="mdi-folder", type="directory")
 GROUP = dict(icon="mdi-file-document-multiple-outline", type="group")
@@ -45,6 +46,9 @@ class ParaViewFileBrowser(TrameComponent):
         self._current_path = Path(current).resolve() if current else self._home_path
         self.pattern_exclude = re.compile(exclude)
         self.pattern_group = re.compile(group)
+
+        # Disable state import by default
+        self.set("is_state_file", False)
 
         self._pxm = simple.servermanager.ProxyManager()
         self._proxy_listing = self._pxm.NewProxy("misc", "ListDirectory")
@@ -229,6 +233,28 @@ class ParaViewFileBrowser(TrameComponent):
     def select_entry(self, entry):
         with self.state as state:
             state[f"{self._prefix}_active"] = entry.get("index", 0) if entry else -1
+            file_path = Path(self.active_path)
+
+            # Check if it is a state file
+            if file_path.suffix == ".json" and file_path.exists():
+                state_content = json.loads(file_path.read_text())
+                self.set(
+                    "is_state_file",
+                    all(
+                        (
+                            k in state_content
+                            for k in [
+                                "files",
+                                "variables-selection",
+                                "layout",
+                                "data-selection",
+                                "views",
+                            ]
+                        )
+                    ),
+                )
+            else:
+                self.set("is_state_file", False)
 
     def load_data_files(self, **_):
         self.set("loading", True)
@@ -238,6 +264,19 @@ class ParaViewFileBrowser(TrameComponent):
         self.ctrl.file_selection_load(
             self.get("data_simulation"), self.get("data_connectivity")
         )
+
+    def import_state_file(self):
+        self.set("state_loading", True)
+
+        state_content = json.loads(Path(self.active_path).read_text())
+        coroutine = self.ctrl.import_state(state_content)
+        task = asynchronous.create_task(coroutine)
+
+        def done_loading():
+            with self.state:
+                self.set("state_loading", False)
+
+        task.add_done_callback(done_loading)
 
     def cancel(self):
         self.ctrl.file_selection_cancel()
@@ -389,6 +428,15 @@ class ParaViewFileBrowser(TrameComponent):
                     text="Cancel",
                     variant="flat",
                     click=self.cancel,
+                )
+                v3.VBtn(
+                    disabled=(f"!{self.name('is_state_file')}",),
+                    loading=(self.name("state_loading"), False),
+                    classes="text-none",
+                    color="primary",
+                    text="Import state file",
+                    variant="flat",
+                    click=self.import_state_file,
                 )
                 v3.VBtn(
                     classes="text-none",

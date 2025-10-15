@@ -38,7 +38,7 @@ python -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivit
 
 To launch server only (no browser popup), use
 ```
-python --server -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc
+python -m quickview.app --data /path/to/your/data.nc --conn /path/to/connectivity.nc --server
 ```
 
 ----

@@ -4,10 +4,10 @@ import time
 
 from pathlib import Path
 
-from trame.app import TrameApp, asynchronous
+from trame.app import TrameApp, asynchronous, file_upload
 from trame.ui.vuetify3 import VAppLayout
-from trame.widgets import vuetify3 as v3, client, html
-from trame.decorators import controller, change
+from trame.widgets import vuetify3 as v3, client, html, dataclass
+from trame.decorators import controller, change, trigger
 
 from quickview import __version__ as quickview_version
 from quickview.pipeline import EAMVisSource
@@ -15,6 +15,7 @@ from quickview.assets import ASSETS
 from quickview.view_manager2 import ViewManager
 from quickview.components.file_browser import ParaViewFileBrowser
 from quickview.utils import compute
+from quickview import module as qv_module
 
 v3.enable_lab()
 
@@ -60,6 +61,10 @@ class EAMApp(TrameApp):
     def __init__(self, server=None):
         super().__init__(server)
 
+        # Pre-load deferred widgets
+        dataclass.initialize(self.server)
+        self.server.enable_module(qv_module)
+
         # CLI
         cli = self.server.cli
         cli.add_argument(
@@ -86,10 +91,6 @@ class EAMApp(TrameApp):
             help="working directory (to store session data)",
         )
         args, _ = cli.parse_known_args()
-
-        # Development setup
-        if self.server.hot_reload:
-            self.ctrl.on_server_reload.add(self._build_ui)
 
         # Initial UI state
         self.state.update(
@@ -118,7 +119,6 @@ class EAMApp(TrameApp):
 
         # Data input
         self.source = EAMVisSource()
-        self.app_state = {}
 
         # Helpers
         self.view_manager = ViewManager(self.server, self.source)
@@ -131,14 +131,21 @@ class EAMApp(TrameApp):
 
         # Process CLI to pre-load data
         if args.state is not None:
-            self.app_state = json.loads(Path(args.state).read_text())
-            self.source.Update(
-                **{k: self.app_state[k] for k in ("data_file", "conn_file")}
-            )
+            state_content = json.loads(Path(args.state).read_text())
+
+            async def wait_for_import(**_):
+                await self.import_state(state_content)
+
+            self.ctrl.on_server_ready.add_task(wait_for_import)
         elif args.data and args.conn:
             self.file_browser.set_data_simulation(args.data)
             self.file_browser.set_data_connectivity(args.conn)
             self.ctrl.on_server_ready.add(self.file_browser.load_data_files)
+
+        # Development setup
+        if self.server.hot_reload:
+            self.ctrl.on_server_reload.add(self._build_ui)
+            self.ctrl.on_server_reload.add(self.view_manager.refresh_ui)
 
         # GUI
         self._build_ui()
@@ -160,14 +167,16 @@ class EAMApp(TrameApp):
                         v_model_selected=("active_tools", ["load-data"]),
                     ):
                         with v3.VTooltip(
-                            text="Reset camera", disabled=("!compact_drawer",)
+                            text=f"QuickView {quickview_version}",
+                            disabled=("!compact_drawer",),
                         ):
                             with v3.Template(v_slot_activator="{ props }"):
                                 with v3.VListItem(
                                     v_bind="props",
-                                    title=("compact_drawer ? null : 'QuickView'",),
+                                    title=(
+                                        f"compact_drawer ? null : 'QuickView {quickview_version}'",
+                                    ),
                                     classes="text-h6",
-                                    click=self.view_manager.reset_camera,
                                 ):
                                     with v3.Template(raw_attrs=["#prepend"]):
                                         v3.VAvatar(
@@ -210,6 +219,17 @@ class EAMApp(TrameApp):
                                     title=(
                                         "compact_drawer ? null : 'Fields selection'",
                                     ),
+                                )
+
+                        with v3.VTooltip(
+                            text="Reset camera", disabled=("!compact_drawer",)
+                        ):
+                            with v3.Template(v_slot_activator="{ props }"):
+                                v3.VListItem(
+                                    v_bind="props",
+                                    prepend_icon="mdi-crop-free",
+                                    title=("compact_drawer ? null : 'Reset camera'",),
+                                    click=self.view_manager.reset_camera,
                                 )
 
                         with v3.VTooltip(
@@ -431,6 +451,47 @@ class EAMApp(TrameApp):
 
                     with v3.VContainer(classes="h-100 pa-0", fluid=True):
                         with client.SizeObserver("main_size"):
+                            # Import/Export toolbar
+                            with v3.VToolbar(
+                                v_show="active_tools.includes('import-export')",
+                                color="white",
+                                classes="border-b-thin",
+                            ):
+                                v3.VIcon(
+                                    "mdi-folder-arrow-left-right-outline",
+                                    classes="px-6 opacity-50",
+                                )
+                                v3.VLabel(
+                                    "Import/Export Controls", classes="text-subtitle-2"
+                                )
+                                v3.VSpacer()
+
+                                v3.VTextField(
+                                    v_model=("download_name", "quickview-state.json"),
+                                    hide_details=True,
+                                    density="compact",
+                                    label="Download state file",
+                                    prepend_inner_icon="mdi-file-download-outline",
+                                    variant="outlined",
+                                    flat=True,
+                                    style="max-width: 250px",
+                                    classes="mx-2",
+                                    click_prependInner="utils.download(download_name, trigger('download_state'), 'application/json')",
+                                )
+
+                                v3.VFileInput(
+                                    v_model=("upload_state_file", None),
+                                    hide_details=True,
+                                    chips=True,
+                                    density="compact",
+                                    label="Import state file",
+                                    prepend_icon=False,
+                                    prepend_inner_icon="mdi-file-upload-outline",
+                                    variant="outlined",
+                                    style="max-width: 250px",
+                                    classes="mx-2",
+                                )
+
                             # Layout control toolbar
                             with v3.VToolbar(
                                 v_show="active_tools.includes('adjust-layout')",
@@ -442,21 +503,6 @@ class EAMApp(TrameApp):
                                 v3.VLabel("Layout Controls", classes="text-subtitle-2")
                                 v3.VSpacer()
 
-                                with v3.VRadioGroup(
-                                    classes="d-inline-block",
-                                    hide_details=True,
-                                    inline=True,
-                                    v_model=("col_mode", "auto"),
-                                ):
-                                    v3.VRadio(label="Auto", value="auto")
-                                    v3.VRadio(label="Full width", value="1")
-                                    v3.VRadio(label="2 cols", value="2")
-                                    v3.VRadio(label="3 cols", value="3")
-                                    v3.VRadio(label="4 cols", value="4")
-                                    v3.VRadio(label="6 cols", value="6")
-                                    v3.VRadio(label="12 cols", value="12")
-
-                                v3.VSpacer()
                                 v3.VSlider(
                                     v_model=("aspect_ratio", 2),
                                     prepend_icon="mdi-aspect-ratio",
@@ -466,8 +512,68 @@ class EAMApp(TrameApp):
                                     density="compact",
                                     hide_details=True,
                                     style="max-width: 400px;",
-                                    classes="mx-4",
                                 )
+                                v3.VSpacer()
+                                v3.VCheckbox(
+                                    v_model=("layout_grouped", True),
+                                    label=("layout_grouped ? 'Grouped' : 'Uniform'",),
+                                    hide_details=True,
+                                    inset=True,
+                                    false_icon="mdi-apps",
+                                    true_icon="mdi-focus-field",
+                                    density="compact",
+                                )
+
+                                with v3.VBtn(
+                                    "Size",
+                                    classes="text-none mx-4",
+                                    prepend_icon="mdi-view-module",
+                                    append_icon="mdi-menu-down",
+                                ):
+                                    with v3.VMenu(activator="parent"):
+                                        with v3.VList(density="compact"):
+                                            v3.VListItem(
+                                                title="Auto",
+                                                click=(
+                                                    self.view_manager.apply_size,
+                                                    "[0]",
+                                                ),
+                                            )
+                                            v3.VListItem(
+                                                title="Full Width",
+                                                click=(
+                                                    self.view_manager.apply_size,
+                                                    "[1]",
+                                                ),
+                                            )
+                                            v3.VListItem(
+                                                title="2 Columns",
+                                                click=(
+                                                    self.view_manager.apply_size,
+                                                    "[2]",
+                                                ),
+                                            )
+                                            v3.VListItem(
+                                                title="3 Columns",
+                                                click=(
+                                                    self.view_manager.apply_size,
+                                                    "[3]",
+                                                ),
+                                            )
+                                            v3.VListItem(
+                                                title="4 Columns",
+                                                click=(
+                                                    self.view_manager.apply_size,
+                                                    "[4]",
+                                                ),
+                                            )
+                                            v3.VListItem(
+                                                title="6 Columns",
+                                                click=(
+                                                    self.view_manager.apply_size,
+                                                    "[6]",
+                                                ),
+                                            )
 
                             # Crop selection
                             with v3.VToolbar(
@@ -688,6 +794,93 @@ class EAMApp(TrameApp):
     # Methods connected to UI
     # -------------------------------------------------------------------------
 
+    @trigger("download_state")
+    def download_state(self):
+        active_variables = self.selected_variables
+        state_content = {}
+        state_content["files"] = {
+            "simulation": self.file_browser.get("data_simulation"),
+            "connectivity": self.file_browser.get("data_connectivity"),
+        }
+        state_content["variables-selection"] = self.state.variables_selected
+        state_content["layout"] = {
+            "aspect-ratio": self.state.aspect_ratio,
+            "grouped": self.state.layout_grouped,
+            "active": self.state.active_layout,
+            "tools": self.state.active_tools,
+            "help": not self.state.compact_drawer,
+        }
+        state_content["data-selection"] = {
+            k: self.state[k]
+            for k in [
+                "time_idx",
+                "midpoint_idx",
+                "interface_idx",
+                "crop_longitude",
+                "crop_latitude",
+                "projection",
+            ]
+        }
+        views_to_export = state_content["views"] = []
+        for view_type, var_names in active_variables.items():
+            for var_name in var_names:
+                config = self.view_manager.get_view(var_name, view_type).config
+                views_to_export.append(
+                    {
+                        "type": view_type,
+                        "name": var_name,
+                        "config": {
+                            "preset": config.preset,
+                            "invert": config.invert,
+                            "use_log_scale": config.use_log_scale,
+                            "color_range": config.color_range,
+                            "override_range": config.override_range,
+                            "order": config.order,
+                            "size": config.size,
+                        },
+                    }
+                )
+
+        return json.dumps(state_content, indent=2)
+
+    @change("upload_state_file")
+    def _on_import_state(self, upload_state_file, **_):
+        if upload_state_file is None:
+            return
+
+        file_proxy = file_upload.ClientFile(upload_state_file)
+        state_content = json.loads(file_proxy.content)
+        asynchronous.create_task(self.import_state(state_content))
+
+    @controller.set("import_state")
+    async def import_state(self, state_content):
+        # Files
+        self.file_browser.set_data_simulation(state_content["files"]["simulation"])
+        self.file_browser.set_data_connectivity(state_content["files"]["connectivity"])
+        await self.data_loading_open(
+            self.file_browser.get("data_simulation"),
+            self.file_browser.get("data_connectivity"),
+        )
+
+        # Load variables
+        self.state.variables_selected = state_content["variables-selection"]
+        self.state.update(state_content["data-selection"])
+        self.data_load_variables()
+
+        # Update view states
+        for view_state in state_content["views"]:
+            view_type = view_state["type"]
+            var_name = view_state["name"]
+            config = self.view_manager.get_view(var_name, view_type).config
+            config.update(**view_state["config"])
+
+        # Update layout
+        self.state.aspect_ratio = state_content["layout"]["aspect-ratio"]
+        self.state.layout_grouped = state_content["layout"]["grouped"]
+        self.state.active_layout = state_content["layout"]["active"]
+        self.state.active_tools = state_content["layout"]["tools"]
+        self.state.compact_drawer = not state_content["layout"]["help"]
+
     def fake_busy(self):
         time.sleep(3)
 
@@ -785,9 +978,10 @@ class EAMApp(TrameApp):
     def _on_dirty_variable_selection(self, **_):
         self.state.variables_loaded = False
 
-    @change("col_mode")
-    def _on_layout_refresh(self, **_):
+    @change("layout_grouped")
+    def _on_layout_change(self, **_):
         vars_to_show = self.selected_variables
+
         if any(vars_to_show.values()):
             self.view_manager.build_auto_layout(vars_to_show)
 
@@ -835,6 +1029,8 @@ class EAMApp(TrameApp):
         self.source.UpdateProjection(projection[0])
         self.source.UpdateTimeStep(time_idx)
         self.source.UpdatePipeline(time_value)
+
+        self.view_manager.update_color_range()
         self.view_manager.render()
 
         # Update avg computation
