@@ -15,6 +15,7 @@ from quickview.pipeline import EAMVisSource
 from quickview.assets import ASSETS
 from quickview.view_manager2 import ViewManager
 from quickview.components.file_browser import ParaViewFileBrowser
+from quickview.components.doc import LandingPage
 from quickview.utils import compute
 from quickview import module as qv_module
 
@@ -576,7 +577,7 @@ class EAMApp(TrameApp):
                             # Fixed overlay for toolbars
                             with html.Div(
                                 style=(
-                                    "`position:fixed;top:0;width:calc(100vw - ${compact_drawer ? '55' : '219'}px);z-index:1;`",
+                                    "`position:fixed;top:0;width:${Math.floor(main_size?.size?.width || 0)}px;z-index:1;`",
                                 ),
                             ):
                                 # Layout control toolbar
@@ -872,7 +873,11 @@ class EAMApp(TrameApp):
                                             click="animation_play = !animation_play",
                                         )
 
+                            # View of all the variables
                             client.ServerTemplate(name=("active_layout", "auto_layout"))
+
+                            with html.Div(v_if="!variables_selected.length"):
+                                LandingPage()
 
     # -------------------------------------------------------------------------
     # Derived properties
