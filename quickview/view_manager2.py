@@ -484,7 +484,6 @@ class ViewManager(TrameComponent):
 
     @controller.set("swap_order")
     def swap_order(self, variable_a, variable_b):
-        print("swap_order", variable_a, variable_b)
         config_a = self._active_configs[variable_a]
         config_b = self._active_configs[variable_b]
         config_a.order, config_b.order = config_b.order, config_a.order

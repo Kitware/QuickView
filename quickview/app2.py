@@ -8,7 +8,7 @@ from pathlib import Path
 from trame.app import TrameApp, asynchronous, file_upload
 from trame.ui.vuetify3 import VAppLayout
 from trame.widgets import vuetify3 as v3, client, html, dataclass
-from trame.decorators import controller, change, trigger
+from trame.decorators import controller, change, trigger, life_cycle
 
 from quickview import __version__ as quickview_version
 from quickview.pipeline import EAMVisSource
@@ -16,7 +16,7 @@ from quickview.assets import ASSETS
 from quickview.view_manager2 import ViewManager
 from quickview.components.file_browser import ParaViewFileBrowser
 from quickview.components.doc import LandingPage
-from quickview.utils import compute
+from quickview.utils import compute, js
 from quickview import module as qv_module
 
 v3.enable_lab()
@@ -40,20 +40,6 @@ TRACK_ENTRIES = {
     "midpoints": {"title": "Layer Midpoints", "value": "midpoints"},
     "interfaces": {"title": "Layer Interfaces", "value": "interfaces"},
 }
-
-
-def js_var_count(name):
-    return f"variables_selected.filter((v) => v[0] === '{name[0]}').length"
-
-
-def js_var_remove(name):
-    return (
-        f"variables_selected = variables_selected.filter((v) => v[0] !== '{name[0]}')"
-    )
-
-
-def js_var_title(name):
-    return " ".join(["{{", js_var_count(name), "}}", name.capitalize()])
 
 
 # -----------------------------------------------------------------------------
@@ -151,6 +137,18 @@ class EAMApp(TrameApp):
 
         # GUI
         self._build_ui()
+
+    # -------------------------------------------------------------------------
+    # Tauri adapter
+    # -------------------------------------------------------------------------
+
+    @life_cycle.server_ready
+    def _tauri_ready(self, **_):
+        os.write(1, f"tauri-server-port={self.server.port}\n".encode())
+
+    @life_cycle.client_connected
+    def _tauri_show(self, **_):
+        os.write(1, "tauri-client-ready\n".encode())
 
     # -------------------------------------------------------------------------
     # UI definition
@@ -505,12 +503,12 @@ class EAMApp(TrameApp):
                                     ("midpoints", "warning"),
                                 ]:
                                     v3.VChip(
-                                        js_var_title(name),
+                                        js.var_title(name),
                                         color=color,
-                                        v_show=js_var_count(name),
+                                        v_show=js.var_count(name),
                                         size="small",
                                         closable=True,
-                                        click_close=js_var_remove(name),
+                                        click_close=js.var_remove(name),
                                     )
 
                                 v3.VSpacer()
