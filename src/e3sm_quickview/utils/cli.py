@@ -25,5 +25,11 @@ def configure_and_parse(parser):
         default=str(Path.cwd().resolve()),
         help="working directory (to store session data)",
     )
+    parser.add_argument(
+        "--user-home",
+        dest="user_home",
+        action="store_true",
+        help="Use user home as home for file browsing",
+    )
 
     return parser.parse_known_args()[0]

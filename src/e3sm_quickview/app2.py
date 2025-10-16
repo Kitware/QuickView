@@ -65,7 +65,7 @@ class EAMApp(TrameApp):
         self.file_browser = file_browser.ParaViewFileBrowser(
             self.server,
             prefix="pv_files",
-            home=args.workdir,  # can use current=
+            home=None if args.user_home else args.workdir,  # can use current=
             group="",
         )
 

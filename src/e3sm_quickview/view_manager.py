@@ -18,7 +18,9 @@ from typing import Dict, List, Optional
 
 from e3sm_quickview.utils.math import calculate_weighted_average
 from e3sm_quickview.utils.color import get_cached_colorbar_image
-from e3sm_quickview.utils.geometry import generate_annotations as generate_map_annotations
+from e3sm_quickview.utils.geometry import (
+    generate_annotations as generate_map_annotations,
+)
 
 # Constants for camera and display
 LABEL_OFFSET_FACTOR = 0.075  # Factor for offsetting labels from map edge
