@@ -3,7 +3,7 @@ import math
 from trame.app import TrameComponent
 from trame.ui.html import DivLayout
 from trame.widgets import paraview as pvw, vuetify3 as v3, client, html
-from trame.decorators import hot_reload, controller
+from trame.decorators import controller
 
 from trame_dataclass.core import StateDataModel
 
@@ -172,7 +172,6 @@ class VariableView(TrameComponent):
                 self.lut.RescaleTransferFunction(*data_range)
         self.render()
 
-    @hot_reload
     def _build_ui(self):
         with DivLayout(
             self.server, template_name=self.name, connect_parent=False, classes="h-100"
@@ -399,7 +398,7 @@ class VariableView(TrameComponent):
                             classes="text-caption px-2 text-no-wrap",
                         )
                         with html.Div(
-                            classes="overflow-hidden rounded", style="height:70%;"
+                            classes="overflow-hidden rounded w-100", style="height:70%;"
                         ):
                             html.Img(
                                 src=("config.preset_img",),
@@ -509,7 +508,6 @@ class ViewManager(TrameComponent):
             for config in self._active_configs.values():
                 config.size = COL_SIZE_LOOKUP[n_cols]
 
-    @hot_reload
     def build_auto_layout(self, variables=None):
         if variables is None:
             variables = self._last_vars
