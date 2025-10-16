@@ -247,14 +247,6 @@ class EAMApp(TrameApp):
         else:
             self.update_state_from_config(initstate)
 
-    @property
-    def state(self):
-        return self.server.state
-
-    @property
-    def ctrl(self):
-        return self.server.controller
-
     @life_cycle.server_ready
     def _tauri_ready(self, **_):
         os.write(1, f"tauri-server-port={self.server.port}\n".encode())
@@ -476,6 +468,10 @@ class EAMApp(TrameApp):
             f_intf = self.interface_vars_state  # Use the full state array
             if len(v_intf) == len(f_intf):  # Ensure arrays are same length
                 intf = v_intf[f_intf].tolist()
+
+        print("Load surf", surf)
+        print("Load mid", mid)
+        print("Load intf", intf)
         self.source.LoadVariables(surf, mid, intf)
 
         vars = surf + mid + intf

@@ -9,7 +9,7 @@ from quickview.pipeline import EAMVisSource
 from quickview.interface import EAMApp
 
 
-def serve():
+def main():
     parser = argparse.ArgumentParser(
         prog="eamapp.py", description="Trame based app for visualizing EAM data"
     )
@@ -57,4 +57,4 @@ def serve():
 
 
 if __name__ == "__main__":
-    serve()
+    main()
