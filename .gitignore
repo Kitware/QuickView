@@ -3,4 +3,4 @@ __pycache__
 build
 server.spec
 CLAUDE.md
-quickview.egg-info/
+*.egg-info

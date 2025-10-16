@@ -26,9 +26,9 @@ jobs:
       - name: Verify LFS files
         run: |
           echo "Checking LFS files..."
-          ls -la quickview/data/
-          file quickview/data/globe.vtk
-          file quickview/data/connectivity.nc
+          ls -la src/e3sm_quickview/data/
+          file src/e3sm_quickview/data/globe.vtk
+          file src/e3sm_quickview/data/connectivity.nc
           echo "LFS file check complete"
 
       - name: Get version for tagging
@@ -51,14 +51,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install .  # Assumes installable via setup.py or pyproject.toml
           # Now we can read the version
-          VERSION=$(python -c "from quickview import __version__; print(__version__)")
+          VERSION=$(python -c "from e3sm_quickview import __version__; print(__version__)")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Found version: $VERSION"
         shell: bash -l {0}
       - name: Package using PyInstaller
         run: |
-          chmod +x scripts/setup_tauri.sh
-          ./scripts/setup_tauri.sh
+          chmod +x scripts/setup_tauri2.sh
+          ./scripts/setup_tauri2.sh
         shell: bash -l {0}
       - name: setup node
         uses: actions/setup-node@v4

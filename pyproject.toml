@@ -1,28 +1,15 @@
 [project]
-name = "quickview"
+name = "e3sm-quickview"
 version = "1.0.2"
 description = "An application to explore/analyze data for atmosphere component for E3SM"
 authors = [
     {name = "Kitware Inc."},
 ]
-dependencies = [
-    "trame>=3.6",
-    "trame-vtk>=2.6",
-    "trame-vuetify>=2.4",
-    "trame-components>=2.3.2",
-    "trame-grid-layout>=1.0.3",
-    "trame-tauri>=0.6.2",
-    "pyproj>=3.6.1",
-    "netCDF4>=1.6.5",
-    "pyinstaller",
-    "trame-dataclass",
-]
-requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "Apache Software License"}
 keywords = ["Python", "Interactive", "Web", "Application", "Framework"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
@@ -32,20 +19,50 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
+requires-python = ">=3.10"
 
-[tool.setuptools.package-data]
-quickview = [
-  "presets/**",
-  "data/**"
+dependencies = [
+    "trame>=3.12",
+    "trame-vtk>=2.10",
+    "trame-vuetify>=3.1",
+    "pyproj>=3.6.1",
+    "netCDF4>=1.6.5",
+    "trame-dataclass>=1.2",
+]
+
+[project.optional-dependencies]
+tauri = [
+    "pyinstaller",
+]
+vue2 = [
+    "trame-grid-layout>=1.0.3",
+    "trame-tauri>=0.6.2",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+  "/src/e3sm_quickview/**/*.py",
+  "/src/e3sm_quickview/presets/**",
+  "/src/e3sm_quickview/data/**",
+  "/src/e3sm_quickview/assets/**",
+  "/src/e3sm_quickview/module/**",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/e3sm_quickview",
 ]
 
 [project.scripts]
-quickview = "quickview.app:main"
-quickview2 = "quickview.app2:main"
+quickview-vue2 = "e3sm_quickview.app:main"
+quickview = "e3sm_quickview.app2:main"
 
 [tool.ruff.lint.per-file-ignores]
 # Ignore star import issues in ParaView plugins
-"quickview/plugins/*.py" = ["F403", "F405"]
-"quickview/pipeline.py" = ["F821"]  # Plugin classes loaded dynamically
+"e3sm_quickview/plugins/*.py" = ["F403", "F405"]
+"e3sm_quickview/pipeline.py" = ["F821"]  # Plugin classes loaded dynamically

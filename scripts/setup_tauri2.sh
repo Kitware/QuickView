@@ -17,14 +17,14 @@ python -m PyInstaller --clean --noconfirm \
         --collect-all pyproj \
         --collect-all netCDF4 \
         --collect-all paraview \
-        --collect-all quickview \
+        --collect-all e3sm_quickview \
         --hidden-import pkgutil \
         --add-binary="$(which pvpython):."  \
-        quickview/app2.py
+        src/e3sm_quickview/app2.py
 
 # Generate trame www + quickview
 python -m trame.tools.www --output ./src-tauri/www
-python -m trame.tools.www --output ./src-tauri/www quickview.module
+python -m trame.tools.www --output ./src-tauri/www e3sm_quickview.module
 
 # Precompile install to speedup start (maybe?)
 ./src-tauri/server/server --timeout 1 --server
