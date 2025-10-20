@@ -6,8 +6,8 @@
 use tauri::api::process::{Command, CommandEvent};
 use tauri::Manager;
 use std::collections::HashMap;
-use std::time::Duration;
-use async_std::task;
+// use std::time::Duration;
+// use async_std::task;
 
 fn main() {
   tauri::Builder::default()
@@ -106,7 +106,9 @@ fn main() {
                 let _ = main_window.eval(&navigation_script);
               }
               if line.contains("tauri-client-ready") {
-                task::sleep(Duration::from_secs(2)).await;
+                // Skip waiting as the loading takes enough time
+                // for us to see the loading screen
+                // task::sleep(Duration::from_secs(2)).await;
 
                 // Apply final DPI settings before showing main window
                 #[cfg(target_os = "macos")]
