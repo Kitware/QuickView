@@ -46,6 +46,8 @@ class ToolResetCamera(Tool):
             title="Reset camera",
             description="Recenter the visualizations to the full data.",
         )
+        with self, v3.Template(v_slot_append=True):
+            v3.VHotkey(keys="r", variant="contained", inline=True)
 
 
 class ToolStateImportExport(Tool):
@@ -73,6 +75,8 @@ class ToolLayoutManagement(Tool):
             title="Layout management",
             description="Toggle layout toolbar for adjusting aspect-ratio, width and grouping options.",
         )
+        with self, v3.Template(v_slot_append=True):
+            v3.VHotkey(keys="a", variant="contained", inline=True)
 
 
 class ToolCropping(Tool):
@@ -82,6 +86,8 @@ class ToolCropping(Tool):
             title="Lat/Long cropping",
             description="Toggle cropping toolbar for adjusting spacial bounds.",
         )
+        with self, v3.Template(v_slot_append=True):
+            v3.VHotkey(keys="s", variant="contained", inline=True)
 
 
 class ToolDataSelection(Tool):
@@ -91,6 +97,8 @@ class ToolDataSelection(Tool):
             title="Slice selection",
             description="Toggle data selection toolbar for selecting a given layer, midpoint or time.",
         )
+        with self, v3.Template(v_slot_append=True):
+            v3.VHotkey(keys="d", variant="contained", inline=True)
 
 
 class ToolAnimation(Tool):
@@ -100,6 +108,8 @@ class ToolAnimation(Tool):
             title="Animation controls",
             description="Toggle animation toolbar.",
         )
+        with self, v3.Template(v_slot_append=True):
+            v3.VHotkey(keys="f", variant="contained", inline=True)
 
 
 # -----------------------------------------------------------------------------
@@ -117,6 +127,28 @@ class Title(html.P):
 class Paragraph(html.P):
     def __init__(self, content):
         super().__init__(content, classes="mt-4 mb-6 text-body-1")
+
+
+class Link(html.A):
+    def __init__(self, text, url):
+        super().__init__(
+            text,
+            classes="text-primary text-decoration-none",
+            href=url,
+            target="_blank",
+            connect_parent=False,
+        )
+
+    def __str__(self):
+        return self.html
+
+
+class Bold(html.B):
+    def __init__(self, text):
+        super().__init__(text, classes="text-medium-emphasis", connect_parent=False)
+
+    def __str__(self):
+        return self.html
 
 
 # -----------------------------------------------------------------------------
@@ -137,13 +169,13 @@ class LandingPage(v3.VContainer):
                     target="_blank",
                 )
 
-            Paragraph("""
-                <b class="text-medium-emphasis">EAM QuickView</b> is an open-source, interactive visualization
+            Paragraph(f"""
+                {Bold("EAM QuickView")} is an open-source, interactive visualization
                 tool designed for scientists working with the atmospheric component
-                of the <a class="text-primary text-decoration-none" href="https://e3sm.org/" target="_blank">Energy Exascale Earth System Model (E3SM)</a>,
+                of the {Link("Energy Exascale Earth System Model (E3SM)", "https://e3sm.org/")},
                 known as the E3SM Atmosphere Model (EAM). 
-                Its Python- and <a class="text-primary text-decoration-none" href="https://www.kitware.com/trame/" target="_blank">Trame</a>-based
-                Graphical User Interface (GUI) provides intuitive access to <a class="text-primary text-decoration-none" href="https://www.paraview.org/" target="_blank">ParaView's</a> powerful analysis
+                Its Python- and {Link("Trame", "https://www.kitware.com/trame/")}-based
+                Graphical User Interface (GUI) provides intuitive access to {Link("ParaView's", "https://www.paraview.org/")} powerful analysis
                 and visualization capabilities, without the steep learning curve.
             """)
 
@@ -167,6 +199,65 @@ class LandingPage(v3.VContainer):
                     ToolDataSelection()
                     ToolAnimation()
                     ToolStateImportExport()
+
+            Title("Keyboard shortcuts")
+
+            with v3.VRow():
+                with v3.VCol(cols=6):
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Reset Camera")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="r", variant="contained", inline=True)
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Toggle Layout management toolbar")
+                        v3.VSpacer(classes="mt-2")
+                        v3.VHotkey(keys="a", variant="contained", inline=True)
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Toggle Lat/Long cropping toolbar")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="s", variant="contained", inline=True)
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Toggle Slice selection toolbar")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="d", variant="contained", inline=True)
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Toggle Animation controls toolbar")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="f", variant="contained", inline=True)
+
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Toggle group layout")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="g", variant="contained", inline=True)
+
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Disable all toolbars and drawers")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="esc", variant="contained", inline=True)
+
+                with v3.VCol(cols=6):
+                    with v3.VRow(classes="ma-0 pb-2"):
+                        v3.VLabel("Apply size")
+
+                    with v3.VList(density="compact", classes="pa-0 ma-0"):
+                        with v3.VListItem(subtitle="1 column"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="1", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="2 columns"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="2", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="3 columns"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="3", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="4 columns"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="4", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="6 columns"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="6", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="Auto"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="0", variant="contained", inline=True)
 
             Title("Simulation Files")
 
