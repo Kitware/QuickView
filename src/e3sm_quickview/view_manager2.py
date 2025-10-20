@@ -11,6 +11,7 @@ from paraview import simple
 
 from e3sm_quickview.utils.color import get_cached_colorbar_image
 from e3sm_quickview.utils.color import COLORBAR_CACHE
+from e3sm_quickview.presets import COLOR_BLIND_SAFE
 
 
 def auto_size_to_col(size):
@@ -51,6 +52,7 @@ class ViewConfiguration(StateDataModel):
     preset: str = "Inferno (matplotlib)"
     preset_img: str
     invert: bool = False
+    color_blind: bool = False
     use_log_scale: bool = False
     color_range: list[float] = (0, 1)
     override_range: bool = False
@@ -366,6 +368,21 @@ class VariableView(TrameComponent):
                             with v3.VCard(style="max-width: 360px;"):
                                 with v3.VCardItem(classes="pb-0"):
                                     v3.VIconBtn(
+                                        raw_attrs=[
+                                            '''v-tooltip:bottom="config.color_blind ? 'Colorblind safe presets' : 'All color presets'"'''
+                                        ],
+                                        icon=(
+                                            "config.color_blind ? 'mdi-shield-check-outline' : 'mdi-palette'",
+                                        ),
+                                        click="config.color_blind = !config.color_blind",
+                                        size="small",
+                                        text="Colorblind safe",
+                                        variant="text",
+                                    )
+                                    v3.VIconBtn(
+                                        raw_attrs=[
+                                            '''v-tooltip:bottom="config.invert ? 'Inverted preset' : 'Normal preset'"'''
+                                        ],
                                         icon=(
                                             "config.invert ? 'mdi-invert-colors' : 'mdi-invert-colors-off'",
                                         ),
@@ -375,6 +392,9 @@ class VariableView(TrameComponent):
                                         variant="text",
                                     )
                                     v3.VIconBtn(
+                                        raw_attrs=[
+                                            '''v-tooltip:bottom="config.use_log_scale ? 'Use log scale' : 'Use linear scale'"'''
+                                        ],
                                         icon=(
                                             "config.use_log_scale ? 'mdi-math-log' : 'mdi-stairs'",
                                         ),
@@ -386,6 +406,9 @@ class VariableView(TrameComponent):
                                         variant="text",
                                     )
                                     v3.VIconBtn(
+                                        raw_attrs=[
+                                            '''v-tooltip:bottom="config.override_range ? 'Use custom range' : 'Use data range'"'''
+                                        ],
                                         icon=(
                                             "config.override_range ? 'mdi-arrow-expand-horizontal' : 'mdi-pencil'",
                                         ),
@@ -443,6 +466,7 @@ class VariableView(TrameComponent):
                                 with v3.VList(density="compact", max_height="40vh"):
                                     with v3.VListItem(
                                         v_for="url, name in (config.invert ? luts_inverted : luts_normal)",
+                                        v_show="!config.color_blind || safe_color[name]",
                                         key="name",
                                         subtitle=("name",),
                                         click=(
@@ -487,6 +511,7 @@ class ViewManager(TrameComponent):
 
         self.state.luts_normal = {k: v["normal"] for k, v in COLORBAR_CACHE.items()}
         self.state.luts_inverted = {k: v["inverted"] for k, v in COLORBAR_CACHE.items()}
+        self.state.safe_color = {name: True for name in COLOR_BLIND_SAFE}
 
     def refresh_ui(self, **_):
         for view in self._var2view.values():

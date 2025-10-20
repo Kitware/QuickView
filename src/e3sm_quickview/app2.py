@@ -167,7 +167,10 @@ class EAMApp(TrameApp):
                                 toolbars.Animation()
 
                             # View of all the variables
-                            client.ServerTemplate(name=("active_layout", "auto_layout"))
+                            client.ServerTemplate(
+                                name=("active_layout", "auto_layout"),
+                                v_if="variables_selected.length",
+                            )
 
                             # Show documentation when no variable selected
                             with html.Div(v_if="!variables_selected.length"):
