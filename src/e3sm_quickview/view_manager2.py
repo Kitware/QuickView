@@ -56,6 +56,8 @@ class ViewConfiguration(StateDataModel):
     override_range: bool = False
     order: int = 0
     size: int = 4
+    offset: int = 0
+    break_row: bool = False
     menu: bool = False
     swap_group: list[str]
 
@@ -207,6 +209,67 @@ class VariableView(TrameComponent):
                                         subtitle="Full Screen",
                                         click=f"active_layout = '{self.name}'",
                                     )
+                                    v3.VDivider()
+                                    with v3.VListItem(
+                                        subtitle="Line Break",
+                                        click="config.break_row = !config.break_row",
+                                    ):
+                                        with v3.Template(v_slot_append=True):
+                                            v3.VSwitch(
+                                                v_model="config.break_row",
+                                                hide_details=True,
+                                                density="compact",
+                                                color="primary",
+                                            )
+                                    with v3.VListItem(subtitle="Offset"):
+                                        v3.VBtn(
+                                            "0",
+                                            classes="text-none ml-2",
+                                            size="small",
+                                            variant="outined",
+                                            click="config.offset = 0",
+                                            active=("config.offset === 0",),
+                                        )
+                                        v3.VBtn(
+                                            "1",
+                                            classes="text-none ml-2",
+                                            size="small",
+                                            variant="outined",
+                                            click="config.offset = 1",
+                                            active=("config.offset === 1",),
+                                        )
+                                        v3.VBtn(
+                                            "2",
+                                            classes="text-none ml-2",
+                                            size="small",
+                                            variant="outined",
+                                            click="config.offset = 2",
+                                            active=("config.offset === 2",),
+                                        )
+                                        v3.VBtn(
+                                            "3",
+                                            classes="text-none ml-2",
+                                            size="small",
+                                            variant="outined",
+                                            click="config.offset = 3",
+                                            active=("config.offset === 3",),
+                                        )
+                                        v3.VBtn(
+                                            "4",
+                                            classes="text-none ml-2",
+                                            size="small",
+                                            variant="outined",
+                                            click="config.offset = 4",
+                                            active=("config.offset === 4",),
+                                        )
+                                        v3.VBtn(
+                                            "5",
+                                            classes="text-none ml-2",
+                                            size="small",
+                                            variant="outined",
+                                            click="config.offset = 5",
+                                            active=("config.offset === 5",),
+                                        )
                                     v3.VDivider()
 
                                     v3.VListItem(
@@ -539,7 +602,14 @@ class ViewManager(TrameComponent):
                                         [n for n in var_names if n != name]
                                     )
                                     with view.config.provide_as("config"):
+                                        v3.VCol(
+                                            v_if="config.break_row",
+                                            cols=12,
+                                            classes="pa-0",
+                                            style=("`order: ${config.order};`",),
+                                        )
                                         with v3.VCol(
+                                            offset=("config.offset * config.size",),
                                             cols=("config.size",),
                                             style=("`order: ${config.order};`",),
                                         ):
@@ -553,7 +623,14 @@ class ViewManager(TrameComponent):
                             view = self.get_view(name, var_type)
                             view.config.swap_group = [n for n in all_names if n != name]
                             with view.config.provide_as("config"):
+                                v3.VCol(
+                                    v_if="config.break_row",
+                                    cols=12,
+                                    classes="pa-0",
+                                    style=("`order: ${config.order};`",),
+                                )
                                 with v3.VCol(
+                                    offset=("config.offset * config.size",),
                                     cols=("config.size",),
                                     style=("`order: ${config.order};`",),
                                 ):
