@@ -461,6 +461,7 @@ class EAMApp(TrameApp):
 
     def toggle_toolbar(self, toolbar_name=None):
         if toolbar_name is None:
+            self.state.compact_drawer = True
             self.state.active_tools = []
             return
 
