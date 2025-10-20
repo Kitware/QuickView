@@ -71,7 +71,7 @@ fn main() {
 
       let (mut rx, _) = Command::new_sidecar("trame")
         .expect("failed to create sidecar")
-        .args(["--server", "--port", "0", "--timeout", "10", "--user-home"])
+        .args(["--server", "--port", "0", "--timeout", "10", "--user-home", "--no-http"])
         .envs(env)
         .spawn()
         .expect("Failed to spawn server");
