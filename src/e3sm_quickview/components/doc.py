@@ -37,6 +37,8 @@ class ToolFieldSelection(Tool):
                 Select the variables to visualize. You need to load files prior any field selection.
             """,
         )
+        with self, v3.Template(v_slot_append=True):
+            v3.VHotkey(keys="space", variant="contained", inline=True)
 
 
 class ToolResetCamera(Tool):
@@ -66,6 +68,10 @@ class ToolMapProjection(Tool):
             title="Map Projection",
             description="Select projection to use for the visualizations. (Cylindrical Equidistant, Robinson, Mollweide)",
         )
+        with self, v3.Template(v_slot_append=True):
+            v3.VHotkey(keys="i", variant="contained", inline=True)
+            v3.VHotkey(keys="o", variant="contained", inline=True)
+            v3.VHotkey(keys="p", variant="contained", inline=True)
 
 
 class ToolLayoutManagement(Tool):
@@ -208,6 +214,9 @@ class LandingPage(v3.VContainer):
                         v3.VLabel("Reset Camera")
                         v3.VSpacer()
                         v3.VHotkey(keys="r", variant="contained", inline=True)
+
+                    v3.VDivider(classes="mb-4")
+
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle Layout management toolbar")
                         v3.VSpacer(classes="mt-2")
@@ -225,10 +234,19 @@ class LandingPage(v3.VContainer):
                         v3.VSpacer()
                         v3.VHotkey(keys="f", variant="contained", inline=True)
 
+                    v3.VDivider(classes="mb-4")
+
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle group layout")
                         v3.VSpacer()
                         v3.VHotkey(keys="g", variant="contained", inline=True)
+
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Toggle variable selection drawer")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="space", variant="contained", inline=True)
+
+                    v3.VDivider(classes="mb-4")
 
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Disable all toolbars and drawers")
@@ -236,6 +254,22 @@ class LandingPage(v3.VContainer):
                         v3.VHotkey(keys="esc", variant="contained", inline=True)
 
                 with v3.VCol(cols=6):
+                    with v3.VRow(classes="ma-0 pb-2"):
+                        v3.VLabel("Projections")
+
+                    with v3.VList(density="compact", classes="pa-0 ma-0"):
+                        with v3.VListItem(subtitle="Cylindrical Equidistant"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="i", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="Robinson"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="o", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="Mollweide"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="p", variant="contained", inline=True)
+
+                    v3.VDivider(classes="my-4")
+
                     with v3.VRow(classes="ma-0 pb-2"):
                         v3.VLabel("Apply size")
 

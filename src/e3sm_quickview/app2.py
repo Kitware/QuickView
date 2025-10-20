@@ -121,8 +121,12 @@ class EAMApp(TrameApp):
                 ToolbarCrop=(self.toggle_toolbar, "['adjust-databounds']"),
                 ToolbarSelect=(self.toggle_toolbar, "['select-slice-time']"),
                 ToolbarAnimation=(self.toggle_toolbar, "['animation-controls']"),
+                ToggleVariableSelection=(self.toggle_toolbar, "['select-fields']"),
                 RemoveAllToolbars=(self.toggle_toolbar),
                 ToggleGroups="layout_grouped = !layout_grouped",
+                ProjectionEquidistant="projection = ['Cyl. Equidistant']",
+                ProjectionRobinson="projection = ['Robinson']",
+                ProjectionMollweide="projection = ['Mollweide']",
             ) as mt:
                 mt.bind(["r"], "ResetCamera")
                 mt.bind(["alt+0", "0"], "SizeAuto")
@@ -132,11 +136,18 @@ class EAMApp(TrameApp):
                 mt.bind(["alt+4", "4"], "Size4")
                 mt.bind(["alt+6", "6"], "Size6")
 
+                mt.bind("i", "ProjectionEquidistant")
+                mt.bind("o", "ProjectionRobinson")
+                mt.bind("p", "ProjectionMollweide")
+
                 mt.bind("a", "ToolbarLayout")
                 mt.bind("s", "ToolbarCrop")
                 mt.bind("d", "ToolbarSelect")
                 mt.bind("f", "ToolbarAnimation")
                 mt.bind("g", "ToggleGroups")
+
+                mt.bind("space", "ToggleVariableSelection")
+
                 mt.bind("esc", "RemoveAllToolbars")
 
             with v3.VLayout():
