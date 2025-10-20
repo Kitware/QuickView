@@ -7,7 +7,7 @@ from pathlib import Path
 
 from trame.app import TrameApp, asynchronous, file_upload
 from trame.ui.vuetify3 import VAppLayout
-from trame.widgets import vuetify3 as v3, client, html, dataclass
+from trame.widgets import vuetify3 as v3, client, html, dataclass, trame as tw
 from trame.decorators import controller, change, trigger, life_cycle
 
 from e3sm_quickview import module as qv_module
@@ -108,6 +108,37 @@ class EAMApp(TrameApp):
 
     def _build_ui(self, **_):
         with VAppLayout(self.server, fill_height=True) as self.ui:
+            # Keyboard shortcut
+            with tw.MouseTrap(
+                ResetCamera=self.view_manager.reset_camera,
+                SizeAuto=(self.view_manager.apply_size, "[0]"),
+                Size1=(self.view_manager.apply_size, "[1]"),
+                Size2=(self.view_manager.apply_size, "[2]"),
+                Size3=(self.view_manager.apply_size, "[3]"),
+                Size4=(self.view_manager.apply_size, "[4]"),
+                Size6=(self.view_manager.apply_size, "[6]"),
+                ToolbarLayout=(self.toggle_toolbar, "['adjust-layout']"),
+                ToolbarCrop=(self.toggle_toolbar, "['adjust-databounds']"),
+                ToolbarSelect=(self.toggle_toolbar, "['select-slice-time']"),
+                ToolbarAnimation=(self.toggle_toolbar, "['animation-controls']"),
+                RemoveAllToolbars=(self.toggle_toolbar),
+                ToggleGroups="layout_grouped = !layout_grouped",
+            ) as mt:
+                mt.bind(["r"], "ResetCamera")
+                mt.bind(["alt+0", "0"], "SizeAuto")
+                mt.bind(["alt+1", "1"], "Size1")
+                mt.bind(["alt+2", "2"], "Size2")
+                mt.bind(["alt+3", "3"], "Size3")
+                mt.bind(["alt+4", "4"], "Size4")
+                mt.bind(["alt+6", "6"], "Size6")
+
+                mt.bind("a", "ToolbarLayout")
+                mt.bind("s", "ToolbarCrop")
+                mt.bind("d", "ToolbarSelect")
+                mt.bind("f", "ToolbarAnimation")
+                mt.bind("g", "ToggleGroups")
+                mt.bind("esc", "RemoveAllToolbars")
+
             with v3.VLayout():
                 drawers.Tools(
                     reset_camera=self.view_manager.reset_camera,
@@ -427,6 +458,21 @@ class EAMApp(TrameApp):
         self.state.fields_avgs = compute.extract_avgs(
             data, self.selected_variable_names
         )
+
+    def toggle_toolbar(self, toolbar_name=None):
+        if toolbar_name is None:
+            self.state.active_tools = []
+            return
+
+        if toolbar_name in self.state.active_tools:
+            # remove
+            self.state.active_tools = [
+                n for n in self.state.active_tools if n != toolbar_name
+            ]
+        else:
+            # add
+            self.state.active_tools.append(toolbar_name)
+            self.state.dirty("active_tools")
 
 
 # -------------------------------------------------------------------------

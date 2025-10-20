@@ -28,6 +28,7 @@ dependencies = [
     "pyproj>=3.6.1",
     "netCDF4>=1.6.5",
     "trame-dataclass>=1.2",
+    "trame-components",
 ]
 
 [project.optional-dependencies]
