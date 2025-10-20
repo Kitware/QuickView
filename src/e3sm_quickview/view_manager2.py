@@ -535,9 +535,9 @@ class ViewManager(TrameComponent):
                             with v3.VRow(dense=True):
                                 for name in var_names:
                                     view = self.get_view(name, var_type)
-                                    view.config.swap_group = [
-                                        n for n in var_names if n != name
-                                    ]
+                                    view.config.swap_group = sorted(
+                                        [n for n in var_names if n != name]
+                                    )
                                     with view.config.provide_as("config"):
                                         with v3.VCol(
                                             cols=("config.size",),
