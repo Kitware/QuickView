@@ -12,7 +12,7 @@ Graphical User Interface (GUI) provides
 intuitive access to [ParaView](https://www.paraview.org/)'s 
 powerful analysis and visualization capabilities, without the steep learning curve.
 
-![Application](./QuickView-app.png)
+![Application](https://raw.githubusercontent.com/Kitware/QuickView/master/QuickView-app.png)
 
 ## Key Features
 
