@@ -13,6 +13,13 @@ DENSITY = {
     "animation-controls": "compact",
 }
 
+SIZES = {
+    "adjust-layout": 49,
+    "adjust-databounds": 65,
+    "select-slice-time": 65,
+    "animation-controls": 49,
+}
+
 VALUES = list(DENSITY.keys())
 
 DEFAULT_STYLES = {

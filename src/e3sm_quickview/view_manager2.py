@@ -183,8 +183,8 @@ class VariableView(TrameComponent):
             self.ui.root.classes = "h-100"
             with v3.VCard(
                 variant="tonal",
-                classes=(
-                    "active_layout !== 'auto_layout' ? 'h-100' : 'overflow-hidden'",
+                style=(
+                    "active_layout !== 'auto_layout' ? `height: calc(100% - ${top_padding}px;` : 'overflow-hidden'",
                 ),
                 tile=("active_layout !== 'auto_layout'",),
             ):
@@ -312,6 +312,12 @@ class VariableView(TrameComponent):
                                         ),
                                     )
 
+                    v3.VIcon(
+                        "mdi-lock-outline",
+                        size="x-small",
+                        v_show=("lock_views", False),
+                    )
+
                     v3.VSpacer()
                     html.Div(
                         "t = {{ time_idx }}",
@@ -344,6 +350,7 @@ class VariableView(TrameComponent):
                         {
                             aspectRatio: active_layout === 'auto_layout' ? aspect_ratio : null,
                             height: active_layout !== 'auto_layout' ? 'calc(100% - 2.4rem)' : null,
+                            pointerEvents: lock_views ? 'none': null,
                         }
                         """,
                     ),

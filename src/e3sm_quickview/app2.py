@@ -127,6 +127,7 @@ class EAMApp(TrameApp):
                 ProjectionEquidistant="projection = ['Cyl. Equidistant']",
                 ProjectionRobinson="projection = ['Robinson']",
                 ProjectionMollweide="projection = ['Mollweide']",
+                ToggleViewLock="lock_views = !lock_views",
             ) as mt:
                 mt.bind(["r"], "ResetCamera")
                 mt.bind(["alt+0", "0"], "SizeAuto")
@@ -146,7 +147,9 @@ class EAMApp(TrameApp):
                 mt.bind("f", "ToolbarAnimation")
                 mt.bind("g", "ToggleGroups")
 
-                mt.bind("space", "ToggleVariableSelection")
+                mt.bind("?", "ToggleVariableSelection")
+
+                mt.bind("space", "ToggleViewLock", stop_propagation=True)
 
                 mt.bind("esc", "RemoveAllToolbars")
 
@@ -163,12 +166,7 @@ class EAMApp(TrameApp):
                     with v3.VContainer(classes="h-100 pa-0", fluid=True):
                         with client.SizeObserver("main_size"):
                             # Take space to push content below the fixed overlay
-                            for value in toolbars.VALUES:
-                                v3.VToolbar(
-                                    v_show=js.is_active(value),
-                                    density=toolbars.DENSITY[value],
-                                    **toolbars.DEFAULT_STYLES,
-                                )
+                            html.Div(style=("`height: ${top_padding}px`",))
 
                             # Fixed overlay for toolbars
                             with html.Div(style=css.TOOLBARS_FIXED_OVERLAY):
@@ -431,6 +429,14 @@ class EAMApp(TrameApp):
             for _ in range(2):
                 await asyncio.sleep(0.1)
                 self.view_manager.reset_camera()
+
+    @change("active_tools")
+    def _on_toolbar_change(self, active_tools, **_):
+        top_padding = 0
+        for name in active_tools:
+            top_padding += toolbars.SIZES.get(name, 0)
+
+        self.state.top_padding = top_padding
 
     @change(
         "variables_loaded",

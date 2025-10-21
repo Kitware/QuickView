@@ -38,7 +38,7 @@ class ToolFieldSelection(Tool):
             """,
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="space", variant="contained", inline=True)
+            v3.VHotkey(keys="?", variant="contained", inline=True)
 
 
 class ToolResetCamera(Tool):
@@ -215,6 +215,11 @@ class LandingPage(v3.VContainer):
                         v3.VSpacer()
                         v3.VHotkey(keys="r", variant="contained", inline=True)
 
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Toggle view interaction lock")
+                        v3.VSpacer()
+                        v3.VHotkey(keys="space", variant="contained", inline=True)
+
                     v3.VDivider(classes="mb-4")
 
                     with v3.VRow(classes="ma-0 pb-4"):
@@ -244,7 +249,7 @@ class LandingPage(v3.VContainer):
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle variable selection drawer")
                         v3.VSpacer()
-                        v3.VHotkey(keys="space", variant="contained", inline=True)
+                        v3.VHotkey(keys="?", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 
