@@ -79,6 +79,7 @@ class VariableView(TrameComponent):
         self.view.UseColorPaletteForBackground = 0
         self.view.BackgroundColorMode = "Gradient"
         self.view.CameraParallelProjection = 1
+        self.view.Size = 0 # make the interactive widget non responsive
         self.representation = simple.Show(
             proxy=source.views["atmosphere_data"],
             view=self.view,
