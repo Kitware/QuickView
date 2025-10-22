@@ -50,16 +50,24 @@ class AppLogo(v3.VTooltip):
 # Clickable tools
 # -----------------------------------------------------------------------------
 class ActionButton(v3.VTooltip):
-    def __init__(self, compact, title, icon, click):
+    def __init__(self, compact, title, icon, click, keybinding=None):
         super().__init__(text=title, disabled=(f"!{compact}",))
         with self:
             with v3.Template(v_slot_activator="{ props }"):
-                v3.VListItem(
+                with v3.VListItem(
                     v_bind="props",
                     prepend_icon=icon,
                     title=(f"{compact} ? null : '{title}'",),
                     click=click,
-                )
+                ):
+                    if keybinding:
+                        with v3.Template(v_slot_append=True):
+                            v3.VHotkey(
+                                keys=keybinding,
+                                variant="contained",
+                                inline=True,
+                                classes="mt-n2",
+                            )
 
 
 class ResetCamera(ActionButton):
@@ -69,6 +77,7 @@ class ResetCamera(ActionButton):
             title="Reset camera",
             icon="mdi-crop-free",
             click=click,
+            keybinding="r",
         )
 
 
@@ -86,7 +95,7 @@ class ToggleHelp(ActionButton):
 # Toggle toolbar tools
 # -----------------------------------------------------------------------------
 class ToggleButton(v3.VTooltip):
-    def __init__(self, compact, title, icon, value, disabled=None):
+    def __init__(self, compact, title, icon, value, disabled=None, keybinding=None):
         super().__init__(text=title, disabled=(f"!{compact}",))
 
         add_on = {}
@@ -95,13 +104,21 @@ class ToggleButton(v3.VTooltip):
 
         with self:
             with v3.Template(v_slot_activator="{ props }"):
-                v3.VListItem(
+                with v3.VListItem(
                     v_bind="props",
                     prepend_icon=icon,
                     value=value,
                     title=(f"{compact} ? null : '{title}'",),
                     **add_on,
-                )
+                ):
+                    if keybinding:
+                        with v3.Template(v_slot_append=True):
+                            v3.VHotkey(
+                                keys=keybinding,
+                                variant="contained",
+                                inline=True,
+                                classes="mt-n2",
+                            )
 
 
 class LayoutManagement(ToggleButton):
@@ -111,6 +128,7 @@ class LayoutManagement(ToggleButton):
             title="Layout management",
             icon="mdi-collage",
             value="adjust-layout",
+            keybinding="l",
         )
 
 
@@ -132,6 +150,7 @@ class FieldSelection(ToggleButton):
             icon="mdi-list-status",
             value="select-fields",
             disabled="variables_listing.length === 0",
+            keybinding="v",
         )
 
 
@@ -142,6 +161,7 @@ class Cropping(ToggleButton):
             title="Lat/Long cropping",
             icon="mdi-crop",
             value="adjust-databounds",
+            keybinding="c",
         )
 
 
@@ -152,6 +172,7 @@ class DataSelection(ToggleButton):
             title="Slice selection",
             icon="mdi-tune-variant",
             value="select-slice-time",
+            keybinding="s",
         )
 
 
@@ -162,6 +183,7 @@ class Animation(ToggleButton):
             title="Animation controls",
             icon="mdi-movie-open-cog-outline",
             value="animation-controls",
+            keybinding="a",
         )
 
 
@@ -186,15 +208,29 @@ class MapProjection(v3.VTooltip):
                         location="end",
                         offset=10,
                     ):
-                        v3.VList(
+                        with v3.VList(
                             mandatory=True,
                             v_model_selected=(
                                 "projection",
                                 ["Cyl. Equidistant"],
                             ),
                             density="compact",
-                            items=("projections", self.options),
-                        )
+                            # items=("projections", self.options),
+                        ):
+                            for entry in self.options:
+                                with (
+                                    v3.VListItem(
+                                        title=entry.get("title"),
+                                        value=entry.get("value"),
+                                    ),
+                                    v3.Template(v_slot_append=True),
+                                ):
+                                    v3.VHotkey(
+                                        keys=entry.get("key"),
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-4 mn-2",
+                                    )
 
     @property
     def options(self):
@@ -202,14 +238,17 @@ class MapProjection(v3.VTooltip):
             {
                 "title": "Cylindrical Equidistant",
                 "value": "Cyl. Equidistant",
+                "key": "e",
             },
             {
                 "title": "Robinson",
                 "value": "Robinson",
+                "key": "b",
             },
             {
                 "title": "Mollweide",
                 "value": "Mollweide",
+                "key": "m",
             },
         ]
 
@@ -235,13 +274,17 @@ class StateImportExport(v3.VTooltip):
                     ):
                         with v3.VList(density="compact"):
                             v3.VListItem(
-                                title="Download state file",
+                                title=(
+                                    "is_tauri ? 'Save state file' : 'Download state file'",
+                                ),
                                 prepend_icon="mdi-file-download-outline",
                                 click=self.download_state,
                                 disabled=("!variables_loaded",),
                             )
                             v3.VListItem(
-                                title="Upload state file",
+                                title=(
+                                    "is_tauri ? 'Load state file' : 'Upload state file'",
+                                ),
                                 prepend_icon="mdi-file-upload-outline",
                                 click="utils.get('document').querySelector('#fileUpload').click()",
                             )

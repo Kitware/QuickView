@@ -279,6 +279,12 @@ class LandingPage(v3.VContainer):
                         v3.VLabel("Apply size")
 
                     with v3.VList(density="compact", classes="pa-0 ma-0"):
+                        with v3.VListItem(subtitle="Auto flow"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="=", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="Auto"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="0", variant="contained", inline=True)
                         with v3.VListItem(subtitle="1 column"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="1", variant="contained", inline=True)
@@ -294,12 +300,6 @@ class LandingPage(v3.VContainer):
                         with v3.VListItem(subtitle="6 columns"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="6", variant="contained", inline=True)
-                        with v3.VListItem(subtitle="Auto"):
-                            with v3.Template(v_slot_append="True"):
-                                v3.VHotkey(keys="0", variant="contained", inline=True)
-                        with v3.VListItem(subtitle="Auto flow"):
-                            with v3.Template(v_slot_append="True"):
-                                v3.VHotkey(keys="=", variant="contained", inline=True)
 
             Title("Simulation Files")
 

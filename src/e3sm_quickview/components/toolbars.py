@@ -2,7 +2,7 @@ import asyncio
 
 from trame.app import asynchronous
 from trame.decorators import change
-from trame.widgets import vuetify3 as v3
+from trame.widgets import html, vuetify3 as v3
 
 from e3sm_quickview.utils import js, constants
 
@@ -56,7 +56,15 @@ class Layout(v3.VToolbar):
                 style="max-width: 400px;",
             )
             v3.VSpacer()
+
+            # ------------------------------------------------------------
+            # Add tooltip for keyboard shortcut??
+            # ------------------------------------------------------------
+            # with v3.VTooltip(location="bottom"):
+            #    with v3.Template(v_slot_activator="{ props }"):
+            v3.VHotkey(keys="g", variant="contained", classes="mr-1")
             v3.VCheckbox(
+                # v_bind="props",
                 v_model=("layout_grouped", True),
                 label=("layout_grouped ? 'Grouped' : 'Uniform'",),
                 hide_details=True,
@@ -65,6 +73,9 @@ class Layout(v3.VToolbar):
                 true_icon="mdi-focus-field",
                 density="compact",
             )
+            # with html.Span("Keyboard shortcut"):
+            #     v3.VHotkey(theme="dark", keys="g", variant="contained", inline=True, classes="ml-2 mt-n2")
+            # ------------------------------------------------------------
 
             with v3.VBtn(
                 "Size",
@@ -74,48 +85,104 @@ class Layout(v3.VToolbar):
             ):
                 with v3.VMenu(activator="parent"):
                     with v3.VList(density="compact"):
-                        v3.VListItem(
+                        with v3.VListItem(
+                            title="Auto flow",
+                            click=(
+                                apply_size,
+                                "['flow']",
+                            ),
+                        ):
+                            with v3.Template(v_slot_append=True):
+                                v3.VHotkey(
+                                    keys="=",
+                                    variant="contained",
+                                    inline=True,
+                                    classes="ml-6 mt-n1",
+                                )
+                        with v3.VListItem(
                             title="Auto",
                             click=(
                                 apply_size,
                                 "[0]",
                             ),
-                        )
-                        v3.VListItem(
+                        ):
+                            with v3.Template(v_slot_append=True):
+                                v3.VHotkey(
+                                    keys="0",
+                                    variant="contained",
+                                    inline=True,
+                                    classes="ml-6 mt-n1",
+                                )
+                        with v3.VListItem(
                             title="Full Width",
                             click=(
                                 apply_size,
                                 "[1]",
                             ),
-                        )
-                        v3.VListItem(
+                        ):
+                            with v3.Template(v_slot_append=True):
+                                v3.VHotkey(
+                                    keys="1",
+                                    variant="contained",
+                                    inline=True,
+                                    classes="ml-6 mt-n1",
+                                )
+                        with v3.VListItem(
                             title="2 Columns",
                             click=(
                                 apply_size,
                                 "[2]",
                             ),
-                        )
-                        v3.VListItem(
+                        ):
+                            with v3.Template(v_slot_append=True):
+                                v3.VHotkey(
+                                    keys="2",
+                                    variant="contained",
+                                    inline=True,
+                                    classes="ml-6 mt-n1",
+                                )
+                        with v3.VListItem(
                             title="3 Columns",
                             click=(
                                 apply_size,
                                 "[3]",
                             ),
-                        )
-                        v3.VListItem(
+                        ):
+                            with v3.Template(v_slot_append=True):
+                                v3.VHotkey(
+                                    keys="3",
+                                    variant="contained",
+                                    inline=True,
+                                    classes="ml-6 mt-n1",
+                                )
+                        with v3.VListItem(
                             title="4 Columns",
                             click=(
                                 apply_size,
                                 "[4]",
                             ),
-                        )
-                        v3.VListItem(
+                        ):
+                            with v3.Template(v_slot_append=True):
+                                v3.VHotkey(
+                                    keys="4",
+                                    variant="contained",
+                                    inline=True,
+                                    classes="ml-6 mt-n1",
+                                )
+                        with v3.VListItem(
                             title="6 Columns",
                             click=(
                                 apply_size,
                                 "[6]",
                             ),
-                        )
+                        ):
+                            with v3.Template(v_slot_append=True):
+                                v3.VHotkey(
+                                    keys="6",
+                                    variant="contained",
+                                    inline=True,
+                                    classes="ml-6 mt-n1",
+                                )
 
 
 class Cropping(v3.VToolbar):

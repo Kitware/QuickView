@@ -1,6 +1,6 @@
-NAV_BAR_TOP = ("`position:fixed;top:0;width:${compact_drawer ? '55' : '219'}px;`",)
+NAV_BAR_TOP = ("`position:fixed;top:0;width:${compact_drawer ? '55' : '250'}px;`",)
 NAV_BAR_BOTTOM = (
-    "`position:fixed;bottom:0;width:${compact_drawer ? '55' : '219'}px;`",
+    "`position:fixed;bottom:0;width:${compact_drawer ? '55' : '250'}px;`",
 )
 
 TOOLBARS_FIXED_OVERLAY = (

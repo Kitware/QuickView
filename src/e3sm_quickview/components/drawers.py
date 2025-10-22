@@ -11,7 +11,7 @@ class Tools(v3.VNavigationDrawer):
         super().__init__(
             permanent=True,
             rail=("compact_drawer", True),
-            width=220,
+            width=253,
             style="transform: none;",
         )
 
