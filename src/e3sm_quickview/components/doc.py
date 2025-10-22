@@ -38,7 +38,7 @@ class ToolFieldSelection(Tool):
             """,
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="?", variant="contained", inline=True)
+            v3.VHotkey(keys="v", variant="contained", inline=True)
 
 
 class ToolResetCamera(Tool):
@@ -69,9 +69,9 @@ class ToolMapProjection(Tool):
             description="Select projection to use for the visualizations. (Cylindrical Equidistant, Robinson, Mollweide)",
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="i", variant="contained", inline=True)
-            v3.VHotkey(keys="o", variant="contained", inline=True)
-            v3.VHotkey(keys="p", variant="contained", inline=True)
+            v3.VHotkey(keys="e", variant="contained", inline=True)
+            v3.VHotkey(keys="b", variant="contained", inline=True)
+            v3.VHotkey(keys="m", variant="contained", inline=True)
 
 
 class ToolLayoutManagement(Tool):
@@ -82,7 +82,7 @@ class ToolLayoutManagement(Tool):
             description="Toggle layout toolbar for adjusting aspect-ratio, width and grouping options.",
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="a", variant="contained", inline=True)
+            v3.VHotkey(keys="l", variant="contained", inline=True)
 
 
 class ToolCropping(Tool):
@@ -93,7 +93,7 @@ class ToolCropping(Tool):
             description="Toggle cropping toolbar for adjusting spacial bounds.",
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="s", variant="contained", inline=True)
+            v3.VHotkey(keys="c", variant="contained", inline=True)
 
 
 class ToolDataSelection(Tool):
@@ -104,7 +104,7 @@ class ToolDataSelection(Tool):
             description="Toggle data selection toolbar for selecting a given layer, midpoint or time.",
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="d", variant="contained", inline=True)
+            v3.VHotkey(keys="s", variant="contained", inline=True)
 
 
 class ToolAnimation(Tool):
@@ -115,7 +115,7 @@ class ToolAnimation(Tool):
             description="Toggle animation toolbar.",
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="f", variant="contained", inline=True)
+            v3.VHotkey(keys="a", variant="contained", inline=True)
 
 
 # -----------------------------------------------------------------------------
@@ -225,19 +225,19 @@ class LandingPage(v3.VContainer):
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle Layout management toolbar")
                         v3.VSpacer(classes="mt-2")
-                        v3.VHotkey(keys="a", variant="contained", inline=True)
+                        v3.VHotkey(keys="l", variant="contained", inline=True)
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle Lat/Long cropping toolbar")
                         v3.VSpacer()
-                        v3.VHotkey(keys="s", variant="contained", inline=True)
+                        v3.VHotkey(keys="c", variant="contained", inline=True)
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle Slice selection toolbar")
                         v3.VSpacer()
-                        v3.VHotkey(keys="d", variant="contained", inline=True)
+                        v3.VHotkey(keys="s", variant="contained", inline=True)
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle Animation controls toolbar")
                         v3.VSpacer()
-                        v3.VHotkey(keys="f", variant="contained", inline=True)
+                        v3.VHotkey(keys="a", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 
@@ -249,7 +249,7 @@ class LandingPage(v3.VContainer):
                     with v3.VRow(classes="ma-0 pb-4"):
                         v3.VLabel("Toggle variable selection drawer")
                         v3.VSpacer()
-                        v3.VHotkey(keys="?", variant="contained", inline=True)
+                        v3.VHotkey(keys="v", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 
@@ -265,13 +265,13 @@ class LandingPage(v3.VContainer):
                     with v3.VList(density="compact", classes="pa-0 ma-0"):
                         with v3.VListItem(subtitle="Cylindrical Equidistant"):
                             with v3.Template(v_slot_append="True"):
-                                v3.VHotkey(keys="i", variant="contained", inline=True)
+                                v3.VHotkey(keys="e", variant="contained", inline=True)
                         with v3.VListItem(subtitle="Robinson"):
                             with v3.Template(v_slot_append="True"):
-                                v3.VHotkey(keys="o", variant="contained", inline=True)
+                                v3.VHotkey(keys="b", variant="contained", inline=True)
                         with v3.VListItem(subtitle="Mollweide"):
                             with v3.Template(v_slot_append="True"):
-                                v3.VHotkey(keys="p", variant="contained", inline=True)
+                                v3.VHotkey(keys="m", variant="contained", inline=True)
 
                     v3.VDivider(classes="my-4")
 
@@ -291,6 +291,9 @@ class LandingPage(v3.VContainer):
                         with v3.VListItem(subtitle="4 columns"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="4", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="5 columns"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="5", variant="contained", inline=True)
                         with v3.VListItem(subtitle="6 columns"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="6", variant="contained", inline=True)

@@ -29,6 +29,7 @@ dependencies = [
     "netCDF4>=1.6.5",
     "trame-dataclass>=1.2",
     "trame-components",
+    "trame-tauri>=0.6.2",
 ]
 
 [project.optional-dependencies]
@@ -37,7 +38,6 @@ tauri = [
 ]
 vue2 = [
     "trame-grid-layout>=1.0.3",
-    "trame-tauri>=0.6.2",
 ]
 
 

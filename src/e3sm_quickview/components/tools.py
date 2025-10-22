@@ -1,4 +1,6 @@
+from pathlib import Path
 from trame.widgets import vuetify3 as v3
+from trame.app import asynchronous
 
 from e3sm_quickview import __version__ as quickview_version
 from e3sm_quickview.assets import ASSETS
@@ -218,6 +220,7 @@ class StateImportExport(v3.VTooltip):
             text=title,
             disabled=(f"!{compact}",),
         )
+        self._pending_task = None
         with self:
             with v3.Template(v_slot_activator="{ props }"):
                 with v3.VListItem(
@@ -234,7 +237,7 @@ class StateImportExport(v3.VTooltip):
                             v3.VListItem(
                                 title="Download state file",
                                 prepend_icon="mdi-file-download-outline",
-                                click="show_export_dialog=true",
+                                click=self.download_state,
                                 disabled=("!variables_loaded",),
                             )
                             v3.VListItem(
@@ -251,3 +254,16 @@ class StateImportExport(v3.VTooltip):
                         prepend_icon=False,
                         style="position: absolute;left:-1000px;width:1px;",
                     )
+
+    def download_state(self):
+        if not self.state.is_tauri:
+            self.state.show_export_dialog = True
+            return
+
+        self._pending_task = asynchronous.create_task(self._tauri_save())
+
+    async def _tauri_save(self):
+        export_path = await self.ctrl.save("Export State")
+        txt_content = self.ctrl.download_state()
+        Path(export_path).write_text(txt_content)
+        self._pending_task = None

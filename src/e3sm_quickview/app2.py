@@ -7,7 +7,7 @@ from pathlib import Path
 
 from trame.app import TrameApp, asynchronous, file_upload
 from trame.ui.vuetify3 import VAppLayout
-from trame.widgets import vuetify3 as v3, client, html, dataclass, trame as tw
+from trame.widgets import vuetify3 as v3, client, html, dataclass, trame as tw, tauri
 from trame.decorators import controller, change, trigger, life_cycle
 
 from e3sm_quickview import module as qv_module
@@ -37,6 +37,7 @@ class EAMApp(TrameApp):
             {
                 "trame__title": "QuickView",
                 "trame__favicon": ASSETS.icon,
+                "is_tauri": False,
                 "animation_play": False,
                 # All available variables
                 "variables_listing": [],
@@ -116,6 +117,7 @@ class EAMApp(TrameApp):
                 Size2=(self.view_manager.apply_size, "[2]"),
                 Size3=(self.view_manager.apply_size, "[3]"),
                 Size4=(self.view_manager.apply_size, "[4]"),
+                Size5=(self.view_manager.apply_size, "[5]"),
                 Size6=(self.view_manager.apply_size, "[6]"),
                 ToolbarLayout=(self.toggle_toolbar, "['adjust-layout']"),
                 ToolbarCrop=(self.toggle_toolbar, "['adjust-databounds']"),
@@ -135,23 +137,29 @@ class EAMApp(TrameApp):
                 mt.bind(["alt+2", "2"], "Size2")
                 mt.bind(["alt+3", "3"], "Size3")
                 mt.bind(["alt+4", "4"], "Size4")
+                mt.bind(["alt+5", "5"], "Size5")
                 mt.bind(["alt+6", "6"], "Size6")
 
-                mt.bind("i", "ProjectionEquidistant")
-                mt.bind("o", "ProjectionRobinson")
-                mt.bind("p", "ProjectionMollweide")
+                mt.bind("e", "ProjectionEquidistant")
+                mt.bind("b", "ProjectionRobinson")
+                mt.bind("m", "ProjectionMollweide")
 
-                mt.bind("a", "ToolbarLayout")
-                mt.bind("s", "ToolbarCrop")
-                mt.bind("d", "ToolbarSelect")
-                mt.bind("f", "ToolbarAnimation")
+                mt.bind("l", "ToolbarLayout")
+                mt.bind("c", "ToolbarCrop")
+                mt.bind("s", "ToolbarSelect")
+                mt.bind("a", "ToolbarAnimation")
                 mt.bind("g", "ToggleGroups")
 
-                mt.bind("?", "ToggleVariableSelection")
+                mt.bind("v", "ToggleVariableSelection")
 
                 mt.bind("space", "ToggleViewLock", stop_propagation=True)
 
                 mt.bind("esc", "RemoveAllToolbars")
+
+            # Native Dialogs
+            client.ClientTriggers(mounted="is_tauri = !!window.__TAURI__")
+            with tauri.Dialog() as dialog:
+                self.ctrl.save = dialog.save
 
             with v3.VLayout():
                 drawers.Tools(
@@ -209,6 +217,7 @@ class EAMApp(TrameApp):
     # -------------------------------------------------------------------------
 
     @trigger("download_state")
+    @controller.set("download_state")
     def download_state(self):
         active_variables = self.selected_variables
         state_content = {}
