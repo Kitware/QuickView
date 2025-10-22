@@ -291,15 +291,15 @@ class LandingPage(v3.VContainer):
                         with v3.VListItem(subtitle="4 columns"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="4", variant="contained", inline=True)
-                        with v3.VListItem(subtitle="5 columns"):
-                            with v3.Template(v_slot_append="True"):
-                                v3.VHotkey(keys="5", variant="contained", inline=True)
                         with v3.VListItem(subtitle="6 columns"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="6", variant="contained", inline=True)
                         with v3.VListItem(subtitle="Auto"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="0", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="Auto flow"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="=", variant="contained", inline=True)
 
             Title("Simulation Files")
 

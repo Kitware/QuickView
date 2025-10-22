@@ -38,6 +38,7 @@ COL_SIZE_LOOKUP = {
     4: 3,
     6: 2,
     12: 1,
+    "flow": None,
 }
 
 TYPE_COLOR = {
@@ -641,6 +642,13 @@ class ViewManager(TrameComponent):
                                             classes="pa-0",
                                             style=("`order: ${config.order};`",),
                                         )
+                                        # For flow handling
+                                        with v3.Template(v_if="!config.size"):
+                                            v3.VCol(
+                                                v_for="i in config.offset",
+                                                key="i",
+                                                style=("{ order: config.order }",),
+                                            )
                                         with v3.VCol(
                                             offset=("config.offset * config.size",),
                                             cols=("config.size",),
@@ -654,7 +662,9 @@ class ViewManager(TrameComponent):
                         var_names = variables[var_type]
                         for name in var_names:
                             view = self.get_view(name, var_type)
-                            view.config.swap_group = [n for n in all_names if n != name]
+                            view.config.swap_group = sorted(
+                                [n for n in all_names if n != name]
+                            )
                             with view.config.provide_as("config"):
                                 v3.VCol(
                                     v_if="config.break_row",
@@ -662,8 +672,18 @@ class ViewManager(TrameComponent):
                                     classes="pa-0",
                                     style=("`order: ${config.order};`",),
                                 )
+
+                                # For flow handling
+                                with v3.Template(v_if="!config.size"):
+                                    v3.VCol(
+                                        v_for="i in config.offset",
+                                        key="i",
+                                        style=("{ order: config.order }",),
+                                    )
                                 with v3.VCol(
-                                    offset=("config.offset * config.size",),
+                                    offset=(
+                                        "config.size ? config.offset * config.size : 0",
+                                    ),
                                     cols=("config.size",),
                                     style=("`order: ${config.order};`",),
                                 ):

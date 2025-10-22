@@ -117,8 +117,8 @@ class EAMApp(TrameApp):
                 Size2=(self.view_manager.apply_size, "[2]"),
                 Size3=(self.view_manager.apply_size, "[3]"),
                 Size4=(self.view_manager.apply_size, "[4]"),
-                Size5=(self.view_manager.apply_size, "[5]"),
                 Size6=(self.view_manager.apply_size, "[6]"),
+                SizeFlow=(self.view_manager.apply_size, "['flow']"),
                 ToolbarLayout=(self.toggle_toolbar, "['adjust-layout']"),
                 ToolbarCrop=(self.toggle_toolbar, "['adjust-databounds']"),
                 ToolbarSelect=(self.toggle_toolbar, "['select-slice-time']"),
@@ -137,8 +137,8 @@ class EAMApp(TrameApp):
                 mt.bind(["alt+2", "2"], "Size2")
                 mt.bind(["alt+3", "3"], "Size3")
                 mt.bind(["alt+4", "4"], "Size4")
-                mt.bind(["alt+5", "5"], "Size5")
                 mt.bind(["alt+6", "6"], "Size6")
+                mt.bind(["="], "SizeFlow")
 
                 mt.bind("e", "ProjectionEquidistant")
                 mt.bind("b", "ProjectionRobinson")
