@@ -260,13 +260,20 @@ class EAMApp(TrameApp):
                         "type": view_type,
                         "name": var_name,
                         "config": {
+                            # lut
                             "preset": config.preset,
                             "invert": config.invert,
                             "use_log_scale": config.use_log_scale,
-                            "color_range": config.color_range,
-                            "override_range": config.override_range,
+                            # layout
                             "order": config.order,
                             "size": config.size,
+                            "offset": config.offset,
+                            "break_row": config.break_row,
+                            # color range
+                            "override_range": config.override_range,
+                            "color_range": config.color_range,
+                            "color_value_min": config.color_value_min,
+                            "color_value_max": config.color_value_max,
                         },
                     }
                 )
