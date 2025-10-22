@@ -253,6 +253,7 @@ class VariableView(TrameComponent):
                         "mdi-lock-outline",
                         size="x-small",
                         v_show=("lock_views", False),
+                        style="transform: scale(0.75);",
                     )
 
                     v3.VSpacer()
