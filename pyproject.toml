@@ -67,3 +67,26 @@ quickview = "e3sm_quickview.app2:main"
 # Ignore star import issues in ParaView plugins
 "e3sm_quickview/plugins/*.py" = ["F403", "F405"]
 "e3sm_quickview/pipeline.py" = ["F821"]  # Plugin classes loaded dynamically
+
+[tool.semantic_release]
+version_toml = [
+    "pyproject.toml:project.version",
+    "src-tauri/Cargo.toml:package.version",
+]
+version_variables = [
+    "src/e3sm_quickview/__init__.py:__version__",
+    "src-tauri/tauri.conf.json:version",
+]
+build_command = """
+  python -m venv .venv
+  source .venv/bin/activate
+  pip install -U pip build
+  python -m build .
+"""
+
+[tool.semantic_release.branches.master]
+match = "master"
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*"]
+upload_to_vcs_release = true

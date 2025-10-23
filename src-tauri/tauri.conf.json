@@ -51,7 +51,7 @@
       },
       "resources": ["server"],
       "shortDescription": "",
-      "targets": ["dmg"],
+      "targets": ["dmg", "deb", "rpm", "msi"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
