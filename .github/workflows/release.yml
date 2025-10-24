@@ -1,0 +1,42 @@
+name: "Release"
+on:
+  workflow_dispatch:  # manually triggered
+
+env:
+  # Many color libraries just need this to be set to any value, but at least
+  # one distinguishes color depth, where "3" -> "256-bit color".
+  FORCE_COLOR: 3
+
+jobs:
+  # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+  release:
+    needs: []
+    name: Distribution build and publish to PyPI
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: write
+    environment:
+      name: pypi
+      url: https://pypi.org/p/e3sm-quickview
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v10.4.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate artifact attestation for sdist and wheel
+        if: steps.release.outputs.released == 'true'
+        uses: actions/attest-build-provenance@v2.2.3
+        with:
+          subject-path: "dist/*"
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: steps.release.outputs.released == 'true'

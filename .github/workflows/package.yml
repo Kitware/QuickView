@@ -1,10 +1,14 @@
-name: "Package and Release"
+name: "Package"
+
 on:
-  push:
-    branches: [release*]
-# This workflow will trigger on each push to the `master` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
+  workflow_dispatch:  # manually triggered
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+    branches: [master]
+
 jobs:
-  publish-tauri:
+  package:
     permissions:
       contents: write
     strategy:
@@ -13,10 +17,12 @@ jobs:
         include:
           - platform: "macos-latest" # for Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs.
-            args: "--target x86_64-apple-darwin"
-    #          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
-    #            args: ''
+          - platform: 'macos-latest' # for Intel based macs.
+            args: '--target x86_64-apple-darwin'
+          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
+            args: ''
+          # - platform: 'windows-latest'
+          #   args: ''
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -49,11 +55,7 @@ jobs:
       - name: Install dependencies and get version
         run: |
           python -m pip install --upgrade pip
-          pip install .  # Assumes installable via setup.py or pyproject.toml
-          # Now we can read the version
-          VERSION=$(python -c "from e3sm_quickview import __version__; print(__version__)")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Found version: $VERSION"
+          pip install .[tauri]
         shell: bash -l {0}
       - name: Package using PyInstaller
         run: |
@@ -82,9 +84,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v${{ env.VERSION }}
-          releaseName: "QuickView release v${{ env.VERSION }}"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
+          tagName: v__VERSION__
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
