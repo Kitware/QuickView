@@ -539,14 +539,12 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
 
     def RequestData(self, request, inInfo, outInfo):
         inData = self.GetInputData(inInfo, 0, 0)
-        inPoints = inData.GetPoints()
-        inCellArray = inData.GetCells()
 
         outData = self.GetOutputData(outInfo, 0)
         if (
             self._cached_output
-            and self._cached_output.GetMTime() > inPoints.GetMTime()
-            and self._cached_output.GetMTime() > inCellArray.GetMTime()
+            and self._cached_output.GetPoints().GetMTime() >= inData.GetPoints().GetMTime()
+            and self._cached_output.GetCells().GetMTime() >= inData.GetCells().GetMTime()
         ):
             # only scalars have been added or removed
             cached_cell_data = self._cached_output.GetCellData()
