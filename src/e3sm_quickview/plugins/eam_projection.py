@@ -5,18 +5,27 @@ from vtkmodules.vtkCommonCore import (
     vtkPoints,
 )
 from vtkmodules.vtkCommonDataModel import (
-    vtkPolyData,
     vtkCellArray,
+    vtkDataSetAttributes,
     vtkPlane,
+    vtkPolyData,
 )
 from vtkmodules.vtkCommonTransforms import vtkTransform
 from vtkmodules.vtkFiltersCore import (
     vtkAppendFilter,
+    vtkCellCenters,
     vtkGenerateIds,
+    vtkPolyDataToUnstructuredGrid,
 )
 from vtkmodules.vtkFiltersGeneral import (
-    vtkTransformFilter,
     vtkTableBasedClipDataSet,
+    vtkTransformFilter,
+)
+from vtkmodules.vtkFiltersPoints import (
+    vtkExtractSurface
+)
+from vtkmodules.vtkFiltersGeometry import (
+    vtkGeometryFilter
 )
 
 try:
@@ -415,15 +424,15 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
 @smdomain.datatype(dataTypes=["vtkPolyData"], composite_data_supported=False)
 @smproperty.xml(
     """
-                <DoubleVectorProperty name="Longitude Range"
-                      command="SetLongitudeRange"
+                <DoubleVectorProperty name="Trim Longitude"
+                      command="SetTrimLongitude"
                       number_of_elements="2"
-                      default_values="-180 180">
+                      default_values="0 0">
                  </DoubleVectorProperty>
-                <DoubleVectorProperty name="Latitude Range"
-                      command="SetLatitudeRange"
+                <DoubleVectorProperty name="Trim Latitude"
+                      command="SetTrimLatitude"
                       number_of_elements="2"
-                      default_values="-90 90">
+                      default_values="0 0">
                  </DoubleVectorProperty>
                 """
 )
@@ -432,44 +441,66 @@ class EAMExtract(VTKPythonAlgorithmBase):
         super().__init__(
             nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid"
         )
-        self.longrange = [-180.0, 180.0]
-        self.latrange = [-90.0, 90.0]
+        self.trim_lon = [0, 0]
+        self.trim_lat = [0, 0]
 
-    def SetLongitudeRange(self, min, max):
-        if self.longrange[0] != min or self.longrange[1] != max:
-            self.longrange = [min, max]
+    def SetTrimLongitude(self, min, max):
+        if self.trim_lon[0] != min or self.trim_lon[1] != max:
+            self.trim_lon = [min, max]
             self.Modified()
 
-    def SetLatitudeRange(self, min, max):
-        if self.latrange[0] != min or self.latrange[1] != max:
-            self.latrange = [min, max]
+    def SetTrimLatitude(self, min, max):
+        if self.trim_lat[0] != min or self.trim_lat[1] != max:
+            self.trim_lat = [min, max]
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
         inData = self.GetInputData(inInfo, 0, 0)
         outData = self.GetOutputData(outInfo, 0)
-        if self.longrange == [-180.0, 180] and self.latrange == [-90, 90]:
+        if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
             outData.ShallowCopy(inData)
             return 1
+        # convert to polydata
+        to_poly = vtkGeometryFilter()
+        to_poly.SetInputData(inData)
 
-        box = vtkPVBox()
-        box.SetReferenceBounds(
-            self.longrange[0],
-            self.longrange[1],
-            self.latrange[0],
-            self.latrange[1],
-            -1.0,
-            1.0,
+        # get cell centers
+        compute_centers = vtkCellCenters()
+        compute_centers.SetInputConnection(to_poly.GetOutputPort())
+        compute_centers.Update()
+
+        # compute the new bounds by trimming the inData bounds
+        bounds = list(inData.GetBounds())
+        bounds[0] = bounds[0] + self.trim_lon[0]
+        bounds[1] = bounds[1] - self.trim_lon[1]
+        bounds[2] = bounds[2] + self.trim_lat[0]
+        bounds[3] = bounds[3] - self.trim_lat[1]
+
+        # add the cell centers as cell data array
+        outData.ShallowCopy(inData)
+        #import pdb;pdb.set_trace()
+        cell_centers = compute_centers.GetOutput().GetPoints().GetData()
+        cell_centers.SetName("CellCenters")
+        outData.GetCellData().AddArray(cell_centers)
+
+        # get the numpy array for cell centers
+        cc = numpy_support.vtk_to_numpy(cell_centers)
+
+
+        # add hidden cells based on bounds
+        outside_mask = (
+            (cc[:,0] < bounds[0]) | (cc[:,0] > bounds[1]) |
+            (cc[:,1] < bounds[2]) | (cc[:,1] > bounds[3])
         )
-        box.SetUseReferenceBounds(True)
-        extract = vtkPVClipDataSet()
-        extract.SetClipFunction(box)
-        extract.InsideOutOn()
-        extract.ExactBoxClipOn()
-        extract.SetInputData(inData)
-        extract.Update()
 
-        outData.ShallowCopy(extract.GetOutput())
+        # Create ghost array (0 = visible, HIDDENCELL = invisible)
+        ghost = np.where(outside_mask, vtkDataSetAttributes.HIDDENCELL, 0).astype(np.uint8)
+
+        # Convert to VTK and add to output
+        ghost_vtk = numpy_support.numpy_to_vtk(ghost)
+        ghost_vtk.SetName(vtkDataSetAttributes.GhostArrayName())
+        outData.GetCellData().AddArray(ghost_vtk)
+
         return 1
 
 
