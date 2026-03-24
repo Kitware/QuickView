@@ -74,6 +74,8 @@ class FieldSelection(v3.VNavigationDrawer):
             style=(f"{js.is_active('select-fields')} ? 'transform: none;' : ''",),
         )
 
+        self.state.setdefault("loading_time", 0)
+
         with self:
             with html.Div(
                 style="position:fixed;top:0;width: 500px;height:100vh;",
@@ -85,12 +87,13 @@ class FieldSelection(v3.VNavigationDrawer):
                         color="primary",
                         prepend_icon="mdi-database",
                         text=(
-                            "`Load ${variables_selected.length} variable${variables_selected.length > 1 ? 's' :''}`",
+                            "`Load ${variables_selected.length} variable${variables_selected.length > 1 ? 's' :''} ${ loading_time ? ('(' + loading_time.toFixed(1) + ' s)') : ''}`",
                         ),
                         variant="flat",
                         disabled=(
-                            "variables_selected.length === 0 || variables_loaded",
+                            "variables_selected.length === 0 || variables_loaded || loading",
                         ),
+                        loading=("loading", False),
                         click=load_variables,
                         block=True,
                     )

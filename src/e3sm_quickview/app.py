@@ -3,6 +3,7 @@ import datetime
 import json
 import math
 import os
+import time
 from functools import partial
 from pathlib import Path
 
@@ -450,10 +451,15 @@ class EAMApp(TrameApp):
         ]
 
     def data_load_variables(self):
+        self.state.loading = True
         asynchronous.create_task(self._data_load_variables())
 
     async def _data_load_variables(self):
         """Called at 'Load Variables' button click"""
+        t0 = time.perf_counter()
+        # Give some room
+        await asyncio.sleep(0.1)
+
         vars_to_show = self.selected_variables
 
         # Flatten the list of lists
@@ -477,16 +483,24 @@ class EAMApp(TrameApp):
         # Trigger source update + compute avg
         with self.state:
             self.state.variables_loaded = True
+
         await self.server.network_completion
 
         # Update views in layout
         with self.state:
             self.view_manager.build_auto_layout(vars_to_show)
+
         await self.server.network_completion
 
         # Reset camera after yield
         await asyncio.sleep(0.1)
         self.view_manager.reset_camera()
+
+        # Done with the loading
+        t1 = time.perf_counter()
+        with self.state:
+            self.state.loading = False
+            self.state.loading_time = t1 - t0
 
     @change("layout_grouped")
     def _on_layout_change(self, **_):
