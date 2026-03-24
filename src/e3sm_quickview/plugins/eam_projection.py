@@ -443,15 +443,29 @@ class EAMExtract(VTKPythonAlgorithmBase):
         )
         self.trim_lon = [0, 0]
         self.trim_lat = [0, 0]
+        self.cached_cell_centers = None
+        self.cached_ghosts = None
 
-    def SetTrimLongitude(self, min, max):
-        if self.trim_lon[0] != min or self.trim_lon[1] != max:
-            self.trim_lon = [min, max]
+    def __del__(self):
+        if self.cached_cell_centers:
+            self.cached_cell_centers.Unregister(self)
+        if self.cached_ghosts:
+            self.cached_ghosts.Unregister(self)
+
+    def SetTrimLongitude(self, left, right):
+        if left < 0 or left > 180 or right < 0 or right > 180:
+            print_error(f"SetTrimLongitude called with parameters outside [0, 180]: {left=}, {right=}")
+            return
+        if self.trim_lon[0] != left or self.trim_lon[1] != right:
+            self.trim_lon = [left, right]
             self.Modified()
 
-    def SetTrimLatitude(self, min, max):
-        if self.trim_lat[0] != min or self.trim_lat[1] != max:
-            self.trim_lat = [min, max]
+    def SetTrimLatitude(self, left, right):
+        if left < 0 or left > 90 or right < 0 or right > 90:
+            print_error(f"SetTrimLatitude called with parameters outside [0, 180]: {left=}, {right=}")
+            return
+        if self.trim_lat[0] != left or self.trim_lat[1] != right:
+            self.trim_lat = [left, right]
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
@@ -460,46 +474,65 @@ class EAMExtract(VTKPythonAlgorithmBase):
         if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
             outData.ShallowCopy(inData)
             return 1
-        # convert to polydata
-        to_poly = vtkGeometryFilter()
-        to_poly.SetInputData(inData)
 
-        # get cell centers
-        compute_centers = vtkCellCenters()
-        compute_centers.SetInputConnection(to_poly.GetOutputPort())
-        compute_centers.Update()
-
-        # compute the new bounds by trimming the inData bounds
-        bounds = list(inData.GetBounds())
-        bounds[0] = bounds[0] + self.trim_lon[0]
-        bounds[1] = bounds[1] - self.trim_lon[1]
-        bounds[2] = bounds[2] + self.trim_lat[0]
-        bounds[3] = bounds[3] - self.trim_lat[1]
-
-        # add the cell centers as cell data array
         outData.ShallowCopy(inData)
-        #import pdb;pdb.set_trace()
-        cell_centers = compute_centers.GetOutput().GetPoints().GetData()
-        cell_centers.SetName("CellCenters")
-        outData.GetCellData().AddArray(cell_centers)
+        if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
+            inData.GetPoints().GetMTime(), inData.GetCells().GetMTime()
+        ):
+            cell_centers = self.cached_cell_centers
+        else:
+            # convert to polydata, as vtkCellCenters only works on polydata
+            # import pdb;pdb.set_trace()
+            to_poly = vtkGeometryFilter()
+            to_poly.SetInputData(inData)
+
+            # get cell centers
+            compute_centers = vtkCellCenters()
+            compute_centers.SetInputConnection(to_poly.GetOutputPort())
+            compute_centers.Update()
+            cell_centers = compute_centers.GetOutput().GetPoints().GetData()
+            if self.cached_cell_centers:
+                self.cached_cell_centers.Unregister(self)
+            self.cached_cell_centers = cell_centers
+            self.cached_cell_centers.Register(self)
 
         # get the numpy array for cell centers
         cc = numpy_support.vtk_to_numpy(cell_centers)
 
+        if self.cached_ghosts and self.cached_ghosts.GetMTime() >= max(
+            self.GetMTime(), inData.GetPoints().GetMTime(), cell_centers.GetMTime()
+        ):
+            ghost = self.cached_ghosts
+        else:
+            # import pdb;pdb.set_trace()
+            # compute the new bounds by trimming the inData bounds
+            bounds = list(inData.GetBounds())
+            bounds[0] = bounds[0] + self.trim_lon[0]
+            bounds[1] = bounds[1] - self.trim_lon[1]
+            bounds[2] = bounds[2] + self.trim_lat[0]
+            bounds[3] = bounds[3] - self.trim_lat[1]
 
-        # add hidden cells based on bounds
-        outside_mask = (
-            (cc[:,0] < bounds[0]) | (cc[:,0] > bounds[1]) |
-            (cc[:,1] < bounds[2]) | (cc[:,1] > bounds[3])
-        )
+            # add hidden cells based on bounds
+            outside_mask = (
+                (cc[:, 0] < bounds[0])
+                | (cc[:, 0] > bounds[1])
+                | (cc[:, 1] < bounds[2])
+                | (cc[:, 1] > bounds[3])
+            )
 
-        # Create ghost array (0 = visible, HIDDENCELL = invisible)
-        ghost = np.where(outside_mask, vtkDataSetAttributes.HIDDENCELL, 0).astype(np.uint8)
+            # Create ghost array (0 = visible, HIDDENCELL = invisible)
+            ghost_np = np.where(
+                outside_mask, vtkDataSetAttributes.HIDDENCELL, 0
+            ).astype(np.uint8)
 
-        # Convert to VTK and add to output
-        ghost_vtk = numpy_support.numpy_to_vtk(ghost)
-        ghost_vtk.SetName(vtkDataSetAttributes.GhostArrayName())
-        outData.GetCellData().AddArray(ghost_vtk)
+            # Convert to VTK and add to output
+            ghost = numpy_support.numpy_to_vtk(ghost_np)
+            ghost.SetName(vtkDataSetAttributes.GhostArrayName())
+            if self.cached_ghosts:
+                self.cached_ghosts.Unregister(self)
+            self.cached_ghosts = ghost
+            self.cached_ghosts.Register(self)
+        outData.GetCellData().AddArray(ghost)
 
         return 1
 
