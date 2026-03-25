@@ -513,6 +513,10 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
         self._center_meridian = 0
         self._cached_output = None
 
+    def __del__(self):
+        if self._cached_output:
+            self._cached_output.Unregister(self)
+
     def SetMeridian(self, meridian_):
         """
         Specifies the central meridian (longitude in the middle of the map)
@@ -606,6 +610,9 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
             append.AddInputData(transform.GetOutput())
             append.Update()
             outData.ShallowCopy(append.GetOutput())
+            if self._cached_output:
+                self._cached_output.Unregister(self)
             self._cached_output = outData.NewInstance()
             self._cached_output.ShallowCopy(outData)
+            self._cached_output.Register(self)
         return 1
