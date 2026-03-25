@@ -264,6 +264,11 @@ class EAMProject(VTKPythonAlgorithmBase):
         self.__Dims = -1
         self.project = 0
         self.translate = False
+        self.cached_points = None
+
+    def __del__(self):
+        if self.cached_points:
+            self.cached_points.Unregister()
 
     def SetTranslation(self, translate):
         if self.translate != translate:
@@ -276,55 +281,58 @@ class EAMProject(VTKPythonAlgorithmBase):
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
+        if self.project == 0:
+            return 1
         inData = self.GetInputData(inInfo, 0, 0)
         outData = self.GetOutputData(outInfo, 0)
         if inData.IsA("vtkPolyData"):
             afilter = vtkAppendFilter()
             afilter.AddInputData(inData)
             afilter.Update()
-            outData.DeepCopy(afilter.GetOutput())
+            outData.ShallowCopy(afilter.GetOutput())
         else:
-            outData.DeepCopy(inData)
+            outData.ShallowCopy(inData)
+        if self.cached_points and \
+           self.cached_points.GetMTime() >= inData.GetPoints().GetMTime():
+            outData.SetPoints(self.cached_points)
+        else:
+            # we modify the points, so copy them
+            out_points_vtk = vtkPoints()
+            out_points_vtk.DeepCopy(inData.GetPoints())
+            outData.SetPoints(out_points_vtk)
+            out_points_np = outData.points
 
-        if self.project == 0:
-            return 1
+            flat = out_points_np.flatten()
+            x = flat[0::3] - 180.0 if self.translate else flat[0::3]
+            y = flat[1::3]
 
-        inWrap = dsa.WrapDataObject(inData)
-        outWrap = dsa.WrapDataObject(outData)
-        inPoints = np.array(inWrap.Points)
+            try:
+                # Use proj4 string for WGS84 instead of EPSG code to avoid database dependency
+                latlon = Proj(proj="latlong", datum="WGS84")
+                if self.project == 1:
+                    proj = Proj(proj="robin")
+                elif self.project == 2:
+                    proj = Proj(proj="moll")
+                else:
+                    # Should not reach here, but return without transformation
+                    return 1
 
-        flat = inPoints.flatten()
-        x = flat[0::3] - 180.0 if self.translate else flat[0::3]
-        y = flat[1::3]
-
-        try:
-            # Use proj4 string for WGS84 instead of EPSG code to avoid database dependency
-            latlon = Proj(proj="latlong", datum="WGS84")
-            if self.project == 1:
-                proj = Proj(proj="robin")
-            elif self.project == 2:
-                proj = Proj(proj="moll")
-            else:
-                # Should not reach here, but return without transformation
+                xformer = Transformer.from_proj(latlon, proj, always_xy=True)
+                res = xformer.transform(x, y)
+            except Exception as e:
+                print(f"Projection error: {e}")
+                # If projection fails, return without modifying coordinates
                 return 1
+            flat[0::3] = np.array(res[0])
+            flat[1::3] = np.array(res[1])
 
-            xformer = Transformer.from_proj(latlon, proj, always_xy=True)
-            res = xformer.transform(x, y)
-        except Exception as e:
-            print(f"Projection error: {e}")
-            # If projection fails, return without modifying coordinates
-            return 1
-        flat[0::3] = np.array(res[0])
-        flat[1::3] = np.array(res[1])
-
-        outPoints = flat.reshape(inPoints.shape)
-        _coords = numpy_support.numpy_to_vtk(
-            outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT
-        )
-        vtk_coords = vtkPoints()
-        vtk_coords.SetData(_coords)
-        outWrap.SetPoints(vtk_coords)
-
+            outPoints = flat.reshape(out_points_np.shape)
+            _coords = numpy_support.numpy_to_vtk(outPoints, deep=True)
+            outData.GetPoints().SetData(_coords)
+            if self.cached_points:
+                self.cached_points.Unregister(self)
+            self.cached_points = out_points_vtk
+            self.cached_points.Register(self)
         return 1
 
 
