@@ -1,6 +1,5 @@
 from paraview.simple import *
 from paraview.util.vtkAlgorithm import *
-from vtkmodules.numpy_interface import dataset_adapter as dsa
 from vtkmodules.vtkCommonCore import (
     vtkPoints,
 )
@@ -107,19 +106,10 @@ class EAMSphere(VTKPythonAlgorithmBase):
         else:
             outData.DeepCopy(inData)
 
-        inWrap = dsa.WrapDataObject(inData)
-        outWrap = dsa.WrapDataObject(outData)
-
-        inPoints = np.array(inWrap.Points)
+        inPoints = inData.points
         pRadius = (self.radius + 1) if self.isData else self.radius
         outPoints = np.array(list(map(lambda x: ProcessPoint(x, pRadius), inPoints)))
-
-        _coords = numpy_support.numpy_to_vtk(
-            outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT
-        )
-        vtk_coords = vtkPoints()
-        vtk_coords.SetData(_coords)
-        outWrap.SetPoints(vtk_coords)
+        outData.points = outPoints
 
         return 1
 
@@ -160,10 +150,7 @@ class EAMVTSSphere(VTKPythonAlgorithmBase):
         outData = self.GetOutputData(outInfo, 0)
         outData.DeepCopy(inData)
 
-        inWrap = dsa.WrapDataObject(inData)
-        outWrap = dsa.WrapDataObject(outData)
-
-        inPoints = np.array(inWrap.Points)
+        inPoints = inData.points
         pRadius = (self.radius + 1) if self.isData else self.radius
         outPoints = np.array(list(map(lambda x: ProcessPoint(x, pRadius), inPoints)))
         # outPoints   = np.array(list(map(ProcessPoint,inPoints)))
@@ -173,7 +160,7 @@ class EAMVTSSphere(VTKPythonAlgorithmBase):
         )
         vtk_coords = vtkPoints()
         vtk_coords.SetData(_coords)
-        outWrap.SetPoints(vtk_coords)
+        outData.points = vtk_coords
 
         return 1
 
