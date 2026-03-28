@@ -15,18 +15,12 @@ from vtkmodules.vtkFiltersCore import (
     vtkAppendFilter,
     vtkCellCenters,
     vtkGenerateIds,
-    vtkPolyDataToUnstructuredGrid,
 )
 from vtkmodules.vtkFiltersGeneral import (
     vtkTableBasedClipDataSet,
     vtkTransformFilter,
 )
-from vtkmodules.vtkFiltersPoints import (
-    vtkExtractSurface
-)
-from vtkmodules.vtkFiltersGeometry import (
-    vtkGeometryFilter
-)
+from vtkmodules.vtkFiltersGeometry import vtkGeometryFilter
 
 try:
     from paraview.modules.vtkPVVTKExtensionsFiltersGeneral import vtkPVClipDataSet
@@ -266,10 +260,6 @@ class EAMProject(VTKPythonAlgorithmBase):
         self.translate = False
         self.cached_points = None
 
-    def __del__(self):
-        if self.cached_points:
-            self.cached_points.Unregister()
-
     def SetTranslation(self, translate):
         if self.translate != translate:
             self.translate = translate
@@ -292,8 +282,10 @@ class EAMProject(VTKPythonAlgorithmBase):
             outData.ShallowCopy(afilter.GetOutput())
         else:
             outData.ShallowCopy(inData)
-        if self.cached_points and \
-           self.cached_points.GetMTime() >= inData.GetPoints().GetMTime():
+        if (
+            self.cached_points
+            and self.cached_points.GetMTime() >= inData.GetPoints().GetMTime()
+        ):
             outData.SetPoints(self.cached_points)
         else:
             # we modify the points, so copy them
@@ -329,10 +321,9 @@ class EAMProject(VTKPythonAlgorithmBase):
             outPoints = flat.reshape(out_points_np.shape)
             _coords = numpy_support.numpy_to_vtk(outPoints, deep=True)
             outData.GetPoints().SetData(_coords)
-            if self.cached_points:
-                self.cached_points.Unregister(self)
+            # the previous cached_points, if any, is available for
+            # garbage collection after this assignment
             self.cached_points = out_points_vtk
-            self.cached_points.Register(self)
         return 1
 
 
@@ -454,15 +445,11 @@ class EAMExtract(VTKPythonAlgorithmBase):
         self.cached_cell_centers = None
         self.cached_ghosts = None
 
-    def __del__(self):
-        if self.cached_cell_centers:
-            self.cached_cell_centers.Unregister(self)
-        if self.cached_ghosts:
-            self.cached_ghosts.Unregister(self)
-
     def SetTrimLongitude(self, left, right):
         if left < 0 or left > 180 or right < 0 or right > 180:
-            print_error(f"SetTrimLongitude called with parameters outside [0, 180]: {left=}, {right=}")
+            print_error(
+                f"SetTrimLongitude called with parameters outside [0, 180]: {left=}, {right=}"
+            )
             return
         if self.trim_lon[0] != left or self.trim_lon[1] != right:
             self.trim_lon = [left, right]
@@ -470,7 +457,9 @@ class EAMExtract(VTKPythonAlgorithmBase):
 
     def SetTrimLatitude(self, left, right):
         if left < 0 or left > 90 or right < 0 or right > 90:
-            print_error(f"SetTrimLatitude called with parameters outside [0, 180]: {left=}, {right=}")
+            print_error(
+                f"SetTrimLatitude called with parameters outside [0, 180]: {left=}, {right=}"
+            )
             return
         if self.trim_lat[0] != left or self.trim_lat[1] != right:
             self.trim_lat = [left, right]
@@ -499,10 +488,9 @@ class EAMExtract(VTKPythonAlgorithmBase):
             compute_centers.SetInputConnection(to_poly.GetOutputPort())
             compute_centers.Update()
             cell_centers = compute_centers.GetOutput().GetPoints().GetData()
-            if self.cached_cell_centers:
-                self.cached_cell_centers.Unregister(self)
+            # previous cached_cell_centers, if any,
+            # is available for garbage collection after this assignment
             self.cached_cell_centers = cell_centers
-            self.cached_cell_centers.Register(self)
 
         # get the numpy array for cell centers
         cc = numpy_support.vtk_to_numpy(cell_centers)
@@ -536,10 +524,9 @@ class EAMExtract(VTKPythonAlgorithmBase):
             # Convert to VTK and add to output
             ghost = numpy_support.numpy_to_vtk(ghost_np)
             ghost.SetName(vtkDataSetAttributes.GhostArrayName())
-            if self.cached_ghosts:
-                self.cached_ghosts.Unregister(self)
+            # the previous cached_ghosts, if any,
+            # is available for garbage collection after this assignment
             self.cached_ghosts = ghost
-            self.cached_ghosts.Register(self)
         outData.GetCellData().AddArray(ghost)
 
         return 1
@@ -585,10 +572,6 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
         self._center_meridian = 0
         self._cached_output = None
 
-    def __del__(self):
-        if self._cached_output:
-            self._cached_output.Unregister(self)
-
     def SetMeridian(self, meridian_):
         """
         Specifies the central meridian (longitude in the middle of the map)
@@ -615,8 +598,10 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
         outData = self.GetOutputData(outInfo, 0)
         if (
             self._cached_output
-            and self._cached_output.GetPoints().GetMTime() >= inData.GetPoints().GetMTime()
-            and self._cached_output.GetCells().GetMTime() >= inData.GetCells().GetMTime()
+            and self._cached_output.GetPoints().GetMTime()
+            >= inData.GetPoints().GetMTime()
+            and self._cached_output.GetCells().GetMTime()
+            >= inData.GetCells().GetMTime()
         ):
             # only scalars have been added or removed
             cached_cell_data = self._cached_output.GetCellData()
@@ -680,9 +665,7 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
             append.AddInputData(transform.GetOutput())
             append.Update()
             outData.ShallowCopy(append.GetOutput())
-            if self._cached_output:
-                self._cached_output.Unregister(self)
+            # previous _cached_output is available for garbage collection
             self._cached_output = outData.NewInstance()
             self._cached_output.ShallowCopy(outData)
-            self._cached_output.Register(self)
         return 1
