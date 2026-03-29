@@ -7,6 +7,16 @@ from vtkmodules.vtkCommonCore import vtkLogger
 from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
 
 
+def range_to_trim(range, max):
+    """
+    Convert an range interval contained in [-180, 180] (such as [-170, 160])
+    into an interval specifying how much to trim (for our example: [10, 20]).
+    'max' is 180 for longitude or 90 for latitude
+    """
+    (min_range, max_range) = range
+    return [min_range + max, max - max_range]
+
+
 def load_plugins():
     try:
         plugin_dir = Path(__file__).with_name("plugins")
@@ -134,8 +144,8 @@ class DataReader:
         )
         self._crop = simple.EAMExtract(
             Input=self.center_meridian,
-            LongitudeRange=[-180, 180],
-            LatitudeRange=[-90.0, 90.0],
+            TrimLongitude=[0, 0],
+            TrimLatitude=[0, 0],
         )
         self.proj = simple.EAMProject(  # noqa: F821
             Input=self._crop,
@@ -233,8 +243,8 @@ class DataReader:
         self.geometry.UpdatePipeline(time)
 
     def crop(self, longitude_min_max, latitude_min_max):
-        self._crop.LongitudeRange = longitude_min_max
-        self._crop.LatitudeRange = latitude_min_max
+        self._crop.TrimLongitude = range_to_trim(longitude_min_max, 180)
+        self._crop.TrimLatitude = range_to_trim(latitude_min_max, 90)
 
 
 class EAMVisSource:
