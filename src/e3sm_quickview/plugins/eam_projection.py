@@ -258,8 +258,6 @@ class EAMProject(VTKPythonAlgorithmBase):
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
-        if self.project == 0:
-            return 1
         inData = self.GetInputData(inInfo, 0, 0)
         outData = self.GetOutputData(outInfo, 0)
         if inData.IsA("vtkPolyData"):
@@ -269,6 +267,8 @@ class EAMProject(VTKPythonAlgorithmBase):
             outData.ShallowCopy(afilter.GetOutput())
         else:
             outData.ShallowCopy(inData)
+        if self.project == 0:
+            return 1
         if (
             self.cached_points
             and self.cached_points.GetMTime() >= inData.GetPoints().GetMTime()
