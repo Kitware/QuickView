@@ -279,10 +279,8 @@ class EAMProject(VTKPythonAlgorithmBase):
 
             outData.SetPoints(self.cached_points)
             return 1
-
-        if (
-            self.cached_points
-            and self.cached_points.GetMTime() >= inData.GetPoints().GetMTime()
+        if self.cached_points and self.cached_points.GetMTime() >= max(
+            inData.GetPoints().GetMTime(), self.GetMTime()
         ):
             outData.SetPoints(self.cached_points)
         else:
