@@ -1,12 +1,27 @@
+import asyncio
 import math
 
+# Rendering Factory
+import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
 from paraview import simple
+from paraview.modules.vtkPVVTKExtensionsInteractionStyle import (
+    vtkPVInteractorStyle,
+    vtkPVTrackballZoom,
+    vtkTrackballPan,
+)
 from trame.app import TrameComponent, dataclass
 from trame.decorators import controller
 from trame.ui.html import DivLayout
 from trame.widgets import client, html, rca
 from trame.widgets import vuetify3 as v3
-from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
+from vtkmodules.vtkRenderingCore import (
+    vtkActor,
+    vtkCamera,
+    vtkPolyDataMapper,
+    vtkRenderer,
+    vtkRenderWindow,
+    vtkRenderWindowInteractor,
+)
 
 from e3sm_quickview.components import view as tview
 from e3sm_quickview.presets import COLOR_BLIND_SAFE
@@ -69,28 +84,25 @@ class ViewConfiguration(dataclass.StateDataModel):
 
 
 class VariableView(TrameComponent):
-    def __init__(self, server, source, variable_name, variable_type):
+    def __init__(self, server, source, variable_name, variable_type, camera):
         super().__init__(server)
         self.source = source
         self.variable_name = variable_name
         self.variable_type = variable_type
         self.disable_render = False
         self.name = f"view_{self.variable_name}"
+        self._bounds_key = f"{self.name}_bounds"
         self.config = ViewConfiguration(server, variable=variable_name)
-
-        # ParaView
-        self.view = simple.CreateRenderView()
-        self.view.InteractionMode = "2D"
-        self.view.OrientationAxesVisibility = 0
-        self.view.UseColorPaletteForBackground = 0
-        self.view.BackgroundColorMode = "Gradient"
-        self.view.CameraParallelProjection = 1
+        self._size = (0, 0)
 
         # VTK
-        self._camera = self.view.GetActiveCamera()
-        self.renderer = self.view.GetRenderer()
-        self.render_window = self.view.GetRenderWindow()
-        self.render_window.SetOffScreenRendering(True)
+        self.renderer = vtkRenderer(
+            active_camera=camera,
+            background=(84 / 255, 89 / 255, 109 / 255),
+            background2=(0, 0, 42 / 255),
+            gradient_background=1,
+        )
+        self._camera = camera
 
         input = source.data_reader.vtk_geometry
         self.mapper = vtkPolyDataMapper(input_connection=input.output_port)
@@ -125,30 +137,31 @@ class VariableView(TrameComponent):
             eager=True,
         )
 
-        # Initial flush
-        simple.Render(self.view)
-
         # GUI
         self._build_ui()
 
-        # Need to be after RCA initialization (gui build)
-        self.reset_camera()
-
-    def render(self):
-        if self.disable_render or not self.ctx.has(self.name):
-            return
-        self.ctx[self.name].update()
-
-    def set_camera_modified(self, fn):
-        self._observer = self.camera.AddObserver("ModifiedEvent", fn)
-
     @property
-    def camera(self):
-        return self._camera
+    def bounds(self):
+        return self.state[self._bounds_key]
+
+    @bounds.setter
+    def bounds(self, v):
+        self.renderer.SetViewport(*v)
+        with self.state as s:
+            s[self._bounds_key] = v
 
     def reset_camera(self):
-        self.view.ResetCamera(True, 0.9)
-        self.render()
+        self.renderer.ResetCameraScreenSpace(0.9)
+
+    def update_size(self, size):
+        new_size = (int(size["w"] * size["p"]), int(size["h"] * size["p"]))
+        if self._size != new_size:
+            self._size = new_size
+            self.ctrl.size_update()
+
+    @property
+    def size(self):
+        return self._size
 
     def update_color_preset(self, name, invert, log_scale, n_colors=255):
         self.config.preset = name
@@ -165,8 +178,6 @@ class VariableView(TrameComponent):
             self.lut.NumberOfTableValues = n_colors
 
         self.config.lut_img = lut_to_img(self.lut)
-
-        self.render()
 
     def color_range_str_to_float(self, color_value_min, color_value_max):
         try:
@@ -215,7 +226,6 @@ class VariableView(TrameComponent):
                 self.config.color_value_min_valid = True
                 self.config.color_value_max_valid = True
                 self.lut.RescaleTransferFunction(*data_range)
-        self.render()
 
     def _build_ui(self):
         with DivLayout(
@@ -297,12 +307,11 @@ class VariableView(TrameComponent):
                         """,
                     ),
                 ):
-                    display = rca.RemoteControlledArea(display="image")
-                    handler = display.create_view_handler(
-                        self.view.GetRenderWindow(),
-                        encoder="turbo-jpeg",
+                    rca.ImageRegion(
+                        enable_interaction=True,
+                        bounds=(self._bounds_key, (0, 0, 1, 1)),
+                        size=(self.update_size, "[$event]"),
                     )
-                    self.ctx[self.name] = handler
 
                 tview.create_bottom_bar(self.config, self.update_color_preset)
 
@@ -310,9 +319,43 @@ class VariableView(TrameComponent):
 class ViewManager(TrameComponent):
     def __init__(self, server, source):
         super().__init__(server)
+        self._camera = vtkCamera(parallel_projection=1)
+        self._render_window = vtkRenderWindow()
+        self._render_window.OffScreenRenderingOn()
+        self._style = vtkPVInteractorStyle()
+        self._style.AddManipulator(
+            vtkPVTrackballZoom(
+                button=3,
+                shift=0,
+                control=0,
+            )
+        )
+        self._style.AddManipulator(
+            vtkPVTrackballZoom(
+                button=1,
+                shift=1,
+                control=0,
+            )
+        )
+        self._style.AddManipulator(
+            vtkTrackballPan(
+                button=1,
+                shift=0,
+                control=0,
+            )
+        )
+
+        self._render_window_interactor = vtkRenderWindowInteractor(
+            interactor_style=self._style
+        )
+        self._render_window_interactor.SetRenderWindow(self._render_window)
+
+        self.loop = asyncio.get_event_loop()
+        self.layout_dirty = True
+        self.pending_reset_camera = 1
+        self.pending_render = False
         self.source = source
         self._var2view = {}
-        self._camera_sync_in_progress = False
         self._last_vars = {}
         self._active_configs = {}
 
@@ -335,47 +378,133 @@ class ViewManager(TrameComponent):
         for view in self._var2view.values():
             view._build_ui()
 
-    def reset_camera(self):
-        views = list(self._var2view.values())
-        for view in views:
-            view.disable_render = True
+    def reset_camera(self, render=True):
+        if self.layout_dirty or not self._last_vars:
+            self.pending_reset_camera = 1
+            return
 
-        for view in views:
-            view.reset_camera()
+        view_to_reset = None
 
-        for view in views:
-            view.disable_render = False
+        if self.state.active_layout.startswith("view_"):
+            for view in self._var2view.values():
+                if view.name == self.state.active_layout:
+                    view_to_reset = view
+                    break
+
+        if not view_to_reset:
+            for var_type, var_names in self._last_vars.items():
+                for name in var_names:
+                    view_to_reset = self.get_view(name, var_type)
+                    if view_to_reset:
+                        break
+
+                if view_to_reset:
+                    break
+
+        if view_to_reset:
+            view_to_reset.reset_camera()
+            self.pending_reset_camera = 0
+        else:
+            self.pending_reset_camera = 1
+
+        if render and view_to_reset:
+            self.render()
+
+    @controller.set("size_update")
+    def on_size_update(self):
+        if not self.layout_dirty or not self.pending_render:
+            self.pending_render = True
+            self.loop.call_later(0.1, self.render)
+        self.layout_dirty = True
 
     def render(self):
-        for view in list(self._var2view.values()):
-            view.render()
+        if self.layout_dirty:
+            self.compute_layout()
+
+        if self.pending_reset_camera:
+            self.reset_camera(False)
+
+        if self.ctx.view:
+            self.ctx.view.update()
+            self.pending_render = False
 
     def update_color_range(self):
         for view in list(self._var2view.values()):
             view.update_color_range()
+        self.render()
 
     def get_view(self, variable_name, variable_type):
         view = self._var2view.get(variable_name)
         if view is None:
-            view = VariableView(self.server, self.source, variable_name, variable_type)
+            view = VariableView(
+                self.server, self.source, variable_name, variable_type, self._camera
+            )
             self._var2view[variable_name] = view
-            view.set_camera_modified(self.sync_camera)
 
         return view
 
-    def sync_camera(self, camera, *_):
-        if self._camera_sync_in_progress:
+    def compute_layout(self, variables=None):
+        if variables is None:
+            variables = self._last_vars
+
+        if not variables:
             return
-        self._camera_sync_in_progress = True
 
-        for var_view in self._var2view.values():
-            cam = var_view.camera
-            if cam is camera:
-                continue
-            cam.DeepCopy(camera)
-            var_view.render()
+        # reset dirty flag
+        self.layout_dirty = False
 
-        self._camera_sync_in_progress = False
+        views = []
+        view_size = [0, 0]
+        fullscreen_view = None
+        fullscreen_view_name = self.state.active_layout
+        for var_type, var_names in variables.items():
+            for name in var_names:
+                view = self.get_view(name, var_type)
+
+                if view.name == fullscreen_view_name:
+                    fullscreen_view = view
+                    break
+                if view.size[1]:
+                    views.append(view)
+                    view_size[0] = max(view_size[0], view.size[0])
+                    view_size[1] = max(view_size[1], view.size[1])
+                else:
+                    # layout is still dirty
+                    self.layout_dirty = True
+
+            if fullscreen_view:
+                break
+
+        if fullscreen_view:
+            view_size = fullscreen_view.size
+            views = [fullscreen_view]
+
+        size = len(views)
+        if size == 0:
+            return
+
+        width_count = math.ceil(math.sqrt(size))
+        height_count = math.ceil(size / width_count)
+        full_size = [
+            view_size[0] * width_count,
+            view_size[1] * height_count,
+        ]
+
+        # Update RenderView
+        self._render_window.SetSize(*full_size)
+        renderers = list(self._render_window.GetRenderers())
+        for r in renderers:
+            self._render_window.RemoveRenderer(r)
+
+        # Compute Viewport
+        dx = 1.0 / width_count
+        dy = 1.0 / height_count
+        for idx, view in enumerate(views):
+            i = idx % width_count
+            j = int(idx / width_count)
+            bounds = (i * dx, j * dy, (i + 1) * dx, (j + 1) * dy)
+            view.bounds = bounds
+            self._render_window.AddRenderer(view.renderer)
 
     @controller.set("swap_variables")
     def swap_variable(self, variable_a, variable_b):
@@ -419,6 +548,7 @@ class ViewManager(TrameComponent):
             variables = self._last_vars
 
         self._last_vars = variables
+        self.compute_layout()
 
         # Create UI based on variables
         self.state.swap_groups = {}

@@ -24,7 +24,7 @@ requires-python = ">=3.10"
 dependencies = [
     "trame>=3.12",
     "trame-vuetify>=3.1",
-    "trame-rca[turbo]>=2.3.1",
+    "trame-rca[turbo]>=2.4",
     "pyproj>=3.6.1",
     "netCDF4>=1.6.5",
     "trame-dataclass >=2.0.2",
