@@ -10,7 +10,7 @@ from pathlib import Path
 from trame.app import TrameApp, asynchronous, file_upload
 from trame.decorators import change, controller, life_cycle, trigger
 from trame.ui.vuetify3 import VAppLayout
-from trame.widgets import client, dataclass, html, tauri
+from trame.widgets import client, dataclass, html, rca, tauri
 from trame.widgets import trame as tw
 from trame.widgets import vuetify3 as v3
 
@@ -19,7 +19,7 @@ from e3sm_quickview.assets import ASSETS
 from e3sm_quickview.components import css, dialogs, doc, drawers, file_browser, toolbars
 from e3sm_quickview.pipeline import EAMVisSource
 from e3sm_quickview.utils import cli, compute
-from e3sm_quickview.view_manager import ViewManager
+from e3sm_quickview.view_manager2 import ViewManager
 
 v3.enable_lab()
 
@@ -210,10 +210,17 @@ class EAMApp(TrameApp):
                                 toolbars.Animation()
 
                             # View of all the variables
-                            client.ServerTemplate(
-                                name=("active_layout", "auto_layout"),
-                                v_if="variables_selected.length",
-                            )
+                            with rca.ImageStream(
+                                self.view_manager._render_window,
+                                encoder="turbo-jpeg",
+                                ctx_name="view",
+                            ):
+                                # To debug vtkRenderWindow content
+                                # html.Img(src=["image?.src"], height="300px")
+                                client.ServerTemplate(
+                                    name=("active_layout", "auto_layout"),
+                                    v_if="variables_selected.length",
+                                )
 
                             # Show documentation when no variable selected
                             with html.Div(v_if="!variables_selected.length"):
