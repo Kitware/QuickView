@@ -310,6 +310,7 @@ class VariableView(TrameComponent):
 class ViewManager(TrameComponent):
     def __init__(self, server, source):
         super().__init__(server)
+        self.use_image_stream = False
         self.source = source
         self._var2view = {}
         self._camera_sync_in_progress = False

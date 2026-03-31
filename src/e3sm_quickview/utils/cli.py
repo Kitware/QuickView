@@ -31,5 +31,11 @@ def configure_and_parse(parser):
         action="store_true",
         help="Use user home as home for file browsing",
     )
+    parser.add_argument(
+        "--fast",
+        dest="fast",
+        action="store_true",
+        help="Use a single vtkRenderWindow to share GPU memory",
+    )
 
     return parser.parse_known_args()[0]
