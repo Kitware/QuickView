@@ -3,6 +3,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from paraview import simple
+from paraview.modules.vtkPVVTKExtensionsFiltersRendering import vtkPVGeometryFilter
 from vtkmodules.vtkCommonCore import vtkLogger
 from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
 
@@ -152,8 +153,17 @@ class DataReader:
             Projection=projection,
             Translate=0,
         )
-        self.geometry = simple.ExtractSurface(Input=self.proj)
-        self.vtk_geometry = self.geometry.GetClientSideObject()
+        vtk_geometry = self.proj.GetClientSideObject()
+        self.vtk_geometry = vtkPVGeometryFilter(
+            use_outline=0,
+            block_colors_distinct_values=0,
+            generate_cell_normals=0,
+            generate_point_normals=0,
+            generate_feature_edges=0,
+            splitting=False,
+            triangulate=0,
+            input_connection=vtk_geometry.output_port,
+        )
 
         # Add observer to
         vtk_obj = self.reader.GetClientSideObject()
@@ -240,7 +250,7 @@ class DataReader:
         if not self.valid:
             return
 
-        self.geometry.UpdatePipeline(time)
+        self.proj.UpdatePipeline(time)
 
     def crop(self, longitude_min_max, latitude_min_max):
         self._crop.TrimLongitude = range_to_trim(longitude_min_max, 180)
@@ -295,7 +305,7 @@ class EAMVisSource:
 
     def Update(self, data_file, conn_file):  # force_reload
         if self.data_reader.load(data_file, conn_file):
-            self.views["atmosphere_data"] = self.data_reader.geometry
+            self.views["atmosphere_data"] = self.data_reader.vtk_geometry
             self.views["continents"] = self.continent.proj
             self.views["grid_lines"] = self.grid_lines.proj
             return True

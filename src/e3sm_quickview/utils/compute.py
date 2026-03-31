@@ -1,6 +1,6 @@
-from paraview import servermanager
-import numpy as np
 from typing import Optional
+
+import numpy as np
 
 
 def calculate_weighted_average(
@@ -33,9 +33,8 @@ def calculate_weighted_average(
         return float(np.mean(data))
 
 
-def extract_avgs(pv_data, array_names):
+def extract_avgs(vtk_data, array_names):
     results = {}
-    vtk_data = servermanager.Fetch(pv_data)
     area_array = vtk_data.GetCellData().GetArray("area")
     for name in array_names:
         vtk_array = vtk_data.GetCellData().GetArray(name)

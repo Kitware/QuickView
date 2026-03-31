@@ -576,7 +576,9 @@ class EAMApp(TrameApp):
 
         # Update avg computation
         # Get area variable to calculate weighted average
-        data = self.source.views["atmosphere_data"]
+        geom_filter = self.source.views["atmosphere_data"]
+        geom_filter.Update()
+        data = geom_filter.GetOutput()
         self.state.fields_avgs = compute.extract_avgs(
             data, self.selected_variable_names
         )
@@ -607,7 +609,9 @@ class EAMApp(TrameApp):
 
         # Update avg computation
         # Get area variable to calculate weighted average
-        data = self.source.views["atmosphere_data"]
+        geom_filter = self.source.views["atmosphere_data"]
+        geom_filter.Update()
+        data = geom_filter.GetOutput()
         self.state.fields_avgs = compute.extract_avgs(
             data, self.selected_variable_names
         )
