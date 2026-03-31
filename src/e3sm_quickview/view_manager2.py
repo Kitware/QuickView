@@ -319,6 +319,7 @@ class VariableView(TrameComponent):
 class ViewManager(TrameComponent):
     def __init__(self, server, source):
         super().__init__(server)
+        self.use_image_stream = True
         self._camera = vtkCamera(parallel_projection=1)
         self._render_window = vtkRenderWindow()
         self._render_window.OffScreenRenderingOn()
