@@ -26,15 +26,16 @@ try:
     from paraview.modules.vtkPVVTKExtensionsMisc import vtkPVBox
 except Exception as e:
     print(e)
-from vtkmodules.util import vtkConstants, numpy_support
-from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
-from paraview import print_error
-
 import math
 
+from paraview import print_error
+from vtkmodules.util import numpy_support, vtkConstants
+from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
+
 try:
-    import numpy as np
     import warnings
+
+    import numpy as np
     from pyproj import Proj, Transformer
 
     warnings.filterwarnings("ignore", category=FutureWarning, module="pyproj")
@@ -250,11 +251,13 @@ class EAMProject(VTKPythonAlgorithmBase):
     def SetTranslation(self, translate):
         if self.translate != translate:
             self.translate = translate
+            self.cached_points = None
             self.Modified()
 
     def SetProjection(self, project):
         if self.project != int(project):
             self.project = int(project)
+            self.cached_points = None
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
@@ -267,8 +270,16 @@ class EAMProject(VTKPythonAlgorithmBase):
             outData.ShallowCopy(afilter.GetOutput())
         else:
             outData.ShallowCopy(inData)
+
         if self.project == 0:
+            # Use cache to move mtime forward when needed
+            if self.cached_points is None:
+                self.cached_points = vtkPoints()
+                self.cached_points.ShallowCopy(inData.GetPoints())
+
+            outData.SetPoints(self.cached_points)
             return 1
+
         if (
             self.cached_points
             and self.cached_points.GetMTime() >= inData.GetPoints().GetMTime()
@@ -311,6 +322,7 @@ class EAMProject(VTKPythonAlgorithmBase):
             # the previous cached_points, if any, is available for
             # garbage collection after this assignment
             self.cached_points = out_points_vtk
+
         return 1
 
 
