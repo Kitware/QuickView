@@ -2,6 +2,7 @@ from paraview.simple import *
 from paraview.util.vtkAlgorithm import *
 from vtkmodules.vtkCommonCore import (
     vtkPoints,
+    vtkUnsignedCharArray,
 )
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
@@ -59,6 +60,44 @@ def ProcessPoint(point, radius):
     y = rho * math.sin(math.radians(phi)) * math.sin(math.radians(theta))
     z = rho * math.cos(math.radians(phi))
     return [x, y, z]
+
+
+def add_cell_arrays(inData, outData, cached_output):
+    """
+    Adds arrays not modified in inData to outData.
+    New arrays (or arrays modified) values are
+    set using the PedigreeIds because the number of values
+    in the new array (just read from the file) is different
+    than the number of values in the arrays already processed through he
+    pipeline.
+    """
+    pedigreeIds = cached_output.cell_data["PedigreeIds"]
+    if pedigreeIds is None:
+        print_error("Error: no PedigreeIds array")
+        return
+    cached_cell_data = cached_output.GetCellData()
+    in_cell_data = inData.GetCellData()
+    outData.ShallowCopy(cached_output)
+    out_cell_data = outData.GetCellData()
+
+    out_cell_data.Initialize()
+    for i in range(in_cell_data.GetNumberOfArrays()):
+        in_array = in_cell_data.GetArray(i)
+        cached_array = cached_cell_data.GetArray(in_array.GetName())
+        if cached_array and cached_array.GetMTime() >= in_array.GetMTime():
+            # this scalar has been seen before
+            # simply add a reference in the outData
+            out_cell_data.AddArray(cached_array)
+        else:
+            # this scalar is new
+            # we have to fill in the additional cells resulted from the clip
+            out_array = in_array.NewInstance()
+            array0 = cached_cell_data.GetArray(0)
+            out_array.SetNumberOfComponents(array0.GetNumberOfComponents())
+            out_array.SetNumberOfTuples(array0.GetNumberOfTuples())
+            out_array.SetName(in_array.GetName())
+            out_cell_data.AddArray(out_array)
+            outData.cell_data[out_array.GetName()] = inData.cell_data[i][pedigreeIds]
 
 
 @smproxy.filter()
@@ -440,7 +479,7 @@ class EAMExtract(VTKPythonAlgorithmBase):
         self.trim_lon = [0, 0]
         self.trim_lat = [0, 0]
         self.cached_cell_centers = None
-        self.cached_ghosts = None
+        self._cached_output = None
 
     def SetTrimLongitude(self, left, right):
         if left < 0 or left > 180 or right < 0 or right > 180:
@@ -469,7 +508,6 @@ class EAMExtract(VTKPythonAlgorithmBase):
             outData.ShallowCopy(inData)
             return 1
 
-        outData.ShallowCopy(inData)
         if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
             inData.GetPoints().GetMTime(), inData.GetCells().GetMTime()
         ):
@@ -492,12 +530,27 @@ class EAMExtract(VTKPythonAlgorithmBase):
         # get the numpy array for cell centers
         cc = numpy_support.vtk_to_numpy(cell_centers)
 
-        if self.cached_ghosts and self.cached_ghosts.GetMTime() >= max(
+        if self._cached_output and self._cached_output.GetMTime() >= max(
             self.GetMTime(), inData.GetPoints().GetMTime(), cell_centers.GetMTime()
         ):
-            ghost = self.cached_ghosts
+            outData.ShallowCopy(self._cached_output)
+            add_cell_arrays(inData, outData, self._cached_output)
         else:
-            # import pdb;pdb.set_trace()
+            # add PedigreeIds
+            generate_ids = vtkGenerateIds()
+            generate_ids.SetInputData(inData)
+            generate_ids.PointIdsOff()
+            generate_ids.SetCellIdsArrayName("PedigreeIds")
+            generate_ids.Update()
+            outData.ShallowCopy(generate_ids.GetOutput())
+            # we have to deep copy the cell array because we modify it
+            # with RemoveGhostCells
+            cells = vtkCellArray()
+            cell_types = vtkUnsignedCharArray()
+            cells.DeepCopy(outData.GetCells())
+            cell_types.DeepCopy(outData.GetCellTypesArray())
+            outData.SetCells(cell_types, cells)
+
             # compute the new bounds by trimming the inData bounds
             bounds = list(inData.GetBounds())
             bounds[0] = bounds[0] + self.trim_lon[0]
@@ -505,14 +558,13 @@ class EAMExtract(VTKPythonAlgorithmBase):
             bounds[2] = bounds[2] + self.trim_lat[0]
             bounds[3] = bounds[3] - self.trim_lat[1]
 
-            # add hidden cells based on bounds
+            # add HIDDENCELL based on bounds
             outside_mask = (
                 (cc[:, 0] < bounds[0])
                 | (cc[:, 0] > bounds[1])
                 | (cc[:, 1] < bounds[2])
                 | (cc[:, 1] > bounds[3])
             )
-
             # Create ghost array (0 = visible, HIDDENCELL = invisible)
             ghost_np = np.where(
                 outside_mask, vtkDataSetAttributes.HIDDENCELL, 0
@@ -521,11 +573,11 @@ class EAMExtract(VTKPythonAlgorithmBase):
             # Convert to VTK and add to output
             ghost = numpy_support.numpy_to_vtk(ghost_np)
             ghost.SetName(vtkDataSetAttributes.GhostArrayName())
-            # the previous cached_ghosts, if any,
-            # is available for garbage collection after this assignment
-            self.cached_ghosts = ghost
-        outData.GetCellData().AddArray(ghost)
+            outData.GetCellData().AddArray(ghost)
+            outData.RemoveGhostCells()
 
+            self._cached_output = outData.NewInstance()
+            self._cached_output.ShallowCopy(outData)
         return 1
 
 
@@ -600,34 +652,7 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
             and self._cached_output.GetCells().GetMTime()
             >= inData.GetCells().GetMTime()
         ):
-            # only scalars have been added or removed
-            cached_cell_data = self._cached_output.GetCellData()
-
-            in_cell_data = inData.GetCellData()
-
-            outData.ShallowCopy(self._cached_output)
-            out_cell_data = outData.GetCellData()
-
-            out_cell_data.Initialize()
-            for i in range(in_cell_data.GetNumberOfArrays()):
-                in_array = in_cell_data.GetArray(i)
-                cached_array = cached_cell_data.GetArray(in_array.GetName())
-                if cached_array and cached_array.GetMTime() >= in_array.GetMTime():
-                    # this scalar has been seen before
-                    # simply add a reference in the outData
-                    out_cell_data.AddArray(cached_array)
-                else:
-                    # this scalar is new
-                    # we have to fill in the additional cells resulted from the clip
-                    out_array = in_array.NewInstance()
-                    array0 = cached_cell_data.GetArray(0)
-                    out_array.SetNumberOfComponents(array0.GetNumberOfComponents())
-                    out_array.SetNumberOfTuples(array0.GetNumberOfTuples())
-                    out_array.SetName(in_array.GetName())
-                    out_cell_data.AddArray(out_array)
-                    outData.cell_data[out_array.GetName()] = inData.cell_data[i][
-                        self._cached_output.cell_data["PedigreeIds"]
-                    ]
+            add_cell_arrays(inData, outData, self._cached_output)
         else:
             generate_ids = vtkGenerateIds()
             generate_ids.SetInputData(inData)
