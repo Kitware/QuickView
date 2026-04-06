@@ -482,9 +482,9 @@ class EAMExtract(VTKPythonAlgorithmBase):
         self._cached_output = None
 
     def SetTrimLongitude(self, left, right):
-        if left < 0 or left > 180 or right < 0 or right > 180:
+        if left < 0 or left > 360 or right < 0 or right > 360 or left > (360 - right):
             print_error(
-                f"SetTrimLongitude called with parameters outside [0, 180]: {left=}, {right=}"
+                f"SetTrimLongitude called with invalid parameters: {left=}, {right=}"
             )
             return
         if self.trim_lon[0] != left or self.trim_lon[1] != right:
@@ -492,9 +492,9 @@ class EAMExtract(VTKPythonAlgorithmBase):
             self.Modified()
 
     def SetTrimLatitude(self, left, right):
-        if left < 0 or left > 90 or right < 0 or right > 90:
+        if left < 0 or left > 180 or right < 0 or right > 180 or left > (180 - right):
             print_error(
-                f"SetTrimLatitude called with parameters outside [0, 180]: {left=}, {right=}"
+                f"SetTrimLatitude called with invalid parameters: {left=}, {right=}"
             )
             return
         if self.trim_lat[0] != left or self.trim_lat[1] != right:
