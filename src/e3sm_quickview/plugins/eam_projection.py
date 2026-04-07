@@ -505,7 +505,8 @@ class EAMExtract(VTKPythonAlgorithmBase):
         inData = self.GetInputData(inInfo, 0, 0)
         outData = self.GetOutputData(outInfo, 0)
         if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
-            outData.ShallowCopy(inData)
+            # ShallowCopy results in a crash
+            outData.DeepCopy(inData)
             return 1
 
         if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
