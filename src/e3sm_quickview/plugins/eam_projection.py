@@ -317,7 +317,7 @@ class EAMProject(VTKPythonAlgorithmBase):
         else:
             # we modify the points, so copy them
             out_points_vtk = vtkPoints()
-            out_points_vtk.DeepCopy(inData.GetPoints())
+            out_points_vtk.DeepCopy(outData.GetPoints())
             outData.SetPoints(out_points_vtk)
             out_points_np = outData.points
 
