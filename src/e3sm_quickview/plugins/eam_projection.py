@@ -497,8 +497,11 @@ class EAMExtract(VTKPythonAlgorithmBase):
         inData = self.GetInputData(inInfo, 0, 0)
         outData = self.GetOutputData(outInfo, 0)
         if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
-            # ShallowCopy results in a crash
-            outData.DeepCopy(inData)
+            outData.ShallowCopy(inData)
+            # if the filter execution follows an another execution that trims the
+            # number of points, the downstream filter could think that
+            # the trimmed points are still valid which results in a crash
+            outData.GetPoints().Modified()
             return 1
 
         if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
