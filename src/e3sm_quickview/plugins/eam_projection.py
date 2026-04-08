@@ -310,14 +310,6 @@ class EAMProject(VTKPythonAlgorithmBase):
         else:
             outData.ShallowCopy(inData)
 
-        if self.project == 0:
-            # Use cache to move mtime forward when needed
-            if self.cached_points is None:
-                self.cached_points = vtkPoints()
-                self.cached_points.ShallowCopy(inData.GetPoints())
-
-            outData.SetPoints(self.cached_points)
-            return 1
         if self.cached_points and self.cached_points.GetMTime() >= max(
             inData.GetPoints().GetMTime(), self.GetMTime()
         ):
