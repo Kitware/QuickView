@@ -42,13 +42,13 @@ class Layout(v3.VToolbar):
         super().__init__(**to_kwargs("adjust-layout"))
 
         with self:
-            v3.VIcon("mdi-collage", classes="px-6 opacity-50")
+            v3.VIcon("mdi-view-module", classes="px-6 opacity-50")
             v3.VLabel("Viewport layout", classes="text-subtitle-2")
             v3.VSpacer()
 
             v3.VSlider(
                 v_model=("aspect_ratio", 2),
-                prepend_icon="mdi-aspect-ratio",
+                prepend_icon="mdi-arrow-expand-horizontal",
                 min=1,
                 max=2,
                 step=0.1,
@@ -81,7 +81,7 @@ class Layout(v3.VToolbar):
             with v3.VBtn(
                 "Size",
                 classes="text-none mx-4",
-                prepend_icon="mdi-view-module",
+                prepend_icon="mdi-view-column",
                 append_icon="mdi-menu-down",
             ):
                 with v3.VMenu(activator="parent"):

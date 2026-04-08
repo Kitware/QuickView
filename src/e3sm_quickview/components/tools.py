@@ -128,7 +128,7 @@ class LayoutManagement(ToggleButton):
         super().__init__(
             compact="compact_drawer",
             title="Viewport layout",
-            icon="mdi-collage",
+            icon="mdi-view-module",
             value="adjust-layout",
             keybinding="p",
         )
@@ -160,7 +160,7 @@ class Cropping(ToggleButton):
     def __init__(self):
         super().__init__(
             compact="compact_drawer",
-            title="Lat/Long cropping",
+            title="Lat/Lon cropping",
             icon="mdi-web",
             value="adjust-databounds",
             keybinding="l",
