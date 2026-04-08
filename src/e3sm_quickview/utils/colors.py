@@ -1,16 +1,16 @@
 TYPE_COLORS = [
-    "red",
-    "yellow",
-    "purple",
-    "cyan",
     "brown",
-    "indigo",
-    "gray",
-    "orange",
+    "amber",
+    "cyan",
+    "purple",
+    "blue-gray",
     "green",
-    "orange",
-    "lime",
-    "deep-purple",
+    "deep-orange",
+    "indigo",
+    "pink",
+    "teal",
+    "gray",
+    "red",
 ]
 
 
