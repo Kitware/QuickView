@@ -177,26 +177,33 @@ class LandingPage(v3.VContainer):
                 html.A(
                     "QuickView",
                     classes="text-primary text-decoration-none",
-                    href="https://quickview.readthedocs.io/en/latest/",
+                    href="https://kitware.github.io/QuickView/guides/quickview/",
                     target="_blank",
                 )
 
             Paragraph(f"""
-                {Bold("EAM QuickView")} is an open-source, interactive visualization
-                tool designed for scientists working with the atmospheric component
-                of the {Link("Energy Exascale Earth System Model (E3SM)", "https://e3sm.org/")},
-                known as the E3SM Atmosphere Model (EAM).
-                Its Python- and {Link("Trame", "https://www.kitware.com/trame/")}-based
-                Graphical User Interface (GUI) provides intuitive access to {Link("ParaView's", "https://www.paraview.org/")} powerful analysis
-                and visualization capabilities, without the steep learning curve.
+                {Bold("QuickView")} is an open-source, interactive visualization
+                tool designed for Earth system modelers to take a quick look at
+                a collection of physical quantities in their simulation files.
+                The current version supports only the cubed-sphere "physics" grids,
+                i.e., the ne*pg2 type, but extensions to other grids are underway. 
+                QuickView's Python and {Link("trame", "https://www.kitware.com/trame/")}-based
+                graphical User Interface (UI) provides the users with an intuitive access to
+                {Link("ParaView", "https://www.paraview.org/")}'s powerful analysis
+                and visualization capabilities without requiring a steep learning curve.
+                A detailed {Bold("User's Guide")} can be found through
+                {Link("this link","https://kitware.github.io/QuickView/guides/quickview/")}.
+                {Bold("Bug reports")} and feature requests can be submitted on
+                {Link("GitHub","https://github.com/Kitware/QuickView/issues")}.
             """)
 
-            v3.VImg(
-                classes="rounded-lg",
-                src=ASSETS.banner,
-            )
+#           v3.VImg(
+#               classes="rounded-lg",
+#               src=ASSETS.banner,
+#           )
 
-            Title("Getting started")
+
+            Title("Toolbar Icons")
 
             with v3.VRow():
                 with v3.VCol(cols=6):
@@ -212,7 +219,7 @@ class LandingPage(v3.VContainer):
                     ToolAnimation()
                     ToolStateImportExport()
 
-            Title("Keyboard shortcuts")
+            Title("Keyboard Shortcuts")
 
             with v3.VRow():
                 with v3.VCol(cols=6):
@@ -329,68 +336,24 @@ class LandingPage(v3.VContainer):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="6", variant="contained", inline=True)
 
-            Title("Simulation Files")
-
-            Paragraph(
-                """
-                QuickView has been developed using EAM's history output on
-                the physics grids (pg2 grids) written by EAMv2, v3, and an
-                intermediate version towards v4 (EAMxx).
-                Those sample output files can be found on Zenodo.
-                """
-            )
-            Paragraph(
-                """
-                Developers and users of EAM often use tools like NCO and CDO
-                or write their own scripts to calculate time averages and/or
-                select a subset of variables from the original model output.
-                For those use cases, we clarify below the features of the data
-                format that QuickView expects in order to properly read and
-                visualize the simulation data.
-                """
-            )
-
-            Title("Connectivity Files")
-
-            Paragraph(
-                """
-                The horizontal grids used by EAM are cubed spheres.
-                Since these are unstructed grids, QuickView needs
-                to know how to map data to the globe. Therefore,
-                for each simulation data file, a "connectivity file"
-                needs to be provided.
-                """
-            )
-
-            Paragraph(
-                """
-                In EAMv2, v3, and v4, most of the variables
-                (physical quantities) are written out on a
-                "physics grid" (also referred to as "physgrid",
-                "FV grid", or "control volume mesh") described
-                in Hannah et al. (2021). The naming convention
-                for such grids is ne*pg2, with * being a number,
-                e.g., 4, 30, 120, 256. Further details about EAM's
-                cubed-sphere grids can be found in EAM's documention,
-                for example in this overview and this description.
-                """
-            )
-            Paragraph(
-                """
-                Future versions of QuickView will also support the
-                cubed-sphere meshes used by EAM's dynamical core,
-                i.e., the ne*np4 grids (also referred to as
-                "native grids" or "GLL grids").
-                """
-            )
-
             Title("Project Background")
 
-            Paragraph(
-                """
-                The lead developer of EAM QuickView is Abhishek Yenpure (abhi.yenpure@kitware.com)
-                at Kitware, Inc.. Other key contributors at Kitware, Inc. include Berk Geveci and
-                Sebastien Jourdain. Key contributors on the atmospheric science side are Hui Wan
-                and Kai Zhang at Pacific Northwest National Laboratory.
-                """
+            Paragraph(f"""
+                QuickView was collaboratively developed by
+                {Link("Kitware", "https://www.kitware.com")} and
+                {Link("Pacific Northwest National Laboratory", "https://www.pnnl.gov/")}
+                using funding from the U.S. Department of Energy's SciDAC program
+                through a partnership between
+                the {Link("Advanced Scientific Computing Reaserch (ASCR)",
+                "https://www.energy.gov/science/ascr/advanced-scientific-computing-research")} program and
+                the {Link("Biological and Environmental Research (BER)",
+                "https://www.energy.gov/science/ber/biological-and-environmental-research")} program.
+            """
+            )
+
+            Paragraph(f"""
+                The development of QuickView used resources of the
+                {Link("National Energy Research Scientific Computing Center (NERSC)","https://www.nersc.gov/")},
+                a U.S. Department of Energy User Facility.
+            """
             )
