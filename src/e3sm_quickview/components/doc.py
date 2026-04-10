@@ -183,12 +183,15 @@ class LandingPage(v3.VContainer):
 
             Paragraph(f"""
                 {Bold("QuickView")} is an open-source, interactive visualization
-                tool designed for Earth system modelers to take a quick look at
+                tool designed to help Earth system modelers take a quick look at
                 a collection of physical quantities in their simulation files.
-                The current version supports only the cubed-sphere "physics" grids,
-                i.e., the ne*pg2 type, but extensions to other grids are underway. 
+                The physical quantities are presented in the form of global or regional maps.
+                Currently, QuickView supports only the cubed-sphere "physics" grids,
+                i.e., the ne*pg2 meshes used by the atmosphere component of the
+                {Link("Energy Exascale Earth System Model (E3SM)","https://e3sm.org/")},
+                but extensions to other grids are underway. 
                 QuickView's Python and {Link("trame", "https://www.kitware.com/trame/")}-based
-                graphical User Interface (UI) provides the users with an intuitive access to
+                graphical User Interface (UI) provides the users with intuitive access to
                 {Link("ParaView", "https://www.paraview.org/")}'s powerful analysis
                 and visualization capabilities without requiring a steep learning curve.
                 A detailed {Bold("User's Guide")} can be found through
