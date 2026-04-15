@@ -157,7 +157,7 @@ def create_bottom_bar(config, update_color_preset):
                                     '''v-tooltip:bottom="config.use_log_scale === 'linear' ? 'Toggle to log scale' : config.use_log_scale === 'log' ? 'Toggle to symlog scale' : 'Toggle to linear scale'"'''
                                 ],
                                 icon=(
-                                    "config.use_log_scale === 'log' ? 'mdi-math-log' : config.use_log_scale === 'symlog' ? 'mdi-chart-bell-curve-cumulative' : 'mdi-stairs'",
+                                    "config.use_log_scale === 'log' ? 'mdi-math-log' : config.use_log_scale === 'symlog' ? 'mdi-sine-wave mdi-rotate-330' : 'mdi-stairs'",
                                 ),
                                 click="config.use_log_scale = config.use_log_scale === 'linear' ? 'log' : config.use_log_scale === 'log' ? 'symlog' : 'linear'",
                                 size="small",
@@ -257,16 +257,43 @@ def create_bottom_bar(config, update_color_preset):
                                 classes="rounded",
                             )
             html.Div(
-                "{{ utils.quickview.formatRange(config.color_range?.[0], config.use_log_scale, config.color_range?.[0], config.color_range?.[1]) }}",
+                "{{ utils.quickview.formatRange(config.effective_color_range?.[0], config.use_log_scale, config.effective_color_range?.[0], config.effective_color_range?.[1]) }}",
                 classes="text-caption px-2 text-no-wrap",
             )
-            with html.Div(classes="overflow-hidden rounded w-100", style="height:70%;"):
+            with html.Div(
+                classes="rounded w-100",
+                style="height:70%;position:relative;",
+            ):
                 html.Img(
                     src=("config.lut_img",),
                     style="width:100%;height:2rem;",
                     draggable=False,
                 )
+                with html.Div(
+                    style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;",
+                ):
+                    with html.Div(
+                        v_for="(tick, i) in config.color_ticks",
+                        key="i",
+                        style=(
+                            "`position:absolute;left:${tick.position}%;top:0;height:100%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;`",
+                        ),
+                    ):
+                        html.Div(
+                            style=(
+                                "`width:1.5px;height:30%;background:${tick.color};`",
+                            ),
+                        )
+                        html.Span(
+                            "{{ tick.label }}",
+                            style=(
+                                "`font-size:0.5rem;line-height:1;white-space:nowrap;color:${tick.color};`",
+                            ),
+                        )
+                        html.Div(
+                            style=("`width:1.5px;flex:1;background:${tick.color};`",),
+                        )
             html.Div(
-                "{{ utils.quickview.formatRange(config.color_range?.[1], config.use_log_scale, config.color_range?.[0], config.color_range?.[1]) }}",
+                "{{ utils.quickview.formatRange(config.effective_color_range?.[1], config.use_log_scale, config.effective_color_range?.[0], config.effective_color_range?.[1]) }}",
                 classes="text-caption px-2 text-no-wrap",
             )

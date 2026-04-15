@@ -133,3 +133,185 @@ def normalize_range(
 
     normalized = (value - old_min) / (old_max - old_min)
     return new_min + normalized * (new_max - new_min)
+
+
+def get_nice_ticks(vmin, vmax, n, scale="linear"):
+    """Compute nicely spaced tick values for a given range and scale.
+
+    Args:
+        vmin: Minimum data value
+        vmax: Maximum data value
+        n: Desired number of ticks
+        scale: One of 'linear', 'log', or 'symlog'
+
+    Returns:
+        Sorted array of unique, snapped tick values.
+    """
+
+    def snap(val):
+        if np.isclose(val, 0, atol=1e-12):
+            return 0.0
+        sign = np.sign(val)
+        val_abs = abs(val)
+        mag = 10 ** np.floor(np.log10(val_abs))
+        residual = val_abs / mag
+        nice_steps = np.array([1.0, 2.0, 5.0, 10.0])
+        best_step = nice_steps[np.abs(nice_steps - residual).argmin()]
+        return sign * best_step * mag
+
+    if scale == "linear":
+        raw_ticks = np.linspace(vmin, vmax, n)
+    elif scale == "log":
+        # Use integer powers of 10 that fall strictly inside [vmin, vmax]
+        safe_vmin = max(vmin, 1e-15)
+        safe_vmax = max(vmax, 1e-14)
+        start_exp = int(np.floor(np.log10(safe_vmin)))
+        stop_exp = int(np.ceil(np.log10(safe_vmax)))
+        powers = [
+            10.0**e
+            for e in range(start_exp, stop_exp + 1)
+            if safe_vmin <= 10.0**e <= safe_vmax
+        ]
+        # Fall back to log-spaced ticks when no powers of 10 are interior
+        if len(powers) < 2:
+            raw_ticks = np.geomspace(safe_vmin, safe_vmax, n)
+        else:
+            raw_ticks = np.array(powers)
+    elif scale == "symlog":
+
+        def transform(x, th):
+            return np.sign(x) * np.log10(np.abs(x) / th + 1)
+
+        def inverse(y, th):
+            return np.sign(y) * th * (10 ** np.abs(y) - 1)
+
+        linthresh = max(abs(vmin), abs(vmax)) * 1e-2
+        if linthresh == 0:
+            linthresh = 1.0
+        t_min, t_max = transform(vmin, linthresh), transform(vmax, linthresh)
+        t_ticks = np.linspace(t_min, t_max, n)
+        raw_ticks = inverse(t_ticks, linthresh)
+    else:
+        raw_ticks = np.linspace(vmin, vmax, n)
+
+    nice_ticks = np.array([snap(t) for t in raw_ticks])
+
+    # Force 0 for non-log scales if it's within range
+    if vmin <= 0 <= vmax and scale != "log":
+        idx = np.abs(nice_ticks).argmin()
+        nice_ticks[idx] = 0.0
+
+    return np.unique(np.sort(nice_ticks))
+
+
+def format_tick(val):
+    """Format a tick value as a concise human-readable string.
+
+    Returns a string suitable for display on a colorbar. Powers of 10 are
+    shown as '10^N', very large/small values use scientific notation, and
+    intermediate values use fixed-point.
+    """
+    if np.isclose(val, 0, atol=1e-12):
+        return "0"
+
+    val_abs = abs(val)
+    log10 = np.log10(val_abs)
+
+    if np.isclose(log10, np.round(log10), atol=1e-12):
+        exponent = int(np.round(log10))
+        sign = "-" if val < 0 else ""
+        if exponent == 0:
+            return f"{sign}1"
+        if exponent == 1:
+            return f"{sign}10"
+        return f"{sign}10^{exponent}"
+
+    if val_abs >= 1000 or val_abs <= 0.01:
+        return f"{val:.1e}"
+    return f"{int(val) if val == int(val) else val:.1f}"
+
+
+def tick_contrast_color(r, g, b):
+    """Return '#fff' or '#000' for best contrast against the given RGB color.
+
+    Uses the W3C relative luminance formula to decide. RGB values are
+    expected in [0, 1] range.
+    """
+    luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    return "#000" if luminance > 0.45 else "#fff"
+
+
+def compute_color_ticks(vmin, vmax, scale="linear", n=5, min_gap=7, edge_margin=3):
+    """Compute tick marks for a colorbar.
+
+    Tick positions are always linear in data space since the colorbar image
+    is sampled linearly (lut_to_img uses uniform steps from vmin to vmax).
+
+    Args:
+        vmin: Minimum color range value
+        vmax: Maximum color range value
+        scale: One of 'linear', 'log', or 'symlog'
+        n: Desired number of ticks
+        min_gap: Minimum gap between ticks in percentage points
+        edge_margin: Minimum distance from edges (0% and 100%) in percentage points
+
+    Returns:
+        List of dicts with 'position' (0-100 percentage) and 'label' keys.
+    """
+    if vmin >= vmax:
+        return []
+
+    raw_n = n if scale == "linear" else n * 2
+    ticks = get_nice_ticks(vmin, vmax, raw_n, scale)
+    data_range = vmax - vmin
+
+    # Build candidate list with position in linear data space
+    candidates = []
+    has_zero = False
+    for t in ticks:
+        val = float(t)
+        pos = (val - vmin) / data_range * 100
+        if edge_margin <= pos <= (100 - edge_margin):
+            is_zero = np.isclose(val, 0, atol=1e-12)
+            if is_zero:
+                has_zero = True
+            candidates.append(
+                {
+                    "position": round(pos, 2),
+                    "label": format_tick(val),
+                    "priority": is_zero,
+                }
+            )
+
+    # Always include 0 when it falls within the range (for any scale)
+    if not has_zero and scale != "log":
+        zero_pos = (0.0 - vmin) / data_range * 100
+        if 0 <= zero_pos <= 100:
+            tick = {"position": round(zero_pos, 2), "label": "0", "priority": True}
+            # Insert in sorted order
+            inserted = False
+            for i, c in enumerate(candidates):
+                if tick["position"] <= c["position"]:
+                    candidates.insert(i, tick)
+                    inserted = True
+                    break
+            if not inserted:
+                candidates.append(tick)
+
+    # Filter out ticks that are too close together, but never remove priority ticks
+    result = []
+    for tick in candidates:
+        is_priority = tick.get("priority", False)
+        if is_priority:
+            if result and (tick["position"] - result[-1]["position"]) < min_gap:
+                if not result[-1].get("priority", False):
+                    result.pop()
+            result.append(tick)
+        elif not result or (tick["position"] - result[-1]["position"]) >= min_gap:
+            # Also check distance to next priority tick (look-ahead)
+            result.append(tick)
+
+    # Clean up internal flags before returning
+    for tick in result:
+        tick.pop("priority", None)
+    return result

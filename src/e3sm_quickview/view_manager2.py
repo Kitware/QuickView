@@ -28,6 +28,7 @@ from vtkmodules.vtkRenderingCore import (
 from e3sm_quickview.components import view as tview
 from e3sm_quickview.presets import COLOR_BLIND_SAFE
 from e3sm_quickview.utils.color import COLORBAR_CACHE, lut_to_img
+from e3sm_quickview.utils.math import compute_color_ticks, tick_contrast_color
 
 
 def auto_size_to_col(size):
@@ -83,6 +84,8 @@ class ViewConfiguration(dataclass.StateDataModel):
     search: str | None = dataclass.Sync(str)
     n_colors: int = dataclass.Sync(int, 255)
     lut_img: str = dataclass.Sync(str)
+    color_ticks: list = dataclass.Sync(list, list)
+    effective_color_range: list[float] = dataclass.Sync(tuple[float, float], (0, 1))
 
 
 class VariableView(TrameComponent):
@@ -172,17 +175,30 @@ class VariableView(TrameComponent):
     def update_color_preset(self, name, invert, log_scale, n_colors=255):
         self.config.preset = name
 
+        # ApplyPreset resets range to [0,1], so always apply the linear
+        # preset first, rescale to the current range, then apply transforms
+        self._apply_linear_to_lut(invert)
+        self.lut.RescaleTransferFunction(*self.config.color_range)
+
         if log_scale == "log":
-            self._apply_log_to_lut(invert)
+            self._apply_log_to_lut()
         elif log_scale == "symlog":
-            self._apply_symlog_to_lut(invert)
-        else:
-            self._apply_linear_to_lut(invert)
+            self._apply_symlog_to_lut()
 
         if n_colors is not None:
             self.lut.NumberOfTableValues = n_colors
 
+        # Read the actual LUT range (may differ from color_range for log scale)
+        ctf = self.lut.GetClientSideObject()
+        self.config.effective_color_range = ctf.GetRange()
+
         self.config.lut_img = lut_to_img(self.lut)
+        self._compute_ticks()
+
+        # Force mapper to pick up LUT changes
+        self.mapper.SetLookupTable(ctf)
+        self.mapper.Modified()
+
         self.render()
 
     def _apply_linear_to_lut(self, invert=False):
@@ -192,19 +208,25 @@ class VariableView(TrameComponent):
         if invert:
             self.lut.InvertTransferFunction()
 
-    def _apply_log_to_lut(self, invert=False):
-        """Apply preset with log scale."""
-        self.lut.UseLogScale = 0
-        self.lut.ApplyPreset(self.config.preset, True)
-        if invert:
-            self.lut.InvertTransferFunction()
+    def _apply_log_to_lut(self):
+        """Transform the already-prepared LUT to log scale.
+
+        Log scale requires all positive values, so clamp the range if needed.
+        """
+        ctf = self.lut.GetClientSideObject()
+        x_min, x_max = ctf.GetRange()
+        if x_max <= 0:
+            return
+        if x_min <= 0:
+            x_min = x_max * 1e-6
+            self.lut.RescaleTransferFunction(x_min, x_max)
         self.lut.MapControlPointsToLogSpace()
         self.lut.UseLogScale = 1
 
     def _apply_symlog_to_lut(
-        self, invert=False, linthresh=None, linscale=1.0, base=10, n_samples=256
+        self, linthresh=None, linscale=1.0, base=10, n_samples=256
     ):
-        """Apply preset with symmetric log scale.
+        """Transform the already-prepared LUT to symmetric log scale.
 
         Uses:
         - Linear for |x| <= linthresh
@@ -214,11 +236,6 @@ class VariableView(TrameComponent):
         Samples colors from the linear preset and redistributes them
         across the data range using symlog spacing.
         """
-        self.lut.UseLogScale = 0
-        self.lut.ApplyPreset(self.config.preset, True)
-        if invert:
-            self.lut.InvertTransferFunction()
-
         # Get the current data range from the LUT
         ctf = self.lut.GetClientSideObject()
         x_min, x_max = ctf.GetRange()
@@ -236,12 +253,14 @@ class VariableView(TrameComponent):
 
         def symlog(x):
             abs_x = np.abs(x)
+            # Clip to avoid log(0); values <= linthresh use linear branch anyway
+            safe_abs = np.maximum(abs_x, linthresh)
             out = np.where(
                 abs_x <= linthresh,
                 x * linscale_adj,
                 np.sign(x)
                 * linthresh
-                * (linscale_adj + np.log(abs_x / linthresh) / log_base),
+                * (linscale_adj + np.log(safe_abs / linthresh) / log_base),
             )
             return out
 
@@ -326,6 +345,29 @@ class VariableView(TrameComponent):
             self.config.use_log_scale,
             self.config.n_colors,
         )
+
+    def _compute_ticks(self):
+        vmin, vmax = self.config.effective_color_range
+        ticks = compute_color_ticks(vmin, vmax, scale=self.config.use_log_scale, n=5)
+        # Sample colors exactly as lut_to_img does: use RGBPoints range
+        rgb_points = self.lut.RGBPoints
+        if len(rgb_points) < 4:
+            self.config.color_ticks = []
+            return
+        ctf = self.lut.GetClientSideObject()
+        rgb = [0.0, 0.0, 0.0]
+        img_min = rgb_points[0]
+        img_max = rgb_points[-4]
+        img_range = img_max - img_min
+        if img_range == 0:
+            self.config.color_ticks = []
+            return
+        for tick in ticks:
+            t = tick["position"] / 100.0
+            value = img_min + t * img_range
+            ctf.GetColor(value, rgb)
+            tick["color"] = tick_contrast_color(rgb[0], rgb[1], rgb[2])
+        self.config.color_ticks = ticks
 
     def _build_ui(self):
         with DivLayout(
