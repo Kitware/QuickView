@@ -1,5 +1,7 @@
 import math
 
+import numpy as np
+
 from paraview import simple
 from trame.app import TrameComponent, dataclass
 from trame.decorators import controller
@@ -50,7 +52,7 @@ class ViewConfiguration(dataclass.StateDataModel):
     preset: str = dataclass.Sync(str, "BuGnYl")
     invert: bool = dataclass.Sync(bool, False)
     color_blind: bool = dataclass.Sync(bool, False)
-    use_log_scale: bool = dataclass.Sync(bool, False)
+    use_log_scale: str = dataclass.Sync(str, "linear")
     color_value_min: str = dataclass.Sync(str, "0")
     color_value_max: str = dataclass.Sync(str, "1")
     color_value_min_valid: bool = dataclass.Sync(bool, True)
@@ -152,14 +154,13 @@ class VariableView(TrameComponent):
 
     def update_color_preset(self, name, invert, log_scale, n_colors=255):
         self.config.preset = name
-        self.lut.UseLogScale = 0
-        self.lut.ApplyPreset(self.config.preset, True)
-        if invert:
-            self.lut.InvertTransferFunction()
 
-        if log_scale:
-            self.lut.MapControlPointsToLogSpace()
-            self.lut.UseLogScale = 1
+        if log_scale == "log":
+            self._apply_log_to_lut(invert)
+        elif log_scale == "symlog":
+            self._apply_symlog_to_lut(invert)
+        else:
+            self._apply_linear_to_lut(invert)
 
         if n_colors is not None:
             self.lut.NumberOfTableValues = n_colors
@@ -167,6 +168,93 @@ class VariableView(TrameComponent):
         self.config.lut_img = lut_to_img(self.lut)
 
         self.render()
+
+    def _apply_linear_to_lut(self, invert=False):
+        """Apply preset with linear scale."""
+        self.lut.UseLogScale = 0
+        self.lut.ApplyPreset(self.config.preset, True)
+        if invert:
+            self.lut.InvertTransferFunction()
+
+    def _apply_log_to_lut(self, invert=False):
+        """Apply preset with log scale."""
+        self.lut.UseLogScale = 0
+        self.lut.ApplyPreset(self.config.preset, True)
+        if invert:
+            self.lut.InvertTransferFunction()
+        self.lut.MapControlPointsToLogSpace()
+        self.lut.UseLogScale = 1
+
+    def _apply_symlog_to_lut(
+        self, invert=False, linthresh=None, linscale=1.0, base=10, n_samples=256
+    ):
+        """Apply preset with symmetric log scale.
+
+        Uses:
+        - Linear for |x| <= linthresh
+        - Logarithmic for |x| > linthresh
+        with continuity at the boundary.
+
+        Samples colors from the linear preset and redistributes them
+        across the data range using symlog spacing.
+        """
+        self.lut.UseLogScale = 0
+        self.lut.ApplyPreset(self.config.preset, True)
+        if invert:
+            self.lut.InvertTransferFunction()
+
+        # Get the current data range from the LUT
+        ctf = self.lut.GetClientSideObject()
+        x_min, x_max = ctf.GetRange()
+        data_range = x_max - x_min
+        if data_range == 0:
+            return
+
+        if linthresh is None:
+            linthresh = max(abs(x_min), abs(x_max)) * 1e-2
+            if linthresh == 0:
+                linthresh = 1.0
+
+        log_base = np.log(base)
+        linscale_adj = linscale / (1.0 - base**-1)
+
+        def symlog(x):
+            abs_x = np.abs(x)
+            out = np.where(
+                abs_x <= linthresh,
+                x * linscale_adj,
+                np.sign(x)
+                * linthresh
+                * (linscale_adj + np.log(abs_x / linthresh) / log_base),
+            )
+            return out
+
+        # Sample colors from the linear LUT at uniform positions
+        rgb = [0.0, 0.0, 0.0]
+        s_min = symlog(x_min)
+        s_max = symlog(x_max)
+        s_range = s_max - s_min
+        if s_range == 0:
+            return
+
+        new_rgb_points = []
+        for i in range(n_samples):
+            # Uniform position in data space
+            t = i / (n_samples - 1)
+            x_data = x_min + t * data_range
+
+            # Map x_data through symlog, normalize to [0,1], then look up
+            # the color at the corresponding linear position
+            s_val = symlog(x_data)
+            s_t = (s_val - s_min) / s_range
+            x_lookup = x_min + s_t * data_range
+            ctf.GetColor(x_lookup, rgb)
+            new_rgb_points.extend(
+                [float(x_data), float(rgb[0]), float(rgb[1]), float(rgb[2])]
+            )
+
+        # Write back through the proxy so state stays in sync
+        self.lut.RGBPoints = new_rgb_points
 
     def color_range_str_to_float(self, color_value_min, color_value_max):
         try:
@@ -215,7 +303,13 @@ class VariableView(TrameComponent):
                 self.config.color_value_min_valid = True
                 self.config.color_value_max_valid = True
                 self.lut.RescaleTransferFunction(*data_range)
-        self.render()
+
+        self.update_color_preset(
+            self.config.preset,
+            self.config.invert,
+            self.config.use_log_scale,
+            self.config.n_colors,
+        )
 
     def _build_ui(self):
         with DivLayout(

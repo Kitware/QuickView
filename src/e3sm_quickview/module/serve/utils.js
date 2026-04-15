@@ -1,10 +1,21 @@
 window.trame.utils.quickview = {
-  formatRange(value, useLog) {
+  formatRange(value, useLog, rangeMin, rangeMax) {
     if (value === null || value === undefined || isNaN(value)) {
       return "Auto";
     }
-    if (useLog && value > 0) {
+    if (useLog === "log" && value > 0) {
       return `10^(${Math.log10(value).toFixed(1)})`;
+    }
+    if (useLog === "symlog") {
+      if (value === 0) return "0";
+      const linthresh =
+        Math.max(Math.abs(rangeMin), Math.abs(rangeMax)) * 1e-2 || 1.0;
+      const absVal = Math.abs(value);
+      if (absVal <= linthresh) {
+        return value.toExponential(1);
+      }
+      const sign = value < 0 ? "-" : "";
+      return `${sign}10^(${Math.log10(absVal).toFixed(1)})`;
     }
     const nSignDigit = Math.log10(Math.abs(value));
     if (Math.abs(nSignDigit) < 6 || value === 0) {

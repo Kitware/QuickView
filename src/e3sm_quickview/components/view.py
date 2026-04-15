@@ -154,15 +154,15 @@ def create_bottom_bar(config, update_color_preset):
                             )
                             v3.VIconBtn(
                                 raw_attrs=[
-                                    '''v-tooltip:bottom="config.use_log_scale ? 'Toggle to linear scale' : 'Toggle to log scale'"'''
+                                    '''v-tooltip:bottom="config.use_log_scale === 'linear' ? 'Toggle to log scale' : config.use_log_scale === 'log' ? 'Toggle to symlog scale' : 'Toggle to linear scale'"'''
                                 ],
                                 icon=(
-                                    "config.use_log_scale ? 'mdi-math-log' : 'mdi-stairs'",
+                                    "config.use_log_scale === 'log' ? 'mdi-math-log' : config.use_log_scale === 'symlog' ? 'mdi-chart-bell-curve-cumulative' : 'mdi-stairs'",
                                 ),
-                                click="config.use_log_scale = !config.use_log_scale",
+                                click="config.use_log_scale = config.use_log_scale === 'linear' ? 'log' : config.use_log_scale === 'log' ? 'symlog' : 'linear'",
                                 size="small",
                                 text=(
-                                    "config.use_log_scale ? 'Log scale' : 'Linear scale'",
+                                    "config.use_log_scale === 'log' ? 'Log' : config.use_log_scale === 'symlog' ? 'SymLog' : 'Linear'",
                                 ),
                                 variant="text",
                             )
@@ -257,7 +257,7 @@ def create_bottom_bar(config, update_color_preset):
                                 classes="rounded",
                             )
             html.Div(
-                "{{ utils.quickview.formatRange(config.color_range?.[0], config.use_log_scale) }}",
+                "{{ utils.quickview.formatRange(config.color_range?.[0], config.use_log_scale, config.color_range?.[0], config.color_range?.[1]) }}",
                 classes="text-caption px-2 text-no-wrap",
             )
             with html.Div(classes="overflow-hidden rounded w-100", style="height:70%;"):
@@ -267,6 +267,6 @@ def create_bottom_bar(config, update_color_preset):
                     draggable=False,
                 )
             html.Div(
-                "{{ utils.quickview.formatRange(config.color_range?.[1], config.use_log_scale) }}",
+                "{{ utils.quickview.formatRange(config.color_range?.[1], config.use_log_scale, config.color_range?.[0], config.color_range?.[1]) }}",
                 classes="text-caption px-2 text-no-wrap",
             )
