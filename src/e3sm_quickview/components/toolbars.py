@@ -450,7 +450,7 @@ class Animation(v3.VToolbar):
                 v3.VSlider(
                     v_model=("animation_step", 1),
                     min=0,
-                    max=("amimation_step_max", 0),
+                    max=("animation_step_max", 0),
                     step=1,
                     hide_details=True,
                     density="compact",
@@ -472,14 +472,14 @@ class Animation(v3.VToolbar):
                 v3.VIconBtn(
                     icon="mdi-chevron-right",
                     flat=True,
-                    disabled=("animation_step === amimation_step_max",),
-                    click="animation_step = Math.min(amimation_step_max, animation_step + 1)",
+                    disabled=("animation_step === animation_step_max",),
+                    click="animation_step = Math.min(animation_step_max, animation_step + 1)",
                 )
                 v3.VIconBtn(
                     icon="mdi-page-last",
-                    disabled=("animation_step === amimation_step_max",),
+                    disabled=("animation_step === animation_step_max",),
                     flat=True,
-                    click="animation_step = amimation_step_max",
+                    click="animation_step = animation_step_max",
                 )
                 v3.VDivider(vertical=True, classes="mx-2")
                 v3.VIconBtn(
@@ -491,12 +491,12 @@ class Animation(v3.VToolbar):
     @change("animation_track")
     def _on_animation_track_change(self, animation_track, **_):
         self.state.animation_step = 0
-        self.state.amimation_step_max = 0
+        self.state.animation_step_max = 0
 
         if animation_track:
             values = self.state[animation_track]
             if values:
-                self.state.amimation_step_max = len(values) - 1
+                self.state.animation_step_max = len(values) - 1
 
     @change("animation_step")
     def _on_animation_step(self, animation_track, animation_step, **_):
@@ -512,7 +512,7 @@ class Animation(v3.VToolbar):
         with self.state as s:
             while s.animation_play:
                 await asyncio.sleep(0.1)
-                if s.animation_step < s.amimation_step_max:
+                if s.animation_step < s.animation_step_max:
                     with s:
                         s.animation_step += 1
                     await self.server.network_completion
