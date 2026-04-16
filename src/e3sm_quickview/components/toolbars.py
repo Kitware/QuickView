@@ -366,7 +366,7 @@ class DataSelection(html.Div):
                                 )
                                 v3.VSpacer()
                                 v3.VLabel(
-                                    "{{ t_values ? parseFloat(t_values[t_idx]).toFixed(2) : '' }} hPa (k={{ t_idx }})",
+                                    "{{ dim_units[track] ? parseFloat(t_values[t_idx]).toFixed(2) + ' ' + dim_units[track] : 'Index value: ' + t_idx }} (k={{ t_idx }})",
                                     classes="text-body-2",
                                 )
                             v3.VSlider(
@@ -418,7 +418,7 @@ class DataSelection(html.Div):
                                     classes="text-subtitle-2 ml-2 mt-1",
                                 )
                                 v3.VLabel(
-                                    "{{ t_values ? parseFloat(t_values[Number(t_idx)]).toFixed(2) : '' }} hPa",
+                                    "{{ dim_units[track] ? parseFloat(t_values[Number(t_idx)]).toFixed(2) + ' ' + dim_units[track] : 'Index value: ' + t_idx }}",
                                     classes="text-body-2 text-no-wrap ml-2 mt-1",
                                 )
 

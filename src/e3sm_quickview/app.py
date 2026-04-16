@@ -442,20 +442,26 @@ class EAMApp(TrameApp):
                 # Update Layer/Time values and ui layout
                 n_cols = 0
                 available_tracks = []
+                dim_units = {}
                 for name, dim in self.source.dimensions.items():
                     values = dim.data
                     # Convert to list for JSON serialization
-                    self.state[name] = (
-                        values.tolist()
-                        if hasattr(values, "tolist")
-                        else list(values)
-                        if values is not None
-                        else []
-                    )
+                    if values is not None:
+                        self.state[name] = (
+                            values.tolist()
+                            if hasattr(values, "tolist")
+                            else list(values)
+                        )
+                    else:
+                        self.state[name] = list(range(dim.size))
 
-                    if values is not None and len(values) > 1:
+                    if dim.size > 1:
                         n_cols += 1
                         available_tracks.append(name)
+                        if dim.units:
+                            dim_units[name] = dim.units
+
+                self.state.dim_units = dim_units
                 self.state.toolbar_slider_cols = 12 / n_cols if n_cols else 12
                 self.state.animation_tracks = available_tracks
                 self.state.animation_track = (
