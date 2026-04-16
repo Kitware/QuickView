@@ -255,6 +255,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         self._timeSteps = []
         # Dictionary to store dimension slices
         self._slices = {}
+        self._changed_dims = set()
 
         # vtkDataArraySelection to allow users choice for fields
         # to fetch from the netCDF data set
@@ -627,6 +628,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                                     f"{dim_display}={slice_val} (valid range: 0-{dim_size - 1})"
                                 )
                             else:
+                                if self._slices.get(dim) != slice_val:
+                                    self._changed_dims.add(dim)
                                 self._slices[dim] = slice_val
                         else:
                             print_error(
@@ -759,12 +762,19 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         for i in range(last_num_arrays):
             to_remove.add(output_mesh.CellData.GetArrayName(i))
 
+        changed_dims = self._changed_dims
         for name, varmeta in self._variables.items():
             if self._variable_selection.ArrayIsEnabled(name):
                 if output_mesh.CellData.HasArray(name):
                     to_remove.remove(name)
+                    if changed_dims and not changed_dims.intersection(
+                        varmeta.dimensions
+                    ):
+                        continue
                 data = self._load_variable(vardata, varmeta)
                 output_mesh.CellData.append(data, name)
+
+        self._changed_dims = set()
 
         area_var_name = "area"
         if self._areavar and not output_mesh.CellData.HasArray(area_var_name):
