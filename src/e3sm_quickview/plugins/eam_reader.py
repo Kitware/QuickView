@@ -423,8 +423,10 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                     slice_tuple.append(self._slices.get(dim, 0))
 
             # Get data with proper slicing
-            data = vardata[varmeta.name][tuple(slice_tuple)].data.reshape(-1).copy()
-            data[data == varmeta.fillval] = np.nan
+            data = vardata[varmeta.name][tuple(slice_tuple)].data.reshape(-1)
+            if not np.isnan(varmeta.fillval):
+                data = data.copy()
+                data[data == varmeta.fillval] = np.nan
             return data
         except Exception as e:
             print_error(f"Error loading variable {varmeta.name}: {e}")
