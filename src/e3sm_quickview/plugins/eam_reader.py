@@ -422,8 +422,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                     slice_tuple.append(self._slices.get(dim, 0))
 
             # Get data with proper slicing
-            data = vardata[varmeta.name][tuple(slice_tuple)].data.flatten()
-            data = np.where(data == varmeta.fillval, np.nan, data)
+            data = vardata[varmeta.name][tuple(slice_tuple)].data.reshape(-1).copy()
+            data[data == varmeta.fillval] = np.nan
             return data
         except Exception as e:
             print_error(f"Error loading variable {varmeta.name}: {e}")
@@ -460,8 +460,8 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         londim = mvars[np.where(np.char.find(mvars, "corner_lon") > -1)][0]
 
         # Build coordinates
-        lat = meshdata[latdim][:].data.flatten()
-        lon = meshdata[londim][:].data.flatten()
+        lat = meshdata[latdim][:].data.reshape(-1)
+        lon = meshdata[londim][:].data.reshape(-1)
 
         if self._ForceFloatPoints:
             points_type = np.float32
@@ -561,7 +561,7 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         # Clear old timestamps before adding new ones
         self._timeSteps.clear()
         if "time" in vardata.variables:
-            timesteps = vardata["time"][:].data.flatten()
+            timesteps = vardata["time"][:].data.reshape(-1)
             self._timeSteps.extend(timesteps)
 
     def SetDataFileName(self, fname):
