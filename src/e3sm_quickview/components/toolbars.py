@@ -438,7 +438,7 @@ class Animation(v3.VToolbar):
             )
             with v3.VRow(classes="ma-0 px-2 align-center"):
                 v3.VSelect(
-                    v_model=("animation_track", "timestamps"),
+                    v_model=("animation_track", None),
                     items=("available_animation_tracks", []),
                     flat=True,
                     variant="plain",
@@ -494,7 +494,9 @@ class Animation(v3.VToolbar):
         self.state.amimation_step_max = 0
 
         if animation_track:
-            self.state.amimation_step_max = len(self.state[animation_track]) - 1
+            values = self.state[animation_track]
+            if values:
+                self.state.amimation_step_max = len(values) - 1
 
     @change("animation_step")
     def _on_animation_step(self, animation_track, animation_step, **_):
