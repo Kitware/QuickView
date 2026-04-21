@@ -286,17 +286,26 @@ class EAMProject(VTKPythonAlgorithmBase):
         self.project = 0
         self.translate = False
         self.cached_points = None
+        # Cache keyed on input-points identity + projection params. Immune to
+        # spurious upstream Modified() on the shared points.
+        self._cached_input_points = None
+        self._cached_key = None
+
+    def _invalidate_cache(self):
+        self.cached_points = None
+        self._cached_input_points = None
+        self._cached_key = None
 
     def SetTranslation(self, translate):
         if self.translate != translate:
             self.translate = translate
-            self.cached_points = None
+            self._invalidate_cache()
             self.Modified()
 
     def SetProjection(self, project):
         if self.project != int(project):
             self.project = int(project)
-            self.cached_points = None
+            self._invalidate_cache()
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
@@ -310,9 +319,9 @@ class EAMProject(VTKPythonAlgorithmBase):
         else:
             outData.ShallowCopy(inData)
 
-        if self.cached_points and self.cached_points.GetMTime() >= max(
-            inData.GetPoints().GetMTime(), self.GetMTime()
-        ):
+        in_points = inData.GetPoints()
+        cache_key = (id(in_points), self.project, self.translate)
+        if self.cached_points is not None and self._cached_key == cache_key:
             outData.SetPoints(self.cached_points)
         else:
             # we modify the points, so copy them
@@ -351,6 +360,8 @@ class EAMProject(VTKPythonAlgorithmBase):
             # the previous cached_points, if any, is available for
             # garbage collection after this assignment
             self.cached_points = out_points_vtk
+            self._cached_input_points = in_points  # hold ref so id() stays valid
+            self._cached_key = cache_key
 
         return 1
 
@@ -472,6 +483,7 @@ class EAMExtract(VTKPythonAlgorithmBase):
         self.trim_lat = [0, 0]
         self.cached_cell_centers = None
         self._cached_output = None
+        self._last_was_trimmed = False
 
     def SetTrimLongitude(self, left, right):
         if left < 0 or left > 360 or right < 0 or right > 360 or left > (360 - right):
@@ -498,10 +510,12 @@ class EAMExtract(VTKPythonAlgorithmBase):
         outData = self.GetOutputData(outInfo, 0)
         if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
             outData.ShallowCopy(inData)
-            # if the filter execution follows an another execution that trims the
-            # number of points, the downstream filter could think that
-            # the trimmed points are still valid which results in a crash
-            outData.GetPoints().Modified()
+            # Only invalidate the shared points when transitioning *out* of a
+            # trimmed state — the original code did it unconditionally, which
+            # defeated EAMProject's cache on every pipeline update.
+            if self._last_was_trimmed:
+                outData.GetPoints().Modified()
+                self._last_was_trimmed = False
             return 1
 
         if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
@@ -574,6 +588,7 @@ class EAMExtract(VTKPythonAlgorithmBase):
 
             self._cached_output = outData.NewInstance()
             self._cached_output.ShallowCopy(outData)
+        self._last_was_trimmed = True
         return 1
 
 
