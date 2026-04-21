@@ -1,7 +1,7 @@
 import asyncio
 
 from trame.app import asynchronous
-from trame.decorators import change
+from trame.decorators import change, trigger
 from trame.widgets import client, html
 from trame.widgets import vuetify3 as v3
 
@@ -486,6 +486,30 @@ class Animation(v3.VToolbar):
                     icon=("animation_play ? 'mdi-stop' : 'mdi-play'",),
                     flat=True,
                     click="animation_play = !animation_play",
+                    disabled=("capture_recording",),
+                )
+                v3.VDivider(vertical=True, classes="mx-2")
+                v3.VSelect(
+                    v_model=("capture_variable", None),
+                    items=("variables_selected", []),
+                    flat=True,
+                    variant="plain",
+                    hide_details=True,
+                    density="compact",
+                    placeholder="Panel",
+                    style="max-width: 10rem;",
+                )
+                v3.VIconBtn(
+                    v_tooltip_bottom="'Record animation as PNG sequence (ZIP)'",
+                    icon=(
+                        "capture_recording ? 'mdi-stop-circle' : 'mdi-record-circle'",
+                    ),
+                    color=("capture_recording ? 'red' : ''",),
+                    flat=True,
+                    disabled=(
+                        "!capture_variable || !animation_track || animation_play",
+                    ),
+                    click="_ensureCaptureStream().then(() => trigger('capture_animation', [capture_variable]))",
                 )
 
     @change("animation_track")
@@ -508,13 +532,56 @@ class Animation(v3.VToolbar):
         if animation_play:
             asynchronous.create_task(self._run_animation())
 
+    async def _step_to(self, step):
+        """Advance animation to a given step and wait for render."""
+        with self.state:
+            self.state.animation_step = step
+        await self.server.network_completion
+
     async def _run_animation(self):
         with self.state as s:
             while s.animation_play:
                 await asyncio.sleep(0.1)
                 if s.animation_step < s.animation_step_max:
-                    with s:
-                        s.animation_step += 1
-                    await self.server.network_completion
+                    await self._step_to(s.animation_step + 1)
                 else:
                     s.animation_play = False
+
+    @trigger("capture_animation")
+    def capture_animation(self, variable_name):
+        """Record every frame of the current animation track for a variable."""
+        asynchronous.create_task(self._run_capture(variable_name))
+
+    async def _run_capture(self, variable_name):
+        """Record every frame of the current animation track."""
+        track = self.state.animation_track
+        if not track:
+            return
+
+        values = self.state[track]
+        if not values:
+            return
+
+        n_frames = len(values)
+
+        with self.state:
+            self.state.capture_recording = True
+
+        await asyncio.sleep(0.3)
+
+        for i in range(n_frames):
+            await self._step_to(i)
+            await asyncio.sleep(0.2)
+
+            with self.state:
+                self.state.capture_action = {"variable": variable_name, "index": i}
+            self.server._js_capture_frame.exec()
+            await self.server.network_completion
+            await asyncio.sleep(0.1)
+
+        with self.state:
+            self.state.capture_action = {"variable": variable_name}
+        self.server._js_capture_download.exec()
+
+        with self.state:
+            self.state.capture_recording = False

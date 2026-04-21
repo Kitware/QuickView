@@ -70,6 +70,10 @@ class EAMApp(TrameApp):
                 "timestamps": [],
                 # Fields summaries
                 "fields_avgs": {},
+                # Capture / recording state
+                "capture_variable": None,
+                "capture_recording": False,
+                "capture_action": None,
             }
         )
 
@@ -204,6 +208,15 @@ class EAMApp(TrameApp):
 
             # Native Dialogs
             client.ClientTriggers(mounted="is_tauri = !!window.__TAURI__")
+
+            # JS helpers for server-to-client capture calls
+            # Store on server so Animation component can access them
+            self.server._js_capture_frame = client.JSEval(
+                exec="window.captureCollectFrame(capture_action.variable, capture_action.index)",
+            )
+            self.server._js_capture_download = client.JSEval(
+                exec="window.captureDownloadZip(capture_action.variable)",
+            )
             with tauri.Dialog() as dialog:
                 self.ctrl.save = dialog.save
 

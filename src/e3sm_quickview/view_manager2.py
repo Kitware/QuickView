@@ -385,6 +385,7 @@ class VariableView(TrameComponent):
                     "active_layout !== 'auto_layout' ? `height: calc(100% - ${top_padding}px;` : 'overflow-hidden'",
                 ),
                 tile=("active_layout !== 'auto_layout'",),
+                datapanel=self.variable_name,
             ):
                 with v3.VRow(
                     dense=True,
@@ -441,6 +442,13 @@ class VariableView(TrameComponent):
                         f"fields_avgs['{self.variable_name}']?.toExponential(2) || 'N/A'"
                         "}}",
                         classes="text-caption px-1 text-no-wrap",
+                    )
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Capture panel as PNG'",
+                        icon="mdi-camera",
+                        size="x-small",
+                        variant="plain",
+                        click=f"utils.quickview.capturePanel('{self.variable_name}', time_idx, midpoint_idx, interface_idx)",
                     )
 
                 with html.Div(
