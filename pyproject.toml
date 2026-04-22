@@ -69,6 +69,7 @@ packages = [
 
 [project.scripts]
 quickview = "e3sm_quickview.app:main"
+quickview-chunk = "e3sm_quickview.cli.chunk:main"
 
 [project.entry-points."jupyter_serverproxy_servers"]
 quickview = "e3sm_quickview.jupyter:setup_quickview"
