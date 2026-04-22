@@ -36,11 +36,21 @@ from vtkmodules.util import numpy_support, vtkConstants
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 
 # Number of threads for the projection fan-out. pyproj releases the GIL
-# inside Transformer.transform, so chunking the input and running threads
-# in parallel scales nearly linearly (7.4x on 8 threads in our bench).
-# Capped at 8 — empirically that's where the speedup flattens on a 10-core
-# machine, and leaving a couple of cores free keeps the UI responsive.
-_PROJECTION_THREADS = min(8, os.cpu_count() or 1)
+# inside Transformer.transform, so chunking the input across threads
+# scales nearly linearly (7.4x on 8 threads in our bench). Default is
+# max(1, cpu_count - 1) to leave one core for the UI/IO thread; override
+# via QV_PROJECTION_THREADS for HPC machines or to pin down for testing.
+def _default_projection_threads():
+    env = os.environ.get("QV_PROJECTION_THREADS")
+    if env:
+        try:
+            return max(1, int(env))
+        except ValueError:
+            pass
+    return max(1, (os.cpu_count() or 2) - 1)
+
+
+_PROJECTION_THREADS = _default_projection_threads()
 # Below this point count the thread-pool overhead outweighs the speedup.
 _PROJECTION_THREADING_MIN = 1_000_000
 
