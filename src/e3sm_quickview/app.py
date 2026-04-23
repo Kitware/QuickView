@@ -70,10 +70,6 @@ class EAMApp(TrameApp):
                 "timestamps": [],
                 # Fields summaries
                 "fields_avgs": {},
-                # Capture / recording state
-                "capture_variable": None,
-                "capture_recording": False,
-                "capture_action": None,
             }
         )
 
@@ -208,15 +204,6 @@ class EAMApp(TrameApp):
 
             # Native Dialogs
             client.ClientTriggers(mounted="is_tauri = !!window.__TAURI__")
-
-            # JS helpers for server-to-client capture calls
-            # Store on server so Animation component can access them
-            self.server._js_capture_frame = client.JSEval(
-                exec="window.captureCollectFrame(capture_action.variable, capture_action.index)",
-            )
-            self.server._js_capture_download = client.JSEval(
-                exec="window.captureDownloadZip(capture_action.variable)",
-            )
             with tauri.Dialog() as dialog:
                 self.ctrl.save = dialog.save
 
@@ -288,6 +275,12 @@ class EAMApp(TrameApp):
     # -------------------------------------------------------------------------
     # Methods connected to UI
     # -------------------------------------------------------------------------
+
+    @trigger("wait_render")
+    async def wait_for_render(self):
+        self.view_manager.render()
+        await asyncio.sleep(0.1)
+        return 1
 
     @trigger("download_state")
     @controller.set("download_state")
@@ -516,7 +509,9 @@ class EAMApp(TrameApp):
             vars_to_show = self.selected_variables
 
             # Flatten the list of lists
-            flattened_vars = [var for var_list in vars_to_show.values() for var in var_list]
+            flattened_vars = [
+                var for var_list in vars_to_show.values() for var in var_list
+            ]
 
             # Compute used dimensions
             used_dims = set()

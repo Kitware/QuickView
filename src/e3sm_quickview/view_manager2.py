@@ -385,7 +385,7 @@ class VariableView(TrameComponent):
                     "active_layout !== 'auto_layout' ? `height: calc(100% - ${top_padding}px;` : 'overflow-hidden'",
                 ),
                 tile=("active_layout !== 'auto_layout'",),
-                datapanel=self.variable_name,
+                raw_attrs=[f'data-field-name="{self.variable_name}"'],
             ):
                 with v3.VRow(
                     dense=True,
@@ -411,6 +411,14 @@ class VariableView(TrameComponent):
                                         ),
                                     )
 
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Capture as png'",
+                        icon="mdi-camera-outline",
+                        size="small",
+                        variant="plain",
+                        click=f"utils.quickview.capturePanel('{self.variable_name}')",
+                        style="transform: scale(0.75);",
+                    )
                     v3.VIcon(
                         "mdi-lock-outline",
                         size="x-small",
@@ -442,13 +450,6 @@ class VariableView(TrameComponent):
                         f"fields_avgs['{self.variable_name}']?.toExponential(2) || 'N/A'"
                         "}}",
                         classes="text-caption px-1 text-no-wrap",
-                    )
-                    v3.VIconBtn(
-                        v_tooltip_bottom="'Capture panel as PNG'",
-                        icon="mdi-camera",
-                        size="x-small",
-                        variant="plain",
-                        click=f"utils.quickview.capturePanel('{self.variable_name}', time_idx, midpoint_idx, interface_idx)",
                     )
 
                 with html.Div(
@@ -728,6 +729,7 @@ class ViewManager(TrameComponent):
         # Build a lookup from type name to color from state.variable_types
         type_to_color = {vt["name"]: vt["color"] for vt in self.state.variable_types}
         with DivLayout(self.server, template_name="auto_layout") as self.ui:
+            self.ui.root.classes = "all-variables"
             if self.state.layout_grouped:
                 with v3.VCol(classes="pa-1"):
                     for var_type in variables.keys():

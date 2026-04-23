@@ -2,7 +2,6 @@ import math
 import time
 
 import numpy as np
-
 from paraview import simple
 from trame.app import TrameComponent, dataclass
 from trame.decorators import controller
@@ -391,7 +390,7 @@ class VariableView(TrameComponent):
                     "active_layout !== 'auto_layout' ? `height: calc(100% - ${top_padding}px;` : 'overflow-hidden'",
                 ),
                 tile=("active_layout !== 'auto_layout'",),
-                datapanel=self.variable_name,
+                raw_attrs=[f'data-field-name="{self.variable_name}"'],
             ):
                 with v3.VRow(
                     dense=True,
@@ -597,6 +596,7 @@ class ViewManager(TrameComponent):
         # Build a lookup from type name to color from state.variable_types
         type_to_color = {vt["name"]: vt["color"] for vt in self.state.variable_types}
         with DivLayout(self.server, template_name="auto_layout") as self.ui:
+            self.ui.root.classes = "all-variables"
             if self.state.layout_grouped:
                 with v3.VCol(classes="pa-1"):
                     for var_type in variables.keys():

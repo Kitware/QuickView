@@ -1,7 +1,7 @@
 import asyncio
 
 from trame.app import asynchronous
-from trame.decorators import change, trigger
+from trame.decorators import change
 from trame.widgets import client, html
 from trame.widgets import vuetify3 as v3
 
@@ -430,7 +430,6 @@ class DataSelection(html.Div):
 class Animation(v3.VToolbar):
     def __init__(self):
         super().__init__(**to_kwargs("animation-controls"))
-
         with self:
             v3.VIcon(
                 "mdi-video",
@@ -489,28 +488,59 @@ class Animation(v3.VToolbar):
                     disabled=("capture_recording",),
                 )
                 v3.VDivider(vertical=True, classes="mx-2")
-                v3.VSelect(
-                    v_model=("capture_variable", None),
-                    items=("variables_selected", []),
+
+                with v3.VIconBtn(
+                    classes="position-relative",
                     flat=True,
-                    variant="plain",
-                    hide_details=True,
-                    density="compact",
-                    placeholder="Panel",
-                    style="max-width: 10rem;",
-                )
-                v3.VIconBtn(
-                    v_tooltip_bottom="'Record animation as PNG sequence (ZIP)'",
-                    icon=(
-                        "capture_recording ? 'mdi-stop-circle' : 'mdi-record-circle'",
-                    ),
-                    color=("capture_recording ? 'red' : ''",),
-                    flat=True,
-                    disabled=(
-                        "!capture_variable || !animation_track || animation_play",
-                    ),
-                    click="_ensureCaptureStream().then(() => trigger('capture_animation', [capture_variable]))",
-                )
+                    v_if=("animation_export", False),
+                    click="animation_export = false",
+                ):
+                    v3.VIcon("mdi-download-multiple-outline")
+                    v3.VProgressCircular(
+                        color="error",
+                        bg_color="white",
+                        width=2,
+                        size=28,
+                        indeterminate=True,
+                        classes="position-absolute",
+                    )
+                with v3.VMenu(
+                    v_else=True,
+                    close_on_content_click=False,
+                    v_model=("show_animation_export_menu", False),
+                ):
+                    with v3.Template(v_slot_activator="{ props }"):
+                        v3.VIconBtn(
+                            v_bind="props",
+                            v_tooltip_bottom="'Export animation (ZIP)'",
+                            icon="mdi-download-multiple-outline",
+                            flat=True,
+                            loading=("animation_export", False),
+                            disabled=(
+                                "!animation_track || animation_play || animation_export",
+                            ),
+                        )
+                    with v3.VList(
+                        density="compact",
+                        v_model_activated=("animation_export_fields", []),
+                        activatable=True,
+                        active_strategy="independent",
+                    ):
+                        v3.VListItem(title="Full grid", value=("false",))
+                        v3.VDivider()
+                        v3.VListItem(
+                            v_for="name in variables_selected",
+                            key="name",
+                            title=("name",),
+                            value=("name",),
+                        )
+                        v3.VDivider()
+                        v3.VListItem(
+                            active=False,
+                            title="Export animation",
+                            value=("null",),
+                            click="utils.quickview.captureAnimation(animation_export_fields)",
+                        )
 
     @change("animation_track")
     def _on_animation_track_change(self, animation_track, **_):
@@ -546,42 +576,3 @@ class Animation(v3.VToolbar):
                     await self._step_to(s.animation_step + 1)
                 else:
                     s.animation_play = False
-
-    @trigger("capture_animation")
-    def capture_animation(self, variable_name):
-        """Record every frame of the current animation track for a variable."""
-        asynchronous.create_task(self._run_capture(variable_name))
-
-    async def _run_capture(self, variable_name):
-        """Record every frame of the current animation track."""
-        track = self.state.animation_track
-        if not track:
-            return
-
-        values = self.state[track]
-        if not values:
-            return
-
-        n_frames = len(values)
-
-        with self.state:
-            self.state.capture_recording = True
-
-        await asyncio.sleep(0.3)
-
-        for i in range(n_frames):
-            await self._step_to(i)
-            await asyncio.sleep(0.2)
-
-            with self.state:
-                self.state.capture_action = {"variable": variable_name, "index": i}
-            self.server._js_capture_frame.exec()
-            await self.server.network_completion
-            await asyncio.sleep(0.1)
-
-        with self.state:
-            self.state.capture_action = {"variable": variable_name}
-        self.server._js_capture_download.exec()
-
-        with self.state:
-            self.state.capture_recording = False

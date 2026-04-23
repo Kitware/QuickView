@@ -83,6 +83,16 @@ class ResetCamera(ActionButton):
         )
 
 
+class CaptureFullPanel(ActionButton):
+    def __init__(self, compact="compact_drawer", click=None):
+        super().__init__(
+            compact=compact,
+            title="Capture full grid as png",
+            icon="mdi-camera-outline",
+            click=click,
+        )
+
+
 class ToggleHelp(ActionButton):
     def __init__(self, compact="compact_drawer"):
         super().__init__(

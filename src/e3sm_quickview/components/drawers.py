@@ -47,6 +47,10 @@ class Tools(v3.VNavigationDrawer):
                     tools.MapProjection()
                     tools.Cropping()
 
+                    v3.VDivider(classes="my-1")  # ---------------------
+
+                    tools.CaptureFullPanel(click="utils.quickview.capturePanel()")
+
                     # dev add-on ui reload
                     if self.server.hot_reload:
                         v3.VDivider(classes="my-1")  # ---------------------
