@@ -2,6 +2,8 @@ from typing import Optional
 
 import numpy as np
 
+from e3sm_quickview.utils import perf
+
 
 def calculate_weighted_average(
     data_array: np.ndarray, weights: Optional[np.ndarray] = None
@@ -41,9 +43,10 @@ def extract_avgs(vtk_data, array_names):
         if vtk_array is None:
             results[name] = np.nan
             continue
-        if area_array:
-            avg_value = calculate_weighted_average(vtk_array, area_array)
-        else:
-            avg_value = float(np.nanmean(np.array(vtk_array)))
+        with perf.timed(f"extract_avgs.{name}"):
+            if area_array:
+                avg_value = calculate_weighted_average(vtk_array, area_array)
+            else:
+                avg_value = float(np.nanmean(np.array(vtk_array)))
         results[name] = avg_value
     return results

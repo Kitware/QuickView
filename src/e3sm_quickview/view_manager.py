@@ -12,6 +12,7 @@ from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
 
 from e3sm_quickview.components import view as tview
 from e3sm_quickview.presets import COLOR_BLIND_SAFE
+from e3sm_quickview.utils import perf
 from e3sm_quickview.utils.color import COLORBAR_CACHE, lut_to_img
 from e3sm_quickview.utils.math import compute_color_ticks, tick_contrast_color
 
@@ -142,7 +143,8 @@ class VariableView(TrameComponent):
     def render(self):
         if self.disable_render or not self.ctx.has(self.name):
             return
-        self.ctx[self.name].update()
+        with perf.timed(f"view.{self.variable_name}.render"):
+            self.ctx[self.name].update()
 
     def set_camera_modified(self, fn):
         self._observer = self.camera.AddObserver("ModifiedEvent", fn)
@@ -299,37 +301,39 @@ class VariableView(TrameComponent):
         return ds.GetCellData().GetArray(self.variable_name)
 
     def update_color_range(self, *_):
-        if self.config.override_range:
-            skip_update = False
-            if math.isnan(self.config.color_range[0]):
-                skip_update = True
-                self.config.color_value_min_valid = False
+        with perf.timed(f"view.{self.variable_name}.update_color_range"):
+            if self.config.override_range:
+                skip_update = False
+                if math.isnan(self.config.color_range[0]):
+                    skip_update = True
+                    self.config.color_value_min_valid = False
 
-            if math.isnan(self.config.color_range[1]):
-                skip_update = True
-                self.config.color_value_max_valid = False
+                if math.isnan(self.config.color_range[1]):
+                    skip_update = True
+                    self.config.color_value_max_valid = False
 
-            if skip_update:
-                return
+                if skip_update:
+                    return
 
-            self.lut.RescaleTransferFunction(*self.config.color_range)
-        else:
-            data_array = self.data_array
-            if data_array:
-                data_range = data_array.GetRange()
-                self.config.color_range = data_range
-                self.config.color_value_min = str(data_range[0])
-                self.config.color_value_max = str(data_range[1])
-                self.config.color_value_min_valid = True
-                self.config.color_value_max_valid = True
-                self.lut.RescaleTransferFunction(*data_range)
+                self.lut.RescaleTransferFunction(*self.config.color_range)
+            else:
+                data_array = self.data_array
+                if data_array:
+                    with perf.timed(f"view.{self.variable_name}.get_range"):
+                        data_range = data_array.GetRange()
+                    self.config.color_range = data_range
+                    self.config.color_value_min = str(data_range[0])
+                    self.config.color_value_max = str(data_range[1])
+                    self.config.color_value_min_valid = True
+                    self.config.color_value_max_valid = True
+                    self.lut.RescaleTransferFunction(*data_range)
 
-        self.update_color_preset(
-            self.config.preset,
-            self.config.invert,
-            self.config.use_log_scale,
-            self.config.n_colors,
-        )
+            self.update_color_preset(
+                self.config.preset,
+                self.config.invert,
+                self.config.use_log_scale,
+                self.config.n_colors,
+            )
 
     def _compute_ticks(self):
         vmin, vmax = self.config.color_range

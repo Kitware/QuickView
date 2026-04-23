@@ -18,7 +18,7 @@ from e3sm_quickview import module as qv_module
 from e3sm_quickview.assets import ASSETS
 from e3sm_quickview.components import css, dialogs, doc, drawers, file_browser, toolbars
 from e3sm_quickview.pipeline import EAMVisSource
-from e3sm_quickview.utils import cli, compute
+from e3sm_quickview.utils import cli, compute, perf
 
 v3.enable_lab()
 
@@ -44,6 +44,10 @@ class EAMApp(TrameApp):
 
         # CLI
         args = cli.configure_and_parse(self.server.cli)
+
+        # Enable performance instrumentation if requested. This is a global
+        # toggle read by the utils.perf module in every instrumented scope.
+        perf.enable(args.perf)
 
         # Initial UI state
         self.state.update(
@@ -495,41 +499,47 @@ class EAMApp(TrameApp):
         # Give some room
         await asyncio.sleep(0.1)
 
-        vars_to_show = self.selected_variables
+        with perf.timed("load_variables.total"):
+            vars_to_show = self.selected_variables
 
-        # Flatten the list of lists
-        flattened_vars = [var for var_list in vars_to_show.values() for var in var_list]
+            # Flatten the list of lists
+            flattened_vars = [var for var_list in vars_to_show.values() for var in var_list]
 
-        # Compute used dimensions
-        used_dims = set()
-        for dims in self.selected_variables.keys():
-            used_dims.update(dims)
-        self.state.available_animation_tracks = [
-            n for n in self.state.animation_tracks if n in used_dims
-        ]
-        self.state.animation_track = (
-            self.state.available_animation_tracks[0]
-            if self.state.available_animation_tracks
-            else None
-        )
+            # Compute used dimensions
+            used_dims = set()
+            for dims in self.selected_variables.keys():
+                used_dims.update(dims)
+            self.state.available_animation_tracks = [
+                n for n in self.state.animation_tracks if n in used_dims
+            ]
+            self.state.animation_track = (
+                self.state.available_animation_tracks[0]
+                if self.state.available_animation_tracks
+                else None
+            )
 
-        self.source.LoadVariables(flattened_vars)
+            with perf.timed("load_variables.LoadVariables"):
+                self.source.LoadVariables(flattened_vars)
 
-        # Trigger source update + compute avg
-        with self.state:
-            self.state.variables_loaded = True
+            # Trigger source update + compute avg
+            with self.state:
+                self.state.variables_loaded = True
 
-        await self.server.network_completion
+            with perf.timed("load_variables.network_completion_1"):
+                await self.server.network_completion
 
-        # Update views in layout
-        with self.state:
-            self.view_manager.build_auto_layout(vars_to_show)
+            # Update views in layout
+            with perf.timed("load_variables.build_auto_layout"):
+                with self.state:
+                    self.view_manager.build_auto_layout(vars_to_show)
 
-        await self.server.network_completion
+            with perf.timed("load_variables.network_completion_2"):
+                await self.server.network_completion
 
-        # Reset camera after yield
-        await asyncio.sleep(0.1)
-        self.view_manager.reset_camera()
+            # Reset camera after yield
+            await asyncio.sleep(0.1)
+            with perf.timed("load_variables.reset_camera"):
+                self.view_manager.reset_camera()
 
         # Done with the loading
         t1 = time.perf_counter()
@@ -580,20 +590,25 @@ class EAMApp(TrameApp):
         self.state.top_padding = top_padding
 
     def _on_slicing_change(self, var, ind_var, **_):
-        self.source.UpdateSlicing(var, self.state[ind_var])
-        self.source.UpdatePipeline()
+        with perf.timed(f"tick.{var}={self.state[ind_var]}.total"):
+            with perf.timed("tick.pipeline"):
+                self.source.UpdateSlicing(var, self.state[ind_var])
+                self.source.UpdatePipeline()
 
-        self.view_manager.update_color_range()
-        self.view_manager.render()
+            with perf.timed("tick.color_range"):
+                self.view_manager.update_color_range()
+            with perf.timed("tick.render"):
+                self.view_manager.render()
 
-        # Update avg computation
-        # Get area variable to calculate weighted average
-        geom_filter = self.source.views["atmosphere_data"]
-        geom_filter.Update()
-        data = geom_filter.GetOutput()
-        self.state.fields_avgs = compute.extract_avgs(
-            data, self.selected_variable_names
-        )
+            with perf.timed("tick.extract_avgs"):
+                # Update avg computation
+                # Get area variable to calculate weighted average
+                geom_filter = self.source.views["atmosphere_data"]
+                geom_filter.Update()
+                data = geom_filter.GetOutput()
+                self.state.fields_avgs = compute.extract_avgs(
+                    data, self.selected_variable_names
+                )
 
     @change(
         "variables_loaded",
@@ -612,21 +627,26 @@ class EAMApp(TrameApp):
         if not variables_loaded:
             return
 
-        self.source.ApplyClipping(crop_longitude, crop_latitude)
-        self.source.UpdateProjection(projection[0])
-        self.source.UpdatePipeline()
+        with perf.timed("downstream_change.total"):
+            with perf.timed("downstream_change.pipeline"):
+                self.source.ApplyClipping(crop_longitude, crop_latitude)
+                self.source.UpdateProjection(projection[0])
+                self.source.UpdatePipeline()
 
-        self.view_manager.update_color_range()
-        self.view_manager.render()
+            with perf.timed("downstream_change.color_range"):
+                self.view_manager.update_color_range()
+            with perf.timed("downstream_change.render"):
+                self.view_manager.render()
 
-        # Update avg computation
-        # Get area variable to calculate weighted average
-        geom_filter = self.source.views["atmosphere_data"]
-        geom_filter.Update()
-        data = geom_filter.GetOutput()
-        self.state.fields_avgs = compute.extract_avgs(
-            data, self.selected_variable_names
-        )
+            with perf.timed("downstream_change.extract_avgs"):
+                # Update avg computation
+                # Get area variable to calculate weighted average
+                geom_filter = self.source.views["atmosphere_data"]
+                geom_filter.Update()
+                data = geom_filter.GetOutput()
+                self.state.fields_avgs = compute.extract_avgs(
+                    data, self.selected_variable_names
+                )
 
     def toggle_toolbar(self, toolbar_name=None):
         if toolbar_name is None:

@@ -37,5 +37,13 @@ def configure_and_parse(parser):
         action="store_true",
         help="Use a single vtkRenderWindow to share GPU memory",
     )
+    parser.add_argument(
+        "--perf",
+        dest="perf",
+        action="store_true",
+        help="Emit performance timing on stderr ([PERF] lines). Used to "
+        "diagnose where slider-tick cost is going — reader I/O, pipeline, "
+        "rendering, web layer, etc.",
+    )
 
     return parser.parse_known_args()[0]

@@ -90,6 +90,23 @@ except ImportError as ie:
     )
     _has_deps = False
 
+try:
+    from e3sm_quickview.utils import perf as _perf
+except ImportError:
+    # Plugin may be loaded by paraview with quickview not on sys.path; fall
+    # back to a no-op shim so the filter still works.
+    from contextlib import contextmanager
+
+    class _perf:  # type: ignore[no-redef]
+        @staticmethod
+        def is_enabled():
+            return False
+
+        @staticmethod
+        @contextmanager
+        def timed(label):
+            yield
+
 
 def ProcessPoint(point, radius):
     # theta = math.radians(point[0] - 180.)
@@ -157,7 +174,8 @@ def add_cell_arrays(inData, outData, cached_output):
         return
 
     pedigree_vtk = cached_output.GetCellData().GetArray("PedigreeIds")
-    starts, ends, pid_np = _get_pedigree_slice_plan(pedigree_vtk)
+    with _perf.timed("add_cell_arrays.slice_plan"):
+        starts, ends, pid_np = _get_pedigree_slice_plan(pedigree_vtk)
 
     cached_cell_data = cached_output.GetCellData()
     in_cell_data = inData.GetCellData()
@@ -172,21 +190,22 @@ def add_cell_arrays(inData, outData, cached_output):
             # This scalar has been seen before — reuse cached copy.
             out_cell_data.AddArray(cached_array)
         else:
-            array0 = cached_cell_data.GetArray(0)
-            n_comp = array0.GetNumberOfComponents()
-            n_tuples = array0.GetNumberOfTuples()
-            out_array = in_array.NewInstance()
-            out_array.SetNumberOfComponents(n_comp)
-            out_array.SetNumberOfTuples(n_tuples)
-            out_array.SetName(in_array.GetName())
-            out_cell_data.AddArray(out_array)
+            with _perf.timed(f"add_cell_arrays.pedigree_copy.{in_array.GetName()}"):
+                array0 = cached_cell_data.GetArray(0)
+                n_comp = array0.GetNumberOfComponents()
+                n_tuples = array0.GetNumberOfTuples()
+                out_array = in_array.NewInstance()
+                out_array.SetNumberOfComponents(n_comp)
+                out_array.SetNumberOfTuples(n_tuples)
+                out_array.SetName(in_array.GetName())
+                out_cell_data.AddArray(out_array)
 
-            in_np = numpy_support.vtk_to_numpy(in_array)
-            out_np = numpy_support.vtk_to_numpy(out_array)
-            for s, e in zip(starts, ends):
-                src_off = int(pid_np[s])
-                out_np[s:e] = in_np[src_off:src_off + (e - s)]
-            out_array.Modified()
+                in_np = numpy_support.vtk_to_numpy(in_array)
+                out_np = numpy_support.vtk_to_numpy(out_array)
+                for s, e in zip(starts, ends):
+                    src_off = int(pid_np[s])
+                    out_np[s:e] = in_np[src_off:src_off + (e - s)]
+                out_array.Modified()
 
 
 @smproxy.filter()
@@ -398,61 +417,66 @@ class EAMProject(VTKPythonAlgorithmBase):
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
-        inData = self.GetInputData(inInfo, 0, 0)
-        outData = self.GetOutputData(outInfo, 0)
-        if inData.IsA("vtkPolyData"):
-            afilter = vtkAppendFilter()
-            afilter.AddInputData(inData)
-            afilter.Update()
-            outData.ShallowCopy(afilter.GetOutput())
-        else:
-            outData.ShallowCopy(inData)
+        with _perf.timed("project.RequestData"):
+            inData = self.GetInputData(inInfo, 0, 0)
+            outData = self.GetOutputData(outInfo, 0)
+            if inData.IsA("vtkPolyData"):
+                afilter = vtkAppendFilter()
+                afilter.AddInputData(inData)
+                afilter.Update()
+                outData.ShallowCopy(afilter.GetOutput())
+            else:
+                outData.ShallowCopy(inData)
 
-        in_points = inData.GetPoints()
-        cache_key = (id(in_points), self.project, self.translate)
-        if self.cached_points is not None and self._cached_key == cache_key:
-            outData.SetPoints(self.cached_points)
-        else:
-            # we modify the points, so copy them
-            out_points_vtk = vtkPoints()
-            out_points_vtk.DeepCopy(outData.GetPoints())
-            outData.SetPoints(out_points_vtk)
-            out_points_np = outData.points
+            in_points = inData.GetPoints()
+            cache_key = (id(in_points), self.project, self.translate)
+            if self.cached_points is not None and self._cached_key == cache_key:
+                with _perf.timed("project.cache_hit"):
+                    outData.SetPoints(self.cached_points)
+            else:
+                with _perf.timed("project.cache_miss"):
+                    # we modify the points, so copy them
+                    with _perf.timed("project.deep_copy_points"):
+                        out_points_vtk = vtkPoints()
+                        out_points_vtk.DeepCopy(outData.GetPoints())
+                        outData.SetPoints(out_points_vtk)
+                    out_points_np = outData.points
 
-            flat = out_points_np.flatten()
-            x = flat[0::3] - 180.0 if self.translate else flat[0::3]
-            y = flat[1::3]
+                    flat = out_points_np.flatten()
+                    x = flat[0::3] - 180.0 if self.translate else flat[0::3]
+                    y = flat[1::3]
 
-            try:
-                # Use proj4 string for WGS84 instead of EPSG code to avoid database dependency
-                latlon = Proj(proj="latlong", datum="WGS84")
-                if self.project == 1:
-                    proj = Proj(proj="robin")
-                elif self.project == 2:
-                    proj = Proj(proj="moll")
-                else:
-                    # Should not reach here, but return without transformation
-                    return 1
+                    try:
+                        # Use proj4 string for WGS84 instead of EPSG code to avoid database dependency
+                        latlon = Proj(proj="latlong", datum="WGS84")
+                        if self.project == 1:
+                            proj = Proj(proj="robin")
+                        elif self.project == 2:
+                            proj = Proj(proj="moll")
+                        else:
+                            # Should not reach here, but return without transformation
+                            return 1
 
-                xformer = Transformer.from_proj(latlon, proj, always_xy=True)
-                res = _threaded_transform(xformer, x, y)
-            except Exception as e:
-                print(f"Projection error: {e}")
-                # If projection fails, return without modifying coordinates
-                return 1
-            flat[0::3] = np.array(res[0])
-            flat[1::3] = np.array(res[1])
+                        xformer = Transformer.from_proj(latlon, proj, always_xy=True)
+                        with _perf.timed("project.pyproj_transform"):
+                            res = _threaded_transform(xformer, x, y)
+                    except Exception as e:
+                        print(f"Projection error: {e}")
+                        # If projection fails, return without modifying coordinates
+                        return 1
+                    flat[0::3] = np.array(res[0])
+                    flat[1::3] = np.array(res[1])
 
-            outPoints = flat.reshape(out_points_np.shape)
-            _coords = numpy_support.numpy_to_vtk(outPoints, deep=True)
-            outData.GetPoints().SetData(_coords)
-            # the previous cached_points, if any, is available for
-            # garbage collection after this assignment
-            self.cached_points = out_points_vtk
-            self._cached_input_points = in_points  # hold ref so id() stays valid
-            self._cached_key = cache_key
+                    outPoints = flat.reshape(out_points_np.shape)
+                    _coords = numpy_support.numpy_to_vtk(outPoints, deep=True)
+                    outData.GetPoints().SetData(_coords)
+                    # the previous cached_points, if any, is available for
+                    # garbage collection after this assignment
+                    self.cached_points = out_points_vtk
+                    self._cached_input_points = in_points  # hold ref so id() stays valid
+                    self._cached_key = cache_key
 
-        return 1
+            return 1
 
 
 @smproxy.filter()
@@ -595,90 +619,96 @@ class EAMExtract(VTKPythonAlgorithmBase):
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
-        inData = self.GetInputData(inInfo, 0, 0)
-        outData = self.GetOutputData(outInfo, 0)
-        if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
-            outData.ShallowCopy(inData)
-            # Only invalidate the shared points when transitioning *out* of a
-            # trimmed state — the original code did it unconditionally, which
-            # defeated EAMProject's cache on every pipeline update.
-            if self._last_was_trimmed:
-                outData.GetPoints().Modified()
-                self._last_was_trimmed = False
+        with _perf.timed("extract.RequestData"):
+            inData = self.GetInputData(inInfo, 0, 0)
+            outData = self.GetOutputData(outInfo, 0)
+            if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
+                outData.ShallowCopy(inData)
+                # Only invalidate the shared points when transitioning *out* of a
+                # trimmed state — the original code did it unconditionally, which
+                # defeated EAMProject's cache on every pipeline update.
+                if self._last_was_trimmed:
+                    outData.GetPoints().Modified()
+                    self._last_was_trimmed = False
+                return 1
+
+            if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
+                inData.GetPoints().GetMTime(), inData.GetCells().GetMTime()
+            ):
+                cell_centers = self.cached_cell_centers
+            else:
+                with _perf.timed("extract.cell_centers"):
+                    # convert to polydata, as vtkCellCenters only works on polydata
+                    to_poly = vtkGeometryFilter()
+                    to_poly.SetInputData(inData)
+
+                    # get cell centers
+                    compute_centers = vtkCellCenters()
+                    compute_centers.SetInputConnection(to_poly.GetOutputPort())
+                    compute_centers.Update()
+                    cell_centers = compute_centers.GetOutput().GetPoints().GetData()
+                    # previous cached_cell_centers, if any,
+                    # is available for garbage collection after this assignment
+                    self.cached_cell_centers = cell_centers
+
+            # get the numpy array for cell centers
+            cc = numpy_support.vtk_to_numpy(cell_centers)
+
+            if self._cached_output and self._cached_output.GetMTime() >= max(
+                self.GetMTime(), inData.GetPoints().GetMTime(), cell_centers.GetMTime()
+            ):
+                with _perf.timed("extract.cache_hit"):
+                    outData.ShallowCopy(self._cached_output)
+                    add_cell_arrays(inData, outData, self._cached_output)
+            else:
+                with _perf.timed("extract.rebuild_trim"):
+                    # add PedigreeIds
+                    generate_ids = vtkGenerateIds()
+                    generate_ids.SetInputData(inData)
+                    generate_ids.PointIdsOff()
+                    generate_ids.SetCellIdsArrayName("PedigreeIds")
+                    generate_ids.Update()
+                    outData.ShallowCopy(generate_ids.GetOutput())
+                    # we have to deep copy the cell array because we modify it
+                    # with RemoveGhostCells
+                    with _perf.timed("extract.deep_copy_cells"):
+                        cells = vtkCellArray()
+                        cell_types = vtkUnsignedCharArray()
+                        cells.DeepCopy(outData.GetCells())
+                        cell_types.DeepCopy(outData.GetCellTypesArray())
+                        outData.SetCells(cell_types, cells)
+
+                    # compute the new bounds by trimming the inData bounds
+                    bounds = list(inData.GetBounds())
+                    bounds[0] = bounds[0] + self.trim_lon[0]
+                    bounds[1] = bounds[1] - self.trim_lon[1]
+                    bounds[2] = bounds[2] + self.trim_lat[0]
+                    bounds[3] = bounds[3] - self.trim_lat[1]
+
+                    # add HIDDENCELL based on bounds
+                    with _perf.timed("extract.ghost_mask"):
+                        outside_mask = (
+                            (cc[:, 0] < bounds[0])
+                            | (cc[:, 0] > bounds[1])
+                            | (cc[:, 1] < bounds[2])
+                            | (cc[:, 1] > bounds[3])
+                        )
+                        # Create ghost array (0 = visible, HIDDENCELL = invisible)
+                        ghost_np = np.where(
+                            outside_mask, vtkDataSetAttributes.HIDDENCELL, 0
+                        ).astype(np.uint8)
+
+                        # Convert to VTK and add to output
+                        ghost = numpy_support.numpy_to_vtk(ghost_np)
+                        ghost.SetName(vtkDataSetAttributes.GhostArrayName())
+                        outData.GetCellData().AddArray(ghost)
+                    with _perf.timed("extract.remove_ghost_cells"):
+                        outData.RemoveGhostCells()
+
+                    self._cached_output = outData.NewInstance()
+                    self._cached_output.ShallowCopy(outData)
+            self._last_was_trimmed = True
             return 1
-
-        if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
-            inData.GetPoints().GetMTime(), inData.GetCells().GetMTime()
-        ):
-            cell_centers = self.cached_cell_centers
-        else:
-            # convert to polydata, as vtkCellCenters only works on polydata
-            # import pdb;pdb.set_trace()
-            to_poly = vtkGeometryFilter()
-            to_poly.SetInputData(inData)
-
-            # get cell centers
-            compute_centers = vtkCellCenters()
-            compute_centers.SetInputConnection(to_poly.GetOutputPort())
-            compute_centers.Update()
-            cell_centers = compute_centers.GetOutput().GetPoints().GetData()
-            # previous cached_cell_centers, if any,
-            # is available for garbage collection after this assignment
-            self.cached_cell_centers = cell_centers
-
-        # get the numpy array for cell centers
-        cc = numpy_support.vtk_to_numpy(cell_centers)
-
-        if self._cached_output and self._cached_output.GetMTime() >= max(
-            self.GetMTime(), inData.GetPoints().GetMTime(), cell_centers.GetMTime()
-        ):
-            outData.ShallowCopy(self._cached_output)
-            add_cell_arrays(inData, outData, self._cached_output)
-        else:
-            # add PedigreeIds
-            generate_ids = vtkGenerateIds()
-            generate_ids.SetInputData(inData)
-            generate_ids.PointIdsOff()
-            generate_ids.SetCellIdsArrayName("PedigreeIds")
-            generate_ids.Update()
-            outData.ShallowCopy(generate_ids.GetOutput())
-            # we have to deep copy the cell array because we modify it
-            # with RemoveGhostCells
-            cells = vtkCellArray()
-            cell_types = vtkUnsignedCharArray()
-            cells.DeepCopy(outData.GetCells())
-            cell_types.DeepCopy(outData.GetCellTypesArray())
-            outData.SetCells(cell_types, cells)
-
-            # compute the new bounds by trimming the inData bounds
-            bounds = list(inData.GetBounds())
-            bounds[0] = bounds[0] + self.trim_lon[0]
-            bounds[1] = bounds[1] - self.trim_lon[1]
-            bounds[2] = bounds[2] + self.trim_lat[0]
-            bounds[3] = bounds[3] - self.trim_lat[1]
-
-            # add HIDDENCELL based on bounds
-            outside_mask = (
-                (cc[:, 0] < bounds[0])
-                | (cc[:, 0] > bounds[1])
-                | (cc[:, 1] < bounds[2])
-                | (cc[:, 1] > bounds[3])
-            )
-            # Create ghost array (0 = visible, HIDDENCELL = invisible)
-            ghost_np = np.where(
-                outside_mask, vtkDataSetAttributes.HIDDENCELL, 0
-            ).astype(np.uint8)
-
-            # Convert to VTK and add to output
-            ghost = numpy_support.numpy_to_vtk(ghost_np)
-            ghost.SetName(vtkDataSetAttributes.GhostArrayName())
-            outData.GetCellData().AddArray(ghost)
-            outData.RemoveGhostCells()
-
-            self._cached_output = outData.NewInstance()
-            self._cached_output.ShallowCopy(outData)
-        self._last_was_trimmed = True
-        return 1
 
 
 @smproxy.filter()
@@ -742,52 +772,59 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
         return self._center_meridian
 
     def RequestData(self, request, inInfo, outInfo):
-        inData = self.GetInputData(inInfo, 0, 0)
+        with _perf.timed("center_meridian.RequestData"):
+            inData = self.GetInputData(inInfo, 0, 0)
 
-        outData = self.GetOutputData(outInfo, 0)
-        if (
-            self._cached_output
-            and self._cached_output.GetPoints().GetMTime()
-            >= inData.GetPoints().GetMTime()
-            and self._cached_output.GetCells().GetMTime()
-            >= inData.GetCells().GetMTime()
-        ):
-            add_cell_arrays(inData, outData, self._cached_output)
-        else:
-            generate_ids = vtkGenerateIds()
-            generate_ids.SetInputData(inData)
-            generate_ids.PointIdsOff()
-            generate_ids.SetCellIdsArrayName("PedigreeIds")
+            outData = self.GetOutputData(outInfo, 0)
+            if (
+                self._cached_output
+                and self._cached_output.GetPoints().GetMTime()
+                >= inData.GetPoints().GetMTime()
+                and self._cached_output.GetCells().GetMTime()
+                >= inData.GetCells().GetMTime()
+            ):
+                with _perf.timed("center_meridian.cache_hit"):
+                    add_cell_arrays(inData, outData, self._cached_output)
+            else:
+                with _perf.timed("center_meridian.rebuild"):
+                    generate_ids = vtkGenerateIds()
+                    generate_ids.SetInputData(inData)
+                    generate_ids.PointIdsOff()
+                    generate_ids.SetCellIdsArrayName("PedigreeIds")
 
-            cut_meridian = self._center_meridian + 180
-            plane = vtkPlane()
-            plane.SetOrigin([cut_meridian, 0.0, 0.0])
-            plane.SetNormal([-1, 0, 0])
-            # vtkClipPolyData hangs
-            clipL = vtkTableBasedClipDataSet()
-            clipL.SetClipFunction(plane)
-            clipL.SetInputConnection(generate_ids.GetOutputPort())
-            clipL.Update()
+                    cut_meridian = self._center_meridian + 180
+                    plane = vtkPlane()
+                    plane.SetOrigin([cut_meridian, 0.0, 0.0])
+                    plane.SetNormal([-1, 0, 0])
+                    # vtkClipPolyData hangs
+                    clipL = vtkTableBasedClipDataSet()
+                    clipL.SetClipFunction(plane)
+                    clipL.SetInputConnection(generate_ids.GetOutputPort())
+                    with _perf.timed("center_meridian.clip_left"):
+                        clipL.Update()
 
-            plane.SetNormal([1, 0, 0])
-            clipR = vtkTableBasedClipDataSet()
-            clipR.SetClipFunction(plane)
-            clipR.SetInputConnection(generate_ids.GetOutputPort())
-            clipR.Update()
+                    plane.SetNormal([1, 0, 0])
+                    clipR = vtkTableBasedClipDataSet()
+                    clipR.SetClipFunction(plane)
+                    clipR.SetInputConnection(generate_ids.GetOutputPort())
+                    with _perf.timed("center_meridian.clip_right"):
+                        clipR.Update()
 
-            transFunc = vtkTransform()
-            transFunc.Translate(-360, 0, 0)
-            transform = vtkTransformFilter()
-            transform.SetInputData(clipR.GetOutput())
-            transform.SetTransform(transFunc)
-            transform.Update()
+                    transFunc = vtkTransform()
+                    transFunc.Translate(-360, 0, 0)
+                    transform = vtkTransformFilter()
+                    transform.SetInputData(clipR.GetOutput())
+                    transform.SetTransform(transFunc)
+                    with _perf.timed("center_meridian.transform"):
+                        transform.Update()
 
-            append = vtkAppendFilter()
-            append.AddInputData(clipL.GetOutput())
-            append.AddInputData(transform.GetOutput())
-            append.Update()
-            outData.ShallowCopy(append.GetOutput())
-            # previous _cached_output is available for garbage collection
-            self._cached_output = outData.NewInstance()
-            self._cached_output.ShallowCopy(outData)
-        return 1
+                    append = vtkAppendFilter()
+                    append.AddInputData(clipL.GetOutput())
+                    append.AddInputData(transform.GetOutput())
+                    with _perf.timed("center_meridian.append"):
+                        append.Update()
+                    outData.ShallowCopy(append.GetOutput())
+                    # previous _cached_output is available for garbage collection
+                    self._cached_output = outData.NewInstance()
+                    self._cached_output.ShallowCopy(outData)
+            return 1

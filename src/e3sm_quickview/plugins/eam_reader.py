@@ -19,6 +19,23 @@ except ImportError as ie:
     )
     _has_deps = False
 
+try:
+    from e3sm_quickview.utils import perf as _perf
+except ImportError:
+    # Plugin may be loaded by paraview with quickview not on sys.path; fall
+    # back to a no-op shim so the reader still works.
+    from contextlib import contextmanager
+
+    class _perf:  # type: ignore[no-redef]
+        @staticmethod
+        def is_enabled():
+            return False
+
+        @staticmethod
+        @contextmanager
+        def timed(label):
+            yield
+
 # Dimensions will be dynamically determined from connectivity and data files
 
 
@@ -422,11 +439,13 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
                     # Use all data for unspecified dimensions
                     slice_tuple.append(self._slices.get(dim, 0))
 
-            # Get data with proper slicing
-            data = vardata[varmeta.name][tuple(slice_tuple)].data.reshape(-1)
+            with _perf.timed(f"reader.netcdf_read.{varmeta.name}"):
+                # Get data with proper slicing
+                data = vardata[varmeta.name][tuple(slice_tuple)].data.reshape(-1)
             if not np.isnan(varmeta.fillval):
-                data = data.copy()
-                data[data == varmeta.fillval] = np.nan
+                with _perf.timed(f"reader.fill_value_scan.{varmeta.name}"):
+                    data = data.copy()
+                    data[data == varmeta.fillval] = np.nan
             return data
         except Exception as e:
             print_error(f"Error loading variable {varmeta.name}: {e}")
@@ -710,6 +729,10 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
         return timeInd
 
     def RequestData(self, request, inInfo, outInfo):
+        with _perf.timed("reader.RequestData"):
+            return self._RequestDataImpl(request, inInfo, outInfo)
+
+    def _RequestDataImpl(self, request, inInfo, outInfo):
         if (
             self._ConnFileName is None
             or self._ConnFileName == "None"
