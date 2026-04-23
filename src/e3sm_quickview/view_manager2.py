@@ -1,5 +1,6 @@
 import asyncio
 import math
+import time
 
 import numpy as np
 
@@ -27,6 +28,7 @@ from vtkmodules.vtkRenderingCore import (
 
 from e3sm_quickview.components import view as tview
 from e3sm_quickview.presets import COLOR_BLIND_SAFE
+from e3sm_quickview.utils import perf
 from e3sm_quickview.utils.color import COLORBAR_CACHE, lut_to_img
 from e3sm_quickview.utils.math import compute_color_ticks, tick_contrast_color
 
@@ -468,6 +470,13 @@ class ViewManager(TrameComponent):
         self._camera = vtkCamera(parallel_projection=1)
         self._render_window = vtkRenderWindow()
         self._render_window.OffScreenRenderingOn()
+
+        # Perf: time the actual VTK render on the shared render window.
+        # Emits `view.shared.render_window` with the elapsed time for
+        # each render. See VariableView._on_render_* in view_manager.py.
+        self._render_t0 = None
+        self._render_window.AddObserver("StartEvent", self._on_render_start)
+        self._render_window.AddObserver("EndEvent", self._on_render_end)
         self._style = vtkPVInteractorStyle()
         self._style.AddManipulator(
             vtkPVTrackballZoom(
@@ -519,6 +528,16 @@ class ViewManager(TrameComponent):
         # Sort lists
         self.state.luts_normal.sort(key=lut_name)
         self.state.luts_inverted.sort(key=lut_name)
+
+    def _on_render_start(self, *_):
+        if perf.is_enabled():
+            self._render_t0 = time.perf_counter()
+
+    def _on_render_end(self, *_):
+        if perf.is_enabled() and self._render_t0 is not None:
+            dt_ms = (time.perf_counter() - self._render_t0) * 1000.0
+            perf.log("view.shared.render_window", dt_ms)
+            self._render_t0 = None
 
     def refresh_ui(self, **_):
         for view in self._var2view.values():

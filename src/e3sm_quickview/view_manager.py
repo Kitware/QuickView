@@ -1,4 +1,5 @@
 import math
+import time
 
 import numpy as np
 
@@ -98,6 +99,16 @@ class VariableView(TrameComponent):
         self.render_window = self.view.GetRenderWindow()
         self.render_window.SetOffScreenRendering(True)
 
+        # Perf: time the actual VTK render. The `render()` method only
+        # calls `ctx[name].update()` which schedules a trame/RCA push,
+        # so the `view.<var>.render` timer doesn't capture the work of
+        # the render window itself. Observers on Start/EndEvent fire
+        # for every VTK render (triggered by RCA, camera change, etc.)
+        # and emit `view.<var>.render_window` with the elapsed time.
+        self._render_t0 = None
+        self.render_window.AddObserver("StartEvent", self._on_render_start)
+        self.render_window.AddObserver("EndEvent", self._on_render_end)
+
         input = source.data_reader.vtk_geometry
         self.mapper = vtkPolyDataMapper(input_connection=input.output_port)
         self.actor = vtkActor(mapper=self.mapper)
@@ -145,6 +156,16 @@ class VariableView(TrameComponent):
             return
         with perf.timed(f"view.{self.variable_name}.render"):
             self.ctx[self.name].update()
+
+    def _on_render_start(self, *_):
+        if perf.is_enabled():
+            self._render_t0 = time.perf_counter()
+
+    def _on_render_end(self, *_):
+        if perf.is_enabled() and self._render_t0 is not None:
+            dt_ms = (time.perf_counter() - self._render_t0) * 1000.0
+            perf.log(f"view.{self.variable_name}.render_window", dt_ms)
+            self._render_t0 = None
 
     def set_camera_modified(self, fn):
         self._observer = self.camera.AddObserver("ModifiedEvent", fn)
