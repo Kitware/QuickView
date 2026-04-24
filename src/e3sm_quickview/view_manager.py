@@ -1,7 +1,7 @@
 import math
-import time
 
 import numpy as np
+
 from paraview import simple
 from trame.app import TrameComponent, dataclass
 from trame.decorators import controller
@@ -12,9 +12,12 @@ from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
 
 from e3sm_quickview.components import view as tview
 from e3sm_quickview.presets import COLOR_BLIND_SAFE
-from e3sm_quickview.utils import perf
 from e3sm_quickview.utils.color import COLORBAR_CACHE, lut_to_img
-from e3sm_quickview.utils.math import compute_color_ticks, tick_contrast_color
+from e3sm_quickview.utils.math import (
+    calculate_linthresh,
+    compute_color_ticks,
+    tick_contrast_color,
+)
 
 
 def auto_size_to_col(size):
@@ -98,16 +101,6 @@ class VariableView(TrameComponent):
         self.render_window = self.view.GetRenderWindow()
         self.render_window.SetOffScreenRendering(True)
 
-        # Perf: time the actual VTK render. The `render()` method only
-        # calls `ctx[name].update()` which schedules a trame/RCA push,
-        # so the `view.<var>.render` timer doesn't capture the work of
-        # the render window itself. Observers on Start/EndEvent fire
-        # for every VTK render (triggered by RCA, camera change, etc.)
-        # and emit `view.<var>.render_window` with the elapsed time.
-        self._render_t0 = None
-        self.render_window.AddObserver("StartEvent", self._on_render_start)
-        self.render_window.AddObserver("EndEvent", self._on_render_end)
-
         input = source.data_reader.vtk_geometry
         self.mapper = vtkPolyDataMapper(input_connection=input.output_port)
         self.actor = vtkActor(mapper=self.mapper)
@@ -153,18 +146,7 @@ class VariableView(TrameComponent):
     def render(self):
         if self.disable_render or not self.ctx.has(self.name):
             return
-        with perf.timed(f"view.{self.variable_name}.render"):
-            self.ctx[self.name].update()
-
-    def _on_render_start(self, *_):
-        if perf.is_enabled():
-            self._render_t0 = time.perf_counter()
-
-    def _on_render_end(self, *_):
-        if perf.is_enabled() and self._render_t0 is not None:
-            dt_ms = (time.perf_counter() - self._render_t0) * 1000.0
-            perf.log(f"view.{self.variable_name}.render_window", dt_ms)
-            self._render_t0 = None
+        self.ctx[self.name].update()
 
     def set_camera_modified(self, fn):
         self._observer = self.camera.AddObserver("ModifiedEvent", fn)
@@ -188,21 +170,30 @@ class VariableView(TrameComponent):
         if n_colors is not None:
             self.lut.NumberOfTableValues = n_colors
 
-        # Capture the colorbar image and tick marks from the LINEAR LUT
-        # before any log/symlog transform so the bar always looks linear.
+        # Capture the linear colorbar image (always the same regardless of scale)
+        ctf = self.lut.GetClientSideObject()
+        self.config.effective_color_range = ctf.GetRange()
         self.config.lut_img = lut_to_img(self.lut)
-        self._compute_ticks()
 
+        # Rebuild LUT with non-linear control points, sampling RGB from
+        # the linear colorbar.  Compute linthresh once from data for symlog.
+        linthresh = None
         if log_scale == "log":
             self._apply_log_to_lut()
         elif log_scale == "symlog":
-            self._apply_symlog_to_lut()
+            from vtkmodules.util.numpy_support import vtk_to_numpy
 
-        # Read the actual LUT range (may differ from color_range for log scale)
-        ctf = self.lut.GetClientSideObject()
-        self.config.effective_color_range = ctf.GetRange()
+            arr = self.data_array
+            if arr is not None:
+                linthresh = calculate_linthresh(vtk_to_numpy(arr))
+            else:
+                linthresh = 1.0
+            self._apply_symlog_to_lut(linthresh)
+
+        self._compute_ticks(linthresh=linthresh)
 
         # Force mapper to pick up LUT changes
+        ctf = self.lut.GetClientSideObject()
         self.mapper.SetLookupTable(ctf)
         self.mapper.Modified()
 
@@ -219,6 +210,7 @@ class VariableView(TrameComponent):
         """Transform the already-prepared LUT to log scale.
 
         Log scale requires all positive values, so clamp the range if needed.
+        The colorbar image is captured before this call, so it stays linear.
         """
         ctf = self.lut.GetClientSideObject()
         x_min, x_max = ctf.GetRange()
@@ -230,72 +222,76 @@ class VariableView(TrameComponent):
         self.lut.MapControlPointsToLogSpace()
         self.lut.UseLogScale = 1
 
-    def _apply_symlog_to_lut(
-        self, linthresh=None, linscale=1.0, base=10, n_samples=256
-    ):
-        """Transform the already-prepared LUT to symmetric log scale.
+    def _apply_symlog_to_lut(self, linthresh):
+        """Build a symlog LUT with decade control points.
 
-        Uses:
-        - Linear for |x| <= linthresh
-        - Logarithmic for |x| > linthresh
-        with continuity at the boundary.
-
-        Samples colors from the linear preset and redistributes them
-        across the data range using symlog spacing.
+        Control points are placed at powers of 10 (and ±linthresh, 0 for
+        mixed-sign data).  The RGB color for each control point is sampled
+        from the linear colorbar at the position where that value falls in
+        symlog space: t = (symlog(v) - symlog(min)) / (symlog(max) - symlog(min)).
         """
-        # Get the current data range from the LUT
         ctf = self.lut.GetClientSideObject()
         x_min, x_max = ctf.GetRange()
         data_range = x_max - x_min
         if data_range == 0:
             return
 
-        if linthresh is None:
-            linthresh = max(abs(x_min), abs(x_max)) * 1e-2
-            if linthresh == 0:
-                linthresh = 1.0
+        def symlog(v):
+            v = np.asarray(v, dtype=float)
+            return np.sign(v) * np.log10(1.0 + np.abs(v) / linthresh)
 
-        log_base = np.log(base)
-        linscale_adj = linscale / (1.0 - base**-1)
+        # Build decade breakpoints
+        breakpoints = set()
 
-        def symlog(x):
-            abs_x = np.abs(x)
-            # Clip to avoid log(0); values <= linthresh use linear branch anyway
-            safe_abs = np.maximum(abs_x, linthresh)
-            out = np.where(
-                abs_x <= linthresh,
-                x * linscale_adj,
-                np.sign(x)
-                * linthresh
-                * (linscale_adj + np.log(safe_abs / linthresh) / log_base),
-            )
-            return out
+        if x_min < 0:
+            lo = max(linthresh, 1e-30)
+            for e in range(
+                int(np.floor(np.log10(lo))), int(np.floor(np.log10(abs(x_min)))) + 1
+            ):
+                val = -(10.0**e)
+                if x_min <= val < 0:
+                    breakpoints.add(val)
 
-        # Sample colors from the linear LUT at uniform positions
-        rgb = [0.0, 0.0, 0.0]
-        s_min = symlog(x_min)
-        s_max = symlog(x_max)
+        if x_max > 0:
+            lo = max(linthresh, 1e-30)
+            for e in range(
+                int(np.floor(np.log10(lo))), int(np.floor(np.log10(x_max))) + 1
+            ):
+                val = 10.0**e
+                if 0 < val <= x_max:
+                    breakpoints.add(val)
+
+        if x_min < 0 and x_max > 0:
+            breakpoints.update((-linthresh, 0.0, linthresh))
+        elif x_min < 0 and x_max <= 0:
+            if -linthresh >= x_min:
+                breakpoints.add(-linthresh)
+        elif x_min >= 0 and x_max > 0:
+            if linthresh <= x_max:
+                breakpoints.add(linthresh)
+
+        breakpoints.add(x_min)
+        breakpoints.add(x_max)
+        breakpoints = sorted(breakpoints)
+
+        # Symlog range for normalization
+        s_min = float(symlog(x_min))
+        s_max = float(symlog(x_max))
         s_range = s_max - s_min
         if s_range == 0:
             return
 
+        # Sample RGB from the linear LUT at symlog-normalized positions
+        rgb = [0.0, 0.0, 0.0]
         new_rgb_points = []
-        for i in range(n_samples):
-            # Uniform position in data space
-            t = i / (n_samples - 1)
-            x_data = x_min + t * data_range
-
-            # Map x_data through symlog, normalize to [0,1], then look up
-            # the color at the corresponding linear position
-            s_val = symlog(x_data)
-            s_t = (s_val - s_min) / s_range
-            x_lookup = x_min + s_t * data_range
+        for v in breakpoints:
+            t = (float(symlog(v)) - s_min) / s_range
+            x_lookup = x_min + t * data_range
             ctf.GetColor(x_lookup, rgb)
             new_rgb_points.extend(
-                [float(x_data), float(rgb[0]), float(rgb[1]), float(rgb[2])]
+                [float(v), float(rgb[0]), float(rgb[1]), float(rgb[2])]
             )
 
-        # Write back through the proxy so state stays in sync
         self.lut.RGBPoints = new_rgb_points
 
     def color_range_str_to_float(self, color_value_min, color_value_max):
@@ -321,60 +317,59 @@ class VariableView(TrameComponent):
         return ds.GetCellData().GetArray(self.variable_name)
 
     def update_color_range(self, *_):
-        with perf.timed(f"view.{self.variable_name}.update_color_range"):
-            if self.config.override_range:
-                skip_update = False
-                if math.isnan(self.config.color_range[0]):
-                    skip_update = True
-                    self.config.color_value_min_valid = False
+        if self.config.override_range:
+            skip_update = False
+            if math.isnan(self.config.color_range[0]):
+                skip_update = True
+                self.config.color_value_min_valid = False
 
-                if math.isnan(self.config.color_range[1]):
-                    skip_update = True
-                    self.config.color_value_max_valid = False
+            if math.isnan(self.config.color_range[1]):
+                skip_update = True
+                self.config.color_value_max_valid = False
 
-                if skip_update:
-                    return
+            if skip_update:
+                return
 
-                self.lut.RescaleTransferFunction(*self.config.color_range)
-            else:
-                data_array = self.data_array
-                if data_array:
-                    with perf.timed(f"view.{self.variable_name}.get_range"):
-                        data_range = data_array.GetRange()
-                    self.config.color_range = data_range
-                    self.config.color_value_min = str(data_range[0])
-                    self.config.color_value_max = str(data_range[1])
-                    self.config.color_value_min_valid = True
-                    self.config.color_value_max_valid = True
-                    self.lut.RescaleTransferFunction(*data_range)
+            self.lut.RescaleTransferFunction(*self.config.color_range)
+        else:
+            data_array = self.data_array
+            if data_array:
+                data_range = data_array.GetRange()
+                self.config.color_range = data_range
+                self.config.color_value_min = str(data_range[0])
+                self.config.color_value_max = str(data_range[1])
+                self.config.color_value_min_valid = True
+                self.config.color_value_max_valid = True
+                self.lut.RescaleTransferFunction(*data_range)
 
-            self.update_color_preset(
-                self.config.preset,
-                self.config.invert,
-                self.config.use_log_scale,
-                self.config.n_colors,
-            )
+        self.update_color_preset(
+            self.config.preset,
+            self.config.invert,
+            self.config.use_log_scale,
+            self.config.n_colors,
+        )
 
-    def _compute_ticks(self):
+    def _compute_ticks(self, linthresh=None):
         vmin, vmax = self.config.color_range
-        ticks = compute_color_ticks(vmin, vmax, scale=self.config.use_log_scale, n=5)
-        if not ticks:
+        ticks = compute_color_ticks(
+            vmin, vmax, scale=self.config.use_log_scale, n=5, linthresh=linthresh
+        )
+        # Sample colors exactly as lut_to_img does: use RGBPoints range
+        rgb_points = self.lut.RGBPoints
+        if len(rgb_points) < 4:
             self.config.color_ticks = []
             return
-        # The colorbar image is always rendered from the linear LUT, so
-        # sample contrast colors using the linear color_range.
         ctf = self.lut.GetClientSideObject()
         rgb = [0.0, 0.0, 0.0]
-        cr_min, cr_max = float(vmin), float(vmax)
-        cr_range = cr_max - cr_min
-        if cr_range == 0:
+        img_min = rgb_points[0]
+        img_max = rgb_points[-4]
+        img_range = img_max - img_min
+        if img_range == 0:
             self.config.color_ticks = []
             return
         for tick in ticks:
-            # tick position is already in the correct visual space (0-100%)
             t = tick["position"] / 100.0
-            # Map back to the linear data range to sample the color
-            value = cr_min + t * cr_range
+            value = img_min + t * img_range
             ctf.GetColor(value, rgb)
             tick["color"] = tick_contrast_color(rgb[0], rgb[1], rgb[2])
         self.config.color_ticks = ticks
@@ -390,7 +385,6 @@ class VariableView(TrameComponent):
                     "active_layout !== 'auto_layout' ? `height: calc(100% - ${top_padding}px;` : 'overflow-hidden'",
                 ),
                 tile=("active_layout !== 'auto_layout'",),
-                raw_attrs=[f'data-field-name="{self.variable_name}"'],
             ):
                 with v3.VRow(
                     dense=True,
@@ -447,13 +441,6 @@ class VariableView(TrameComponent):
                         f"fields_avgs['{self.variable_name}']?.toExponential(2) || 'N/A'"
                         "}}",
                         classes="text-caption px-1 text-no-wrap",
-                    )
-                    v3.VIconBtn(
-                        v_tooltip_bottom="'Capture panel as PNG'",
-                        icon="mdi-camera",
-                        size="x-small",
-                        variant="plain",
-                        click=f"utils.quickview.capturePanel('{self.variable_name}', time_idx, midpoint_idx, interface_idx)",
                     )
 
                 with html.Div(
@@ -596,7 +583,6 @@ class ViewManager(TrameComponent):
         # Build a lookup from type name to color from state.variable_types
         type_to_color = {vt["name"]: vt["color"] for vt in self.state.variable_types}
         with DivLayout(self.server, template_name="auto_layout") as self.ui:
-            self.ui.root.classes = "all-variables"
             if self.state.layout_grouped:
                 with v3.VCol(classes="pa-1"):
                     for var_type in variables.keys():
