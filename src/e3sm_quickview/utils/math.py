@@ -9,6 +9,39 @@ import numpy as np
 from typing import List, Tuple, Optional
 
 
+def calculate_linthresh(data):
+    """Calculate the linear threshold for symlog scaling.
+
+    Excludes machine-error zeros (values within ±sqrt(eps) of the data dtype),
+    then returns min(abs(valid)).
+
+    Operates on the original array without copies.
+
+    Args:
+        data: numpy array of data values
+
+    Returns:
+        linthresh value (float), clamped to at least 1.0
+    """
+    eps = np.finfo(data.dtype).eps
+    threshold = np.sqrt(eps)
+
+    # Find min |x| > threshold without allocating a copy.
+    # Using where= runs as a tight vectorized C loop, roughly 2-3 orders
+    # of magnitude faster than a Python for loop.
+    min_pos = np.nanmin(data, where=data > threshold, initial=np.inf)
+    # For negatives: max(data) where data < -threshold gives closest to zero
+    max_neg = np.nanmax(data, where=data < -threshold, initial=-np.inf)
+    min_abs = min(min_pos, -max_neg)
+
+    if min_abs == np.inf:
+        linthresh = 1.0
+    else:
+        linthresh = max(float(min_abs), 1.0)
+
+    return linthresh
+
+
 def calculate_weighted_average(
     data_array: np.ndarray, weights: Optional[np.ndarray] = None
 ) -> float:
@@ -135,7 +168,7 @@ def normalize_range(
     return new_min + normalized * (new_max - new_min)
 
 
-def get_nice_ticks(vmin, vmax, n, scale="linear"):
+def get_nice_ticks(vmin, vmax, n, scale="linear", linthresh=None):
     """Compute nicely spaced tick values for a given range and scale.
 
     Args:
@@ -163,8 +196,9 @@ def get_nice_ticks(vmin, vmax, n, scale="linear"):
         raw_ticks = np.linspace(vmin, vmax, n)
     elif scale == "log":
         # Use integer powers of 10 that fall strictly inside [vmin, vmax]
-        safe_vmin = max(vmin, 1e-15)
-        safe_vmax = max(vmax, 1e-14)
+        log_floor = linthresh if linthresh is not None else 1e-15
+        safe_vmin = max(vmin, log_floor)
+        safe_vmax = max(vmax, log_floor)
         start_exp = int(np.floor(np.log10(safe_vmin)))
         stop_exp = int(np.ceil(np.log10(safe_vmax)))
         powers = [
@@ -178,19 +212,33 @@ def get_nice_ticks(vmin, vmax, n, scale="linear"):
         else:
             raw_ticks = np.array(powers)
     elif scale == "symlog":
-
-        def transform(x, th):
-            return np.sign(x) * np.log10(np.abs(x) / th + 1)
-
-        def inverse(y, th):
-            return np.sign(y) * th * (10 ** np.abs(y) - 1)
-
-        linthresh = max(abs(vmin), abs(vmax)) * 1e-2
-        if linthresh == 0:
+        if linthresh is None:
             linthresh = 1.0
-        t_min, t_max = transform(vmin, linthresh), transform(vmax, linthresh)
-        t_ticks = np.linspace(t_min, t_max, n)
-        raw_ticks = inverse(t_ticks, linthresh)
+        # Use powers of 10 as tick values, matching the LUT breakpoints
+        ticks_set = set()
+        if vmin < 0:
+            lo = max(linthresh, 1e-30)
+            for e in range(
+                int(np.floor(np.log10(lo))), int(np.floor(np.log10(abs(vmin)))) + 1
+            ):
+                val = -(10.0**e)
+                if vmin <= val < 0:
+                    ticks_set.add(val)
+        if vmax > 0:
+            lo = max(linthresh, 1e-30)
+            for e in range(
+                int(np.floor(np.log10(lo))), int(np.floor(np.log10(vmax))) + 1
+            ):
+                val = 10.0**e
+                if 0 < val <= vmax:
+                    ticks_set.add(val)
+        if vmin <= 0 <= vmax:
+            ticks_set.add(0.0)
+        ticks_set.add(vmin)
+        ticks_set.add(vmax)
+        raw_ticks = np.array(sorted(ticks_set))
+        # Skip snap — powers of 10 are already nice
+        return raw_ticks
     else:
         raw_ticks = np.linspace(vmin, vmax, n)
 
@@ -241,54 +289,17 @@ def tick_contrast_color(r, g, b):
     return "#000" if luminance > 0.45 else "#fff"
 
 
-def _position_on_bar(val, vmin, vmax, scale):
-    """Map a data value to a 0-100 percentage position on a linear colorbar.
-
-    For 'linear' scale, position is simply the linear interpolation.
-    For 'log' and 'symlog', the colorbar image is always rendered from the
-    linear LUT, so tick positions must be placed in the *transformed* space
-    to show where data values actually map.
-    """
-    data_range = vmax - vmin
-    if data_range == 0:
-        return 50.0
-
-    if scale == "log":
-        safe_vmin = max(vmin, 1e-15)
-        safe_vmax = max(vmax, 1e-14)
-        safe_val = max(val, safe_vmin)
-        log_min = np.log10(safe_vmin)
-        log_max = np.log10(safe_vmax)
-        log_range = log_max - log_min
-        if log_range == 0:
-            return 50.0
-        return (np.log10(safe_val) - log_min) / log_range * 100
-
-    if scale == "symlog":
-        linthresh = max(abs(vmin), abs(vmax)) * 1e-2
-        if linthresh == 0:
-            linthresh = 1.0
-
-        def _symlog(x):
-            return np.sign(x) * np.log10(np.abs(x) / linthresh + 1)
-
-        s_min = _symlog(vmin)
-        s_max = _symlog(vmax)
-        s_range = s_max - s_min
-        if s_range == 0:
-            return 50.0
-        return float((_symlog(val) - s_min) / s_range * 100)
-
-    # linear
-    return (val - vmin) / data_range * 100
-
-
-def compute_color_ticks(vmin, vmax, scale="linear", n=5, min_gap=7, edge_margin=3):
+def compute_color_ticks(
+    vmin, vmax, scale="linear", n=5, min_gap=7, edge_margin=3, linthresh=None
+):
     """Compute tick marks for a colorbar.
 
-    The colorbar image is always rendered from the linear LUT.  For log and
-    symlog scales, tick *positions* are placed in the transformed space so
-    they line up visually with the correct colours.
+    Tick positions are computed in the space matching the scale:
+    - linear: position = (val - vmin) / (vmax - vmin) * 100
+    - symlog: position = (symlog(val) - symlog(vmin)) / (symlog(vmax) - symlog(vmin)) * 100
+
+    The colorbar image is always the linear preset, so symlog ticks
+    appear at different positions than linear ticks for the same values.
 
     Args:
         vmin: Minimum color range value
@@ -305,14 +316,44 @@ def compute_color_ticks(vmin, vmax, scale="linear", n=5, min_gap=7, edge_margin=
         return []
 
     raw_n = n if scale == "linear" else n * 2
-    ticks = get_nice_ticks(vmin, vmax, raw_n, scale)
+    ticks = get_nice_ticks(vmin, vmax, raw_n, scale, linthresh=linthresh)
+    data_range = vmax - vmin
 
-    # Build candidate list with position in transformed space
+    # Build mapping functions for non-linear tick positions
+    _symlog_fn = None
+    _log_min = _log_max = _log_range = None
+
+    if scale == "symlog":
+        if linthresh is None:
+            linthresh = 1.0
+
+        def _symlog_fn(v):
+            v = np.asarray(v, dtype=float)
+            return np.sign(v) * np.log10(1.0 + np.abs(v) / linthresh)
+
+        s_min = float(_symlog_fn(vmin))
+        s_max = float(_symlog_fn(vmax))
+        s_range = s_max - s_min
+
+    elif scale == "log":
+        log_floor = linthresh if linthresh is not None else 1e-30
+        safe_vmin = max(vmin, log_floor)
+        safe_vmax = max(vmax, log_floor)
+        _log_min = np.log10(safe_vmin)
+        _log_max = np.log10(safe_vmax)
+        _log_range = _log_max - _log_min
+
+    # Build candidate list with position in the appropriate space
     candidates = []
     has_zero = False
     for t in ticks:
         val = float(t)
-        pos = _position_on_bar(val, vmin, vmax, scale)
+        if scale == "symlog" and s_range != 0:
+            pos = (float(_symlog_fn(val)) - s_min) / s_range * 100
+        elif scale == "log" and _log_range and _log_range != 0 and val > 0:
+            pos = (np.log10(val) - _log_min) / _log_range * 100
+        else:
+            pos = (val - vmin) / data_range * 100
         if edge_margin <= pos <= (100 - edge_margin):
             is_zero = np.isclose(val, 0, atol=1e-12)
             if is_zero:
@@ -327,7 +368,10 @@ def compute_color_ticks(vmin, vmax, scale="linear", n=5, min_gap=7, edge_margin=
 
     # Always include 0 when it falls within the range (for any scale)
     if not has_zero and scale != "log":
-        zero_pos = _position_on_bar(0.0, vmin, vmax, scale)
+        if scale == "symlog" and s_range != 0:
+            zero_pos = (float(_symlog_fn(0.0)) - s_min) / s_range * 100
+        else:
+            zero_pos = (0.0 - vmin) / data_range * 100
         if 0 <= zero_pos <= 100:
             tick = {"position": round(zero_pos, 2), "label": "0", "priority": True}
             # Insert in sorted order
