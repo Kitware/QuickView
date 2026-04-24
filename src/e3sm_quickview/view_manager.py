@@ -14,7 +14,11 @@ from e3sm_quickview.components import view as tview
 from e3sm_quickview.presets import COLOR_BLIND_SAFE
 from e3sm_quickview.utils import perf
 from e3sm_quickview.utils.color import COLORBAR_CACHE, lut_to_img
-from e3sm_quickview.utils.math import compute_color_ticks, tick_contrast_color
+from e3sm_quickview.utils.math import (
+    calculate_linthresh,
+    compute_color_ticks,
+    tick_contrast_color,
+)
 
 
 def auto_size_to_col(size):
@@ -55,6 +59,7 @@ class ViewConfiguration(dataclass.StateDataModel):
     invert: bool = dataclass.Sync(bool, False)
     color_blind: bool = dataclass.Sync(bool, False)
     use_log_scale: str = dataclass.Sync(str, "linear")
+    discrete_log: bool = dataclass.Sync(bool, False)
     color_value_min: str = dataclass.Sync(str, "0")
     color_value_max: str = dataclass.Sync(str, "1")
     color_value_min_valid: bool = dataclass.Sync(bool, True)
@@ -136,7 +141,7 @@ class VariableView(TrameComponent):
             ["override_range", "color_range"], self.update_color_range, eager=True
         )
         self.config.watch(
-            ["preset", "invert", "use_log_scale", "n_colors"],
+            ["preset", "invert", "use_log_scale", "discrete_log", "n_colors"],
             self.update_color_preset,
             eager=True,
         )
@@ -177,7 +182,9 @@ class VariableView(TrameComponent):
         self.view.ResetCamera(True, 0.9)
         self.render()
 
-    def update_color_preset(self, name, invert, log_scale, n_colors=255):
+    def update_color_preset(
+        self, name, invert, log_scale, discrete_log=False, n_colors=255
+    ):
         self.config.preset = name
 
         # ApplyPreset resets range to [0,1], so always apply the linear
@@ -188,21 +195,59 @@ class VariableView(TrameComponent):
         if n_colors is not None:
             self.lut.NumberOfTableValues = n_colors
 
-        # Capture the colorbar image and tick marks from the LINEAR LUT
-        # before any log/symlog transform so the bar always looks linear.
-        self.config.lut_img = lut_to_img(self.lut)
-        self._compute_ticks()
-
-        if log_scale == "log":
-            self._apply_log_to_lut()
-        elif log_scale == "symlog":
-            self._apply_symlog_to_lut()
-
-        # Read the actual LUT range (may differ from color_range for log scale)
+        # Capture the linear colorbar image (always the same regardless of scale)
         ctf = self.lut.GetClientSideObject()
         self.config.effective_color_range = ctf.GetRange()
+        self.config.lut_img = lut_to_img(self.lut)
 
-        # Force mapper to pick up LUT changes
+        # Save a reference to the linear LUT range for tick contrast sampling
+        linear_rgb_points = list(self.lut.RGBPoints)
+
+        # Compute linthresh (smallest positive non-zero value) from data
+        # for log and symlog scales.
+        linthresh = None
+        if log_scale in ("log", "symlog"):
+            from vtkmodules.util.numpy_support import vtk_to_numpy
+
+            arr = self.data_array
+            if arr is not None:
+                linthresh = calculate_linthresh(vtk_to_numpy(arr))
+            else:
+                linthresh = 1.0
+
+        if log_scale == "log":
+            self._apply_log_to_lut(linthresh)
+        elif log_scale == "symlog":
+            if discrete_log:
+                display_rgb_points = self._apply_discrete_symlog_to_lut(
+                    linthresh, linear_rgb_points
+                )
+                if display_rgb_points is not None:
+                    linear_rgb_points = display_rgb_points
+            else:
+                self._apply_symlog_to_lut(linthresh, linear_rgb_points)
+
+        self._compute_ticks(linthresh=linthresh, linear_rgb_points=linear_rgb_points)
+
+        # For symlog, rebuild the client-side CTF as the VERY LAST step
+        # so nothing (proxy sync, _compute_ticks, lut_to_img) can overwrite it.
+        if log_scale == "symlog":
+            from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
+
+            symlog_pts = list(self.lut.RGBPoints)
+            ctf = vtkColorTransferFunction()
+            for i in range(0, len(symlog_pts), 4):
+                ctf.AddRGBPoint(
+                    symlog_pts[i],
+                    symlog_pts[i + 1],
+                    symlog_pts[i + 2],
+                    symlog_pts[i + 3],
+                )
+            self._symlog_ctf = ctf  # prevent GC
+        else:
+            self.lut.UpdateVTKObjects()
+            ctf = self.lut.GetClientSideObject()
+
         self.mapper.SetLookupTable(ctf)
         self.mapper.Modified()
 
@@ -215,88 +260,221 @@ class VariableView(TrameComponent):
         if invert:
             self.lut.InvertTransferFunction()
 
-    def _apply_log_to_lut(self):
+    def _apply_log_to_lut(self, linthresh):
         """Transform the already-prepared LUT to log scale.
 
-        Log scale requires all positive values, so clamp the range if needed.
+        Uses linthresh (smallest positive non-zero data value) as the floor
+        when the range includes zero or negative values.
+        The colorbar image is captured before this call, so it stays linear.
         """
         ctf = self.lut.GetClientSideObject()
         x_min, x_max = ctf.GetRange()
         if x_max <= 0:
             return
         if x_min <= 0:
-            x_min = x_max * 1e-6
+            x_min = linthresh
             self.lut.RescaleTransferFunction(x_min, x_max)
         self.lut.MapControlPointsToLogSpace()
         self.lut.UseLogScale = 1
 
-    def _apply_symlog_to_lut(
-        self, linthresh=None, linscale=1.0, base=10, n_samples=256
-    ):
-        """Transform the already-prepared LUT to symmetric log scale.
+    def _apply_symlog_to_lut(self, linthresh, linear_rgb_points=None):
+        """Build a symlog LUT with decade control points.
 
-        Uses:
-        - Linear for |x| <= linthresh
-        - Logarithmic for |x| > linthresh
-        with continuity at the boundary.
-
-        Samples colors from the linear preset and redistributes them
-        across the data range using symlog spacing.
+        Control points are placed at powers of 10 (and ±linthresh, 0 for
+        mixed-sign data).  The RGB color for each control point is sampled
+        from the linear colorbar at the position where that value falls in
+        symlog space: t = (symlog(v) - symlog(min)) / (symlog(max) - symlog(min)).
         """
-        # Get the current data range from the LUT
         ctf = self.lut.GetClientSideObject()
         x_min, x_max = ctf.GetRange()
         data_range = x_max - x_min
         if data_range == 0:
             return
 
-        if linthresh is None:
-            linthresh = max(abs(x_min), abs(x_max)) * 1e-2
-            if linthresh == 0:
-                linthresh = 1.0
+        def symlog(v):
+            v = np.asarray(v, dtype=float)
+            return np.sign(v) * np.log10(1.0 + np.abs(v) / linthresh)
 
-        log_base = np.log(base)
-        linscale_adj = linscale / (1.0 - base**-1)
+        # Build control points: N uniform samples in symlog space, plus
+        # mandatory breakpoints at ±linthresh and 0 for exact transitions.
+        n_samples = 256
+        s_min_val = float(symlog(x_min))
+        s_max_val = float(symlog(x_max))
+        s_range_bp = s_max_val - s_min_val
+        if s_range_bp == 0:
+            return
 
-        def symlog(x):
-            abs_x = np.abs(x)
-            # Clip to avoid log(0); values <= linthresh use linear branch anyway
-            safe_abs = np.maximum(abs_x, linthresh)
-            out = np.where(
-                abs_x <= linthresh,
-                x * linscale_adj,
-                np.sign(x)
-                * linthresh
-                * (linscale_adj + np.log(safe_abs / linthresh) / log_base),
-            )
-            return out
+        # Uniform in symlog space → invert to data space
+        # Inverse of symlog: v = sign(s) * linthresh * (10^|s| - 1)
+        s_vals = np.linspace(s_min_val, s_max_val, n_samples)
+        breakpoints = []
+        for s in s_vals:
+            v = float(np.sign(s) * linthresh * (10.0 ** abs(s) - 1.0))
+            v = max(x_min, min(x_max, v))
+            breakpoints.append(v)
 
-        # Sample colors from the linear LUT at uniform positions
-        rgb = [0.0, 0.0, 0.0]
-        s_min = symlog(x_min)
-        s_max = symlog(x_max)
+        # Symlog range for normalization
+        s_min = float(symlog(x_min))
+        s_max = float(symlog(x_max))
         s_range = s_max - s_min
         if s_range == 0:
             return
 
-        new_rgb_points = []
-        for i in range(n_samples):
-            # Uniform position in data space
-            t = i / (n_samples - 1)
-            x_data = x_min + t * data_range
+        # Build a standalone linear CTF for safe color sampling
+        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
 
-            # Map x_data through symlog, normalize to [0,1], then look up
-            # the color at the corresponding linear position
-            s_val = symlog(x_data)
-            s_t = (s_val - s_min) / s_range
-            x_lookup = x_min + s_t * data_range
-            ctf.GetColor(x_lookup, rgb)
+        linear_ctf = vtkColorTransferFunction()
+        if linear_rgb_points:
+            src = linear_rgb_points
+        else:
+            src = list(self.lut.RGBPoints)
+        for i in range(0, len(src), 4):
+            linear_ctf.AddRGBPoint(src[i], src[i + 1], src[i + 2], src[i + 3])
+
+        # Sample RGB from the linear CTF at symlog-normalized positions
+        rgb = [0.0, 0.0, 0.0]
+        new_rgb_points = []
+        for v in breakpoints:
+            t = (float(symlog(v)) - s_min) / s_range
+            x_lookup = x_min + t * data_range
+            linear_ctf.GetColor(x_lookup, rgb)
             new_rgb_points.extend(
-                [float(x_data), float(rgb[0]), float(rgb[1]), float(rgb[2])]
+                [float(v), float(rgb[0]), float(rgb[1]), float(rgb[2])]
             )
 
-        # Write back through the proxy so state stays in sync
+        # Store on proxy for bookkeeping — the actual CTF used by the
+        # mapper is a standalone vtkColorTransferFunction built in
+        # update_color_preset to avoid proxy client-side object issues.
+        self.lut.UseLogScale = 0
         self.lut.RGBPoints = new_rgb_points
+
+    def _apply_discrete_symlog_to_lut(self, linthresh, linear_rgb_points):
+        """Build a discrete (stepped) symlog LUT.
+
+        Each decade interval gets a single flat color sampled from the
+        continuous LUT at the interval midpoint (in symlog space).
+        Twin control points with a tiny offset create hard steps at the
+        decade boundaries.  The display image is also replaced with a
+        banded colorbar.
+        """
+        ctf = self.lut.GetClientSideObject()
+        x_min, x_max = ctf.GetRange()
+        data_range = x_max - x_min
+        if data_range == 0:
+            return
+
+        def symlog(v):
+            v = np.asarray(v, dtype=float)
+            return np.sign(v) * np.log10(1.0 + np.abs(v) / linthresh)
+
+        # Build decade boundaries (same logic as symlog ticks)
+        boundaries = set()
+        if x_min < 0:
+            lo = max(linthresh, 1e-30)
+            for e in range(
+                int(np.floor(np.log10(lo))),
+                int(np.floor(np.log10(abs(x_min)))) + 1,
+            ):
+                val = -(10.0**e)
+                if x_min <= val < 0:
+                    boundaries.add(val)
+        if x_max > 0:
+            lo = max(linthresh, 1e-30)
+            for e in range(
+                int(np.floor(np.log10(lo))),
+                int(np.floor(np.log10(x_max))) + 1,
+            ):
+                val = 10.0**e
+                if 0 < val <= x_max:
+                    boundaries.add(val)
+        if x_min < 0 and x_max > 0:
+            boundaries.update((-linthresh, 0.0, linthresh))
+        elif x_min < 0 and x_max <= 0:
+            if -linthresh >= x_min:
+                boundaries.add(-linthresh)
+        elif x_min >= 0 and x_max > 0:
+            if linthresh <= x_max:
+                boundaries.add(linthresh)
+        if x_min <= 0 <= x_max:
+            boundaries.add(0.0)
+        boundaries.add(x_min)
+        boundaries.add(x_max)
+        boundaries = sorted(boundaries)
+
+        if len(boundaries) < 2:
+            return
+
+        # Symlog range for normalization
+        s_min = float(symlog(x_min))
+        s_max = float(symlog(x_max))
+        s_range = s_max - s_min
+        if s_range == 0:
+            return
+
+        # Build a temporary linear CTF from the saved linear RGB points
+        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
+
+        linear_ctf = vtkColorTransferFunction()
+        for i in range(0, len(linear_rgb_points), 4):
+            linear_ctf.AddRGBPoint(
+                linear_rgb_points[i],
+                linear_rgb_points[i + 1],
+                linear_rgb_points[i + 2],
+                linear_rgb_points[i + 3],
+            )
+
+        # For each interval, compute the midpoint color in symlog space.
+        # We build two CTFs:
+        #   display_ctf – bands at linear positions for the colorbar image
+        #   rendering LUT – bands at actual data values for the 3D view
+        rgb = [0.0, 0.0, 0.0]
+        eps_data = (x_max - x_min) * 1e-9
+        eps_lin = 1e-9
+        display_rgb_points = []
+        render_rgb_points = []
+        for i in range(len(boundaries) - 1):
+            lo_val = boundaries[i]
+            hi_val = boundaries[i + 1]
+            # Midpoint in symlog space → color from linear LUT
+            s_lo = float(symlog(lo_val))
+            s_hi = float(symlog(hi_val))
+            s_mid = (s_lo + s_hi) / 2.0
+            t_mid = (s_mid - s_min) / s_range
+            x_lookup = x_min + t_mid * data_range
+            linear_ctf.GetColor(x_lookup, rgb)
+            r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
+
+            # Linear positions for display image (0..1 in symlog-normalized space)
+            t_lo = (s_lo - s_min) / s_range
+            t_hi = (s_hi - s_min) / s_range
+            # Map to display range
+            d_lo = x_min + t_lo * data_range
+            d_hi = x_min + t_hi * data_range
+
+            if i == 0:
+                display_rgb_points.extend([d_lo, r, g, b])
+                render_rgb_points.extend([float(lo_val), r, g, b])
+            else:
+                display_rgb_points.extend([d_lo + eps_lin, r, g, b])
+                render_rgb_points.extend([float(lo_val) + eps_data, r, g, b])
+
+            if i == len(boundaries) - 2:
+                display_rgb_points.extend([d_hi, r, g, b])
+                render_rgb_points.extend([float(hi_val), r, g, b])
+            else:
+                display_rgb_points.extend([d_hi - eps_lin, r, g, b])
+                render_rgb_points.extend([float(hi_val) - eps_data, r, g, b])
+
+        # Generate the discrete banded colorbar image
+        self.lut.RGBPoints = display_rgb_points
+        self.config.lut_img = lut_to_img(self.lut)
+
+        # Store rendering points on proxy — the actual CTF used by the
+        # mapper is a standalone vtkColorTransferFunction built in
+        # update_color_preset to avoid proxy client-side object issues.
+        self.lut.RGBPoints = render_rgb_points
+
+        return display_rgb_points
 
     def color_range_str_to_float(self, color_value_min, color_value_max):
         try:
@@ -352,30 +530,42 @@ class VariableView(TrameComponent):
                 self.config.preset,
                 self.config.invert,
                 self.config.use_log_scale,
+                self.config.discrete_log,
                 self.config.n_colors,
             )
 
-    def _compute_ticks(self):
+    def _compute_ticks(self, linthresh=None, linear_rgb_points=None):
         vmin, vmax = self.config.color_range
-        ticks = compute_color_ticks(vmin, vmax, scale=self.config.use_log_scale, n=5)
-        if not ticks:
+        ticks = compute_color_ticks(
+            vmin, vmax, scale=self.config.use_log_scale, n=5, linthresh=linthresh
+        )
+        # Sample colors from the *linear* LUT so tick contrast matches the
+        # displayed colorbar image, not the log/symlog-remapped rendering LUT.
+        rgb_points = (
+            linear_rgb_points if linear_rgb_points else list(self.lut.RGBPoints)
+        )
+        if len(rgb_points) < 4:
             self.config.color_ticks = []
             return
-        # The colorbar image is always rendered from the linear LUT, so
-        # sample contrast colors using the linear color_range.
-        ctf = self.lut.GetClientSideObject()
+        img_min = rgb_points[0]
+        img_max = rgb_points[-4]
+        img_range = img_max - img_min
+        if img_range == 0:
+            self.config.color_ticks = []
+            return
+        # Build a temporary linear CTF to sample colors from
+        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
+
+        linear_ctf = vtkColorTransferFunction()
+        for i in range(0, len(rgb_points), 4):
+            linear_ctf.AddRGBPoint(
+                rgb_points[i], rgb_points[i + 1], rgb_points[i + 2], rgb_points[i + 3]
+            )
         rgb = [0.0, 0.0, 0.0]
-        cr_min, cr_max = float(vmin), float(vmax)
-        cr_range = cr_max - cr_min
-        if cr_range == 0:
-            self.config.color_ticks = []
-            return
         for tick in ticks:
-            # tick position is already in the correct visual space (0-100%)
             t = tick["position"] / 100.0
-            # Map back to the linear data range to sample the color
-            value = cr_min + t * cr_range
-            ctf.GetColor(value, rgb)
+            value = img_min + t * img_range
+            linear_ctf.GetColor(value, rgb)
             tick["color"] = tick_contrast_color(rgb[0], rgb[1], rgb[2])
         self.config.color_ticks = ticks
 

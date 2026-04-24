@@ -180,6 +180,21 @@ def create_bottom_bar(config, update_color_preset):
                                 ),
                                 variant="text",
                             )
+                            v3.VIconBtn(
+                                v_show="config.use_log_scale === 'symlog'",
+                                v_tooltip_bottom=(
+                                    "config.discrete_log ? 'Switch to continuous colormap' : 'Switch to discrete colormap'",
+                                ),
+                                icon=(
+                                    "config.discrete_log ? 'mdi-view-sequential' : 'mdi-gradient-horizontal'",
+                                ),
+                                click="config.discrete_log = !config.discrete_log",
+                                size="small",
+                                text=(
+                                    "config.discrete_log ? 'Discrete' : 'Continuous'",
+                                ),
+                                variant="text",
+                            )
 
                             v3.VTextField(
                                 v_model="config.search",
@@ -247,7 +262,7 @@ def create_bottom_bar(config, update_color_preset):
                             subtitle=("entry.name",),
                             click=(
                                 update_color_preset,
-                                "[entry.name, config.invert, config.use_log_scale, config.n_colors]",
+                                "[entry.name, config.invert, config.use_log_scale, config.discrete_log, config.n_colors]",
                             ),
                             active=("config.preset === entry.name",),
                         ):
