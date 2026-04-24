@@ -12,7 +12,7 @@ from typing import List, Tuple, Optional
 def calculate_linthresh(data):
     """Calculate the linear threshold for symlog scaling.
 
-    Excludes machine-error zeros (values within ±2*eps of the data dtype),
+    Excludes machine-error zeros (values within ±sqrt(eps) of the data dtype),
     then returns min(abs(valid)).
 
     Operates on the original array without copies.
@@ -21,10 +21,10 @@ def calculate_linthresh(data):
         data: numpy array of data values
 
     Returns:
-        linthresh value (float), or 1.0 if no valid values exist
+        linthresh value (float), clamped to at least 1.0
     """
     eps = np.finfo(data.dtype).eps
-    threshold = 2 * eps
+    threshold = np.sqrt(eps)
 
     # Find min |x| > threshold without allocating a copy.
     # Using where= runs as a tight vectorized C loop, roughly 2-3 orders
@@ -37,7 +37,7 @@ def calculate_linthresh(data):
     if min_abs == np.inf:
         linthresh = 1.0
     else:
-        linthresh = float(min_abs)
+        linthresh = max(float(min_abs), 1.0)
 
     return linthresh
 
@@ -196,8 +196,9 @@ def get_nice_ticks(vmin, vmax, n, scale="linear", linthresh=None):
         raw_ticks = np.linspace(vmin, vmax, n)
     elif scale == "log":
         # Use integer powers of 10 that fall strictly inside [vmin, vmax]
-        safe_vmin = max(vmin, 1e-15)
-        safe_vmax = max(vmax, 1e-14)
+        log_floor = linthresh if linthresh is not None else 1e-15
+        safe_vmin = max(vmin, log_floor)
+        safe_vmax = max(vmax, log_floor)
         start_exp = int(np.floor(np.log10(safe_vmin)))
         stop_exp = int(np.ceil(np.log10(safe_vmax)))
         powers = [
@@ -328,15 +329,21 @@ def compute_color_ticks(
 
         def _symlog_fn(v):
             v = np.asarray(v, dtype=float)
-            return np.sign(v) * np.log10(1.0 + np.abs(v) / linthresh)
+            abs_v = np.abs(v)
+            return np.where(
+                abs_v > linthresh,
+                np.sign(v) * np.log10(np.maximum(abs_v, linthresh)),
+                v / linthresh * np.log10(linthresh),
+            )
 
         s_min = float(_symlog_fn(vmin))
         s_max = float(_symlog_fn(vmax))
         s_range = s_max - s_min
 
     elif scale == "log":
-        safe_vmin = max(vmin, 1e-30)
-        safe_vmax = max(vmax, 1e-30)
+        log_floor = linthresh if linthresh is not None else 1e-30
+        safe_vmin = max(vmin, log_floor)
+        safe_vmax = max(vmax, log_floor)
         _log_min = np.log10(safe_vmin)
         _log_max = np.log10(safe_vmax)
         _log_range = _log_max - _log_min
