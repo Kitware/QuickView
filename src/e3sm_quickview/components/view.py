@@ -181,7 +181,6 @@ def create_bottom_bar(config, update_color_preset):
                                 variant="text",
                             )
                             v3.VIconBtn(
-                                v_show="config.use_log_scale === 'symlog'",
                                 v_tooltip_bottom=(
                                     "config.discrete_log ? 'Switch to continuous colormap' : 'Switch to discrete colormap'",
                                 ),
@@ -217,18 +216,23 @@ def create_bottom_bar(config, update_color_preset):
                                 click="config.menu=false",
                             )
 
-                    with v3.VCardItem(classes="py-0 mb-2"):
+                    with v3.VCardItem(
+                        v_show="config.discrete_log",
+                        classes="py-0 mb-2",
+                    ):
                         v3.VNumberInput(
-                            v_model="config.n_colors",
+                            v_model="config.n_discrete_colors",
                             hide_details=True,
                             density="compact",
                             variant="outlined",
                             flat=True,
-                            label="Number of colors",
+                            label=(
+                                "config.use_log_scale === 'linear' ? 'Colors per tick interval' : 'Colors per decade'",
+                            ),
                             classes="mt-2",
                             step=[1],
-                            min=[2],
-                            max=[255],
+                            min=[1],
+                            max=[5],
                         )
                     with v3.VCardItem(
                         v_show="config.override_range", classes="py-0 mb-2"
@@ -262,7 +266,7 @@ def create_bottom_bar(config, update_color_preset):
                             subtitle=("entry.name",),
                             click=(
                                 update_color_preset,
-                                "[entry.name, config.invert, config.use_log_scale, config.discrete_log, config.n_colors]",
+                                "[entry.name, config.invert, config.use_log_scale, config.discrete_log, config.n_discrete_colors, config.n_colors]",
                             ),
                             active=("config.preset === entry.name",),
                         ):

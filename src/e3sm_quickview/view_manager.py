@@ -17,6 +17,7 @@ from e3sm_quickview.utils.color import COLORBAR_CACHE, lut_to_img
 from e3sm_quickview.utils.math import (
     calculate_linthresh,
     compute_color_ticks,
+    format_tick,
     tick_contrast_color,
 )
 
@@ -60,6 +61,7 @@ class ViewConfiguration(dataclass.StateDataModel):
     color_blind: bool = dataclass.Sync(bool, False)
     use_log_scale: str = dataclass.Sync(str, "linear")
     discrete_log: bool = dataclass.Sync(bool, False)
+    n_discrete_colors: int = dataclass.Sync(int, 1)
     color_value_min: str = dataclass.Sync(str, "0")
     color_value_max: str = dataclass.Sync(str, "1")
     color_value_min_valid: bool = dataclass.Sync(bool, True)
@@ -141,7 +143,13 @@ class VariableView(TrameComponent):
             ["override_range", "color_range"], self.update_color_range, eager=True
         )
         self.config.watch(
-            ["preset", "invert", "use_log_scale", "discrete_log", "n_colors"],
+            [
+                "preset",
+                "invert",
+                "use_log_scale",
+                "discrete_log",
+                "n_discrete_colors",
+            ],
             self.update_color_preset,
             eager=True,
         )
@@ -183,7 +191,13 @@ class VariableView(TrameComponent):
         self.render()
 
     def update_color_preset(
-        self, name, invert, log_scale, discrete_log=False, n_colors=255
+        self,
+        name,
+        invert,
+        log_scale,
+        discrete_log=False,
+        n_discrete_colors=1,
+        n_colors=255,
     ):
         self.config.preset = name
 
@@ -191,9 +205,6 @@ class VariableView(TrameComponent):
         # preset first, rescale to the current range, then apply transforms
         self._apply_linear_to_lut(invert)
         self.lut.RescaleTransferFunction(*self.config.color_range)
-
-        if n_colors is not None:
-            self.lut.NumberOfTableValues = n_colors
 
         # Capture the linear colorbar image (always the same regardless of scale)
         ctf = self.lut.GetClientSideObject()
@@ -215,12 +226,26 @@ class VariableView(TrameComponent):
             else:
                 linthresh = 1.0
 
-        if log_scale == "log":
-            self._apply_log_to_lut(linthresh)
+        n_sub = max(1, min(5, int(n_discrete_colors)))
+        if log_scale == "linear" and discrete_log:
+            display_rgb_points = self._apply_discrete_linear_to_lut(
+                linear_rgb_points, n_sub
+            )
+            if display_rgb_points is not None:
+                linear_rgb_points = display_rgb_points
+        elif log_scale == "log":
+            if discrete_log:
+                display_rgb_points = self._apply_discrete_log_to_lut(
+                    linthresh, linear_rgb_points, n_sub
+                )
+                if display_rgb_points is not None:
+                    linear_rgb_points = display_rgb_points
+            else:
+                self._apply_log_to_lut(linthresh)
         elif log_scale == "symlog":
             if discrete_log:
                 display_rgb_points = self._apply_discrete_symlog_to_lut(
-                    linthresh, linear_rgb_points
+                    linthresh, linear_rgb_points, n_sub
                 )
                 if display_rgb_points is not None:
                     linear_rgb_points = display_rgb_points
@@ -229,20 +254,16 @@ class VariableView(TrameComponent):
 
         self._compute_ticks(linthresh=linthresh, linear_rgb_points=linear_rgb_points)
 
-        # For symlog, rebuild the client-side CTF as the VERY LAST step
-        # so nothing (proxy sync, _compute_ticks, lut_to_img) can overwrite it.
-        if log_scale == "symlog":
+        # For symlog (or any discrete mode), rebuild the client-side CTF as
+        # the VERY LAST step so nothing (proxy sync, _compute_ticks, lut_to_img)
+        # can overwrite it.
+        if log_scale == "symlog" or (discrete_log and log_scale in ("log", "linear")):
             from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
 
-            symlog_pts = list(self.lut.RGBPoints)
+            pts = list(self.lut.RGBPoints)
             ctf = vtkColorTransferFunction()
-            for i in range(0, len(symlog_pts), 4):
-                ctf.AddRGBPoint(
-                    symlog_pts[i],
-                    symlog_pts[i + 1],
-                    symlog_pts[i + 2],
-                    symlog_pts[i + 3],
-                )
+            for i in range(0, len(pts), 4):
+                ctf.AddRGBPoint(pts[i], pts[i + 1], pts[i + 2], pts[i + 3])
             self._symlog_ctf = ctf  # prevent GC
         else:
             self.lut.UpdateVTKObjects()
@@ -260,6 +281,90 @@ class VariableView(TrameComponent):
         if invert:
             self.lut.InvertTransferFunction()
 
+    def _apply_discrete_linear_to_lut(self, linear_rgb_points, n_sub=1):
+        """Build a discrete (stepped) linear LUT.
+
+        The data range is divided into N_INTERVALS equal-percentage intervals.
+        Each interval is then split into *n_sub* equal sub-bands, each with a
+        flat color sampled from the continuous linear LUT at the sub-band
+        midpoint.  The boundary values are stored so ``_compute_ticks`` can
+        place tick marks at the exact same positions.
+        """
+        N_INTERVALS = 4
+        ctf = self.lut.GetClientSideObject()
+        x_min, x_max = ctf.GetRange()
+        data_range = x_max - x_min
+        if data_range == 0:
+            return
+
+        # Evenly spaced boundaries (percentages of data range)
+        boundaries = [
+            x_min + data_range * i / N_INTERVALS for i in range(N_INTERVALS + 1)
+        ]
+        # Store boundary values and their display positions (%) for tick alignment
+        self._discrete_tick_data = [
+            {"val": boundaries[i], "pos": i / N_INTERVALS * 100}
+            for i in range(1, N_INTERVALS)
+        ]
+
+        # Build a temporary linear CTF from the saved linear RGB points
+        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
+
+        linear_ctf = vtkColorTransferFunction()
+        for i in range(0, len(linear_rgb_points), 4):
+            linear_ctf.AddRGBPoint(
+                linear_rgb_points[i],
+                linear_rgb_points[i + 1],
+                linear_rgb_points[i + 2],
+                linear_rgb_points[i + 3],
+            )
+
+        rgb = [0.0, 0.0, 0.0]
+        eps = data_range * 1e-9
+        display_rgb_points = []
+        render_rgb_points = []
+        band_idx = 0
+        total_bands = (len(boundaries) - 1) * n_sub
+        for i in range(len(boundaries) - 1):
+            lo = boundaries[i]
+            hi = boundaries[i + 1]
+            for j in range(n_sub):
+                # Sub-band edges in linear space
+                sub_lo = lo + (hi - lo) * j / n_sub
+                sub_hi = lo + (hi - lo) * (j + 1) / n_sub
+                sub_mid = (sub_lo + sub_hi) / 2.0
+                linear_ctf.GetColor(sub_mid, rgb)
+                r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
+
+                is_first = band_idx == 0
+                is_last = band_idx == total_bands - 1
+
+                if is_first:
+                    display_rgb_points.extend([sub_lo, r, g, b])
+                    render_rgb_points.extend([sub_lo, r, g, b])
+                else:
+                    display_rgb_points.extend([sub_lo + eps, r, g, b])
+                    render_rgb_points.extend([sub_lo + eps, r, g, b])
+
+                if is_last:
+                    display_rgb_points.extend([sub_hi, r, g, b])
+                    render_rgb_points.extend([sub_hi, r, g, b])
+                else:
+                    display_rgb_points.extend([sub_hi - eps, r, g, b])
+                    render_rgb_points.extend([sub_hi - eps, r, g, b])
+
+                band_idx += 1
+
+        # Generate the discrete banded colorbar image
+        self.lut.RGBPoints = display_rgb_points
+        self.config.lut_img = lut_to_img(self.lut)
+
+        # Store rendering points on proxy
+        self.lut.UseLogScale = 0
+        self.lut.RGBPoints = render_rgb_points
+
+        return display_rgb_points
+
     def _apply_log_to_lut(self, linthresh):
         """Transform the already-prepared LUT to log scale.
 
@@ -276,6 +381,127 @@ class VariableView(TrameComponent):
             self.lut.RescaleTransferFunction(x_min, x_max)
         self.lut.MapControlPointsToLogSpace()
         self.lut.UseLogScale = 1
+
+    def _apply_discrete_log_to_lut(self, linthresh, linear_rgb_points, n_sub=1):
+        """Build a discrete (stepped) log-scale LUT.
+
+        Decade boundaries are powers of 10 from linthresh to x_max.
+        Each decade is split into *n_sub* equal sub-bands in log space,
+        each with a flat color sampled from the continuous linear LUT.
+        """
+        ctf = self.lut.GetClientSideObject()
+        x_min, x_max = ctf.GetRange()
+        if x_max <= 0:
+            return
+        # Clamp floor
+        x_min = max(x_min, linthresh)
+        data_range = x_max - x_min
+        if data_range == 0:
+            return
+
+        log_min = np.log10(x_min)
+        log_max = np.log10(x_max)
+        log_range = log_max - log_min
+        if log_range == 0:
+            return
+
+        # Build decade boundaries
+        boundaries = [x_min]
+        e_lo = int(np.ceil(np.log10(x_min)))
+        e_hi = int(np.floor(np.log10(x_max)))
+        for e in range(e_lo, e_hi + 1):
+            val = 10.0**e
+            if x_min < val < x_max:
+                boundaries.append(val)
+        boundaries.append(x_max)
+
+        if len(boundaries) < 2:
+            return
+
+        # Store boundary values and their display positions (%) for tick alignment
+        log_min = np.log10(x_min)
+        log_max = np.log10(x_max)
+        log_range_val = log_max - log_min
+        self._discrete_tick_data = []
+        for bv in boundaries[1:-1]:
+            pct = (np.log10(bv) - log_min) / log_range_val * 100 if log_range_val else 0
+            self._discrete_tick_data.append({"val": bv, "pos": float(pct)})
+
+        # Build a temporary linear CTF from the saved linear RGB points
+        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
+
+        linear_ctf = vtkColorTransferFunction()
+        for i in range(0, len(linear_rgb_points), 4):
+            linear_ctf.AddRGBPoint(
+                linear_rgb_points[i],
+                linear_rgb_points[i + 1],
+                linear_rgb_points[i + 2],
+                linear_rgb_points[i + 3],
+            )
+
+        rgb = [0.0, 0.0, 0.0]
+        eps_data = data_range * 1e-9
+        eps_lin = 1e-9
+        display_rgb_points = []
+        render_rgb_points = []
+        band_idx = 0
+        total_bands = (len(boundaries) - 1) * n_sub
+        for i in range(len(boundaries) - 1):
+            log_lo_decade = np.log10(boundaries[i])
+            log_hi_decade = np.log10(boundaries[i + 1])
+            for j in range(n_sub):
+                # Sub-band edges in log space
+                log_lo = log_lo_decade + (log_hi_decade - log_lo_decade) * j / n_sub
+                log_hi = (
+                    log_lo_decade + (log_hi_decade - log_lo_decade) * (j + 1) / n_sub
+                )
+                log_mid = (log_lo + log_hi) / 2.0
+                # Sample color from linear LUT at normalized position
+                t_mid = (log_mid - log_min) / log_range
+                x_lookup = x_min + t_mid * data_range
+                linear_ctf.GetColor(x_lookup, rgb)
+                r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
+
+                # Data-space boundaries for rendering
+                v_lo = 10.0**log_lo
+                v_hi = 10.0**log_hi
+                v_lo = max(x_min, min(x_max, v_lo))
+                v_hi = max(x_min, min(x_max, v_hi))
+
+                # Linear positions for display image
+                t_lo_pos = (log_lo - log_min) / log_range
+                t_hi_pos = (log_hi - log_min) / log_range
+                d_lo = x_min + t_lo_pos * data_range
+                d_hi = x_min + t_hi_pos * data_range
+
+                is_first = band_idx == 0
+                is_last = band_idx == total_bands - 1
+
+                if is_first:
+                    display_rgb_points.extend([d_lo, r, g, b])
+                    render_rgb_points.extend([float(v_lo), r, g, b])
+                else:
+                    display_rgb_points.extend([d_lo + eps_lin, r, g, b])
+                    render_rgb_points.extend([float(v_lo) + eps_data, r, g, b])
+
+                if is_last:
+                    display_rgb_points.extend([d_hi, r, g, b])
+                    render_rgb_points.extend([float(v_hi), r, g, b])
+                else:
+                    display_rgb_points.extend([d_hi - eps_lin, r, g, b])
+                    render_rgb_points.extend([float(v_hi) - eps_data, r, g, b])
+
+                band_idx += 1
+
+        # Generate the discrete banded colorbar image
+        self.lut.RGBPoints = display_rgb_points
+        self.config.lut_img = lut_to_img(self.lut)
+
+        # Store rendering points on proxy
+        self.lut.UseLogScale = 0
+        self.lut.RGBPoints = render_rgb_points
+
+        return display_rgb_points
 
     def _apply_symlog_to_lut(self, linthresh, linear_rgb_points=None):
         """Build a symlog LUT with decade control points.
@@ -348,14 +574,14 @@ class VariableView(TrameComponent):
         self.lut.UseLogScale = 0
         self.lut.RGBPoints = new_rgb_points
 
-    def _apply_discrete_symlog_to_lut(self, linthresh, linear_rgb_points):
+    def _apply_discrete_symlog_to_lut(self, linthresh, linear_rgb_points, n_sub=1):
         """Build a discrete (stepped) symlog LUT.
 
-        Each decade interval gets a single flat color sampled from the
-        continuous LUT at the interval midpoint (in symlog space).
-        Twin control points with a tiny offset create hard steps at the
-        decade boundaries.  The display image is also replaced with a
-        banded colorbar.
+        Each decade interval is split into *n_sub* equal sub-bands in symlog
+        space, each with a flat color sampled from the continuous LUT at the
+        sub-band midpoint.  Twin control points with a tiny offset create hard
+        steps at the sub-band boundaries.  The display image is also replaced
+        with a banded colorbar.
         """
         ctf = self.lut.GetClientSideObject()
         x_min, x_max = ctf.GetRange()
@@ -399,7 +625,8 @@ class VariableView(TrameComponent):
             boundaries.add(0.0)
         boundaries.add(x_min)
         boundaries.add(x_max)
-        boundaries = sorted(boundaries)
+        # Filter to only values within [x_min, x_max]
+        boundaries = sorted(b for b in boundaries if x_min <= b <= x_max)
 
         if len(boundaries) < 2:
             return
@@ -410,6 +637,34 @@ class VariableView(TrameComponent):
         s_range = s_max - s_min
         if s_range == 0:
             return
+
+        # Store boundary values and their display positions (%) for tick alignment.
+        # All boundaries are used for discrete bands, but when x_min < 0 we
+        # thin the displayed ticks: always show 0, then only every other
+        # decade moving outward from 0 in each direction.
+        all_tick_data = []
+        for bv in boundaries[1:-1]:
+            s_val = float(symlog(bv))
+            pct = (s_val - s_min) / s_range * 100
+            all_tick_data.append({"val": bv, "pos": float(pct)})
+
+        if x_min < 0:
+            # Exclude linthresh / -linthresh from tick labels
+            lt = float(linthresh)
+            filtered = [t for t in all_tick_data if abs(abs(t["val"]) - lt) > 1e-12]
+            # Separate into negative, zero, and positive
+            neg = [t for t in filtered if t["val"] < 0]
+            zero = [t for t in filtered if t["val"] == 0]
+            pos = [t for t in filtered if t["val"] > 0]
+            # Keep every other decade tick moving outward from 0
+            neg_outward = list(reversed(neg))
+            thinned_neg = [neg_outward[i] for i in range(0, len(neg_outward), 2)]
+            thinned_pos = [pos[i] for i in range(0, len(pos), 2)]
+            self._discrete_tick_data = sorted(
+                thinned_neg + zero + thinned_pos, key=lambda t: t["val"]
+            )
+        else:
+            self._discrete_tick_data = all_tick_data
 
         # Build a temporary linear CTF from the saved linear RGB points
         from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
@@ -423,47 +678,59 @@ class VariableView(TrameComponent):
                 linear_rgb_points[i + 3],
             )
 
-        # For each interval, compute the midpoint color in symlog space.
-        # We build two CTFs:
-        #   display_ctf – bands at linear positions for the colorbar image
-        #   rendering LUT – bands at actual data values for the 3D view
+        # For each decade interval, split into n_sub equal sub-bands in
+        # symlog space.  Each sub-band gets a flat color sampled from the
+        # continuous LUT at the sub-band midpoint.
         rgb = [0.0, 0.0, 0.0]
         eps_data = (x_max - x_min) * 1e-9
         eps_lin = 1e-9
         display_rgb_points = []
         render_rgb_points = []
+        band_idx = 0
+        total_bands = (len(boundaries) - 1) * n_sub
         for i in range(len(boundaries) - 1):
-            lo_val = boundaries[i]
-            hi_val = boundaries[i + 1]
-            # Midpoint in symlog space → color from linear LUT
-            s_lo = float(symlog(lo_val))
-            s_hi = float(symlog(hi_val))
-            s_mid = (s_lo + s_hi) / 2.0
-            t_mid = (s_mid - s_min) / s_range
-            x_lookup = x_min + t_mid * data_range
-            linear_ctf.GetColor(x_lookup, rgb)
-            r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
+            s_lo_decade = float(symlog(boundaries[i]))
+            s_hi_decade = float(symlog(boundaries[i + 1]))
+            for j in range(n_sub):
+                # Sub-band edges in symlog space
+                s_lo = s_lo_decade + (s_hi_decade - s_lo_decade) * j / n_sub
+                s_hi = s_lo_decade + (s_hi_decade - s_lo_decade) * (j + 1) / n_sub
+                s_mid = (s_lo + s_hi) / 2.0
+                t_mid = (s_mid - s_min) / s_range
+                x_lookup = x_min + t_mid * data_range
+                linear_ctf.GetColor(x_lookup, rgb)
+                r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
 
-            # Linear positions for display image (0..1 in symlog-normalized space)
-            t_lo = (s_lo - s_min) / s_range
-            t_hi = (s_hi - s_min) / s_range
-            # Map to display range
-            d_lo = x_min + t_lo * data_range
-            d_hi = x_min + t_hi * data_range
+                # Invert symlog to get data-space boundaries for rendering
+                v_lo = float(np.sign(s_lo) * linthresh * (10.0 ** abs(s_lo) - 1.0))
+                v_hi = float(np.sign(s_hi) * linthresh * (10.0 ** abs(s_hi) - 1.0))
+                v_lo = max(x_min, min(x_max, v_lo))
+                v_hi = max(x_min, min(x_max, v_hi))
 
-            if i == 0:
-                display_rgb_points.extend([d_lo, r, g, b])
-                render_rgb_points.extend([float(lo_val), r, g, b])
-            else:
-                display_rgb_points.extend([d_lo + eps_lin, r, g, b])
-                render_rgb_points.extend([float(lo_val) + eps_data, r, g, b])
+                # Linear positions for display image
+                t_lo_pos = (s_lo - s_min) / s_range
+                t_hi_pos = (s_hi - s_min) / s_range
+                d_lo = x_min + t_lo_pos * data_range
+                d_hi = x_min + t_hi_pos * data_range
 
-            if i == len(boundaries) - 2:
-                display_rgb_points.extend([d_hi, r, g, b])
-                render_rgb_points.extend([float(hi_val), r, g, b])
-            else:
-                display_rgb_points.extend([d_hi - eps_lin, r, g, b])
-                render_rgb_points.extend([float(hi_val) - eps_data, r, g, b])
+                is_first = band_idx == 0
+                is_last = band_idx == total_bands - 1
+
+                if is_first:
+                    display_rgb_points.extend([d_lo, r, g, b])
+                    render_rgb_points.extend([float(v_lo), r, g, b])
+                else:
+                    display_rgb_points.extend([d_lo + eps_lin, r, g, b])
+                    render_rgb_points.extend([float(v_lo) + eps_data, r, g, b])
+
+                if is_last:
+                    display_rgb_points.extend([d_hi, r, g, b])
+                    render_rgb_points.extend([float(v_hi), r, g, b])
+                else:
+                    display_rgb_points.extend([d_hi - eps_lin, r, g, b])
+                    render_rgb_points.extend([float(v_hi) - eps_data, r, g, b])
+
+                band_idx += 1
 
         # Generate the discrete banded colorbar image
         self.lut.RGBPoints = display_rgb_points
@@ -531,14 +798,32 @@ class VariableView(TrameComponent):
                 self.config.invert,
                 self.config.use_log_scale,
                 self.config.discrete_log,
-                self.config.n_colors,
+                self.config.n_discrete_colors,
             )
 
     def _compute_ticks(self, linthresh=None, linear_rgb_points=None):
         vmin, vmax = self.config.color_range
-        ticks = compute_color_ticks(
-            vmin, vmax, scale=self.config.use_log_scale, n=5, linthresh=linthresh
-        )
+
+        # For discrete mode, use pre-computed boundary positions.
+        # For continuous linear, use the same evenly spaced percentage ticks.
+        if self.config.discrete_log and hasattr(self, "_discrete_tick_data"):
+            ticks = [
+                {"position": round(td["pos"], 2), "label": format_tick(td["val"])}
+                for td in self._discrete_tick_data
+            ]
+        elif self.config.use_log_scale == "linear":
+            N_INTERVALS = 4
+            data_range = vmax - vmin
+            ticks = []
+            if data_range > 0:
+                for i in range(1, N_INTERVALS):
+                    val = vmin + data_range * i / N_INTERVALS
+                    pos = i / N_INTERVALS * 100
+                    ticks.append({"position": round(pos, 2), "label": format_tick(val)})
+        else:
+            ticks = compute_color_ticks(
+                vmin, vmax, scale=self.config.use_log_scale, n=5, linthresh=linthresh
+            )
         # Sample colors from the *linear* LUT so tick contrast matches the
         # displayed colorbar image, not the log/symlog-remapped rendering LUT.
         rgb_points = (
