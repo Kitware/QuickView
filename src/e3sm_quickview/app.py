@@ -307,17 +307,21 @@ class EAMApp(TrameApp):
             "tools": self.state.active_tools,
             "help": not self.state.compact_drawer,
         }
-        state_content["data-selection"] = {
+        data_selection = {
             k: self.state[k]
             for k in [
-                "time_idx",
-                "midpoint_idx",
-                "interface_idx",
                 "crop_longitude",
                 "crop_latitude",
                 "projection",
+                "animation_track",
             ]
         }
+        # Save all dynamic dimension indices
+        for dim_name in self.state.available_animation_tracks:
+            idx_key = f"{dim_name}_idx"
+            data_selection[idx_key] = self.state[idx_key]
+
+        state_content["data-selection"] = data_selection
         views_to_export = state_content["views"] = []
         for view_type, var_names in active_variables.items():
             for var_name in var_names:
@@ -330,7 +334,10 @@ class EAMApp(TrameApp):
                             # lut
                             "preset": config.preset,
                             "invert": config.invert,
+                            "color_blind": config.color_blind,
                             "use_log_scale": config.use_log_scale,
+                            "discrete_log": config.discrete_log,
+                            "n_discrete_colors": config.n_discrete_colors,
                             # layout
                             "order": config.order,
                             "size": config.size,
@@ -371,16 +378,34 @@ class EAMApp(TrameApp):
 
         # Load variables
         self.state.variables_selected = state_content["variables-selection"]
-        self.state.update(state_content["data-selection"])
+        # Apply non-index data-selection fields (crop, projection) before load
+        data_sel = state_content["data-selection"]
+        non_idx = {
+            k: v
+            for k, v in data_sel.items()
+            if not k.endswith("_idx") and k != "animation_track"
+        }
+        self.state.update(non_idx)
         await self._data_load_variables()
         self.state.variables_loaded = True
+
+        # Restore dimension indices after data is loaded
+        with self.state:
+            for k, v in data_sel.items():
+                if k.endswith("_idx"):
+                    self.state[k] = v
+            if "animation_track" in data_sel:
+                self.state.animation_track = data_sel["animation_track"]
 
         # Update view states
         for view_state in state_content["views"]:
             view_type = view_state["type"]
             var_name = view_state["name"]
+            cfg = view_state["config"]
+            if "color_range" in cfg and isinstance(cfg["color_range"], list):
+                cfg["color_range"] = tuple(cfg["color_range"])
             config = self.view_manager.get_view(var_name, view_type).config
-            config.update(**view_state["config"])
+            config.update(**cfg)
 
         # Update layout
         self.state.aspect_ratio = state_content["layout"]["aspect-ratio"]
