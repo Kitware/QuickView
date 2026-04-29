@@ -1,8 +1,8 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-04-21 11:44:36.237023",
-    "comment": "For documentation on slice selection"
+    "created": "2026-04-29 14:57:46.717733",
+    "comment": ""
   },
   "files": {
     "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202509_EAM_QuickView_demo/EAMxx-MAM4xx_ne4pg2_202508.nc",
@@ -17,18 +17,15 @@
     "p_int"
   ],
   "layout": {
-    "aspect-ratio": 2,
+    "aspect-ratio": 0.5,
     "grouped": false,
     "active": "auto_layout",
     "tools": [
-      "select-slice-time"
+      "animation-controls"
     ],
     "help": false
   },
   "data-selection": {
-    "time_idx": 0,
-    "midpoint_idx": 0,
-    "interface_idx": 0,
     "crop_longitude": [
       -180,
       180
@@ -39,7 +36,14 @@
     ],
     "projection": [
       "Mollweide"
-    ]
+    ],
+    "animation_track": "lwband",
+    "nmodes_idx": 2,
+    "ilev_idx": 50,
+    "num_phys_constituents_idx": 17,
+    "swband_idx": 6,
+    "lwband_idx": 9,
+    "lev_idx": 42
   },
   "views": [
     {
@@ -53,7 +57,10 @@
       "config": {
         "preset": "BuGnYl",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
         "order": 1,
         "size": 4,
         "offset": 0,
@@ -61,10 +68,10 @@
         "override_range": false,
         "color_range": [
           9.999999974752427e-07,
-          1.2010792715955176e-06
+          1.2165580756118288e-06
         ],
         "color_value_min": "9.999999974752427e-07",
-        "color_value_max": "1.2010792715955176e-06"
+        "color_value_max": "1.2165580756118288e-06"
       }
     },
     {
@@ -77,18 +84,21 @@
       "config": {
         "preset": "BuGnYl",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
         "order": 2,
         "size": 4,
         "offset": 0,
         "break_row": false,
         "override_range": false,
         "color_range": [
-          18.292064666748047,
-          356.4249267578125
+          18.035438537597656,
+          351.5260314941406
         ],
-        "color_value_min": "18.292064666748047",
-        "color_value_max": "356.4249267578125"
+        "color_value_min": "18.035438537597656",
+        "color_value_max": "351.5260314941406"
       }
     },
     {
@@ -101,18 +111,21 @@
       "config": {
         "preset": "BuGnYl",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
         "order": 6,
         "size": 4,
         "offset": 0,
         "break_row": false,
         "override_range": false,
         "color_range": [
-          48752.1328125,
-          64027.72265625
+          51225.61328125,
+          67737.34375
         ],
-        "color_value_min": "48752.1328125",
-        "color_value_max": "64027.72265625"
+        "color_value_min": "51225.61328125",
+        "color_value_max": "67737.34375"
       }
     },
     {
@@ -125,7 +138,10 @@
       "config": {
         "preset": "BuGnYl",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
         "order": 5,
         "size": 4,
         "offset": 0,
@@ -150,18 +166,21 @@
       "config": {
         "preset": "BuGnYl",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
         "order": 3,
         "size": 4,
         "offset": 0,
         "break_row": false,
         "override_range": false,
         "color_range": [
-          0.00014850075240246952,
-          0.003409830154851079
+          0.0004798854934051633,
+          0.005261988844722509
         ],
-        "color_value_min": "0.00014850075240246952",
-        "color_value_max": "0.003409830154851079"
+        "color_value_min": "0.0004798854934051633",
+        "color_value_max": "0.005261988844722509"
       }
     },
     {
@@ -175,18 +194,21 @@
       "config": {
         "preset": "BuGnYl",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
         "order": 4,
         "size": 4,
         "offset": 0,
         "break_row": false,
         "override_range": false,
         "color_range": [
-          1.4798792108194903e-05,
-          0.0004141666868235916
+          4.756277849082835e-05,
+          0.0006377813406288624
         ],
-        "color_value_min": "1.4798792108194903e-05",
-        "color_value_max": "0.0004141666868235916"
+        "color_value_min": "4.756277849082835e-05",
+        "color_value_max": "0.0006377813406288624"
       }
     }
   ]

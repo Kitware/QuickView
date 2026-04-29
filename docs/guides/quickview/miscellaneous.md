@@ -51,7 +51,7 @@ or animations for presentations and manuscripts, etc.:
   After the scan is finished, a file `quickview-animation.zip` gets downloaded to the local computer.
   This file is a zipped folder that may contain multiple files.
 
-Note: as of version 2.6.0, the animation export downloads
+Note: as of version 2.6.1, the animation export downloads
 images of individual frames to the local computer, and the user needs to use a tool to combine
 the images into an animation (or animations).
 Direct download of animation files will be provided soon.
