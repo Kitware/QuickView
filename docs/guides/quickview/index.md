@@ -31,7 +31,7 @@ platform that streamlines the analysis of atmospheric simulations. It minimizes
 the need for E3SM developers and users to write custom scripts, thereby
 shortening the path from data to insight.
 
-The core goal of QuickView is a first glance at the contents in a simulation
+The primary goal of QuickView is a first glance at the contents in a simulation
 data file, i.e., a first inspection of the characteristic values of physical
 quantities and their variations with respect to geographical location, altitude,
 and time, as well as a quick inspection across different physical quantities for
