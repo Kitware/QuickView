@@ -19,7 +19,7 @@ for the horizontal dimension (e.g., `ncol` in EAM files or
 
 Starting from QuickView version 2 and QuickCompare version 1,
 the tool family has been generalized to visualize any variable
-in a NetCDF file that has a horizontal dimension matching the connecitivity file,
+in a NetCDF file that has a horizontal dimension matching the connectivity file,
 regardless of how many additional dimensions the variables have.
 
 Here are some examples of variable dimensions (array shapes) from EAM output files:

@@ -17,11 +17,11 @@ QuickView's UI contains three main components.
 
 ![Toolbar compact or expanded](./screenshots/toolbar_compact_or_expanded.png){ width="40%" align=right}
 
-- **Control panels**: Various contral panels allow the user to
+- **Control panels**: Various control panels allow the user to
   change properties of all map plots shown in the viewport.
   The control panels can be collapsed (hidden)
   or expanded (shown) by clicking on their corresponding icons in the
-  toolbar or by using [keybord shortcuts](./shortcuts).
+  toolbar or by using [keyboard shortcuts](./shortcuts).
 
 - **Main toolbar**: The vertical toolbar located on the left of the UI
   contains various buttons that either activate pop-up menus on a single click

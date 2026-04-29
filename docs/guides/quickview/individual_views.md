@@ -1,7 +1,7 @@
 
 ![pop-up panel](./screenshots/single_view_pop-up_panel.png){ width="60%", align=right }
 
-# Custimizing Individual Views
+# Customizing Individual Views
 
 Each view in the viewport (i.e., each contour plot shown on a global or regional map)
 can be customized individually by clicking the associated colorbar.
@@ -31,12 +31,30 @@ using a fuzzy search on their names. The x icon clears the filter.
 The second icon in the top-left corner is a toggle
 for inverting and resetting the sequence of colors. 
 
-## Linear and symmetric logarithmic scales {#linear-and-log-scales}
+## Linear vs. logarithmic scales {#linear-and-log-scales}
 
-![linear and log](./screenshots/linear_log_icons.png){ width="12%", align=right }
+![linear and log](./screenshots/linear_log_icons.png){ width="16%", align=right }
 
-## Automatic and fixed data ranges
+QuickView supports both linear and logarithmic color scaling to facilitate the inspection of variables that span multiple orders of magnitude.
 
+- By default, a **linear scale** is used, indicated by a staircase-style icon in the pop-up panel.
+
+- A click on the staircase icon changes the scaling to **logarithmic** to enhance the visibility of variations across multiple orders of magnitude.
+
+- Because standard logarithmic scaling is only defined for positive values, QuickView also provides a **symmetric logarithmic (“symlog”)** scale, which accommodates negative values and zero. The symlog scale behaves linearly in a small region around zero and logarithmically away from zero, enabling consistent visualization of fields that include both positive and negative values.
+
+## Continuous vs. discrete colormaps
+
+![linear and log](./screenshots/continuous_and_discrete_colormap_icons.png){ width="12%", align=right }
+
+QuickView supports both continuous and discrete colormaps, which can be toggled using the corresponding icon in the pop-up panel. A continuous colormap maps data values smoothly along a color gradient, so each value is represented by a unique color. In contrast, a discrete colormap groups values into a finite number of color bins, assigning the same color to all values within each bin .
+
+When a discrete colormap is selected, a text box allows the user to specify the number of colors.
+
+-  With a linear scale, this value is interpreted as the number of colors between two neighboring (automatically determined) colorbar ticks.
+-  With a logarithmic scale, it instead specifies the number of colors per order of magnitude.
+
+## Automatic vs. fixed data ranges
 
 By default, QuickView automatically fits the selected colormap over the entire range of values
 of the current variable in the current data slice.

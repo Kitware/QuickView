@@ -1,6 +1,6 @@
 # Miscellaneous Features 
 
-This page summarizes several addtional convenient features in QuickView.
+This page summarizes several additional convenient features in QuickView.
 
 ## Choosing map projection and extent
 

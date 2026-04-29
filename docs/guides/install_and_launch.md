@@ -95,7 +95,7 @@ quickcompare -p 0
 After some seconds, the Terminal window should indicate that the app has
 loaded various plugins, and then provide an URL similar to `http://localhost:50329/`
 (your actual number will likely be different).
-**Enter the URL into a web brower** to access the graphical UL.
+**Enter the URL into a web browser** to access the graphical UL.
 
  
 :::tip Tip: First execution on macOS

@@ -47,7 +47,7 @@ features:
       The tools have been deployed to NERSC so that users can
       directly access simulation data there.
       No installation is required on the user's end,
-      as the UI shows up in a brower window.
+      as the UI shows up in a browser window.
     link: /nersc/index
   - title: Funding Source 
     icon:

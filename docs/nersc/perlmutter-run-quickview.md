@@ -21,11 +21,11 @@ Once connected,
 - Starting **QuickView** using the command `/global/common/software/m4359/quickview2` in the shell.
 
 - After some seconds, the terminal window will provide a URL, similar to the screenshot below.
-  A click on the URL will bring up the graphical UI in a separate brower window or tab.
+  A click on the URL will bring up the graphical UI in a separate browser window or tab.
   ![](./quickview/quickview-terminal-with-url.png)
 
 - The graphical UI will prompt you to choose connectivity and simulation files, see example below.
-  Double click your connecitivity file and then the simulation file, then
+  Double click your connectivity file and then the simulation file, then
   click on the blue "Load Files" button in the bottom-right corner
   ![](./quickview/quickview-file-loading.png)
 

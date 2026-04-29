@@ -25,7 +25,7 @@ The remainder of this page documents how the developers' installation was done.
 ## Setting default permissions
 
 To allow any developer in project m4359 to install, uninstall, or update,
-and to allow all NERSC users to use the installtion, we set the default permission using
+and to allow all NERSC users to use the installation, we set the default permission using
 ```
 umask 002
 ```

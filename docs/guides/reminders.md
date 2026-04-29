@@ -51,8 +51,11 @@ that the grid described by the connecitivity file does not match the grid in the
 simulation data file. In such a case, after the user specified the two files
 and clicked `Load files` (see more detailed description [here](/guides/quickview/file_selection#new-analysis)),
 the file loading dialogue window will
-remain open and appear nonresponsive. 
-When this happens, please double check the paths and names of the two files.
+remain open and appear non-responsive, and the terminal window will display
+a message like the following:
+```
+Error occurred in UpdatePipeline. Please check if the data and connectivity files exist and are compatible
+```
 :::
 
 ::: warning The `Load ... Variables` button
@@ -69,9 +72,9 @@ as images in the viewport.
 
 ::: info Show/hide control panels
 Each tool in the QuickView family contains multiple control panels
-for setting proverties of the visualization.
+for setting properties of the visualization.
 These control panels can be shown/expanded for easy access or
-be hidden/folded to maximize the screenspace for visualization
+be hidden/folded to maximize the screen space for visualization
 The UIs provide both keyboard shortcuts and toggles in the toolbar
 to show or hide these control panels.
 :::

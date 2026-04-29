@@ -37,10 +37,10 @@ on separate pages:
 ```
 
 - After a few seconds, the terminal window will provide a URL.
-  A click on the URL will bring up the graphical UI in a separate brower window or tab.
+  A click on the URL will bring up the graphical UI in a separate browser window or tab.
 
 ::: tip Tip 1: Choosing a server for your analysis session.
-JupyterHub's control panel provides NERSC users access to serveral different types of resources (nodes),
+JupyterHub's control panel provides NERSC users access to several different types of resources (nodes),
 including, e.g., login node, shared GPU node, exclusive nodes, as explained in
 [NERSC's documentation](https://docs.nersc.gov/services/jupyter/reference/).
 Since login nodes are shared by users and hence can get very busy or run into memory constraints,
@@ -70,7 +70,7 @@ to your project's allocation. This is explained at the end of
 Also see below for a recap of the steps (clicks).
 :::
 
-#### Shuting down a servier in JupyterHub
+#### Shutting down a server in JupyterHub
 
 - Go to the JupytherHub window/tab in your browser.
 - Click on `File` in the top-left corner.

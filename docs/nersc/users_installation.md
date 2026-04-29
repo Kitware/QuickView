@@ -62,7 +62,7 @@ quickcompare -p 0
 ## Recommended shortcuts
 
 Since the conda environment and tools are installed in custom paths, it will
-be useful to create shortcuts so that the tools can be lauched using very short 1-line commands.
+be useful to create shortcuts so that the tools can be launched using very short 1-line commands.
 
 ### Setup step 1
 
@@ -82,7 +82,7 @@ And to make the shortcut executable, we do
 chmod +x ${pathRoot}/quickview2
 ```
 
-Similarily, we create a script`${pathRoot}/quickcompare` with the following contents:
+Similarly, we create a script`${pathRoot}/quickcompare` with the following contents:
 ```sh
 #!/usr/bin/env bash
 

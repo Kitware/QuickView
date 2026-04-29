@@ -28,7 +28,7 @@ Once connected,
 :::
 
 - The graphical UI will prompt you to choose connectivity and simulation files, see example below.
-  Double click your connecitivity file and then the simulation files, then
+  Double click your connectivity file and then the simulation files, then
   click on the blue "Load Files" button in the bottom-right corner
   <!-- ![](./quickview/quickview-file-loading.png) -->
 
@@ -44,7 +44,7 @@ Once connected,
   The variable search and selection functionalities are the same
   in QuickCompare and QuickView.
 
-## Shuttin down the server
+## Shutting down the server
 
 ::: warning ATTENTION: Shut down the server when you are done!
 After finishing your analysis, please remember to shut down the connection to your

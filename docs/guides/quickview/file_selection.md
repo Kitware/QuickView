@@ -20,7 +20,7 @@ from the file system.
 The user can single-click a file name and then click the "simulation" or "connectivity"
 button in the bottom-left corner to clarify file type.
 
-Alternatively, if a filename starts with "connecitivity", then
+Alternatively, if a filename starts with "connectivity", then
 the user can **double-click** the file to have it automatically
 recognized as a connectivity file.
 Double-clicking a filename not starting with "connectivity" makes
