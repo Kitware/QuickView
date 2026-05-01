@@ -639,7 +639,7 @@ class Animation(v3.VToolbar):
                         activatable=True,
                         active_strategy="independent",
                     ):
-                        v3.VListItem(title="Full grid", value=("false",))
+                        v3.VListItem(title="Viewport", value=("false",))
                         v3.VDivider()
                         v3.VListItem(
                             v_for="name in variables_selected",

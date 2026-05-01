@@ -45,7 +45,7 @@ or animations for presentations and manuscripts, etc.:
   change in that dimension, the user can click on the icon on the right end of the
   animation control panel, i.e., the downward arrow with two lines,
   to bring up a drop-down menu and then click to select
-  `Full grid` and/or individual variables. Subsequently, a click on `Export animation`
+  `Viewport` and/or individual variables. Subsequently, a click on `Export animation`
   triggers QuickView to scan through the indices in the `lev` dimension,
   with a dark-red circle spinning around the download button while the scan is in progress.
   After the scan is finished, a file `quickview-animation.zip` gets downloaded to the local computer.
