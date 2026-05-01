@@ -287,9 +287,7 @@ class StateImportExport(v3.VTooltip):
                     ):
                         with v3.VList(density="compact"):
                             v3.VListItem(
-                                title=(
-                                    "is_tauri ? 'Save state file' : 'Download state file'",
-                                ),
+                                title="Save state file",
                                 prepend_icon="mdi-file-download-outline",
                                 click=self.download_state_dialog,
                                 disabled=("!variables_loaded",),
