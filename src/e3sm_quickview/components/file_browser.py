@@ -470,3 +470,12 @@ class ParaViewFileBrowser(TrameComponent):
                             loading=(self.name("loading"), False),
                             click=self.load_data_files,
                         )
+
+    def on_enter(self):
+        if self.get("error"):
+            return
+
+        if self.get("is_state_file"):
+            self.import_state_file()
+        elif self.get("data_simulation") and self.get("data_connectivity"):
+            self.load_data_files()

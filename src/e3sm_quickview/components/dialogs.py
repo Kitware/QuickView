@@ -12,6 +12,7 @@ class FileOpen(html.Div):
             with v3.VDialog(
                 model_value=(js.is_active("load-data"),),
                 **css.DIALOG_STYLES,
+                v_on_keyup_enter=file_browser.on_enter,
             ):
                 file_browser.ui()
 
@@ -23,6 +24,7 @@ class StateDownload(html.Div):
             with v3.VDialog(
                 model_value=("show_export_dialog", False),
                 **css.DIALOG_STYLES,
+                v_on_keyup_enter="utils.quickview.saveState(download_name)",
             ):
                 with v3.VCard(title="Save QuickView State file", rounded="lg"):
                     v3.VDivider()

@@ -78,6 +78,7 @@ class FieldSelection(v3.VNavigationDrawer):
             style=(f"{js.is_active('select-fields')} ? 'transform: none;' : ''",),
         )
 
+        self._load_variables = load_variables
         self.state.setdefault("loading_time", 0)
         self.state.setdefault(
             "visible_selection_icons",
@@ -93,6 +94,7 @@ class FieldSelection(v3.VNavigationDrawer):
             with html.Div(
                 style="position:fixed;top:0;width: 500px;height:100vh;",
                 classes="d-flex flex-column",
+                v_on_keyup_enter=self.on_enter,
             ):
                 with v3.VCardActions(classes="pb-0", style="min-height: 0;"):
                     v3.VBtn(
@@ -271,3 +273,13 @@ class FieldSelection(v3.VNavigationDrawer):
         self.state.visible_selection_icon_idx += 1
         if self.state.visible_selection_icon_idx >= 3:
             self.state.visible_selection_icon_idx = 0
+
+    def on_enter(self):
+        if (
+            len(self.state.variables_selected) == 0
+            or self.state.variables_loaded
+            or self.state.loading
+        ):
+            return
+
+        self._load_variables()
