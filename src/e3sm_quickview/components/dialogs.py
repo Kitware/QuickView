@@ -1,4 +1,5 @@
-from trame.widgets import html, vuetify3 as v3
+from trame.widgets import html
+from trame.widgets import vuetify3 as v3
 
 from e3sm_quickview.components import css
 from e3sm_quickview.utils import js
@@ -70,31 +71,5 @@ class StateDownload(html.Div):
                             classes="text-none",
                             variant="flat",
                             color="primary",
-                            click="""
-                                show_export_dialog=false;
-                                const fname = download_name.split('/').pop() || 'quickview-state.json';
-                                if (window.showSaveFilePicker) {
-                                    (async () => {
-                                        try {
-                                            const content = await trigger('download_state');
-                                            const handle = await window.showSaveFilePicker({
-                                                suggestedName: fname,
-                                                types: [{
-                                                    description: 'JSON State File',
-                                                    accept: {'application/json': ['.json']},
-                                                }],
-                                            });
-                                            const writable = await handle.createWritable();
-                                            await writable.write({type: 'write', data: content});
-                                            await writable.close();
-                                        } catch(e) {
-                                            if (e.name !== 'AbortError') console.error(e);
-                                        }
-                                    })();
-                                } else {
-                                    trigger('download_state').then((content) => {
-                                        utils.download(fname, content, 'application/json');
-                                    });
-                                }
-                            """,
+                            click="utils.quickview.saveState(download_name)",
                         )

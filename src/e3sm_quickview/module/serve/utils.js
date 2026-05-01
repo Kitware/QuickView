@@ -238,6 +238,29 @@ function downloadURL(dataURL, filename) {
   document.body.removeChild(a);
 }
 
+async function download(
+  fileName,
+  content,
+  description = "JSON State File",
+  accept = { "application/json": [".json"] },
+) {
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [{ description, accept }],
+      });
+      const writable = await handle.createWritable();
+      await writable.write({ type: "write", data: content });
+      await writable.close();
+    } catch (e) {
+      if (e.name !== "AbortError") console.error(e);
+    }
+  } else {
+    window.trame.utils.download(fileName, content, "application/json");
+  }
+}
+
 window.trame.utils.quickview = {
   formatRange(value, useLog, rangeMin, rangeMax) {
     if (value === null || value === undefined || isNaN(value)) {
@@ -335,5 +358,11 @@ window.trame.utils.quickview = {
     }
     trame.utils.download("quickview-animation.zip", buildZipBlob(entries));
     trame.state.set("animation_export", false);
+  },
+  async saveState(download_name) {
+    trame.state.set("show_export_dialog", false);
+    const fname = download_name.split("/").pop() || "quickview-state.json";
+    const content = await window.trame.trigger("download_state");
+    await download(fname, content);
   },
 };
