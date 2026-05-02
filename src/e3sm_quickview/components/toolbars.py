@@ -160,7 +160,7 @@ class Layout(v3.VToolbar):
 
             # --- Grouped/Uniform toggle ---
             v3.VCheckbox(
-                v_tooltip_bottom="layout_grouped ? 'Switch to uniform' : 'Switch to grouped'",
+                v_tooltip_bottom="layout_grouped ? 'Switch to ungrouped' : 'Switch to grouped'",
                 v_model=("layout_grouped", True),
                 hide_details=True,
                 inset=True,
