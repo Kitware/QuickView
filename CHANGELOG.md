@@ -2,6 +2,53 @@
 
 <!-- version list -->
 
+## v2.6.3 (2026-05-02)
+
+### Bug Fixes
+
+- Add Enter key to trigger active primary buttons
+  ([`eed18bc`](https://github.com/Kitware/QuickView/commit/eed18bc67c8102a316ea2d39f99202dca7d2ea92))
+
+- Allow pasting file paths in file loading dialog
+  ([`88cb508`](https://github.com/Kitware/QuickView/commit/88cb5082fb1ddfddeaed1aa662c9f77485e828ea))
+
+- Use showSaveFilePicker for state export with browser fallback
+  ([`d1c2d6d`](https://github.com/Kitware/QuickView/commit/d1c2d6d370f68e22e5b410e46883ca536e1597d1))
+
+- **browser**: Skip invalid symbolic links
+  ([`64de0a0`](https://github.com/Kitware/QuickView/commit/64de0a0ef61e799eaaa397d138753a90fcb310de))
+
+- **camera**: Disable view interaction, add zoom buttons with tooltips to layout toolbar
+  ([#81](https://github.com/Kitware/QuickView/pull/81),
+  [`df006c5`](https://github.com/Kitware/QuickView/commit/df006c5fa2a6ada0f2381d8e87b7f73be6eb0662))
+
+- **js**: Improve js style
+  ([`8c1c229`](https://github.com/Kitware/QuickView/commit/8c1c229e5846db8e9523251636839f14ade0701f))
+
+- **log**: Build continuous log CTF before sampling bands
+  ([#75](https://github.com/Kitware/QuickView/pull/75),
+  [`c54885a`](https://github.com/Kitware/QuickView/commit/c54885ad67c9aa45966246fcdd1e128d04a17db6))
+
+### Documentation
+
+- Add doc on linear/log/symlog scales and discrete/continuous colormaps; correct many typos
+  ([#73](https://github.com/Kitware/QuickView/pull/73),
+  [`d017719`](https://github.com/Kitware/QuickView/commit/d01771944b8622d4c0b7dc77ea13e9f10d8a10a0))
+
+- Update a screenshot
+  ([`d67dfbd`](https://github.com/Kitware/QuickView/commit/d67dfbd6bd7dacb517590503034e35488f30c250))
+
+- Update screenshots; add state files ([#73](https://github.com/Kitware/QuickView/pull/73),
+  [`d017719`](https://github.com/Kitware/QuickView/commit/d01771944b8622d4c0b7dc77ea13e9f10d8a10a0))
+
+- Update webpage contents for recently merged changes; correct many typos
+  ([#73](https://github.com/Kitware/QuickView/pull/73),
+  [`d017719`](https://github.com/Kitware/QuickView/commit/d01771944b8622d4c0b7dc77ea13e9f10d8a10a0))
+
+- **readme**: Replace outdated contents ([#72](https://github.com/Kitware/QuickView/pull/72),
+  [`561ac30`](https://github.com/Kitware/QuickView/commit/561ac3020166cd661cebd499d80c281da5d65aee))
+
+
 ## v2.6.2 (2026-04-29)
 
 ### Bug Fixes
