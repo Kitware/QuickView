@@ -161,6 +161,12 @@ class EAMApp(TrameApp):
                 SaveState="trigger('download_state_dialog')",
                 UploadState="utils.get('document').querySelector('#fileUpload').click()",
                 ToggleHelp="compact_drawer = !compact_drawer",
+                PanLeft=(self.view_manager.pan, "[1, 0]"),
+                PanRight=(self.view_manager.pan, "[-1, 0]"),
+                PanUp=(self.view_manager.pan, "[0, -1]"),
+                PanDown=(self.view_manager.pan, "[0, 1]"),
+                ZoomIn=(self.view_manager.zoom, "[0.83]"),
+                ZoomOut=(self.view_manager.zoom, "[1.2]"),
             ) as mt:
                 mt.bind(["z"], "ResetCamera")
                 mt.bind(["alt+0", "0"], "SizeAuto")
@@ -185,6 +191,14 @@ class EAMApp(TrameApp):
                 mt.bind("s", "ToolbarSelect")
                 mt.bind("a", "ToolbarAnimation")
                 mt.bind("g", "ToggleGroups")
+
+                mt.bind("left", "PanLeft", stop_propagation=True)
+                mt.bind("right", "PanRight", stop_propagation=True)
+                mt.bind("up", "PanUp", stop_propagation=True)
+                mt.bind("down", "PanDown", stop_propagation=True)
+
+                mt.bind("shift+up", "ZoomIn", stop_propagation=True)
+                mt.bind("shift+down", "ZoomOut", stop_propagation=True)
 
                 mt.bind("v", "ToggleVariableSelection")
 
