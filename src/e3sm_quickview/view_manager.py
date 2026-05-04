@@ -1019,16 +1019,13 @@ class ViewManager(TrameComponent):
         for view in views:
             view.disable_render = False
 
-    def zoom_in(self):
-        for view in list(self._var2view.values()):
-            cam = view.camera
-            cam.SetParallelScale(cam.GetParallelScale() / 1.2)
+        for view in views:
             view.render()
 
-    def zoom_out(self):
+    def zoom(self, factor):
         for view in list(self._var2view.values()):
             cam = view.camera
-            cam.SetParallelScale(cam.GetParallelScale() * 1.2)
+            cam.SetParallelScale(cam.GetParallelScale() * factor)
             view.render()
 
     def get_zoom(self):
@@ -1041,6 +1038,47 @@ class ViewManager(TrameComponent):
             return
         for view in list(self._var2view.values()):
             view.camera.SetParallelScale(scale)
+            view.render()
+
+    def pan(self, dx, dy):
+        for view in list(self._var2view.values()):
+            cam = view.camera
+            scale = cam.GetParallelScale()
+            step = scale * 0.1
+            pos = list(cam.GetPosition())
+            foc = list(cam.GetFocalPoint())
+            pos[0] += dx * step
+            pos[1] += dy * step
+            foc[0] += dx * step
+            foc[1] += dy * step
+            cam.SetPosition(*pos)
+            cam.SetFocalPoint(*foc)
+            view.render()
+
+    def get_camera_state(self):
+        for view in list(self._var2view.values()):
+            cam = view.camera
+            return {
+                "zoom": cam.GetParallelScale(),
+                "position": list(cam.GetPosition()),
+                "focal_point": list(cam.GetFocalPoint()),
+                "view_up": list(cam.GetViewUp()),
+                "clipping_range": list(cam.GetClippingRange()),
+            }
+        return None
+
+    def set_camera_state(self, camera_state):
+        if camera_state is None:
+            return
+        for view in list(self._var2view.values()):
+            cam = view.camera
+            cam.SetParallelScale(camera_state["zoom"])
+            cam.SetPosition(*camera_state["position"])
+            cam.SetFocalPoint(*camera_state["focal_point"])
+            if "view_up" in camera_state:
+                cam.SetViewUp(*camera_state["view_up"])
+            if "clipping_range" in camera_state:
+                cam.SetClippingRange(*camera_state["clipping_range"])
             view.render()
 
     def render(self):
