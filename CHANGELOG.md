@@ -2,6 +2,35 @@
 
 <!-- version list -->
 
+## v2.7.1 (2026-05-04)
+
+### Bug Fixes
+
+- Update web icon
+  ([`31ff84e`](https://github.com/Kitware/QuickView/commit/31ff84e647e8d4a5ab9c795fc541d3e437ad921c))
+
+- **event**: Cleaner syntax
+  ([`2cc2fe5`](https://github.com/Kitware/QuickView/commit/2cc2fe5b3c90511ab7c35bd4e5ac3ae8338b6794))
+
+- **hotkey**: Improve style
+  ([`cac4a43`](https://github.com/Kitware/QuickView/commit/cac4a4310df699cd096440ecc88435260cfd4959))
+
+- **key binding**: Enable zoom and pan
+  ([`e694cf5`](https://github.com/Kitware/QuickView/commit/e694cf5d4320fbff4d176f00e865a99cb2ff3fda))
+
+- **tauri**: Update icons
+  ([`83277fe`](https://github.com/Kitware/QuickView/commit/83277fe966615cfb40ebbfd46c53765114456c0a))
+
+- **toolbar**: Improve layout style
+  ([`34963af`](https://github.com/Kitware/QuickView/commit/34963af72d3e2e6021bdcaa089a16b8350e4d476))
+
+- **view_manager**: Remove multi-view implementation
+  ([`d758bbb`](https://github.com/Kitware/QuickView/commit/d758bbb455510316a81b7f097fc760adf9d39ee5))
+
+- **view_manager**: Use single render window by default
+  ([`dc547ec`](https://github.com/Kitware/QuickView/commit/dc547ec81c84512d11f2b0d98a610099a48c009d))
+
+
 ## v2.7.0 (2026-05-04)
 
 ### Bug Fixes
