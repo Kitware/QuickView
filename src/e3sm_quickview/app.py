@@ -19,19 +19,9 @@ from e3sm_quickview.assets import ASSETS
 from e3sm_quickview.components import css, dialogs, doc, drawers, file_browser, toolbars
 from e3sm_quickview.pipeline import EAMVisSource
 from e3sm_quickview.utils import cli, compute, perf
+from e3sm_quickview.view_manager import ViewManager
 
 v3.enable_lab()
-
-
-def create_view_manager(single_view, server, source):
-    if single_view:
-        from e3sm_quickview.view_manager2 import ViewManager
-
-        return ViewManager(server, source)
-
-    from e3sm_quickview.view_manager import ViewManager
-
-    return ViewManager(server, source)
 
 
 class EAMApp(TrameApp):
@@ -78,7 +68,7 @@ class EAMApp(TrameApp):
         self.source = EAMVisSource()
 
         # Helpers
-        self.view_manager = create_view_manager(args.fast, self.server, self.source)
+        self.view_manager = ViewManager(self.server, self.source)
         self.file_browser = file_browser.ParaViewFileBrowser(
             self.server,
             prefix="pv_files",
