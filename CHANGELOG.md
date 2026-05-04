@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v2.7.0 (2026-05-04)
+
+### Bug Fixes
+
+- Set default discrete colors per magnitude to 4
+  ([`2bad3ca`](https://github.com/Kitware/QuickView/commit/2bad3ca9e22f651f8811d766b5d4778e4d13cde5))
+
+### Features
+
+- Add pan and zoom toggle controls with full camera state save/restore
+  ([`5c2319a`](https://github.com/Kitware/QuickView/commit/5c2319af21190775d58548d56a1fc2059fc5a66c))
+
+
 ## v2.6.3 (2026-05-02)
 
 ### Bug Fixes
