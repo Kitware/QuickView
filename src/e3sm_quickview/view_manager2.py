@@ -1090,14 +1090,8 @@ class ViewManager(TrameComponent):
         if render and view_to_reset:
             self.render()
 
-    def zoom_in(self):
-        scale = self._camera.GetParallelScale()
-        self._camera.SetParallelScale(scale / 1.2)
-        self.render()
-
-    def zoom_out(self):
-        scale = self._camera.GetParallelScale()
-        self._camera.SetParallelScale(scale * 1.2)
+    def zoom(self, factor):
+        self._camera.SetParallelScale(self._camera.GetParallelScale() * factor)
         self.render()
 
     def get_zoom(self):
@@ -1107,6 +1101,43 @@ class ViewManager(TrameComponent):
         if scale is None:
             return
         self._camera.SetParallelScale(scale)
+        self.render()
+
+    def pan(self, dx, dy):
+        cam = self._camera
+        scale = cam.GetParallelScale()
+        step = scale * 0.1
+        pos = list(cam.GetPosition())
+        foc = list(cam.GetFocalPoint())
+        pos[0] += dx * step
+        pos[1] += dy * step
+        foc[0] += dx * step
+        foc[1] += dy * step
+        cam.SetPosition(*pos)
+        cam.SetFocalPoint(*foc)
+        self.render()
+
+    def get_camera_state(self):
+        cam = self._camera
+        return {
+            "zoom": cam.GetParallelScale(),
+            "position": list(cam.GetPosition()),
+            "focal_point": list(cam.GetFocalPoint()),
+            "view_up": list(cam.GetViewUp()),
+            "clipping_range": list(cam.GetClippingRange()),
+        }
+
+    def set_camera_state(self, camera_state):
+        if camera_state is None:
+            return
+        cam = self._camera
+        cam.SetParallelScale(camera_state["zoom"])
+        cam.SetPosition(*camera_state["position"])
+        cam.SetFocalPoint(*camera_state["focal_point"])
+        if "view_up" in camera_state:
+            cam.SetViewUp(*camera_state["view_up"])
+        if "clipping_range" in camera_state:
+            cam.SetClippingRange(*camera_state["clipping_range"])
         self.render()
 
     @controller.set("size_update")
