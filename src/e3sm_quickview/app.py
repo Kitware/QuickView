@@ -224,8 +224,9 @@ class EAMApp(TrameApp):
                             with html.Div(style=css.TOOLBARS_FIXED_OVERLAY):
                                 toolbars.Layout(
                                     apply_size=self.view_manager.apply_size,
-                                    zoom_in=self.view_manager.zoom_in,
-                                    zoom_out=self.view_manager.zoom_out,
+                                    zoom=self.view_manager.zoom,
+                                    pan=self.view_manager.pan,
+                                    reset_camera=self.view_manager.reset_camera,
                                 )
                                 toolbars.Cropping()
                                 toolbars.DataSelection()
@@ -307,7 +308,7 @@ class EAMApp(TrameApp):
             "active": self.state.active_layout,
             "tools": self.state.active_tools,
             "help": not self.state.compact_drawer,
-            "zoom": self.view_manager.get_zoom(),
+            "camera": self.view_manager.get_camera_state(),
         }
         data_selection = {
             k: self.state[k]
@@ -415,8 +416,8 @@ class EAMApp(TrameApp):
         self.state.active_layout = state_content["layout"]["active"]
         self.state.active_tools = state_content["layout"]["tools"]
         self.state.compact_drawer = not state_content["layout"]["help"]
-        if "zoom" in state_content["layout"]:
-            self.view_manager.set_zoom(state_content["layout"]["zoom"])
+        if "camera" in state_content["layout"]:
+            self.view_manager.set_camera_state(state_content["layout"]["camera"])
 
         # Update filebrowser state
         with self.state:
