@@ -153,7 +153,7 @@ class Layout(v3.VToolbar):
                 v_tooltip_bottom="'Reset view'",
                 icon="mdi-fit-to-page-outline",
                 flat=True,
-                click=(reset_camera,),
+                click=reset_camera,
             )
 
             v3.VDivider(vertical=True, classes="mx-1")
