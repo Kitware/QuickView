@@ -77,7 +77,7 @@ class ViewConfiguration(dataclass.StateDataModel):
     color_blind: bool = dataclass.Sync(bool, False)
     use_log_scale: str = dataclass.Sync(str, "linear")
     discrete_log: bool = dataclass.Sync(bool, False)
-    n_discrete_colors: int = dataclass.Sync(int, 1)
+    n_discrete_colors: int = dataclass.Sync(int, 4)
     color_value_min: str = dataclass.Sync(str, "0")
     color_value_max: str = dataclass.Sync(str, "1")
     color_value_min_valid: bool = dataclass.Sync(bool, True)
@@ -193,7 +193,7 @@ class VariableView(TrameComponent):
         invert,
         log_scale,
         discrete_log=False,
-        n_discrete_colors=1,
+        n_discrete_colors=4,
         n_colors=255,
     ):
         self.config.preset = name
