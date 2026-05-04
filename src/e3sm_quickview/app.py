@@ -186,8 +186,8 @@ class EAMApp(TrameApp):
                 mt.bind("m", "ProjectionMollweide")
 
                 mt.bind("f", "FileOpen")
-                mt.bind("d", "SaveState")
-                mt.bind("u", "UploadState")
+                mt.bind("e", "SaveState")
+                mt.bind("i", "UploadState")
                 mt.bind("h", "ToggleHelp")
 
                 mt.bind("p", "ToolbarLayout")
