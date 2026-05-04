@@ -57,7 +57,7 @@ class Layout(v3.VToolbar):
 
             # --- Aspect ratio toggle + slider ---
             with v3.VSheet(
-                classes="d-flex align-center rounded px-1",
+                classes="d-flex align-center rounded px-1 ga-1 py-1",
                 color=("show_aspect_ratio ? 'grey-lighten-3' : 'transparent'",),
             ):
                 v3.VIconBtn(
@@ -66,23 +66,31 @@ class Layout(v3.VToolbar):
                     flat=True,
                     click="show_aspect_ratio = !show_aspect_ratio; show_zoom_controls = false; show_pan_controls = false",
                     color=("show_aspect_ratio ? 'primary' : ''",),
+                    size=("show_aspect_ratio ? 'small' : 'default'",),
+                    classes=("show_aspect_ratio ? 'ml-1' : 'rounded'",),
                 )
-                v3.VSlider(
-                    v_if="show_aspect_ratio",
-                    v_tooltip_bottom="'Reduce (left) / Increase (right) vertical aspect'",
-                    v_model=("aspect_ratio", 0.5),
-                    min=0,
-                    max=4,
-                    step=0.25,
-                    show_ticks="always",
-                    density="compact",
-                    hide_details=True,
-                    style="min-width: 200px; max-width: 300px;",
-                )
+                with (
+                    v3.VExpandXTransition(),
+                    html.Div(
+                        v_if="show_aspect_ratio", classes="d-flex align-center ga-1"
+                    ),
+                ):
+                    v3.VDivider(vertical=True, classes="mx-1")
+                    v3.VSlider(
+                        v_tooltip_bottom="'Reduce (left) / Increase (right) vertical aspect'",
+                        v_model=("aspect_ratio", 0.5),
+                        min=0,
+                        max=4,
+                        step=0.25,
+                        show_ticks="always",
+                        density="compact",
+                        hide_details=True,
+                        style="min-width: 200px; max-width: 300px;",
+                    )
 
             # --- Zoom toggle + in/out ---
             with v3.VSheet(
-                classes="d-flex align-center rounded px-1",
+                classes="d-flex align-center rounded px-1 ga-1",
                 color=("show_zoom_controls ? 'grey-lighten-3' : 'transparent'",),
             ):
                 v3.VIconBtn(
@@ -91,70 +99,91 @@ class Layout(v3.VToolbar):
                     flat=True,
                     click="show_zoom_controls = !show_zoom_controls; show_pan_controls = false; show_aspect_ratio = false",
                     color=("show_zoom_controls ? 'primary' : ''",),
+                    size=("show_zoom_controls ? 'small' : 'default'",),
+                    classes=("show_zoom_controls ? 'ml-1' : 'rounded'",),
                 )
-                v3.VIconBtn(
-                    v_if="show_zoom_controls",
-                    v_tooltip_bottom="'Zoom in'",
-                    icon="mdi-plus",
-                    flat=True,
-                    click=(zoom, "[0.8333333]"),
-                )
-                v3.VIconBtn(
-                    v_if="show_zoom_controls",
-                    v_tooltip_bottom="'Zoom out'",
-                    icon="mdi-minus",
-                    flat=True,
-                    click=(zoom, "[1.2]"),
-                )
+                with (
+                    v3.VExpandXTransition(),
+                    html.Div(
+                        v_if="show_zoom_controls", classes="d-flex align-center ga-1"
+                    ),
+                ):
+                    v3.VDivider(vertical=True, classes="mx-1")
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Zoom in'",
+                        icon="mdi-plus",
+                        variant="plain",
+                        click=(zoom, "[0.8333333]"),
+                    )
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Zoom out'",
+                        icon="mdi-minus",
+                        variant="plain",
+                        click=(zoom, "[1.2]"),
+                    )
 
             # --- Pan toggle + directions ---
-            with v3.VSheet(
-                classes="d-flex align-center rounded px-1",
-                color=("show_pan_controls ? 'grey-lighten-3' : 'transparent'",),
+            with (
+                v3.VSheet(
+                    classes="d-flex align-center rounded px-1 ga-1",
+                    color=("show_pan_controls ? 'grey-lighten-3' : 'transparent'",),
+                ),
             ):
                 v3.VIconBtn(
-                    v_tooltip_bottom="'Toggle pan controls'",
+                    v_tooltip="'Toggle pan controls'",
                     icon="mdi-arrow-all",
                     flat=True,
                     click="show_pan_controls = !show_pan_controls; show_zoom_controls = false; show_aspect_ratio = false",
                     color=("show_pan_controls ? 'primary' : ''",),
+                    size=("show_pan_controls ? 'small' : 'default'",),
+                    classes=("show_pan_controls ? 'ml-1' : 'rounded'",),
                 )
-                v3.VIconBtn(
-                    v_if="show_pan_controls",
-                    v_tooltip_bottom="'Pan up'",
-                    icon="mdi-arrow-up",
-                    flat=True,
-                    click=(pan, "[0, -1]"),
-                )
-                v3.VIconBtn(
-                    v_if="show_pan_controls",
-                    v_tooltip_bottom="'Pan down'",
-                    icon="mdi-arrow-down",
-                    flat=True,
-                    click=(pan, "[0, 1]"),
-                )
-                v3.VIconBtn(
-                    v_if="show_pan_controls",
-                    v_tooltip_bottom="'Pan left'",
-                    icon="mdi-arrow-left",
-                    flat=True,
-                    click=(pan, "[1, 0]"),
-                )
-                v3.VIconBtn(
-                    v_if="show_pan_controls",
-                    v_tooltip_bottom="'Pan right'",
-                    icon="mdi-arrow-right",
-                    flat=True,
-                    click=(pan, "[-1, 0]"),
-                )
+                with (
+                    v3.VExpandXTransition(),
+                    html.Div(
+                        v_if="show_pan_controls", classes="d-flex align-center ga-1"
+                    ),
+                ):
+                    v3.VDivider(vertical=True, classes="mx-1")
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Pan up'",
+                        icon="mdi-arrow-up",
+                        click=(pan, "[0, -1]"),
+                        variant="plain",
+                        classes="rounded",
+                    )
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Pan down'",
+                        icon="mdi-arrow-down",
+                        flat=True,
+                        click=(pan, "[0, 1]"),
+                        variant="plain",
+                    )
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Pan left'",
+                        icon="mdi-arrow-left",
+                        flat=True,
+                        click=(pan, "[1, 0]"),
+                        variant="plain",
+                    )
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Pan right'",
+                        icon="mdi-arrow-right",
+                        flat=True,
+                        click=(pan, "[-1, 0]"),
+                        variant="plain",
+                    )
 
             # --- Reset view ---
-            v3.VIconBtn(
+            with v3.VBtn(
                 v_tooltip_bottom="'Reset view'",
-                icon="mdi-fit-to-page-outline",
                 flat=True,
                 click=reset_camera,
-            )
+                density="compact",
+                icon=True,
+                classes="ml-2",
+            ):
+                v3.VIcon("mdi-fit-to-page-outline")
 
             v3.VDivider(vertical=True, classes="mx-1")
 
@@ -173,7 +202,9 @@ class Layout(v3.VToolbar):
             with v3.VBtn(
                 v_tooltip_bottom="'Column layout'",
                 flat=True,
-                size="small",
+                icon=True,
+                density="compact",
+                classes="mx-2",
             ):
                 v3.VIcon("mdi-view-column")
                 with v3.VMenu(activator="parent"):
