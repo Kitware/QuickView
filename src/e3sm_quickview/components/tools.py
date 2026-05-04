@@ -68,7 +68,7 @@ class ActionButton(v3.VTooltip):
                                 keys=keybinding,
                                 variant="contained",
                                 inline=True,
-                                classes="mt-n2 border-md border-grey-darken-1 border-opacity-100 rounded-lg",
+                                classes="mt-n2",
                             )
 
 
@@ -130,7 +130,7 @@ class ToggleButton(v3.VTooltip):
                                 keys=keybinding,
                                 variant="contained",
                                 inline=True,
-                                classes="mt-n2 border-md border-grey-darken-1 border-opacity-100 rounded-lg",
+                                classes="mt-n2",
                             )
 
 
