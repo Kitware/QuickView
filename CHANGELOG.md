@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.7.2 (2026-05-05)
+
+### Bug Fixes
+
+- **ui**: Improve wording
+  ([`68f2eaf`](https://github.com/Kitware/QuickView/commit/68f2eaf2b04ec3dc761f9ea423ea579ee75ceb34))
+
+
 ## v2.7.1 (2026-05-04)
 
 ### Bug Fixes
