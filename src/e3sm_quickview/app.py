@@ -1,7 +1,6 @@
 import asyncio
 import datetime
 import json
-import math
 import os
 import time
 from functools import partial
@@ -221,11 +220,12 @@ class EAMApp(TrameApp):
 
                     with v3.VContainer(classes="h-100 pa-0", fluid=True):
                         with client.SizeObserver("main_size"):
-                            # Take space to push content below the fixed overlay
-                            html.Div(style=("`height: ${top_padding}px`",))
-
-                            # Fixed overlay for toolbars
+                            # Sticky toolbar overlay
                             with html.Div(style=css.TOOLBARS_FIXED_OVERLAY):
+                                client.SizeObserver(
+                                    "toolbar_size",
+                                    style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;",
+                                )
                                 toolbars.Layout(
                                     apply_size=self.view_manager.apply_size,
                                     zoom=self.view_manager.zoom,
@@ -610,27 +610,6 @@ class EAMApp(TrameApp):
             for _ in range(2):
                 await asyncio.sleep(0.1)
                 self.view_manager.reset_camera()
-
-    @change("active_tools", "available_animation_tracks")
-    def _on_toolbar_change(self, active_tools, **_):
-        top_padding = 0
-        for name in active_tools:
-            if name == "select-slice-time":
-                track_count = len(self.state.available_animation_tracks or [])
-                rows_needed = 1
-                if track_count > 3:
-                    if track_count % 3 == 0 or (track_count + 1) % 3 == 0:
-                        rows_needed = math.ceil(track_count / 3)
-                    elif track_count % 2 == 0:
-                        rows_needed = track_count / 2
-                    else:
-                        rows_needed = math.ceil(track_count / 3)
-
-                top_padding += 70 * rows_needed
-            else:
-                top_padding += toolbars.SIZES.get(name, 0)
-
-        self.state.top_padding = top_padding
 
     def _on_slicing_change(self, var, ind_var, **_):
         with perf.timed(f"tick.{var}={self.state[ind_var]}.total"):

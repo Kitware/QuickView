@@ -7,35 +7,6 @@ from trame.widgets import vuetify3 as v3
 
 from e3sm_quickview.utils import js
 
-DENSITY = {
-    "adjust-layout": "compact",
-    "adjust-databounds": "default",
-    "select-slice-time": "default",
-    "animation-controls": "compact",
-}
-
-SIZES = {
-    "adjust-layout": 49,
-    "adjust-databounds": 65,
-    "select-slice-time": 70,
-    "animation-controls": 49,
-}
-
-VALUES = list(DENSITY.keys())
-
-DEFAULT_STYLES = {
-    "color": "white",
-    "classes": "border-b-thin",
-}
-
-
-def to_kwargs(value):
-    return {
-        "v_show": js.is_active(value),
-        "density": DENSITY[value],
-        **DEFAULT_STYLES,
-    }
-
 
 class Layout(v3.VToolbar):
     def __init__(
@@ -45,7 +16,12 @@ class Layout(v3.VToolbar):
         pan=None,
         reset_camera=None,
     ):
-        super().__init__(**to_kwargs("adjust-layout"))
+        super().__init__(
+            v_show=js.is_active("adjust-layout"),
+            density="compact",
+            color="white",
+            classes="border-b-thin",
+        )
 
         self.state.setdefault("show_zoom_controls", False)
         self.state.setdefault("show_pan_controls", False)
@@ -311,7 +287,12 @@ class Layout(v3.VToolbar):
 
 class Cropping(v3.VToolbar):
     def __init__(self):
-        super().__init__(**to_kwargs("adjust-databounds"))
+        super().__init__(
+            v_show=js.is_active("adjust-databounds"),
+            density="default",
+            color="white",
+            classes="border-b-thin",
+        )
 
         with self:
             with v3.VTooltip(
@@ -439,110 +420,101 @@ class Cropping(v3.VToolbar):
 
 class DataSelection(html.Div):
     def __init__(self):
-        style = to_kwargs("select-slice-time")
-        # Use style instead of d-flex class to avoid !important override of v-show
-        # Add background color to match VToolbar appearance
-        style["style"] = (
-            "display: flex; align-items: center; background: rgb(var(--v-theme-surface));"
+        super().__init__(
+            v_show=js.is_active("select-slice-time"),
+            classes="border-b-thin",
+            style="display: flex; align-items: center; background: rgb(var(--v-theme-surface));",
         )
-        super().__init__(**style)
+
+        self.state.setdefault("expanded_slice_track", None)
 
         with self:
-            with v3.VTooltip(
-                text=(
-                    "slice_slider_edit ? 'Toggle to text edit' : 'Toggle to slider edit'",
-                ),
-            ):
-                with v3.Template(v_slot_activator="{ props }"):
-                    v3.VIcon(
-                        "mdi-tune-variant",
-                        v_bind="props",
-                        classes="ml-3 mr-2 opacity-50",
-                        click="slice_slider_edit = !slice_slider_edit",
-                    )
+            v3.VIcon("mdi-tune-variant", classes="ml-3 mr-2 opacity-50")
 
-            with v3.VRow(
-                classes="ma-0 pr-2 flex-wrap flex-grow-1",
-                dense=True,
-                v_if=("slice_slider_edit", True),
+            with html.Div(
+                classes="d-flex align-center flex-wrap flex-grow-1 ga-1 py-1 pr-2"
             ):
-                # Debug: Show animation_tracks array
-                # html.Div(
-                #     "Animation Tracks: {{ JSON.stringify(available_animation_tracks) }}",
-                #     classes="col-12",
-                # )
-                # Each track gets a column (3 per row)
-                with v3.VCol(
-                    cols=("utils.quickview.cols(available_animation_tracks.length)",),
+                with html.Template(
                     v_for="(track, idx) in available_animation_tracks",
                     key="idx",
-                    classes="pa-2",
                 ):
                     with client.Getter(name=("track",), value_name="t_values"):
                         with client.Getter(
                             name=("track + '_idx'",), value_name="t_idx"
                         ):
-                            with v3.VRow(classes="ma-0 align-center", dense=True):
-                                v3.VLabel(
-                                    "{{track}}",
-                                    classes="text-subtitle-2",
-                                )
-                                v3.VSpacer()
-                                v3.VLabel(
-                                    "{{ dim_units[track] ? parseFloat(t_values[t_idx]).toFixed(2) + ' ' + dim_units[track] : 'Index value: ' + t_idx }} (k={{ t_idx }})",
-                                    classes="text-body-2",
-                                )
-                            v3.VSlider(
-                                model_value=("t_idx",),
-                                update_modelValue=(
-                                    self.on_update_slider,
-                                    "[track, $event]",
+                            # --- Per-variable group ---
+                            with v3.VSheet(
+                                classes="d-flex align-center rounded px-1 ga-1",
+                                color=(
+                                    "expanded_slice_track === track ? 'grey-lighten-3' : 'grey-lighten-4'",
                                 ),
-                                min=0,
-                                # max=100,#("get(track.value).length - 1",),
-                                max=("t_values.length - 1",),
-                                step=1,
-                                density="compact",
-                                hide_details=True,
-                            )
-            with v3.VRow(
-                classes="ma-0 pl-6 pr-2 align-center ga-4",
-                v_if="!slice_slider_edit",
-            ):
-                with v3.VCol(
-                    v_for="(track, idx) in available_animation_tracks",
-                    key="idx",
-                ):
-                    with client.Getter(name=("track",), value_name="t_values"):
-                        with client.Getter(
-                            name=("track + '_idx'",), value_name="t_idx"
-                        ):
-                            with v3.VRow(classes="ma-0 align-center", dense=True):
-                                v3.VNumberInput(
-                                    model_value=("Number(t_idx)",),
-                                    update_modelValue=(
-                                        self.on_update_slider,
-                                        "[track, Number($event)]",
-                                    ),
-                                    key=("track + '_' + t_idx",),
-                                    min=[0],
-                                    max=["t_values ? t_values.length - 1 : 0"],
-                                    step=[1],
-                                    hide_details=True,
-                                    density="comfortable",
-                                    variant="plain",
+                            ):
+                                # Toggle button with track name
+                                v3.VBtn(
+                                    "{{ track }}",
+                                    v_tooltip_bottom="'Toggle ' + track + ' controls'",
                                     flat=True,
-                                    control_variant="stacked",
-                                    style="max-width: 100px;",
-                                    reverse=True,
+                                    variant=(
+                                        "expanded_slice_track === track ? 'flat' : 'outlined'",
+                                    ),
+                                    rounded=True,
+                                    click="expanded_slice_track = expanded_slice_track === track ? null : track",
+                                    color=(
+                                        "expanded_slice_track === track ? 'primary' : ''",
+                                    ),
+                                    style=(
+                                        "'text-transform: none;' + (expanded_slice_track === track ? '' : ' background-color: white;')",
+                                    ),
                                 )
+                                # Expanded controls
+                                with html.Div(
+                                    v_if="expanded_slice_track === track",
+                                    classes="d-flex align-center ga-1",
+                                    style="height: 36px; overflow: visible;",
+                                ):
+                                    v3.VDivider(vertical=True, classes="mx-1")
+                                    # Text input
+                                    html.Input(
+                                        type="number",
+                                        value=("t_idx",),
+                                        min=[0],
+                                        max=["t_values ? t_values.length - 1 : 0"],
+                                        step=[1],
+                                        change=(
+                                            self.on_update_slider,
+                                            "[track, Number($event.target.value)]",
+                                        ),
+                                        style="width: 60px; height: 28px; padding: 16px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; text-align: right;",
+                                    )
+                                    # Slider
+                                    v3.VSlider(
+                                        v_tooltip_bottom=(
+                                            "dim_units[track] ? parseFloat(t_values[t_idx]).toFixed(2) + ' ' + dim_units[track] : 'Index: ' + t_idx",
+                                        ),
+                                        model_value=("t_idx",),
+                                        update_modelValue=(
+                                            self.on_update_slider,
+                                            "[track, $event]",
+                                        ),
+                                        min=0,
+                                        max=("t_values.length - 1",),
+                                        step=1,
+                                        show_ticks="always",
+                                        hide_details=True,
+                                        density="compact",
+                                        style="min-width: 200px; max-width: 400px;",
+                                    )
+                                # Index label (shown when collapsed)
                                 v3.VLabel(
-                                    "{{track}}",
-                                    classes="text-subtitle-2 ml-2 mt-1",
+                                    v_if="expanded_slice_track !== track",
+                                    v_text="`(${t_idx})`",
+                                    classes="font-weight-bold",
                                 )
+                                # Value + units label
                                 v3.VLabel(
-                                    "{{ dim_units[track] ? parseFloat(t_values[Number(t_idx)]).toFixed(2) + ' ' + dim_units[track] : 'Index value: ' + t_idx }}",
-                                    classes="text-body-2 text-no-wrap ml-2 mt-1",
+                                    v_if="dim_units[track] && isNaN(Number(dim_units[track]))",
+                                    v_text="`${parseFloat(t_values[t_idx]).toFixed(2)} ${dim_units[track]}`",
+                                    classes="font-italic text-medium-emphasis",
                                 )
 
     def on_update_slider(self, dimension, index, *_, **__):
@@ -552,7 +524,12 @@ class DataSelection(html.Div):
 
 class Animation(v3.VToolbar):
     def __init__(self):
-        super().__init__(**to_kwargs("animation-controls"))
+        super().__init__(
+            v_show=js.is_active("animation-controls"),
+            density="compact",
+            color="white",
+            classes="border-b-thin",
+        )
         with self:
             v3.VIcon(
                 "mdi-video",

@@ -894,7 +894,7 @@ class VariableView(TrameComponent):
             with v3.VCard(
                 variant="tonal",
                 style=(
-                    "active_layout !== 'auto_layout' ? `height: calc(100% - ${top_padding}px;` : 'overflow-hidden'",
+                    "active_layout !== 'auto_layout' ? `height: calc(100% - ${toolbar_size?.size?.height || 0}px)` : 'overflow-hidden'",
                 ),
                 tile=("active_layout !== 'auto_layout'",),
                 raw_attrs=[f'data-field-name="{self.variable_name}"'],
