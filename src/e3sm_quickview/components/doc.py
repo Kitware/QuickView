@@ -59,12 +59,12 @@ class ToolStateImportExport(Tool):
     def __init__(self):
         super().__init__(
             icon="mdi-folder-arrow-left-right-outline",
-            title="State import/export",
-            description="Export the application state into a small text file. The same file can then be imported to restore that application state.",
+            title="State export/import",
+            description="Export and download the application state into a small text file. The same file can then be uploaded and imported to restore that application state.",
         )
         with self, v3.Template(v_slot_append=True):
-            v3.VHotkey(keys="d", variant="contained", inline=True)
-            v3.VHotkey(keys="u", variant="contained", inline=True)
+            v3.VHotkey(keys="e", variant="contained", inline=True)
+            v3.VHotkey(keys="i", variant="contained", inline=True)
 
 
 class ToolMapProjection(Tool):
@@ -249,14 +249,14 @@ class LandingPage(v3.VContainer):
                         v3.VHotkey(keys="f", variant="contained", inline=True)
 
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Download state")
+                        v3.VLabel("Export state")
                         v3.VSpacer(classes="mt-2")
-                        v3.VHotkey(keys="d", variant="contained", inline=True)
+                        v3.VHotkey(keys="e", variant="contained", inline=True)
 
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Upload state")
+                        v3.VLabel("Import state")
                         v3.VSpacer(classes="mt-2")
-                        v3.VHotkey(keys="u", variant="contained", inline=True)
+                        v3.VHotkey(keys="i", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 

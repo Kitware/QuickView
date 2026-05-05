@@ -189,7 +189,7 @@ class Layout(v3.VToolbar):
 
             # --- Grouped/Uniform toggle ---
             v3.VCheckbox(
-                v_tooltip_bottom="layout_grouped ? 'Switch to uniform' : 'Switch to grouped'",
+                v_tooltip_bottom="layout_grouped ? 'Switch to ungrouped' : 'Switch to grouped'",
                 v_model=("layout_grouped", True),
                 hide_details=True,
                 inset=True,
@@ -670,7 +670,7 @@ class Animation(v3.VToolbar):
                         activatable=True,
                         active_strategy="independent",
                     ):
-                        v3.VListItem(title="Full grid", value=("false",))
+                        v3.VListItem(title="Viewport", value=("false",))
                         v3.VDivider()
                         v3.VListItem(
                             v_for="name in variables_selected",
