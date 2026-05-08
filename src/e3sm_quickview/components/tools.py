@@ -152,6 +152,7 @@ class OpenFile(ToggleButton):
             title="File loading",
             icon="mdi-file-upload-outline",
             value="load-data",
+            keybinding="f",
         )
 
 

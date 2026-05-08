@@ -95,7 +95,7 @@ class Layout(v3.VToolbar):
             ):
                 v3.VIconBtn(
                     v_tooltip_bottom="'Toggle zoom controls'",
-                    icon="mdi-magnify",
+                    icon="mdi-magnify-plus-cursor",
                     flat=True,
                     click="show_zoom_controls = !show_zoom_controls; show_pan_controls = false; show_aspect_ratio = false",
                     color=("show_zoom_controls ? 'primary' : ''",),
@@ -131,7 +131,7 @@ class Layout(v3.VToolbar):
             ):
                 v3.VIconBtn(
                     v_tooltip="'Toggle pan controls'",
-                    icon="mdi-arrow-all",
+                    icon="mdi-pan",
                     flat=True,
                     click="show_pan_controls = !show_pan_controls; show_zoom_controls = false; show_aspect_ratio = false",
                     color=("show_pan_controls ? 'primary' : ''",),
@@ -176,7 +176,7 @@ class Layout(v3.VToolbar):
 
             # --- Reset view ---
             with v3.VBtn(
-                v_tooltip_bottom="'Reset view'",
+                v_tooltip_bottom="'Auto zoom to fit'",
                 flat=True,
                 click=reset_camera,
                 density="compact",

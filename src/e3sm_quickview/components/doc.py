@@ -37,7 +37,7 @@ class ToolFieldSelection(Tool):
             icon="mdi-list-status",
             title="Variable selection",
             description="""
-                Select the variables to visualize. You need to load files prior any variable selection.
+                Select the variables to visualize. You need to load files prior to any variable selection.
             """,
         )
         with self, v3.Template(v_slot_append=True):
@@ -49,7 +49,7 @@ class ToolResetCamera(Tool):
         super().__init__(
             icon="mdi-fit-to-page-outline",
             title="Auto zoom",
-            description="Recenter the visualizations to the full data.",
+            description="Reset size of the visualizations to fit the individual views.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="z", variant="contained", inline=True)
@@ -60,7 +60,7 @@ class ToolStateImportExport(Tool):
         super().__init__(
             icon="mdi-folder-arrow-left-right-outline",
             title="State export/import",
-            description="Export and download the application state into a small text file. The same file can then be uploaded and imported to restore that application state.",
+            description="Export and download the application state into a small text file (.json). The same file can then be uploaded and imported to restore that application state.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="e", variant="contained", inline=True)
@@ -72,7 +72,7 @@ class ToolMapProjection(Tool):
         super().__init__(
             icon="mdi-earth",
             title="Map Projection",
-            description="Select projection to use for the visualizations. (Cylindrical Equidistant, Robinson, Mollweide)",
+            description="Select projection to use for the visualizations: cylindrical equidistant, Robinson, Mollweide.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="c", variant="contained", inline=True)
@@ -85,7 +85,7 @@ class ToolLayoutManagement(Tool):
         super().__init__(
             icon="mdi-view-module",
             title="Viewport layout",
-            description="Toggle viewport layout toolbar for adjusting aspect-ratio, width and grouping options.",
+            description="Toggle viewport layout control panel for adjusting aspect ratio, view size/center, and grouping options.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="p", variant="contained", inline=True)
@@ -96,7 +96,7 @@ class ToolCropping(Tool):
         super().__init__(
             icon="mdi-web",
             title="Lat/Lon cropping",
-            description="Toggle cropping toolbar for adjusting spacial bounds.",
+            description="Toggle control panel for cropping a lat-lon box from the globe.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="l", variant="contained", inline=True)
@@ -107,7 +107,7 @@ class ToolDataSelection(Tool):
         super().__init__(
             icon="mdi-tune-variant",
             title="Slice selection",
-            description="Toggle data selection toolbar for selecting a given layer, midpoint or time.",
+            description="Toggle slice selection panel for selecting data slices from multi-dimensional data arrays.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="s", variant="contained", inline=True)
@@ -118,7 +118,7 @@ class ToolAnimation(Tool):
         super().__init__(
             icon="mdi-video",
             title="Animation controls",
-            description="Toggle animation toolbar.",
+            description="Toggle animation control panel.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="a", variant="contained", inline=True)
@@ -227,7 +227,7 @@ class LandingPage(v3.VContainer):
             with v3.VRow():
                 with v3.VCol(cols=6):
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle help")
+                        v3.VLabel("Toggle help for main toolbar")
                         v3.VSpacer()
                         v3.VHotkey(keys="h", variant="contained", inline=True)
 
@@ -236,15 +236,15 @@ class LandingPage(v3.VContainer):
                         v3.VSpacer()
                         v3.VHotkey(keys="z", variant="contained", inline=True)
 
-                    with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle view interaction lock")
-                        v3.VSpacer()
-                        v3.VHotkey(keys="space", variant="contained", inline=True)
+            #       with v3.VRow(classes="ma-0 pb-4"):
+            #           v3.VLabel("Toggle view interaction lock")
+            #           v3.VSpacer()
+            #           v3.VHotkey(keys="space", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("File Open")
+                        v3.VLabel("File loading")
                         v3.VSpacer(classes="mt-2")
                         v3.VHotkey(keys="f", variant="contained", inline=True)
 
@@ -261,38 +261,38 @@ class LandingPage(v3.VContainer):
                     v3.VDivider(classes="mb-4")
 
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle viewport layout toolbar")
+                        v3.VLabel("Toggle viewport layout control panel")
                         v3.VSpacer(classes="mt-2")
                         v3.VHotkey(keys="p", variant="contained", inline=True)
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle Lat/Lon cropping toolbar")
+                        v3.VLabel("Toggle lat/lon cropping panel")
                         v3.VSpacer()
                         v3.VHotkey(keys="l", variant="contained", inline=True)
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle Slice selection toolbar")
+                        v3.VLabel("Toggle slice selection panel")
                         v3.VSpacer()
                         v3.VHotkey(keys="s", variant="contained", inline=True)
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle Animation controls toolbar")
+                        v3.VLabel("Toggle animation control panel")
                         v3.VSpacer()
                         v3.VHotkey(keys="a", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle group layout")
+                        v3.VLabel("Toggle grouped layout in viewport")
                         v3.VSpacer()
                         v3.VHotkey(keys="g", variant="contained", inline=True)
 
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Toggle variable selection drawer")
+                        v3.VLabel("Toggle variable selection panel")
                         v3.VSpacer()
                         v3.VHotkey(keys="v", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 
                     with v3.VRow(classes="ma-0 pb-4"):
-                        v3.VLabel("Disable all toolbars and drawers")
+                        v3.VLabel("Disable all toolbars and control panels")
                         v3.VSpacer()
                         v3.VHotkey(keys="esc", variant="contained", inline=True)
 
@@ -314,7 +314,7 @@ class LandingPage(v3.VContainer):
                     v3.VDivider(classes="my-4")
 
                     with v3.VRow(classes="ma-0 pb-2"):
-                        v3.VLabel("Apply size")
+                        v3.VLabel("Change column arrangement in viewport")
 
                     with v3.VList(density="compact", classes="pa-0 ma-0"):
                         with v3.VListItem(subtitle="Auto flow"):
