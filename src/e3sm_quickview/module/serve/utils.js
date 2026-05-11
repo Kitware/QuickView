@@ -338,6 +338,7 @@ window.trame.utils.quickview = {
 
     for (let i = 0; i < nValues; i++) {
       trame.state.set(idxKey, i);
+      trame.state.set("animation_step", i);
 
       await sleep(0.1);
       await trame.trigger("wait_render");
