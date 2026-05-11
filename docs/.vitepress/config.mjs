@@ -3,9 +3,9 @@ import { defineConfig } from "vitepress";
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   base: "/QuickView",
-  title: "QuickView Family",
+  title: "The QuickView Family",
   description:
-    "How to use the QuickView family of tools to look at your simulation data",
+    "How to use the QuickView family of tools to look at Earth system simulation data",
   head: [["link", { rel: "stylesheet", href: "custom.css" }]],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config

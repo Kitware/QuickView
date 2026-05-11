@@ -7,7 +7,7 @@ hero:
   text: "for Earth system models"
   tagline:
     Efficient, intuitive, and interactive exploration of simulation data.
-  image: /banner.png
+  image: /website_banner.png
   actions:
     - theme: brand 
       text: Installation

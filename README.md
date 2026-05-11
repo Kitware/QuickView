@@ -20,7 +20,7 @@ provides intuitive access to [ParaView](https://www.paraview.org/)'s powerful
 analysis and visualization capabilities without requiring a steep learning curve.
 
 
-![Application](https://raw.githubusercontent.com/Kitware/QuickView/master/QuickView-app.png)
+![Application](https://raw.githubusercontent.com/Kitware/QuickView/master/docs/public/website_banner.png)
 
 ## Key Features
 
