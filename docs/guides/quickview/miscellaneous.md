@@ -2,7 +2,7 @@
 
 This page summarizes several additional convenient features in QuickView.
 
-## Choosing map projection and extent
+## Choosing map projection and extent {#maps}
 
 The map projection used for the contour plots can be changed using the mini menu
 activated by a click on the Earth icon in the vertical tool bar—or by keyboard shortcuts:

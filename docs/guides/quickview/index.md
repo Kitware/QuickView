@@ -1,5 +1,7 @@
 # What is QuickView?
 
+![QuickView logo](/public/icon-full.png){ width="20%", align=right }
+
 **QuickView** is an open-source, interactive visualization
 tool designed to help Earth system modelers take a quick look at
 a collection of physical quantities in their simulation files.
@@ -13,7 +15,7 @@ QuickView's Python- and
 provides intuitive access to [ParaView](https://www.paraview.org/)'s powerful
 analysis and visualization capabilities without requiring a steep learning curve.
 
-## Useful links: see [Quickstart](./quickstart).
+Useful links: see [Quickstart](./quickstart).
 
 ## Why QuickView?
 
