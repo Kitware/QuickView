@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.7.3 (2026-05-11)
+
+### Bug Fixes
+
+- **ui**: Minor updates in button icons, tooltips, and landing page
+  ([`d958bda`](https://github.com/Kitware/QuickView/commit/d958bdab0baad7d2eb8b23546040ddabc20e521e))
+
+
 ## v2.7.2 (2026-05-05)
 
 ### Bug Fixes
