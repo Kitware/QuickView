@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.7.4 (2026-05-11)
+
+### Bug Fixes
+
+- Slice selection toolbar with toggle groups ([#94](https://github.com/Kitware/QuickView/pull/94),
+  [`c81ec31`](https://github.com/Kitware/QuickView/commit/c81ec31dfe08803aeda959b7ec8318c7a05bada6))
+
+
 ## v2.7.3 (2026-05-11)
 
 ### Bug Fixes
