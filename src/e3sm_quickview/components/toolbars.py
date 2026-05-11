@@ -444,77 +444,74 @@ class DataSelection(html.Div):
                         ):
                             # --- Per-variable group ---
                             with v3.VSheet(
-                                classes="d-flex align-center rounded px-1 ga-1",
+                                classes=(
+                                    "`cursor-pointer d-flex align-center rounded px-2 ga-1 ${expanded_slice_track === track && 'border-primary border-md border-primary border-opacity-100'}`",
+                                ),
                                 color=(
                                     "expanded_slice_track === track ? 'grey-lighten-3' : 'grey-lighten-4'",
                                 ),
+                                style=(
+                                    "expanded_slice_track === track ? 'width: 100%; height: 32px;': 'height: 32px;'",
+                                ),
+                                v_tooltip_bottom="'Toggle ' + track + ' controls'",
                             ):
                                 # Toggle button with track name
-                                v3.VBtn(
+                                v3.VLabel(
                                     "{{ track }}",
-                                    v_tooltip_bottom="'Toggle ' + track + ' controls'",
-                                    flat=True,
-                                    variant=(
-                                        "expanded_slice_track === track ? 'flat' : 'outlined'",
-                                    ),
-                                    rounded=True,
+                                    classes="text-subtitle-1 font-weight-medium user-select-none",
                                     click="expanded_slice_track = expanded_slice_track === track ? null : track",
-                                    color=(
-                                        "expanded_slice_track === track ? 'primary' : ''",
-                                    ),
-                                    style=(
-                                        "'text-transform: none;' + (expanded_slice_track === track ? '' : ' background-color: white;')",
-                                    ),
                                 )
                                 # Expanded controls
-                                with html.Div(
-                                    v_if="expanded_slice_track === track",
-                                    classes="d-flex align-center ga-1",
-                                    style="height: 36px; overflow: visible;",
-                                ):
-                                    v3.VDivider(vertical=True, classes="mx-1")
-                                    # Text input
-                                    html.Input(
-                                        type="number",
-                                        value=("t_idx",),
-                                        min=[0],
-                                        max=["t_values ? t_values.length - 1 : 0"],
-                                        step=[1],
-                                        change=(
-                                            self.on_update_slider,
-                                            "[track, Number($event.target.value)]",
-                                        ),
-                                        style="width: 60px; height: 28px; padding: 16px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; text-align: right;",
-                                    )
-                                    # Slider
-                                    v3.VSlider(
-                                        v_tooltip_bottom=(
-                                            "dim_units[track] ? parseFloat(t_values[t_idx]).toFixed(2) + ' ' + dim_units[track] : 'Index: ' + t_idx",
-                                        ),
-                                        model_value=("t_idx",),
-                                        update_modelValue=(
-                                            self.on_update_slider,
-                                            "[track, $event]",
-                                        ),
-                                        min=0,
-                                        max=("t_values.length - 1",),
-                                        step=1,
-                                        show_ticks="always",
-                                        hide_details=True,
-                                        density="compact",
-                                        style="min-width: 200px; max-width: 400px;",
-                                    )
-                                # Index label (shown when collapsed)
-                                v3.VLabel(
-                                    v_if="expanded_slice_track !== track",
-                                    v_text="`(${t_idx})`",
-                                    classes="font-weight-bold",
-                                )
+                                with v3.VExpandXTransition():
+                                    with html.Div(
+                                        classes="d-flex flex-fill align-center ga-2",
+                                        style="pointer",
+                                    ):
+                                        # Index label (shown when collapsed)
+                                        v3.VLabel(
+                                            v_if="expanded_slice_track !== track",
+                                            v_text="`(${t_idx + 1}/${t_values.length})`",
+                                            classes="text-caption user-select-none",
+                                            click="expanded_slice_track = expanded_slice_track === track ? null : track",
+                                        )
+                                        with v3.Template(v_else=True):
+                                            # Text input
+                                            html.Input(
+                                                type="number",
+                                                value=("t_idx",),
+                                                min=[0],
+                                                max=[
+                                                    "t_values ? t_values.length - 1 : 0"
+                                                ],
+                                                step=[1],
+                                                change=(
+                                                    self.on_update_slider,
+                                                    "[track, Number($event.target.value)]",
+                                                ),
+                                                classes="ml-2",
+                                                style="width: 60px; border: 1px solid #ccc; border-radius: 4px; text-align: right;",
+                                            )
+                                            # Slider
+                                            v3.VSlider(
+                                                model_value=("t_idx",),
+                                                update_modelValue=(
+                                                    self.on_update_slider,
+                                                    "[track, $event]",
+                                                ),
+                                                min=0,
+                                                max=("t_values.length - 1",),
+                                                step=1,
+                                                show_ticks="always",
+                                                hide_details=True,
+                                                density="compact",
+                                                style="min-width: 200px;",
+                                            )
                                 # Value + units label
                                 v3.VLabel(
                                     v_if="dim_units[track] && isNaN(Number(dim_units[track]))",
                                     v_text="`${parseFloat(t_values[t_idx]).toFixed(2)} ${dim_units[track]}`",
-                                    classes="font-italic text-medium-emphasis",
+                                    classes="text-subtitle-1 user-select-none",
+                                    click="expanded_slice_track = expanded_slice_track === track ? null : track",
                                 )
 
     def on_update_slider(self, dimension, index, *_, **__):
