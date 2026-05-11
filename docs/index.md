@@ -56,5 +56,5 @@ features:
     details:
       The QuickView family of tools is developed using funding from the
       U.S. Department of Energy's SciDAC program.
-    link: https://www.energy.gov/science/articles/accelerating-scientific-discovery-through-advanced-computing
+    link: https://www.scidac.gov/
 ---
