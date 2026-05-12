@@ -24,7 +24,8 @@ its current value and unit are also displayed.
 A click on a gray tab changes it into an expanded mode,
 revealing a textbox, a pair of up and down buttons, as well as
 a slider for changing the slice along that dimension.
-A click on an expanded tab changes it back to a compact mode.
+A click on the dimension name in an expanded tab changes
+the tab back to a compact mode.
 
 ![](./screenshots/dimension_slider_expanded.png){ width="100%" }
 
