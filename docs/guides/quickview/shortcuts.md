@@ -8,4 +8,4 @@ Note that these shortcuts will only take effect
 when the browser window (or tab) showing the QuickView UI
 is the active window (or tab).
 
-![shortcuts](./screenshots/shortcuts.png){ width="90%" }
+![shortcuts](./screenshots/shortcuts.png){ width="100%" }

@@ -12,11 +12,11 @@ activated by a click on the Earth icon in the vertical tool bar—or by keyboard
 - `M` for Mollweide.
 
 
-![lat/lon sliders](./screenshots/latlon_sliders.png){ width="70%", align=right }
-
 The geographical region, i.e., the latitude and longitude bounds to be displayed in the contour plots,
 can be adjusted using the sliders in the lat/lon cropping panel activated by a click on
 the Earth grid icon in the vertical toolbar.
+
+![lat/lon sliders](./screenshots/latlon_sliders.png){ width="90%" }
 
 
 ## Saving the visualization {#save-vis}
@@ -26,7 +26,7 @@ of the current session so that the analysis can be resumed later,
 QuickView provides three ways for the user to save the visualization as images
 or animations for presentations and manuscripts, etc.:
 
-![image download](./screenshots/image_download.png){ width="20%", align=right }
+![image download](./screenshots/image_download.png){ width="30%", align=right }
 
 - A click on the **camera icon** at the end of the vertical **toolbar** saves the entire
   viewport—in its current layout—to the local computer as `Viewport.png`.
@@ -36,9 +36,6 @@ or animations for presentations and manuscripts, etc.:
   dimension names and indices are appended when relevant.
   For example, `aero_tau_sw-lev-71-swband-00.png` is an image of variable `aero_tau_sw`
   at `lev` index 71 and `swband` index 0.
-
-
-![animation download](./screenshots/animation_download.png){ width="70%", align=right }
 
 - Let us assume the user has been inspecting 4 variables along the `lev` dimension,
   as depicted by the screenshot here. To export animations showing how these variables
@@ -50,6 +47,8 @@ or animations for presentations and manuscripts, etc.:
   with a dark-red circle spinning around the download button while the scan is in progress.
   After the scan is finished, a file `quickview-animation.zip` gets downloaded to the local computer.
   This file is a zipped folder that may contain multiple files.
+
+![animation download](./screenshots/animation_download.png){ width="90%" }
 
 Note: as of version 2.6.1, the animation export downloads
 images of individual frames to the local computer, and the user needs to use a tool to combine

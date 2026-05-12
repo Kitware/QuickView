@@ -47,7 +47,7 @@ to swap contents.
   lists all the other loaded variables *in the same group* that
   the user can choose from.
 
-![Select variable for a view](./screenshots/variable_selection_in_viewport_when_ungrouped.png){ width="90%", align=center }
+![Select variable for a view](./screenshots/variable_selection_in_viewport_when_ungrouped.png){ width="100%", align=center }
 
 ## Additional adjustments
 
@@ -56,7 +56,7 @@ reveal additional sliders or buttons for simultaneously
 adjusting all views in the viewport, as shown in the screenshots below. 
 
 
-![toggles](./screenshots/viewport_adjustment_toggles_central.png){ width="90", align=center }
+![toggles](./screenshots/viewport_adjustment_toggles_central.png){ width="100", align=center }
 
 ### Aspect ratio of view frame
 
@@ -64,18 +64,18 @@ A slider is provided for adjusting the aspect ratio of the view frames by changi
 This can be useful for controlling the blank spaces, especially for
 [regional plots](./miscellaneous#maps).
 
-![toggles](./screenshots/viewport_aspect_ratio.png){ width="90%", align=center }
+![toggles](./screenshots/viewport_aspect_ratio.png){ width="100%", align=center }
 
 ### Plot size relative to view frame
 
 A pair of zoom-in and zoom-out buttons are provided for changing the plot sizes
 with respect to the view frames. A click on the auto-zoom button resets the sizes to fit the frames.
 
-![toggles](./screenshots/viewport_zoom_in_out_auto.png){ width="90%", align=center }
+![toggles](./screenshots/viewport_zoom_in_out_auto.png){ width="100%", align=center }
 
 ### Plot location inside view frame
 
 A set of four buttons is provided for moving the plots left, right, up, or down
 with respect to the view frames, an operation commonly referred to as panning in graphical user interfaces.
 
-![toggles](./screenshots/viewport_pan.png){ width="90%", align=center }
+![toggles](./screenshots/viewport_pan.png){ width="100%", align=center }

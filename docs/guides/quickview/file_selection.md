@@ -15,7 +15,7 @@ a dialogue window like the screenshot below is brought up.
 The user is expected to select a connectivity file and at least one simulation data file
 from the file system.
 
-![File loading window](./screenshots/file_loading_dialogue.png){ width="95%", align=center }
+![File loading window](./screenshots/file_loading_dialogue.png){ width="100%", align=center }
 
 The user can single-click a file name and then click the "simulation" or "connectivity"
 button in the bottom-left corner to clarify file type.
@@ -36,7 +36,7 @@ on the **left** showing a **list of parsed variables** in the simulation file(s)
 and the viewport on the **right** showing a **brief introduction to QuickView**.
 The user can now start to search for and load variables to inspect.
 
-![File loaded](./screenshots/file_loaded.png){ width="95%", align=center }
+![File loaded](./screenshots/file_loaded.png){ width="100%", align=center }
 
 ::: tip Tip: File system navigation
 ![Nav buttons](./screenshots/file_loading_start_and_parent_dirs.png){ width="12%", align=right }

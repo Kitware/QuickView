@@ -13,10 +13,6 @@
   - [Simulation files: what is supported?](../simulation_data)
   - [State files: how to use them?](./file_selection#state-files)
 
-
-
-![QuickView logo](/public/icon-full.png){ width="20%", align=right }
-
 - How to use QuickView
   - [The graphical UI](./ui_overview)
   - [Keyboard shortcuts](./shortcuts)

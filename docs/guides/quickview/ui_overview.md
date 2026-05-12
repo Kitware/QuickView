@@ -1,6 +1,6 @@
 # QuickView's Graphical UI
 
-![QuickView UI](./screenshots/quickview_ui.png){ width="95%" }
+![QuickView UI](./screenshots/quickview_ui.png){ width="100%" }
 
 
 ## UI components
@@ -15,7 +15,7 @@ QuickView's UI contains three main components.
   individually using the [pop-up panel](./individual_views.md)
   activated by a click on the colorbar.
 
-![Toolbar compact or expanded](./screenshots/toolbar_compact_or_expanded.png){ width="40%" align=right}
+![Toolbar compact or expanded](./screenshots/toolbar_compact_or_expanded.png){ width="50%" align=right}
 
 - **Control panels**: QuickView includes various control panels for
   changing the properties of contour plots shown in the viewport.
