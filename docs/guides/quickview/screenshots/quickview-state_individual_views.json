@@ -1,0 +1,87 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-05-11 19:32:05.001618",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202604_documentation/v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202604_documentation/connectivity_ne30pg2_TEMPEST.scrip.nc"
+  },
+  "variables-selection": [
+    "ncl_a3"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 10015307.223792594,
+      "position": [
+        0.0,
+        0.0,
+        77928734.37784009
+      ],
+      "focal_point": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        76155628.27002007,
+        80348677.3302033
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -180,
+      180
+    ],
+    "crop_latitude": [
+      -90,
+      90
+    ],
+    "projection": [
+      "Mollweide"
+    ],
+    "animation_track": "lev",
+    "lev_idx": 71
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "ncl_a3",
+      "config": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "order": 1,
+        "size": 12,
+        "offset": 0,
+        "break_row": false,
+        "override_range": false,
+        "color_range": [
+          9.864797347047816e-12,
+          1.870906274348272e-08
+        ],
+        "color_value_min": "9.864797347047816e-12",
+        "color_value_max": "1.870906274348272e-08"
+      }
+    }
+  ]
+}

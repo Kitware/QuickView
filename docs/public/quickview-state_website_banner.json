@@ -1,7 +1,7 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-04-27 12:35:35.665126",
+    "created": "2026-05-11 12:43:47.847886",
     "comment": ""
   },
   "files": {
@@ -15,16 +15,35 @@
     "CLDLOW"
   ],
   "layout": {
-    "aspect-ratio": 2,
+    "aspect-ratio": 0.5,
     "grouped": false,
     "active": "auto_layout",
     "tools": [],
-    "help": false
+    "help": false,
+    "camera": {
+      "zoom": 9542795.040380873,
+      "position": [
+        0.0,
+        0.0,
+        73673405.62958878
+      ],
+      "focal_point": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        71987162.971775,
+        75973741.28534032
+      ]
+    }
   },
   "data-selection": {
-    "time_idx": 0,
-    "midpoint_idx": 0,
-    "interface_idx": 0,
     "crop_longitude": [
       -180,
       180
@@ -35,7 +54,9 @@
     ],
     "projection": [
       "Robinson"
-    ]
+    ],
+    "animation_track": "lev",
+    "lev_idx": 51
   },
   "views": [
     {
@@ -48,7 +69,10 @@
       "config": {
         "preset": "Yellow - Gray - Blue",
         "invert": true,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
         "order": 7,
         "size": 6,
         "offset": 0,
@@ -72,7 +96,10 @@
       "config": {
         "preset": "batlow",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
         "order": 5,
         "size": 6,
         "offset": 0,
@@ -96,7 +123,10 @@
       "config": {
         "preset": "Rainbow Desaturated",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
         "order": 3,
         "size": 6,
         "offset": 0,
@@ -119,7 +149,10 @@
       "config": {
         "preset": "Grayscale",
         "invert": false,
+        "color_blind": false,
         "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
         "order": 2,
         "size": 6,
         "offset": 0,

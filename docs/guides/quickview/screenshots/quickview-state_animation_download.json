@@ -1,7 +1,7 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-04-29 15:22:02.256346",
+    "created": "2026-05-11 19:51:49.474706",
     "comment": ""
   },
   "files": {
@@ -19,9 +19,31 @@
     "grouped": false,
     "active": "auto_layout",
     "tools": [
-      "adjust-databounds"
+      "animation-controls"
     ],
-    "help": false
+    "help": false,
+    "camera": {
+      "zoom": 9561555.450027756,
+      "position": [
+        0.0,
+        0.0,
+        73673405.62958878
+      ],
+      "focal_point": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        72461319.21669145,
+        75376876.26347312
+      ]
+    }
   },
   "data-selection": {
     "crop_longitude": [
@@ -33,7 +55,7 @@
       90
     ],
     "projection": [
-      "Mollweide"
+      "Robinson"
     ],
     "animation_track": "lev",
     "lev_idx": 0
@@ -111,11 +133,11 @@
         "break_row": false,
         "override_range": false,
         "color_range": [
-          37851584.0,
-          432790592.0
+          4738292.5,
+          4228730624.0
         ],
-        "color_value_min": "37851584.0",
-        "color_value_max": "432790592.0"
+        "color_value_min": "4738292.5",
+        "color_value_max": "4228730624.0"
       }
     },
     {
@@ -138,11 +160,11 @@
         "break_row": false,
         "override_range": false,
         "color_range": [
-          89625480.0,
-          12674042880.0
+          10611544.0,
+          15063609344.0
         ],
-        "color_value_min": "89625480.0",
-        "color_value_max": "12674042880.0"
+        "color_value_min": "10611544.0",
+        "color_value_max": "15063609344.0"
       }
     }
   ]

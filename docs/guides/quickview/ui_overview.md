@@ -7,18 +7,18 @@
 
 QuickView's UI contains three main components.
 
-- **Viewport**: The viewport displays global or regional map plots
+- **Viewport**: The viewport displays contour plots on global or regional maps
   for the user-selected physical quantities (variables in the NetCDF files).
-  The sequence of the displayed variables and the size of the map plots
+  The sequence of the displayed variables and the size of the contour plots
   can be adjusted using the [viewport layout](./viewport_layout.md) control panel.
   For each variable shown on a map, the colormap, value ranges etc. can be adjusted
-  individually using the [pop-up menu](./individual_views.md)
+  individually using the [pop-up panel](./individual_views.md)
   activated by a click on the colorbar.
 
 ![Toolbar compact or expanded](./screenshots/toolbar_compact_or_expanded.png){ width="40%" align=right}
 
-- **Control panels**: Various control panels allow the user to
-  change properties of all map plots shown in the viewport.
+- **Control panels**: QuickView includes various control panels for
+  changing the properties of contour plots shown in the viewport.
   The control panels can be collapsed (hidden)
   or expanded (shown) by clicking on their corresponding icons in the
   toolbar or by using [keyboard shortcuts](./shortcuts).

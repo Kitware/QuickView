@@ -1,0 +1,113 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-05-11 14:18:57.149671",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_ne1024/output.scream.Cess.hourly2DVars.INSTANT.nhours_x1.2019-09-02-03600.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_ne1024/connectivity_ne1024pg2_TEMPEST.scrip.nc"
+  },
+  "variables-selection": [
+    "LW_flux_up_at_model_top",
+    "precip_total_surf_mass_flux"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": true,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 3374338.862067296,
+      "position": [
+        -11769607.25,
+        337433.8862067296,
+        28027417.239626117
+      ],
+      "focal_point": [
+        -11769607.25,
+        337433.8862067296,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        27225812.404588137,
+        29104075.2620484
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -180,
+      -60
+    ],
+    "crop_latitude": [
+      -30,
+      30
+    ],
+    "projection": [
+      "Mollweide"
+    ],
+    "animation_track": "time",
+    "time_idx": 50
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "LW_flux_up_at_model_top",
+      "config": {
+        "preset": "BuGnYl",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "order": 1,
+        "size": 6,
+        "offset": 0,
+        "break_row": false,
+        "override_range": true,
+        "color_range": [
+          30.0,
+          300.0
+        ],
+        "color_value_min": "30",
+        "color_value_max": "300"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "precip_total_surf_mass_flux",
+      "config": {
+        "preset": "erdc_iceFire_H",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "order": 2,
+        "size": 6,
+        "offset": 0,
+        "break_row": false,
+        "override_range": true,
+        "color_range": [
+          1e-10,
+          1e-05
+        ],
+        "color_value_min": "1e-10",
+        "color_value_max": "1e-05"
+      }
+    }
+  ]
+}

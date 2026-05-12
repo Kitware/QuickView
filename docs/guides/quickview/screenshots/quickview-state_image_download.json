@@ -1,33 +1,29 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-05-11 13:43:44.026889",
+    "created": "2026-05-11 20:02:10.134181",
     "comment": ""
   },
   "files": {
-    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202508_EAM_QuickView_test_data/large/EAMv2_ne120pg2_spinup.eam.h0.nc",
-    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202508_EAM_QuickView_test_data/connectivity/connectivity_ne120pg2_TEMPEST.scrip.nc"
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
   },
   "variables-selection": [
-    "T",
-    "Q",
-    "CCN3",
-    "CLDLOW"
+    "AODALL",
+    "AODBC",
+    "num_a1",
+    "num_a2"
   ],
   "layout": {
     "aspect-ratio": 0.5,
     "grouped": false,
     "active": "auto_layout",
     "tools": [
-      "select-fields",
-      "select-slice-time",
-      "animation-controls",
-      "adjust-databounds",
-      "adjust-layout"
+      "animation-controls"
     ],
     "help": false,
     "camera": {
-      "zoom": 9542795.040380873,
+      "zoom": 9561555.450027756,
       "position": [
         0.0,
         0.0,
@@ -44,8 +40,8 @@
         0.0
       ],
       "clipping_range": [
-        71987162.971775,
-        75973741.28534032
+        72461319.21669145,
+        75376876.26347312
       ]
     }
   },
@@ -62,88 +58,33 @@
       "Robinson"
     ],
     "animation_track": "lev",
-    "lev_idx": 51
+    "lev_idx": 1
   },
   "views": [
     {
       "type": [
         "time",
-        "lev",
         "ncol"
       ],
-      "name": "T",
+      "name": "AODALL",
       "config": {
-        "preset": "Yellow - Gray - Blue",
-        "invert": true,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "order": 7,
-        "size": 6,
-        "offset": 0,
-        "break_row": false,
-        "override_range": true,
-        "color_range": [
-          220.0,
-          285.0
-        ],
-        "color_value_min": "220",
-        "color_value_max": "285"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
-      "name": "Q",
-      "config": {
-        "preset": "batlow",
+        "preset": "BuGnYl",
         "invert": false,
         "color_blind": false,
         "use_log_scale": "linear",
         "discrete_log": false,
-        "n_discrete_colors": 4,
-        "order": 5,
+        "n_discrete_colors": 1,
+        "order": 1,
         "size": 6,
         "offset": 0,
         "break_row": false,
-        "override_range": true,
+        "override_range": false,
         "color_range": [
-          0.0,
-          0.008
+          0.01264046598225832,
+          1.01161527633667
         ],
-        "color_value_min": "0",
-        "color_value_max": "0.008"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
-      "name": "CCN3",
-      "config": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "order": 3,
-        "size": 6,
-        "offset": 0,
-        "break_row": false,
-        "override_range": true,
-        "color_range": [
-          0.0,
-          260.0
-        ],
-        "color_value_min": "0",
-        "color_value_max": "260"
+        "color_value_min": "0.01264046598225832",
+        "color_value_max": "1.01161527633667"
       }
     },
     {
@@ -151,25 +92,79 @@
         "time",
         "ncol"
       ],
-      "name": "CLDLOW",
+      "name": "AODBC",
       "config": {
-        "preset": "Grayscale",
+        "preset": "BuGnYl",
         "invert": false,
         "color_blind": false,
         "use_log_scale": "linear",
         "discrete_log": false,
-        "n_discrete_colors": 4,
+        "n_discrete_colors": 1,
         "order": 2,
         "size": 6,
         "offset": 0,
         "break_row": false,
-        "override_range": true,
+        "override_range": false,
         "color_range": [
-          0.0,
-          0.88
+          0.0006716852076351643,
+          0.08890804648399353
         ],
-        "color_value_min": "0.0",
-        "color_value_max": "0.88"
+        "color_value_min": "0.0006716852076351643",
+        "color_value_max": "0.08890804648399353"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "config": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
+        "order": 3,
+        "size": 6,
+        "offset": 0,
+        "break_row": false,
+        "override_range": false,
+        "color_range": [
+          2050.944091796875,
+          30090.498046875
+        ],
+        "color_value_min": "2050.944091796875",
+        "color_value_max": "30090.498046875"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a2",
+      "config": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
+        "order": 4,
+        "size": 6,
+        "offset": 0,
+        "break_row": false,
+        "override_range": false,
+        "color_range": [
+          7832657.0,
+          9135130.0
+        ],
+        "color_value_min": "7832657.0",
+        "color_value_max": "9135130.0"
       }
     }
   ]
