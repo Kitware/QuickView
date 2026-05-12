@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v2.7.5 (2026-05-12)
+
+### Bug Fixes
+
+- **export**: Update animation track while exporting
+  ([`51d6866`](https://github.com/Kitware/QuickView/commit/51d6866f4a3f6c48497316ea8b3580247355420a))
+
+- **ui**: Improve field selection look and feel
+  ([`25c20d1`](https://github.com/Kitware/QuickView/commit/25c20d1ebce0978b76b993442e987975890d920f))
+
+### Documentation
+
+- Correct size of a image
+  ([`963803f`](https://github.com/Kitware/QuickView/commit/963803f3b951f89f3b3196db66d062fbff0db892))
+
+- Update image sizes
+  ([`528d61e`](https://github.com/Kitware/QuickView/commit/528d61e7c7189eef6919384d79dd6ce7a42bfe98))
+
+
 ## v2.7.4 (2026-05-11)
 
 ### Bug Fixes
