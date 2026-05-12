@@ -1,7 +1,7 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-05-11 19:51:49.474706",
+    "created": "2026-05-11 20:02:10.134181",
     "comment": ""
   },
   "files": {
@@ -58,7 +58,7 @@
       "Robinson"
     ],
     "animation_track": "lev",
-    "lev_idx": 0
+    "lev_idx": 1
   },
   "views": [
     {
@@ -133,11 +133,11 @@
         "break_row": false,
         "override_range": false,
         "color_range": [
-          4738292.5,
-          4228730624.0
+          2050.944091796875,
+          30090.498046875
         ],
-        "color_value_min": "4738292.5",
-        "color_value_max": "4228730624.0"
+        "color_value_min": "2050.944091796875",
+        "color_value_max": "30090.498046875"
       }
     },
     {
@@ -160,11 +160,11 @@
         "break_row": false,
         "override_range": false,
         "color_range": [
-          10611544.0,
-          15063609344.0
+          7832657.0,
+          9135130.0
         ],
-        "color_value_min": "10611544.0",
-        "color_value_max": "15063609344.0"
+        "color_value_min": "7832657.0",
+        "color_value_max": "9135130.0"
       }
     }
   ]

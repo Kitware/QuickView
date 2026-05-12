@@ -1,7 +1,7 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-04-29 15:25:40.465295",
+    "created": "2026-05-11 19:47:37.569618",
     "comment": ""
   },
   "files": {
@@ -21,7 +21,29 @@
     "tools": [
       "adjust-databounds"
     ],
-    "help": false
+    "help": false,
+    "camera": {
+      "zoom": 4777405.644235796,
+      "position": [
+        5668611.25,
+        4312577.5,
+        36836702.20333518
+      ],
+      "focal_point": [
+        5668611.25,
+        4312577.5,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        35992073.55422117,
+        37988766.87002192
+      ]
+    }
   },
   "data-selection": {
     "crop_longitude": [
@@ -111,11 +133,11 @@
         "break_row": false,
         "override_range": false,
         "color_range": [
-          89570888.0,
-          432790592.0
+          30360974.0,
+          4228730624.0
         ],
-        "color_value_min": "89570888.0",
-        "color_value_max": "432790592.0"
+        "color_value_min": "30360974.0",
+        "color_value_max": "4228730624.0"
       }
     },
     {
@@ -138,11 +160,11 @@
         "break_row": false,
         "override_range": false,
         "color_range": [
-          90726912.0,
-          963400576.0
+          13090005.0,
+          15063609344.0
         ],
-        "color_value_min": "90726912.0",
-        "color_value_max": "963400576.0"
+        "color_value_min": "13090005.0",
+        "color_value_max": "15063609344.0"
       }
     }
   ]

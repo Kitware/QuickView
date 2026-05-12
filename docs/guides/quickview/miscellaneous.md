@@ -2,7 +2,7 @@
 
 This page summarizes several additional convenient features in QuickView.
 
-## Choosing map projection and extent {#maps}
+## Choosing map projection and geographical region {#maps}
 
 The map projection used for the contour plots can be changed using the mini menu
 activated by a click on the Earth icon in the vertical tool bar—or by keyboard shortcuts:
@@ -14,7 +14,7 @@ activated by a click on the Earth icon in the vertical tool bar—or by keyboard
 
 ![lat/lon sliders](./screenshots/latlon_sliders.png){ width="70%", align=right }
 
-The map extent, i.e., the latitude-longitude bounds to be displayed in the contour plots,
+The geographical region, i.e., the latitude and longitude bounds to be displayed in the contour plots,
 can be adjusted using the sliders in the lat/lon cropping panel activated by a click on
 the Earth grid icon in the vertical toolbar.
 
