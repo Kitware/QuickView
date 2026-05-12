@@ -56,7 +56,8 @@ reveal additional sliders or buttons for simultaneously
 adjusting all views in the viewport, as shown in the screenshots below. 
 
 
-![toggles](./screenshots/viewport_adjustment_toggles_central.png){ width="100", align=center }
+![toggles](./screenshots/viewport_adjustment_toggles_central.png){ width="100%", align=center }
+
 
 ### Aspect ratio of view frame
 
