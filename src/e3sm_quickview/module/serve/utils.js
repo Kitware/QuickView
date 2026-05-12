@@ -219,7 +219,7 @@ function findContainerToCapture(varName) {
 
 function getFileName(fieldName) {
   const state = trame.state.state;
-  const nameTokens = [fieldName || "FullPanel"];
+  const nameTokens = [fieldName || "Viewport"];
   state.available_animation_tracks.forEach((n) => {
     nameTokens.push(n);
     const nDigit = Math.floor(Math.log10(state[n].length) + 1);

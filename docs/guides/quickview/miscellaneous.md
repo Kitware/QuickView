@@ -29,7 +29,7 @@ or animations for presentations and manuscripts, etc.:
 ![image download](./screenshots/image_download.png){ width="20%", align=right }
 
 - A click on the **camera icon** at the end of the vertical **toolbar** saves the entire
-  viewport—in its current layout—to the local computer as `FullPanel.png`.
+  viewport—in its current layout—to the local computer as `Viewport.png`.
 
 - A click on the **camera icon** next to the variable name **inside a view panel**
   saves that single view as a `.png` file. The file name starts with the variable name;
