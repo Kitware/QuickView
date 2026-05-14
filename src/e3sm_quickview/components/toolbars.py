@@ -479,15 +479,13 @@ class DataSelection(html.Div):
                                             # Text input
                                             html.Input(
                                                 type="number",
-                                                value=("t_idx",),
-                                                min=[0],
-                                                max=[
-                                                    "t_values ? t_values.length - 1 : 0"
-                                                ],
-                                                step=[1],
+                                                value=("t_idx + 1",),
+                                                min="1",
+                                                max=("t_values ? t_values.length : 0",),
+                                                step="1",
                                                 change=(
                                                     self.on_update_slider,
-                                                    "[track, Number($event.target.value)]",
+                                                    "[track, Number($event.target.value) - 1]",
                                                 ),
                                                 classes="ml-2",
                                                 style="width: 60px; border: 1px solid #ccc; border-radius: 4px; text-align: right;",
