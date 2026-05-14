@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v2.7.6 (2026-05-14)
+
+### Bug Fixes
+
+- **arrow**: Prevent pan when using arrow key when moving slider
+  ([`f4727c2`](https://github.com/Kitware/QuickView/commit/f4727c224aa7811de98ad6bc6f9bab3fa470deac))
+
+- **SliceIndex**: Text field use 1 as min value
+  ([`8bbadb7`](https://github.com/Kitware/QuickView/commit/8bbadb7d55df45122f204809dd4393ee358b9084))
+
+### Documentation
+
+- Small clarification
+  ([`db4cfac`](https://github.com/Kitware/QuickView/commit/db4cfac7f7728a89cc988a435793c94afa4ebc17))
+
+- Update screenshots and text for revised slice selection controls
+  ([`2afe3df`](https://github.com/Kitware/QuickView/commit/2afe3df478589912b6e2544e8d1a6d989c8d8926))
+
+
 ## v2.7.5 (2026-05-12)
 
 ### Bug Fixes
