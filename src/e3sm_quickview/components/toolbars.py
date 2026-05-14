@@ -30,259 +30,260 @@ class Layout(v3.VToolbar):
         with self:
             v3.VIcon("mdi-view-module", classes="px-6 opacity-50")
             v3.VSpacer()
-
-            # --- Aspect ratio toggle + slider ---
-            with v3.VSheet(
-                classes="d-flex align-center rounded px-1 ga-1 py-1",
-                color=("show_aspect_ratio ? 'grey-lighten-3' : 'transparent'",),
-            ):
-                v3.VIconBtn(
-                    v_tooltip_bottom="'Toggle aspect ratio'",
-                    icon="mdi-arrow-expand-vertical",
-                    flat=True,
-                    click="show_aspect_ratio = !show_aspect_ratio; show_zoom_controls = false; show_pan_controls = false",
-                    color=("show_aspect_ratio ? 'primary' : ''",),
-                    size=("show_aspect_ratio ? 'small' : 'default'",),
-                    classes=("show_aspect_ratio ? 'ml-1' : 'rounded'",),
-                )
-                with (
-                    v3.VExpandXTransition(),
-                    html.Div(
-                        v_if="show_aspect_ratio", classes="d-flex align-center ga-1"
-                    ),
+            with html.Div(classes="d-flex ga-2 align-center"):
+                # --- Aspect ratio toggle + slider ---
+                with v3.VSheet(
+                    classes="d-flex align-center rounded px-1 ga-1 py-1",
+                    color=("show_aspect_ratio ? 'grey-lighten-3' : 'transparent'",),
                 ):
-                    v3.VDivider(vertical=True, classes="mx-1")
-                    v3.VSlider(
-                        v_tooltip_bottom="'Reduce (left) / Increase (right) vertical aspect'",
-                        v_model=("aspect_ratio", 0.5),
-                        min=0,
-                        max=4,
-                        step=0.25,
-                        show_ticks="always",
-                        density="compact",
-                        hide_details=True,
-                        style="min-width: 200px; max-width: 300px;",
-                    )
-
-            # --- Zoom toggle + in/out ---
-            with v3.VSheet(
-                classes="d-flex align-center rounded px-1 ga-1",
-                color=("show_zoom_controls ? 'grey-lighten-3' : 'transparent'",),
-            ):
-                v3.VIconBtn(
-                    v_tooltip_bottom="'Toggle zoom controls'",
-                    icon="mdi-magnify-plus-cursor",
-                    flat=True,
-                    click="show_zoom_controls = !show_zoom_controls; show_pan_controls = false; show_aspect_ratio = false",
-                    color=("show_zoom_controls ? 'primary' : ''",),
-                    size=("show_zoom_controls ? 'small' : 'default'",),
-                    classes=("show_zoom_controls ? 'ml-1' : 'rounded'",),
-                )
-                with (
-                    v3.VExpandXTransition(),
-                    html.Div(
-                        v_if="show_zoom_controls", classes="d-flex align-center ga-1"
-                    ),
-                ):
-                    v3.VDivider(vertical=True, classes="mx-1")
                     v3.VIconBtn(
-                        v_tooltip_bottom="'Zoom in'",
-                        icon="mdi-plus",
-                        variant="plain",
-                        click=(zoom, "[0.8333333]"),
+                        v_tooltip_bottom="'Toggle aspect ratio'",
+                        icon="mdi-arrow-expand-vertical",
+                        flat=True,
+                        click="show_aspect_ratio = !show_aspect_ratio",
+                        color=("show_aspect_ratio ? 'primary' : ''",),
+                        size=("show_aspect_ratio ? 'small' : 'default'",),
+                        classes=("show_aspect_ratio ? 'ml-1' : 'rounded'",),
                     )
-                    v3.VIconBtn(
-                        v_tooltip_bottom="'Zoom out'",
-                        icon="mdi-minus",
-                        variant="plain",
-                        click=(zoom, "[1.2]"),
-                    )
+                    with (
+                        v3.VExpandXTransition(),
+                        html.Div(
+                            v_if="show_aspect_ratio", classes="d-flex align-center ga-1"
+                        ),
+                    ):
+                        v3.VDivider(vertical=True, classes="mx-1")
+                        v3.VSlider(
+                            v_tooltip_bottom="'Reduce (left) / Increase (right) vertical aspect'",
+                            v_model=("aspect_ratio", 0.5),
+                            min=0,
+                            max=4,
+                            step=0.25,
+                            show_ticks="always",
+                            density="compact",
+                            hide_details=True,
+                            style="min-width: 200px; max-width: 300px;",
+                        )
 
-            # --- Pan toggle + directions ---
-            with (
-                v3.VSheet(
+                # --- Zoom toggle + in/out ---
+                with v3.VSheet(
                     classes="d-flex align-center rounded px-1 ga-1",
-                    color=("show_pan_controls ? 'grey-lighten-3' : 'transparent'",),
-                ),
-            ):
-                v3.VIconBtn(
-                    v_tooltip="'Toggle pan controls'",
-                    icon="mdi-pan",
-                    flat=True,
-                    click="show_pan_controls = !show_pan_controls; show_zoom_controls = false; show_aspect_ratio = false",
-                    color=("show_pan_controls ? 'primary' : ''",),
-                    size=("show_pan_controls ? 'small' : 'default'",),
-                    classes=("show_pan_controls ? 'ml-1' : 'rounded'",),
-                )
+                    color=("show_zoom_controls ? 'grey-lighten-3' : 'transparent'",),
+                ):
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Toggle zoom controls'",
+                        icon="mdi-magnify-plus-cursor",
+                        flat=True,
+                        click="show_zoom_controls = !show_zoom_controls",
+                        color=("show_zoom_controls ? 'primary' : ''",),
+                        size=("show_zoom_controls ? 'small' : 'default'",),
+                        classes=("show_zoom_controls ? 'ml-1' : 'rounded'",),
+                    )
+                    with (
+                        v3.VExpandXTransition(),
+                        html.Div(
+                            v_if="show_zoom_controls",
+                            classes="d-flex align-center ga-1",
+                        ),
+                    ):
+                        v3.VDivider(vertical=True, classes="mx-1")
+                        v3.VIconBtn(
+                            v_tooltip_bottom="'Zoom in'",
+                            icon="mdi-plus",
+                            variant="plain",
+                            click=(zoom, "[0.8333333]"),
+                        )
+                        v3.VIconBtn(
+                            v_tooltip_bottom="'Zoom out'",
+                            icon="mdi-minus",
+                            variant="plain",
+                            click=(zoom, "[1.2]"),
+                        )
+
+                # --- Pan toggle + directions ---
                 with (
-                    v3.VExpandXTransition(),
-                    html.Div(
-                        v_if="show_pan_controls", classes="d-flex align-center ga-1"
+                    v3.VSheet(
+                        classes="d-flex align-center rounded px-1 ga-1",
+                        color=("show_pan_controls ? 'grey-lighten-3' : 'transparent'",),
                     ),
                 ):
-                    v3.VDivider(vertical=True, classes="mx-1")
                     v3.VIconBtn(
-                        v_tooltip_bottom="'Pan up'",
-                        icon="mdi-arrow-up",
-                        click=(pan, "[0, -1]"),
-                        variant="plain",
-                        classes="rounded",
-                    )
-                    v3.VIconBtn(
-                        v_tooltip_bottom="'Pan down'",
-                        icon="mdi-arrow-down",
+                        v_tooltip="'Toggle pan controls'",
+                        icon="mdi-pan",
                         flat=True,
-                        click=(pan, "[0, 1]"),
-                        variant="plain",
+                        click="show_pan_controls = !show_pan_controls",
+                        color=("show_pan_controls ? 'primary' : ''",),
+                        size=("show_pan_controls ? 'small' : 'default'",),
+                        classes=("show_pan_controls ? 'ml-1' : 'rounded'",),
                     )
-                    v3.VIconBtn(
-                        v_tooltip_bottom="'Pan left'",
-                        icon="mdi-arrow-left",
-                        flat=True,
-                        click=(pan, "[1, 0]"),
-                        variant="plain",
-                    )
-                    v3.VIconBtn(
-                        v_tooltip_bottom="'Pan right'",
-                        icon="mdi-arrow-right",
-                        flat=True,
-                        click=(pan, "[-1, 0]"),
-                        variant="plain",
-                    )
+                    with (
+                        v3.VExpandXTransition(),
+                        html.Div(
+                            v_if="show_pan_controls", classes="d-flex align-center ga-1"
+                        ),
+                    ):
+                        v3.VDivider(vertical=True, classes="mx-1")
+                        v3.VIconBtn(
+                            v_tooltip_bottom="'Pan up'",
+                            icon="mdi-arrow-up",
+                            click=(pan, "[0, -1]"),
+                            variant="plain",
+                            classes="rounded",
+                        )
+                        v3.VIconBtn(
+                            v_tooltip_bottom="'Pan down'",
+                            icon="mdi-arrow-down",
+                            flat=True,
+                            click=(pan, "[0, 1]"),
+                            variant="plain",
+                        )
+                        v3.VIconBtn(
+                            v_tooltip_bottom="'Pan left'",
+                            icon="mdi-arrow-left",
+                            flat=True,
+                            click=(pan, "[1, 0]"),
+                            variant="plain",
+                        )
+                        v3.VIconBtn(
+                            v_tooltip_bottom="'Pan right'",
+                            icon="mdi-arrow-right",
+                            flat=True,
+                            click=(pan, "[-1, 0]"),
+                            variant="plain",
+                        )
 
-            # --- Reset view ---
-            with v3.VBtn(
-                v_tooltip_bottom="'Auto zoom to fit'",
-                flat=True,
-                click=reset_camera,
-                density="compact",
-                icon=True,
-                classes="ml-2",
-            ):
-                v3.VIcon("mdi-fit-to-page-outline")
+                # --- Reset view ---
+                with v3.VBtn(
+                    v_tooltip_bottom="'Auto zoom to fit'",
+                    flat=True,
+                    click=reset_camera,
+                    density="compact",
+                    icon=True,
+                    classes="ml-2",
+                ):
+                    v3.VIcon("mdi-fit-to-page-outline")
 
-            v3.VDivider(vertical=True, classes="mx-1")
+                v3.VDivider(vertical=True, classes="mx-1")
 
-            # --- Grouped/Uniform toggle ---
-            v3.VCheckbox(
-                v_tooltip_bottom="layout_grouped ? 'Switch to ungrouped' : 'Switch to grouped'",
-                v_model=("layout_grouped", True),
-                hide_details=True,
-                inset=True,
-                false_icon="mdi-apps",
-                true_icon="mdi-focus-field",
-                density="compact",
-            )
+                # --- Grouped/Uniform toggle ---
+                v3.VCheckbox(
+                    v_tooltip_bottom="layout_grouped ? 'Switch to ungrouped' : 'Switch to grouped'",
+                    v_model=("layout_grouped", True),
+                    hide_details=True,
+                    inset=True,
+                    false_icon="mdi-apps",
+                    true_icon="mdi-focus-field",
+                    density="compact",
+                )
 
-            # --- Size menu ---
-            with v3.VBtn(
-                v_tooltip_bottom="'Column layout'",
-                flat=True,
-                icon=True,
-                density="compact",
-                classes="mx-2",
-            ):
-                v3.VIcon("mdi-view-column")
-                with v3.VMenu(activator="parent"):
-                    with v3.VList(density="compact"):
-                        with v3.VListItem(
-                            title="Auto flow",
-                            click=(
-                                apply_size,
-                                "['flow']",
-                            ),
-                        ):
-                            with v3.Template(v_slot_append=True):
-                                v3.VHotkey(
-                                    keys="=",
-                                    variant="contained",
-                                    inline=True,
-                                    classes="ml-6 mt-n1",
-                                )
-                        with v3.VListItem(
-                            title="Auto",
-                            click=(
-                                apply_size,
-                                "[0]",
-                            ),
-                        ):
-                            with v3.Template(v_slot_append=True):
-                                v3.VHotkey(
-                                    keys="0",
-                                    variant="contained",
-                                    inline=True,
-                                    classes="ml-6 mt-n1",
-                                )
-                        with v3.VListItem(
-                            title="Full Width",
-                            click=(
-                                apply_size,
-                                "[1]",
-                            ),
-                        ):
-                            with v3.Template(v_slot_append=True):
-                                v3.VHotkey(
-                                    keys="1",
-                                    variant="contained",
-                                    inline=True,
-                                    classes="ml-6 mt-n1",
-                                )
-                        with v3.VListItem(
-                            title="2 Columns",
-                            click=(
-                                apply_size,
-                                "[2]",
-                            ),
-                        ):
-                            with v3.Template(v_slot_append=True):
-                                v3.VHotkey(
-                                    keys="2",
-                                    variant="contained",
-                                    inline=True,
-                                    classes="ml-6 mt-n1",
-                                )
-                        with v3.VListItem(
-                            title="3 Columns",
-                            click=(
-                                apply_size,
-                                "[3]",
-                            ),
-                        ):
-                            with v3.Template(v_slot_append=True):
-                                v3.VHotkey(
-                                    keys="3",
-                                    variant="contained",
-                                    inline=True,
-                                    classes="ml-6 mt-n1",
-                                )
-                        with v3.VListItem(
-                            title="4 Columns",
-                            click=(
-                                apply_size,
-                                "[4]",
-                            ),
-                        ):
-                            with v3.Template(v_slot_append=True):
-                                v3.VHotkey(
-                                    keys="4",
-                                    variant="contained",
-                                    inline=True,
-                                    classes="ml-6 mt-n1",
-                                )
-                        with v3.VListItem(
-                            title="6 Columns",
-                            click=(
-                                apply_size,
-                                "[6]",
-                            ),
-                        ):
-                            with v3.Template(v_slot_append=True):
-                                v3.VHotkey(
-                                    keys="6",
-                                    variant="contained",
-                                    inline=True,
-                                    classes="ml-6 mt-n1",
-                                )
+                # --- Size menu ---
+                with v3.VBtn(
+                    v_tooltip_bottom="'Column layout'",
+                    flat=True,
+                    icon=True,
+                    density="compact",
+                    classes="mx-2",
+                ):
+                    v3.VIcon("mdi-view-column")
+                    with v3.VMenu(activator="parent"):
+                        with v3.VList(density="compact"):
+                            with v3.VListItem(
+                                title="Auto flow",
+                                click=(
+                                    apply_size,
+                                    "['flow']",
+                                ),
+                            ):
+                                with v3.Template(v_slot_append=True):
+                                    v3.VHotkey(
+                                        keys="=",
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-6 mt-n1",
+                                    )
+                            with v3.VListItem(
+                                title="Auto",
+                                click=(
+                                    apply_size,
+                                    "[0]",
+                                ),
+                            ):
+                                with v3.Template(v_slot_append=True):
+                                    v3.VHotkey(
+                                        keys="0",
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-6 mt-n1",
+                                    )
+                            with v3.VListItem(
+                                title="Full Width",
+                                click=(
+                                    apply_size,
+                                    "[1]",
+                                ),
+                            ):
+                                with v3.Template(v_slot_append=True):
+                                    v3.VHotkey(
+                                        keys="1",
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-6 mt-n1",
+                                    )
+                            with v3.VListItem(
+                                title="2 Columns",
+                                click=(
+                                    apply_size,
+                                    "[2]",
+                                ),
+                            ):
+                                with v3.Template(v_slot_append=True):
+                                    v3.VHotkey(
+                                        keys="2",
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-6 mt-n1",
+                                    )
+                            with v3.VListItem(
+                                title="3 Columns",
+                                click=(
+                                    apply_size,
+                                    "[3]",
+                                ),
+                            ):
+                                with v3.Template(v_slot_append=True):
+                                    v3.VHotkey(
+                                        keys="3",
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-6 mt-n1",
+                                    )
+                            with v3.VListItem(
+                                title="4 Columns",
+                                click=(
+                                    apply_size,
+                                    "[4]",
+                                ),
+                            ):
+                                with v3.Template(v_slot_append=True):
+                                    v3.VHotkey(
+                                        keys="4",
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-6 mt-n1",
+                                    )
+                            with v3.VListItem(
+                                title="6 Columns",
+                                click=(
+                                    apply_size,
+                                    "[6]",
+                                ),
+                            ):
+                                with v3.Template(v_slot_append=True):
+                                    v3.VHotkey(
+                                        keys="6",
+                                        variant="contained",
+                                        inline=True,
+                                        classes="ml-6 mt-n1",
+                                    )
 
 
 class Cropping(v3.VToolbar):
@@ -423,7 +424,7 @@ class DataSelection(html.Div):
         super().__init__(
             v_show=js.is_active("select-slice-time"),
             classes="border-b-thin",
-            style="display: flex; align-items: center; background: rgb(var(--v-theme-surface));",
+            style="display: flex; align-items: center; background: rgb(var(--v-theme-surface));min-height:41px;",
         )
 
         self.state.setdefault("expanded_slice_track", None)

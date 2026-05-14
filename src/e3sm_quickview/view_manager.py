@@ -1090,6 +1090,14 @@ class ViewManager(TrameComponent):
         if render and view_to_reset:
             self.render()
 
+    def guarded_zoom(self, factor):
+        if (
+            "adjust-layout" not in self.state.active_tools
+            or not self.state.show_zoom_controls
+        ):
+            return
+        self.zoom(factor)
+
     def zoom(self, factor):
         self._camera.SetParallelScale(self._camera.GetParallelScale() * factor)
         self.render()
@@ -1102,6 +1110,15 @@ class ViewManager(TrameComponent):
             return
         self._camera.SetParallelScale(scale)
         self.render()
+
+    def guarded_pan(self, dx, dy):
+        if (
+            "adjust-layout" not in self.state.active_tools
+            or not self.state.show_pan_controls
+        ):
+            return
+
+        self.pan(dx, dy)
 
     def pan(self, dx, dy):
         cam = self._camera
