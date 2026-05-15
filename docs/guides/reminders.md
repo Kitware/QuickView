@@ -16,6 +16,9 @@ to stay simple and intuitive.
 On the other hand, we are continually summarizing typical analysis
 workflows and assessing new needs to add members to the family.
 
+![QuickView app icon](/guides/quickview/screenshots/QuickView_app_icon_with_text.png){ width="15%", align=right }
+![QuickCompare app icon](/guides/quickcompare/screenshots/QuickCompare_app_icon_with_text.png){ width="15%", align=right }
+
 The first two members of the family are
 - [QuickView](/guides/quickview/index)
   for simultaneously presenting 2D contour plots of
