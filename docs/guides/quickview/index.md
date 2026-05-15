@@ -1,6 +1,6 @@
 # What is QuickView?
 
-![QuickView logo](/public/icon-full.png){ width="18%", align=right }
+![QuickView logo](./screenshots/QuickView_app_icon_with_text.png){ width="18%", align=right }
 
 **QuickView** is an open-source, interactive visualization
 tool designed to help Earth system modelers take a quick look at

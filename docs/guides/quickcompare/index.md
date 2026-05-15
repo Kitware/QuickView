@@ -1,5 +1,7 @@
 # What is QuickCompare?
 
+![QuickView logo](./screenshots/QuickCompare_app_icon_with_text.png){ width="18%", align=right }
+
 QuickCompare is an offshoot of [QuickView](/guides/quickview/index.md).
 Instead of presenting a single simulation,
 QuickCompare contrasts two or more simulations that

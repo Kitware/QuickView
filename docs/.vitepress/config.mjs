@@ -64,37 +64,23 @@ export default defineConfig({
             { text: "Quickstart", link: "/guides/quickview/quickstart" },
             { text: "UI Overview", link: "/guides/quickview/ui_overview" },
             { text: "Keyboard Shortcuts", link: "/guides/quickview/shortcuts" },
-            {
-              text: "File Selection",
-              link: "/guides/quickview/file_selection",
-            },
-            {
-              text: "Variable Selection",
-              link: "/guides/quickview/variable_selection",
-            },
-            {
-              text: "Slice Selection",
-              link: "/guides/quickview/slice_selection",
-            },
-            {
-              text: "Viewport Layout",
-              link: "/guides/quickview/viewport_layout",
-            },
-            {
-              text: "Individual Views",
-              link: "/guides/quickview/individual_views",
-            },
+            { text: "File Selection", link: "/guides/quickview/file_selection", },
+            { text: "Variable Selection", link: "/guides/quickview/variable_selection", },
+            { text: "Slice Selection", link: "/guides/quickview/slice_selection", },
+            { text: "Viewport Layout", link: "/guides/quickview/viewport_layout", },
+            { text: "Individual Views", link: "/guides/quickview/individual_views", },
             { text: "Miscellaneous", link: "/guides/quickview/miscellaneous" },
           ],
         },
         {
           text: "QuickCompare",
           items: [
-            {
-              text: "What is QuickCompare?",
-              link: "/guides/quickcompare/index",
-            },
+            { text: "What is QuickCompare?", link: "/guides/quickcompare/index", },
             { text: "Quickstart", link: "/guides/quickcompare/quickstart" },
+            { text: "UI Overview", link: "/guides/quickcompare/ui_overview_and_shortcuts" },
+            { text: "Modes of Comparison", link: "/guides/quickcompare/modes_of_comparison", },
+            { text: "Variable/Slice Selection", link: "/guides/quickcompare/variable_and_slice_selection", },
+            { text: "Save/Resume Analysis", link: "/guides/quickcompare/save_resume_analysis", },
           ],
         },
         {
