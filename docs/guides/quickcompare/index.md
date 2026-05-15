@@ -1,6 +1,6 @@
 # What is QuickCompare?
 
-![QuickView logo](./screenshots/QuickCompare_app_icon_with_text.png){ width="18%", align=right }
+![QuickCompare logo](./screenshots/QuickCompare_app_icon_with_text.png){ width="18%", align=right }
 
 QuickCompare is an offshoot of [QuickView](/guides/quickview/index.md).
 Instead of presenting a single simulation,
@@ -12,5 +12,5 @@ to a control simulation.
 Like [QuickView](/guides/quickview/index.md),
 QuickCompare can present multiple variables simultaneously.
 
-## Useful links: see [Quickstart](./quickstart).
+Useful links: see [Quickstart](./quickstart).
 

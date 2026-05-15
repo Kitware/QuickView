@@ -76,11 +76,12 @@ export default defineConfig({
           text: "QuickCompare",
           items: [
             { text: "What is QuickCompare?", link: "/guides/quickcompare/index", },
-            { text: "Quickstart", link: "/guides/quickcompare/quickstart" },
-            { text: "UI Overview", link: "/guides/quickcompare/ui_overview_and_shortcuts" },
-            { text: "Modes of Comparison", link: "/guides/quickcompare/modes_of_comparison", },
-            { text: "Variable/Slice Selection", link: "/guides/quickcompare/variable_and_slice_selection", },
-            { text: "Save/Resume Analysis", link: "/guides/quickcompare/save_resume_analysis", },
+            { text: "Quickstart",            link: "/guides/quickcompare/quickstart" },
+            { text: "UI Overview",           link: "/guides/quickcompare/ui_overview_and_shortcuts" },
+            { text: "Modes of Comparison",   link: "/guides/quickcompare/modes_of_comparison", },
+            { text: "Variables and Slices",  link: "/guides/quickcompare/variable_and_slice_selection", },
+            { text: "Resuming an Analysis",  link: "/guides/quickcompare/save_resume_analysis", },
+            { text: "Miscellaneous",         link: "/guides/quickcompare/miscellaneous" },
           ],
         },
         {
