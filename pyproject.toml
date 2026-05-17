@@ -29,6 +29,7 @@ dependencies = [
     "trame-components",
     "trame-tauri>=0.6.2",
     "Pillow",
+    "trame-colormaps>=1.1.0",
 ]
 
 [project.optional-dependencies]
