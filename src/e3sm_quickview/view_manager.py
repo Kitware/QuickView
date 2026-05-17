@@ -2,11 +2,8 @@ import asyncio
 import math
 import time
 
-import numpy as np
-
 # Rendering Factory
 import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
-from paraview import simple
 from paraview.modules.vtkPVVTKExtensionsInteractionStyle import (
     vtkPVInteractorStyle,
     vtkPVTrackballZoom,
@@ -26,16 +23,11 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderWindowInteractor,
 )
 
+from trame.dataclasses.colormaps import ColormapConfig
+from trame.widgets.colormaps import HorizontalScalarBar
+from trame_colormaps import module as colormaps_module
 from e3sm_quickview.components import view as tview
-from e3sm_quickview.presets import COLOR_BLIND_SAFE
 from e3sm_quickview.utils import perf
-from e3sm_quickview.utils.color import COLORBAR_CACHE, lut_to_img
-from e3sm_quickview.utils.math import (
-    calculate_linthresh,
-    compute_color_ticks,
-    format_tick,
-    tick_contrast_color,
-)
 
 
 def auto_size_to_col(size):
@@ -66,35 +58,16 @@ COL_SIZE_LOOKUP = {
 }
 
 
-def lut_name(element):
-    return element.get("name").lower()
-
-
 class ViewConfiguration(dataclass.StateDataModel):
+    # --- View identity ---
     variable: str = dataclass.Sync(str)
-    preset: str = dataclass.Sync(str, "BuGnYl")
-    invert: bool = dataclass.Sync(bool, False)
-    color_blind: bool = dataclass.Sync(bool, False)
-    use_log_scale: str = dataclass.Sync(str, "linear")
-    discrete_log: bool = dataclass.Sync(bool, False)
-    n_discrete_colors: int = dataclass.Sync(int, 4)
-    color_value_min: str = dataclass.Sync(str, "0")
-    color_value_max: str = dataclass.Sync(str, "1")
-    color_value_min_valid: bool = dataclass.Sync(bool, True)
-    color_value_max_valid: bool = dataclass.Sync(bool, True)
-    color_range: list[float] = dataclass.Sync(tuple[float, float], (0, 1))
-    override_range: bool = dataclass.Sync(bool, False)
+
+    # --- Layout ---
     order: int = dataclass.Sync(int, 0)
     size: int = dataclass.Sync(int, 6)
     offset: int = dataclass.Sync(int, 0)
     break_row: bool = dataclass.Sync(bool, False)
-    menu: bool = dataclass.Sync(bool, False)
     swap_group: list[str] = dataclass.Sync(list[str], list)
-    search: str | None = dataclass.Sync(str)
-    n_colors: int = dataclass.Sync(int, 255)
-    lut_img: str = dataclass.Sync(str)
-    color_ticks: list = dataclass.Sync(list, list)
-    effective_color_range: list[float] = dataclass.Sync(tuple[float, float], (0, 1))
 
 
 class VariableView(TrameComponent):
@@ -123,39 +96,17 @@ class VariableView(TrameComponent):
         self.actor = vtkActor(mapper=self.mapper)
         self.renderer.AddActor(self.actor)
 
-        # Lookup table color management
-        self.lut = simple.GetColorTransferFunction(variable_name)
-        self.lut.NanOpacity = 0.0
-
-        # Color mapping
-        self.mapper.SetScalarVisibility(1)
-        self.mapper.SetScalarModeToUseCellFieldData()
-        self.mapper.SelectColorArray(variable_name)
-        self.mapper.SetLookupTable(self.lut.GetClientSideObject())
-
         # Add annotation to the view (continents, gridlines)
         self.renderer.AddActor(source.continent.actor)
         self.renderer.AddActor(source.grid_lines.actor)
 
-        # Reactive behavior
-        self.config.watch(
-            ["color_value_min", "color_value_max"],
-            self.color_range_str_to_float,
-        )
-        self.config.watch(
-            ["override_range", "color_range"], self.update_color_range, eager=True
-        )
-        self.config.watch(
-            [
-                "preset",
-                "invert",
-                "use_log_scale",
-                "discrete_log",
-                "n_discrete_colors",
-            ],
-            self.update_color_preset,
-            eager=True,
-        )
+        # colormaps module: creates LUT, wires mapper, manages presets/range/ticks
+        self.colormap = ColormapConfig(
+            server,
+            mapper=self.mapper,
+            data_array_fn=lambda: self.data_array,
+        ).set_data_array(variable_name, lambda: self.data_array, "cell")
+        self.colormap.watch(["mapper_change"], lambda *_: self.render())
 
         # GUI
         self._build_ui()
@@ -187,704 +138,11 @@ class VariableView(TrameComponent):
         if self.ctx.view:
             self.ctx.view.update()
 
-    def update_color_preset(
-        self,
-        name,
-        invert,
-        log_scale,
-        discrete_log=False,
-        n_discrete_colors=4,
-        n_colors=255,
-    ):
-        self.config.preset = name
-
-        # ApplyPreset resets range to [0,1], so always apply the linear
-        # preset first, rescale to the current range, then apply transforms
-        self._apply_linear_to_lut(invert)
-        self.lut.RescaleTransferFunction(*self.config.color_range)
-
-        # Capture the linear colorbar image (always the same regardless of scale)
-        ctf = self.lut.GetClientSideObject()
-        self.config.effective_color_range = ctf.GetRange()
-        self.config.lut_img = lut_to_img(self.lut)
-
-        # Save a reference to the linear LUT range for tick contrast sampling
-        linear_rgb_points = list(self.lut.RGBPoints)
-
-        # Compute linthresh (smallest positive non-zero value) from data
-        # for log and symlog scales.
-        linthresh = None
-        if log_scale in ("log", "symlog"):
-            from vtkmodules.util.numpy_support import vtk_to_numpy
-
-            arr = self.data_array
-            if arr is not None:
-                linthresh = calculate_linthresh(vtk_to_numpy(arr))
-            else:
-                linthresh = 1.0
-
-        n_sub = max(1, min(20, int(n_discrete_colors)))
-        if log_scale == "linear" and discrete_log:
-            display_rgb_points = self._apply_discrete_linear_to_lut(
-                linear_rgb_points, n_sub
-            )
-            if display_rgb_points is not None:
-                linear_rgb_points = display_rgb_points
-        elif log_scale == "log":
-            if discrete_log:
-                display_rgb_points = self._apply_discrete_log_to_lut(
-                    linthresh, linear_rgb_points, n_sub
-                )
-                if display_rgb_points is not None:
-                    linear_rgb_points = display_rgb_points
-            else:
-                self._apply_log_to_lut(linthresh)
-        elif log_scale == "symlog":
-            if discrete_log:
-                display_rgb_points = self._apply_discrete_symlog_to_lut(
-                    linthresh, linear_rgb_points, n_sub
-                )
-                if display_rgb_points is not None:
-                    linear_rgb_points = display_rgb_points
-            else:
-                self._apply_symlog_to_lut(linthresh, linear_rgb_points)
-
-        self._compute_ticks(linthresh=linthresh, linear_rgb_points=linear_rgb_points)
-
-        # For symlog (or any discrete mode), rebuild the client-side CTF as
-        # the VERY LAST step so nothing (proxy sync, _compute_ticks, lut_to_img)
-        # can overwrite it.
-        if log_scale == "symlog" or (discrete_log and log_scale in ("log", "linear")):
-            from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
-
-            pts = list(self.lut.RGBPoints)
-            ctf = vtkColorTransferFunction()
-            for i in range(0, len(pts), 4):
-                ctf.AddRGBPoint(pts[i], pts[i + 1], pts[i + 2], pts[i + 3])
-            self._symlog_ctf = ctf  # prevent GC
-        else:
-            self.lut.UpdateVTKObjects()
-            ctf = self.lut.GetClientSideObject()
-
-        self.mapper.SetLookupTable(ctf)
-        self.mapper.Modified()
-
-        self.render()
-
-    def _apply_linear_to_lut(self, invert=False):
-        """Apply preset with linear scale."""
-        self.lut.UseLogScale = 0
-        self.lut.ApplyPreset(self.config.preset, True)
-        if invert:
-            self.lut.InvertTransferFunction()
-
-    def _apply_discrete_linear_to_lut(self, linear_rgb_points, n_sub=1):
-        """Build a discrete (stepped) linear LUT.
-
-        The data range is divided into N_INTERVALS equal-percentage intervals.
-        Each interval is then split into *n_sub* equal sub-bands, each with a
-        flat color sampled from the continuous linear LUT at the sub-band
-        midpoint.  The boundary values are stored so ``_compute_ticks`` can
-        place tick marks at the exact same positions.
-        """
-        N_INTERVALS = 4
-        ctf = self.lut.GetClientSideObject()
-        x_min, x_max = ctf.GetRange()
-        data_range = x_max - x_min
-        if data_range == 0:
-            return
-
-        # Evenly spaced boundaries (percentages of data range)
-        boundaries = [
-            x_min + data_range * i / N_INTERVALS for i in range(N_INTERVALS + 1)
-        ]
-        # Store boundary values and their display positions (%) for tick alignment
-        self._discrete_tick_data = [
-            {"val": boundaries[i], "pos": i / N_INTERVALS * 100}
-            for i in range(1, N_INTERVALS)
-        ]
-
-        if len(boundaries) < 2:
-            return
-
-        # Build a temporary linear CTF from the saved linear RGB points
-        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
-
-        linear_ctf = vtkColorTransferFunction()
-        for i in range(0, len(linear_rgb_points), 4):
-            linear_ctf.AddRGBPoint(
-                linear_rgb_points[i],
-                linear_rgb_points[i + 1],
-                linear_rgb_points[i + 2],
-                linear_rgb_points[i + 3],
-            )
-
-        rgb = [0.0, 0.0, 0.0]
-        eps = data_range * 1e-9
-        display_rgb_points = []
-        render_rgb_points = []
-        band_idx = 0
-        total_bands = (len(boundaries) - 1) * n_sub
-        for i in range(len(boundaries) - 1):
-            lo = boundaries[i]
-            hi = boundaries[i + 1]
-            for j in range(n_sub):
-                # Sub-band edges in linear space
-                sub_lo = lo + (hi - lo) * j / n_sub
-                sub_hi = lo + (hi - lo) * (j + 1) / n_sub
-                sub_mid = (sub_lo + sub_hi) / 2.0
-                linear_ctf.GetColor(sub_mid, rgb)
-                r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
-
-                is_first = band_idx == 0
-                is_last = band_idx == total_bands - 1
-
-                if is_first:
-                    display_rgb_points.extend([sub_lo, r, g, b])
-                    render_rgb_points.extend([sub_lo, r, g, b])
-                else:
-                    display_rgb_points.extend([sub_lo + eps, r, g, b])
-                    render_rgb_points.extend([sub_lo + eps, r, g, b])
-
-                if is_last:
-                    display_rgb_points.extend([sub_hi, r, g, b])
-                    render_rgb_points.extend([sub_hi, r, g, b])
-                else:
-                    display_rgb_points.extend([sub_hi - eps, r, g, b])
-                    render_rgb_points.extend([sub_hi - eps, r, g, b])
-
-                band_idx += 1
-
-        # Generate the discrete banded colorbar image
-        self.lut.RGBPoints = display_rgb_points
-        self.config.lut_img = lut_to_img(self.lut)
-
-        # Store rendering points on proxy
-        self.lut.UseLogScale = 0
-        self.lut.RGBPoints = render_rgb_points
-
-        return display_rgb_points
-
-    def _apply_log_to_lut(self, linthresh):
-        """Transform the already-prepared LUT to log scale.
-
-        Uses linthresh (smallest positive non-zero data value) as the floor
-        when the range includes zero or negative values.
-        The colorbar image is captured before this call, so it stays linear.
-        """
-        ctf = self.lut.GetClientSideObject()
-        x_min, x_max = ctf.GetRange()
-        if x_max <= 0:
-            return
-        if x_min <= 0:
-            x_min = linthresh
-            self.lut.RescaleTransferFunction(x_min, x_max)
-        self.lut.MapControlPointsToLogSpace()
-        self.lut.UseLogScale = 1
-
-    def _apply_discrete_log_to_lut(self, linthresh, linear_rgb_points, n_sub=1):
-        """Build a discrete (stepped) log-scale LUT.
-
-        Decade boundaries are powers of 10 from linthresh to x_max.
-        Each decade is split into *n_sub* equal sub-bands in log space,
-        each with a flat color sampled from the continuous linear LUT.
-        """
-        ctf = self.lut.GetClientSideObject()
-        x_min, x_max = ctf.GetRange()
-        if x_max <= 0:
-            return
-        # Clamp floor
-        x_min = max(x_min, linthresh)
-        data_range = x_max - x_min
-        if data_range == 0:
-            return
-
-        log_min = np.log10(x_min)
-        log_max = np.log10(x_max)
-        log_range = log_max - log_min
-        if log_range == 0:
-            return
-
-        # Build decade boundaries
-        boundaries = [x_min]
-        e_lo = int(np.ceil(np.log10(x_min)))
-        e_hi = int(np.floor(np.log10(x_max)))
-        for e in range(e_lo, e_hi + 1):
-            val = 10.0**e
-            if x_min < val < x_max:
-                boundaries.append(val)
-        boundaries.append(x_max)
-
-        if len(boundaries) < 2:
-            return
-
-        # Store boundary values and their display positions (%) for tick alignment
-        log_min = np.log10(x_min)
-        log_max = np.log10(x_max)
-        log_range_val = log_max - log_min
-        self._discrete_tick_data = []
-        for bv in boundaries[1:-1]:
-            pct = (np.log10(bv) - log_min) / log_range_val * 100 if log_range_val else 0
-            self._discrete_tick_data.append({"val": bv, "pos": float(pct)})
-
-        # Build a continuous log CTF so discrete bands sample colours that
-        # match the continuous log rendering.
-        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
-
-        linear_ctf = vtkColorTransferFunction()
-        for i in range(0, len(linear_rgb_points), 4):
-            linear_ctf.AddRGBPoint(
-                linear_rgb_points[i],
-                linear_rgb_points[i + 1],
-                linear_rgb_points[i + 2],
-                linear_rgb_points[i + 3],
-            )
-
-        n_samples = 256
-        log_vals = np.linspace(log_min, log_max, n_samples)
-        log_ctf = vtkColorTransferFunction()
-        rgb_tmp = [0.0, 0.0, 0.0]
-        for lg in log_vals:
-            v = 10.0**lg
-            v = max(x_min, min(x_max, v))
-            t = (lg - log_min) / log_range
-            x_lookup = x_min + t * data_range
-            linear_ctf.GetColor(x_lookup, rgb_tmp)
-            log_ctf.AddRGBPoint(v, rgb_tmp[0], rgb_tmp[1], rgb_tmp[2])
-
-        rgb = [0.0, 0.0, 0.0]
-        eps_data = data_range * 1e-9
-        eps_lin = data_range * 1e-9
-        display_rgb_points = []
-        render_rgb_points = []
-        band_idx = 0
-        total_bands = (len(boundaries) - 1) * n_sub
-        for i in range(len(boundaries) - 1):
-            log_lo_decade = np.log10(boundaries[i])
-            log_hi_decade = np.log10(boundaries[i + 1])
-            for j in range(n_sub):
-                # Sub-band edges in log space
-                log_lo = log_lo_decade + (log_hi_decade - log_lo_decade) * j / n_sub
-                log_hi = (
-                    log_lo_decade + (log_hi_decade - log_lo_decade) * (j + 1) / n_sub
-                )
-                log_mid = (log_lo + log_hi) / 2.0
-                # Sample color from continuous log CTF at sub-band midpoint
-                v_mid = 10.0**log_mid
-                v_mid = max(x_min, min(x_max, v_mid))
-                log_ctf.GetColor(v_mid, rgb)
-                r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
-
-                # Data-space boundaries for rendering
-                v_lo = 10.0**log_lo
-                v_hi = 10.0**log_hi
-                v_lo = max(x_min, min(x_max, v_lo))
-                v_hi = max(x_min, min(x_max, v_hi))
-
-                # Linear positions for display image
-                t_lo_pos = (log_lo - log_min) / log_range
-                t_hi_pos = (log_hi - log_min) / log_range
-                d_lo = x_min + t_lo_pos * data_range
-                d_hi = x_min + t_hi_pos * data_range
-
-                is_first = band_idx == 0
-                is_last = band_idx == total_bands - 1
-
-                if is_first:
-                    display_rgb_points.extend([d_lo, r, g, b])
-                    render_rgb_points.extend([float(v_lo), r, g, b])
-                else:
-                    display_rgb_points.extend([d_lo + eps_lin, r, g, b])
-                    render_rgb_points.extend([float(v_lo) + eps_data, r, g, b])
-
-                if is_last:
-                    display_rgb_points.extend([d_hi, r, g, b])
-                    render_rgb_points.extend([float(v_hi), r, g, b])
-                else:
-                    display_rgb_points.extend([d_hi - eps_lin, r, g, b])
-                    render_rgb_points.extend([float(v_hi) - eps_data, r, g, b])
-
-                band_idx += 1
-
-        # Generate the discrete banded colorbar image
-        self.lut.RGBPoints = display_rgb_points
-        self.config.lut_img = lut_to_img(self.lut)
-
-        # Store rendering points on proxy
-        self.lut.UseLogScale = 0
-        self.lut.RGBPoints = render_rgb_points
-
-        return display_rgb_points
-
-    def _apply_symlog_to_lut(self, linthresh, linear_rgb_points=None):
-        """Build a symlog LUT with decade control points.
-
-        Control points are placed at powers of 10 (and ±linthresh, 0 for
-        mixed-sign data).  The RGB color for each control point is sampled
-        from the linear colorbar at the position where that value falls in
-        symlog space: t = (symlog(v) - symlog(min)) / (symlog(max) - symlog(min)).
-        """
-        ctf = self.lut.GetClientSideObject()
-        x_min, x_max = ctf.GetRange()
-        data_range = x_max - x_min
-        if data_range == 0:
-            return
-
-        def symlog(v):
-            v = np.asarray(v, dtype=float)
-            return np.sign(v) * np.log10(1.0 + np.abs(v) / linthresh)
-
-        # Build control points: N uniform samples in symlog space, plus
-        # mandatory breakpoints at ±linthresh and 0 for exact transitions.
-        n_samples = 256
-        s_min_val = float(symlog(x_min))
-        s_max_val = float(symlog(x_max))
-        s_range_bp = s_max_val - s_min_val
-        if s_range_bp == 0:
-            return
-
-        # Uniform in symlog space → invert to data space
-        # Inverse of symlog: v = sign(s) * linthresh * (10^|s| - 1)
-        s_vals = np.linspace(s_min_val, s_max_val, n_samples)
-        breakpoints = []
-        for s in s_vals:
-            v = float(np.sign(s) * linthresh * (10.0 ** abs(s) - 1.0))
-            v = max(x_min, min(x_max, v))
-            breakpoints.append(v)
-
-        # Symlog range for normalization
-        s_min = float(symlog(x_min))
-        s_max = float(symlog(x_max))
-        s_range = s_max - s_min
-        if s_range == 0:
-            return
-
-        # Build a standalone linear CTF for safe color sampling
-        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
-
-        linear_ctf = vtkColorTransferFunction()
-        if linear_rgb_points:
-            src = linear_rgb_points
-        else:
-            src = list(self.lut.RGBPoints)
-        for i in range(0, len(src), 4):
-            linear_ctf.AddRGBPoint(src[i], src[i + 1], src[i + 2], src[i + 3])
-
-        # Sample RGB from the linear CTF at symlog-normalized positions
-        rgb = [0.0, 0.0, 0.0]
-        new_rgb_points = []
-        display_rgb_points = []
-        for v in breakpoints:
-            t = (float(symlog(v)) - s_min) / s_range
-            x_lookup = x_min + t * data_range
-            linear_ctf.GetColor(x_lookup, rgb)
-            r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
-            new_rgb_points.extend([float(v), r, g, b])
-            # Display points: uniform linear positions with symlog colors
-            display_rgb_points.extend([x_lookup, r, g, b])
-
-        # Regenerate colorbar image from display points so it matches the 3D
-        self.lut.UseLogScale = 0
-        self.lut.RGBPoints = display_rgb_points
-        self.config.lut_img = lut_to_img(self.lut)
-
-        # Store rendering points on proxy — the actual CTF used by the
-        # mapper is a standalone vtkColorTransferFunction built in
-        # update_color_preset to avoid proxy client-side object issues.
-        self.lut.RGBPoints = new_rgb_points
-
-    def _apply_discrete_symlog_to_lut(self, linthresh, linear_rgb_points, n_sub=1):
-        """Build a discrete (stepped) symlog LUT.
-
-        Each decade interval is split into *n_sub* equal sub-bands in symlog
-        space, each with a flat color sampled from the continuous LUT at the
-        sub-band midpoint.  Twin control points with a tiny offset create hard
-        steps at the sub-band boundaries.  The display image is also replaced
-        with a banded colorbar.
-        """
-        ctf = self.lut.GetClientSideObject()
-        x_min, x_max = ctf.GetRange()
-        data_range = x_max - x_min
-        if data_range == 0:
-            return
-
-        def symlog(v):
-            v = np.asarray(v, dtype=float)
-            return np.sign(v) * np.log10(1.0 + np.abs(v) / linthresh)
-
-        # Build decade boundaries (same logic as symlog ticks)
-        boundaries = set()
-        if x_min < 0:
-            lo = max(linthresh, 1e-30)
-            for e in range(
-                int(np.floor(np.log10(lo))),
-                int(np.floor(np.log10(abs(x_min)))) + 1,
-            ):
-                val = -(10.0**e)
-                if x_min <= val < 0:
-                    boundaries.add(val)
-        if x_max > 0:
-            lo = max(linthresh, 1e-30)
-            for e in range(
-                int(np.floor(np.log10(lo))),
-                int(np.floor(np.log10(x_max))) + 1,
-            ):
-                val = 10.0**e
-                if 0 < val <= x_max:
-                    boundaries.add(val)
-        if x_min < 0 and x_max > 0:
-            boundaries.update((-linthresh, 0.0, linthresh))
-        elif x_min < 0 and x_max <= 0:
-            if -linthresh >= x_min:
-                boundaries.add(-linthresh)
-        elif x_min >= 0 and x_max > 0:
-            if linthresh <= x_max:
-                boundaries.add(linthresh)
-        if x_min <= 0 <= x_max:
-            boundaries.add(0.0)
-        boundaries.add(x_min)
-        boundaries.add(x_max)
-        # Filter to only values within [x_min, x_max]
-        boundaries = sorted(b for b in boundaries if x_min <= b <= x_max)
-
-        if len(boundaries) < 2:
-            return
-
-        # Symlog range for normalization
-        s_min = float(symlog(x_min))
-        s_max = float(symlog(x_max))
-        s_range = s_max - s_min
-        if s_range == 0:
-            return
-
-        # Store boundary values and their display positions (%) for tick alignment.
-        # All boundaries are used for discrete bands, but when x_min < 0 we
-        # thin the displayed ticks: always show 0, then only every other
-        # decade moving outward from 0 in each direction.
-        all_tick_data = []
-        for bv in boundaries[1:-1]:
-            s_val = float(symlog(bv))
-            pct = (s_val - s_min) / s_range * 100
-            all_tick_data.append({"val": bv, "pos": float(pct)})
-
-        if x_min < 0:
-            # Exclude linthresh / -linthresh from tick labels
-            lt = float(linthresh)
-            filtered = [t for t in all_tick_data if abs(abs(t["val"]) - lt) > 1e-12]
-            # Separate into negative, zero, and positive
-            neg = [t for t in filtered if t["val"] < 0]
-            zero = [t for t in filtered if t["val"] == 0]
-            pos = [t for t in filtered if t["val"] > 0]
-            # Keep every other decade tick moving outward from 0
-            neg_outward = list(reversed(neg))
-            thinned_neg = [neg_outward[i] for i in range(0, len(neg_outward), 2)]
-            thinned_pos = [pos[i] for i in range(0, len(pos), 2)]
-            self._discrete_tick_data = sorted(
-                thinned_neg + zero + thinned_pos, key=lambda t: t["val"]
-            )
-        else:
-            self._discrete_tick_data = all_tick_data
-
-        # Build a continuous symlog CTF (same as _apply_symlog_to_lut) so
-        # discrete bands sample colours that match the continuous rendering.
-        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
-
-        linear_ctf = vtkColorTransferFunction()
-        for i in range(0, len(linear_rgb_points), 4):
-            linear_ctf.AddRGBPoint(
-                linear_rgb_points[i],
-                linear_rgb_points[i + 1],
-                linear_rgb_points[i + 2],
-                linear_rgb_points[i + 3],
-            )
-
-        n_samples = 256
-        s_vals = np.linspace(s_min, s_max, n_samples)
-        symlog_ctf = vtkColorTransferFunction()
-        rgb_tmp = [0.0, 0.0, 0.0]
-        for s in s_vals:
-            v = float(np.sign(s) * linthresh * (10.0 ** abs(s) - 1.0))
-            v = max(x_min, min(x_max, v))
-            t = (s - s_min) / s_range
-            x_lookup = x_min + t * data_range
-            linear_ctf.GetColor(x_lookup, rgb_tmp)
-            symlog_ctf.AddRGBPoint(v, rgb_tmp[0], rgb_tmp[1], rgb_tmp[2])
-
-        # For each decade interval, split into n_sub equal sub-bands in
-        # symlog space.  Each sub-band gets a flat color sampled from the
-        # continuous symlog LUT at the sub-band midpoint.
-        rgb = [0.0, 0.0, 0.0]
-        eps_data = (x_max - x_min) * 1e-9
-        eps_lin = data_range * 1e-9
-        display_rgb_points = []
-        render_rgb_points = []
-        band_idx = 0
-        total_bands = (len(boundaries) - 1) * n_sub
-        for i in range(len(boundaries) - 1):
-            s_lo_decade = float(symlog(boundaries[i]))
-            s_hi_decade = float(symlog(boundaries[i + 1]))
-            for j in range(n_sub):
-                # Sub-band edges in symlog space
-                s_lo = s_lo_decade + (s_hi_decade - s_lo_decade) * j / n_sub
-                s_hi = s_lo_decade + (s_hi_decade - s_lo_decade) * (j + 1) / n_sub
-                s_mid = (s_lo + s_hi) / 2.0
-
-                # Invert symlog to get data-space values
-                v_mid = float(np.sign(s_mid) * linthresh * (10.0 ** abs(s_mid) - 1.0))
-                v_mid = max(x_min, min(x_max, v_mid))
-                symlog_ctf.GetColor(v_mid, rgb)
-                r, g, b = float(rgb[0]), float(rgb[1]), float(rgb[2])
-
-                # Invert symlog to get data-space boundaries for rendering
-                v_lo = float(np.sign(s_lo) * linthresh * (10.0 ** abs(s_lo) - 1.0))
-                v_hi = float(np.sign(s_hi) * linthresh * (10.0 ** abs(s_hi) - 1.0))
-                v_lo = max(x_min, min(x_max, v_lo))
-                v_hi = max(x_min, min(x_max, v_hi))
-
-                # Linear positions for display image
-                t_lo_pos = (s_lo - s_min) / s_range
-                t_hi_pos = (s_hi - s_min) / s_range
-                d_lo = x_min + t_lo_pos * data_range
-                d_hi = x_min + t_hi_pos * data_range
-
-                is_first = band_idx == 0
-                is_last = band_idx == total_bands - 1
-
-                if is_first:
-                    display_rgb_points.extend([d_lo, r, g, b])
-                    render_rgb_points.extend([float(v_lo), r, g, b])
-                else:
-                    display_rgb_points.extend([d_lo + eps_lin, r, g, b])
-                    render_rgb_points.extend([float(v_lo) + eps_data, r, g, b])
-
-                if is_last:
-                    display_rgb_points.extend([d_hi, r, g, b])
-                    render_rgb_points.extend([float(v_hi), r, g, b])
-                else:
-                    display_rgb_points.extend([d_hi - eps_lin, r, g, b])
-                    render_rgb_points.extend([float(v_hi) - eps_data, r, g, b])
-
-                band_idx += 1
-
-        # Generate the discrete banded colorbar image
-        self.lut.RGBPoints = display_rgb_points
-        self.config.lut_img = lut_to_img(self.lut)
-
-        # Store rendering points on proxy — the actual CTF used by the
-        # mapper is a standalone vtkColorTransferFunction built in
-        # update_color_preset to avoid proxy client-side object issues.
-        self.lut.RGBPoints = render_rgb_points
-
-        return display_rgb_points
-
-    def color_range_str_to_float(self, color_value_min, color_value_max):
-        try:
-            min_value = float(color_value_min)
-            self.config.color_value_min_valid = not math.isnan(min_value)
-        except ValueError:
-            self.config.color_value_min_valid = False
-
-        try:
-            max_value = float(color_value_max)
-            self.config.color_value_max_valid = not math.isnan(max_value)
-        except ValueError:
-            self.config.color_value_max_valid = False
-
-        if self.config.color_value_min_valid and self.config.color_value_max_valid:
-            self.config.color_range = (min_value, max_value)
-
     @property
     def data_array(self):
         self.source.data_reader.vtk_geometry.Update()
         ds = self.source.data_reader.vtk_geometry.GetOutput()
         return ds.GetCellData().GetArray(self.variable_name)
-
-    def update_color_range(self, *_):
-        if self.config.override_range:
-            skip_update = False
-            if math.isnan(self.config.color_range[0]):
-                skip_update = True
-                self.config.color_value_min_valid = False
-
-            if math.isnan(self.config.color_range[1]):
-                skip_update = True
-                self.config.color_value_max_valid = False
-
-            if skip_update:
-                return
-
-            self.lut.RescaleTransferFunction(*self.config.color_range)
-        else:
-            data_array = self.data_array
-            if data_array:
-                data_range = data_array.GetRange()
-                self.config.color_range = data_range
-                self.config.color_value_min = str(data_range[0])
-                self.config.color_value_max = str(data_range[1])
-                self.config.color_value_min_valid = True
-                self.config.color_value_max_valid = True
-                self.lut.RescaleTransferFunction(*data_range)
-
-        self.update_color_preset(
-            self.config.preset,
-            self.config.invert,
-            self.config.use_log_scale,
-            self.config.discrete_log,
-            self.config.n_discrete_colors,
-        )
-
-    def _compute_ticks(self, linthresh=None, linear_rgb_points=None):
-        vmin, vmax = self.config.color_range
-
-        # For discrete mode, use pre-computed boundary positions.
-        # For continuous linear, use the same evenly spaced percentage ticks.
-        if self.config.discrete_log and hasattr(self, "_discrete_tick_data"):
-            ticks = [
-                {"position": round(td["pos"], 2), "label": format_tick(td["val"])}
-                for td in self._discrete_tick_data
-            ]
-        elif self.config.use_log_scale == "linear":
-            N_INTERVALS = 4
-            data_range = vmax - vmin
-            ticks = []
-            if data_range > 0:
-                for i in range(1, N_INTERVALS):
-                    val = vmin + data_range * i / N_INTERVALS
-                    pos = i / N_INTERVALS * 100
-                    ticks.append({"position": round(pos, 2), "label": format_tick(val)})
-        else:
-            ticks = compute_color_ticks(
-                vmin, vmax, scale=self.config.use_log_scale, n=5, linthresh=linthresh
-            )
-        # Sample colors from the *linear* LUT so tick contrast matches the
-        # displayed colorbar image, not the log/symlog-remapped rendering LUT.
-        rgb_points = (
-            linear_rgb_points if linear_rgb_points else list(self.lut.RGBPoints)
-        )
-        if len(rgb_points) < 4:
-            self.config.color_ticks = []
-            return
-        img_min = rgb_points[0]
-        img_max = rgb_points[-4]
-        img_range = img_max - img_min
-        if img_range == 0:
-            self.config.color_ticks = []
-            return
-        # Build a temporary linear CTF to sample colors from
-        from vtkmodules.vtkRenderingCore import vtkColorTransferFunction
-
-        linear_ctf = vtkColorTransferFunction()
-        for i in range(0, len(rgb_points), 4):
-            linear_ctf.AddRGBPoint(
-                rgb_points[i], rgb_points[i + 1], rgb_points[i + 2], rgb_points[i + 3]
-            )
-        rgb = [0.0, 0.0, 0.0]
-        for tick in ticks:
-            t = tick["position"] / 100.0
-            value = img_min + t * img_range
-            linear_ctf.GetColor(value, rgb)
-            tick["color"] = tick_contrast_color(rgb[0], rgb[1], rgb[2])
-        self.config.color_ticks = ticks
 
     def _build_ui(self):
         with DivLayout(
@@ -975,7 +233,8 @@ class VariableView(TrameComponent):
                         size=(self.update_size, "[$event]"),
                     )
 
-                tview.create_bottom_bar(self.config, self.update_color_preset)
+                with self.colormap.provide_as(self.name):
+                    HorizontalScalarBar(self.name, popup_location="top")
 
 
 class ViewManager(TrameComponent):
@@ -1030,19 +289,7 @@ class ViewManager(TrameComponent):
         self._active_configs = {}
 
         rca.initialize(self.server)
-
-        self.state.luts_normal = [
-            {"name": k, "url": v["normal"], "safe": k in COLOR_BLIND_SAFE}
-            for k, v in COLORBAR_CACHE.items()
-        ]
-        self.state.luts_inverted = [
-            {"name": k, "url": v["inverted"], "safe": k in COLOR_BLIND_SAFE}
-            for k, v in COLORBAR_CACHE.items()
-        ]
-
-        # Sort lists
-        self.state.luts_normal.sort(key=lut_name)
-        self.state.luts_inverted.sort(key=lut_name)
+        self.server.enable_module(colormaps_module)
 
     def _on_render_start(self, *_):
         if perf.is_enabled():
@@ -1159,9 +406,9 @@ class ViewManager(TrameComponent):
             self.pending_render = False
 
     def update_color_range(self):
+        """Update color range on all views via colormaps module."""
         for view in list(self._var2view.values()):
-            view.update_color_range()
-        self.render()
+            view.colormap.update_color_range()  # colormaps module
 
     def get_view(self, variable_name, variable_type):
         view = self._var2view.get(variable_name)
@@ -1282,7 +529,7 @@ class ViewManager(TrameComponent):
 
         # Create UI based on variables
         self.state.swap_groups = {}
-        # Build a lookup from type name to color from state.variable_types
+        # Vuetify color per dimension type (e.g. midpoint, interface) via utils/colors.py
         type_to_color = {vt["name"]: vt["color"] for vt in self.state.variable_types}
         with DivLayout(self.server, template_name="auto_layout") as self.ui:
             self.ui.root.classes = "all-variables"
@@ -1295,7 +542,7 @@ class ViewManager(TrameComponent):
                         if total_size == 0:
                             continue
 
-                        # Look up color from variable_types to match chip colors
+                        # Border color matches dimension type chips via utils/colors.py
                         border_color = type_to_color.get(", ".join(var_type), "primary")
                         with v3.VAlert(
                             border="start",

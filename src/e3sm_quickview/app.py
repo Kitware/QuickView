@@ -18,6 +18,7 @@ from e3sm_quickview.assets import ASSETS
 from e3sm_quickview.components import css, dialogs, doc, drawers, file_browser, toolbars
 from e3sm_quickview.pipeline import EAMVisSource
 from e3sm_quickview.utils import cli, compute, perf
+from e3sm_quickview.utils.colors import get_type_color
 from e3sm_quickview.view_manager import ViewManager
 
 v3.enable_lab()
@@ -52,7 +53,7 @@ class EAMApp(TrameApp):
                 "variables_selected": [],
                 # Control 'Load Variables' button availability
                 "variables_loaded": False,
-                # Dynamic type-color mapping (populated when data loads)
+                # Dimension type → Vuetify color mapping via utils/colors.py
                 "variable_types": [],
                 # Dimension arrays (will be populated dynamically)
                 "midpoints": [],
@@ -332,29 +333,31 @@ class EAMApp(TrameApp):
         views_to_export = state_content["views"] = []
         for view_type, var_names in active_variables.items():
             for var_name in var_names:
-                config = self.view_manager.get_view(var_name, view_type).config
+                view = self.view_manager.get_view(var_name, view_type)
+                config = view.config
+                cmap = view.colormap
                 views_to_export.append(
                     {
                         "type": view_type,
                         "name": var_name,
                         "config": {
-                            # lut
-                            "preset": config.preset,
-                            "invert": config.invert,
-                            "color_blind": config.color_blind,
-                            "use_log_scale": config.use_log_scale,
-                            "discrete_log": config.discrete_log,
-                            "n_discrete_colors": config.n_discrete_colors,
-                            # layout
+                            # view layout
                             "order": config.order,
                             "size": config.size,
                             "offset": config.offset,
                             "break_row": config.break_row,
-                            # color range
-                            "override_range": config.override_range,
-                            "color_range": config.color_range,
-                            "color_value_min": config.color_value_min,
-                            "color_value_max": config.color_value_max,
+                        },
+                        "colormap": {
+                            "preset": cmap.preset,
+                            "invert": cmap.invert,
+                            "color_blind": cmap.color_blind,
+                            "use_log_scale": cmap.use_log_scale,
+                            "discrete_log": cmap.discrete_log,
+                            "n_discrete_colors": cmap.n_discrete_colors,
+                            "override_range": cmap.override_range,
+                            "color_range": cmap.color_range,
+                            "color_value_min": cmap.color_value_min,
+                            "color_value_max": cmap.color_value_max,
                         },
                     }
                 )
@@ -405,14 +408,29 @@ class EAMApp(TrameApp):
                 self.state.animation_track = data_sel["animation_track"]
 
         # Update view states
+        _COLORMAP_KEYS = {
+            "preset", "invert", "color_blind", "use_log_scale",
+            "discrete_log", "n_discrete_colors", "override_range",
+            "color_range", "color_value_min", "color_value_max",
+        }
         for view_state in state_content["views"]:
             view_type = view_state["type"]
             var_name = view_state["name"]
-            cfg = view_state["config"]
-            if "color_range" in cfg and isinstance(cfg["color_range"], list):
-                cfg["color_range"] = tuple(cfg["color_range"])
-            config = self.view_manager.get_view(var_name, view_type).config
-            config.update(**cfg)
+            view = self.view_manager.get_view(var_name, view_type)
+
+            cfg = dict(view_state["config"])
+            # Backward compat: old state files store colormap fields in "config"
+            cmap_cfg = dict(view_state.get("colormap", {}))
+            if not cmap_cfg:
+                cmap_cfg = {k: cfg.pop(k) for k in list(cfg) if k in _COLORMAP_KEYS}
+
+            # Layout config
+            view.config.update(**cfg)
+            # Colormap config
+            if "color_range" in cmap_cfg and isinstance(cmap_cfg["color_range"], list):
+                cmap_cfg["color_range"] = tuple(cmap_cfg["color_range"])
+            if cmap_cfg:
+                view.colormap.update(**cmap_cfg)
 
         # Update layout
         self.state.aspect_ratio = state_content["layout"]["aspect-ratio"]
@@ -470,9 +488,7 @@ class EAMApp(TrameApp):
                     ),
                 ]
 
-                # Build dynamic type-color mapping
-                from e3sm_quickview.utils.colors import get_type_color
-
+                # Dimension type → Vuetify color mapping via utils/colors.py
                 dim_types = sorted(
                     set(
                         ", ".join(var.dimensions)
@@ -618,7 +634,7 @@ class EAMApp(TrameApp):
                 self.source.UpdatePipeline()
 
             with perf.timed("tick.color_range"):
-                self.view_manager.update_color_range()
+                self.view_manager.update_color_range()  # colormaps module
             with perf.timed("tick.render"):
                 self.view_manager.render()
 
@@ -656,7 +672,7 @@ class EAMApp(TrameApp):
                 self.source.UpdatePipeline()
 
             with perf.timed("downstream_change.color_range"):
-                self.view_manager.update_color_range()
+                self.view_manager.update_color_range()  # colormaps module
             with perf.timed("downstream_change.render"):
                 self.view_manager.render()
 
