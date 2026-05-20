@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v2.7.7 (2026-05-20)
+
+### Bug Fixes
+
+- **colormaps**: Improve usage and initialization
+  ([`765dc37`](https://github.com/Kitware/QuickView/commit/765dc370e0d73e4c133acf7f8db5e6eed9beb7d8))
+
+### Documentation
+
+- **quickcompare**: Add a structure and some placeholders
+  ([#100](https://github.com/Kitware/QuickView/pull/100),
+  [`1b2dc29`](https://github.com/Kitware/QuickView/commit/1b2dc295965bbfde4cb3874df62ab6ee9fca6ac9))
+
+### Refactoring
+
+- Split view manager into view panel and layout manager
+  ([`d5a3f77`](https://github.com/Kitware/QuickView/commit/d5a3f770cbdcdbe36a85f88827c133ba6334e8bd))
+
+- Use external trame-colormaps package for all colormap functionality
+  ([`f10d0c8`](https://github.com/Kitware/QuickView/commit/f10d0c8362103f40dcb9eb44c5f51d7189451001))
+
+
 ## v2.7.6 (2026-05-14)
 
 ### Bug Fixes
