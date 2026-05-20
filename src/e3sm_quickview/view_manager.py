@@ -10,9 +10,10 @@ from paraview.modules.vtkPVVTKExtensionsInteractionStyle import (
     vtkTrackballPan,
 )
 from trame.app import TrameComponent, dataclass
+from trame.dataclasses.colormaps import ColormapConfig
 from trame.decorators import controller
 from trame.ui.html import DivLayout
-from trame.widgets import client, html, rca
+from trame.widgets import client, colormaps, html, rca
 from trame.widgets import vuetify3 as v3
 from vtkmodules.vtkRenderingCore import (
     vtkActor,
@@ -23,9 +24,6 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderWindowInteractor,
 )
 
-from trame.dataclasses.colormaps import ColormapConfig
-from trame.widgets.colormaps import HorizontalScalarBar
-from trame_colormaps import module as colormaps_module
 from e3sm_quickview.components import view as tview
 from e3sm_quickview.utils import perf
 
@@ -234,7 +232,7 @@ class VariableView(TrameComponent):
                     )
 
                 with self.colormap.provide_as(self.name):
-                    HorizontalScalarBar(self.name, popup_location="top")
+                    colormaps.HorizontalScalarBar(self.name, popup_location="top")
 
 
 class ViewManager(TrameComponent):
@@ -288,8 +286,9 @@ class ViewManager(TrameComponent):
         self._last_vars = {}
         self._active_configs = {}
 
+        # Initialize deferred widgets
         rca.initialize(self.server)
-        self.server.enable_module(colormaps_module)
+        colormaps.initialize(self.server)
 
     def _on_render_start(self, *_):
         if perf.is_enabled():
