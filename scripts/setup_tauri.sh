@@ -17,6 +17,7 @@ python -m PyInstaller --clean --noconfirm \
         --collect-all trame_vtk \
         --collect-all trame_vuetify \
         --collect-all trame_tauri \
+        --collect-all trame_colormaps \
         --collect-all pyproj \
         --collect-all netCDF4 \
         --collect-all paraview \
