@@ -1,0 +1,329 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-05-26 14:11:07.411284",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pd.eam.h0.2011-01.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202511_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
+  },
+  "variables-selection": [
+    "num_a1",
+    "num_a2",
+    "num_a3",
+    "so4_a1",
+    "so4_a2",
+    "so4_a3",
+    "ncl_a1",
+    "ncl_a2",
+    "ncl_a3"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 9991937.963069865,
+      "position": [
+        999193.7963069864,
+        0.0,
+        77928734.37784009
+      ],
+      "focal_point": [
+        999193.7963069864,
+        0.0,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        76154309.68191113,
+        80350337.16096354
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -180,
+      180
+    ],
+    "crop_latitude": [
+      -90,
+      90
+    ],
+    "projection": [
+      "Mollweide"
+    ],
+    "animation_track": "lev",
+    "lev_idx": 63
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "config": {
+        "order": 2,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Yellow - Gray - Blue",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          9959794.0,
+          4005174528.0
+        ],
+        "color_value_min": "9959794.0",
+        "color_value_max": "4005174528.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a2",
+      "config": {
+        "order": 1,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Yellow - Gray - Blue",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          1879615.875,
+          11933620224.0
+        ],
+        "color_value_min": "1879615.875",
+        "color_value_max": "11933620224.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a3",
+      "config": {
+        "order": 3,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Yellow - Gray - Blue",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          10968.1357421875,
+          24592876.0
+        ],
+        "color_value_min": "10968.1357421875",
+        "color_value_max": "24592876.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "so4_a1",
+      "config": {
+        "order": 6,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "batlow",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 7,
+        "override_range": true,
+        "color_range": [
+          2e-10,
+          2e-08
+        ],
+        "color_value_min": "2e-10",
+        "color_value_max": "2e-08"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "so4_a2",
+      "config": {
+        "order": 5,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "batlow",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 8,
+        "override_range": true,
+        "color_range": [
+          4e-12,
+          4e-10
+        ],
+        "color_value_min": "4e-12",
+        "color_value_max": "4e-10"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "so4_a3",
+      "config": {
+        "order": 7,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "batlow",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          1e-11,
+          1e-09
+        ],
+        "color_value_min": "1e-11",
+        "color_value_max": "1e-9"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "ncl_a1",
+      "config": {
+        "order": 12,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 6,
+        "override_range": true,
+        "color_range": [
+          2e-12,
+          2e-09
+        ],
+        "color_value_min": "2e-12",
+        "color_value_max": "2e-09"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "ncl_a2",
+      "config": {
+        "order": 11,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          2e-15,
+          2e-12
+        ],
+        "color_value_min": "2e-15",
+        "color_value_max": "2e-12"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "ncl_a3",
+      "config": {
+        "order": 13,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          2e-11,
+          2e-08
+        ],
+        "color_value_min": "2e-11",
+        "color_value_max": "2e-08"
+      }
+    }
+  ]
+}

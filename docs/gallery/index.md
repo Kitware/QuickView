@@ -1,4 +1,11 @@
 
+## Aerosol concentrations in EAMv2 displayed by [QuickView](/guides/quickview/index) {#eamv2-aerosols}
+
+Horizontal mesh is ne30pg2 (~165 km).
+Simulation was performed by Hui Wan at PNNL.
+
+![EAMv2 aerosols](/gallery/gallery_eamv2_aerosols_ne30.png){ width="100%", align=center }
+
 
 ## SCREAM simulation output displayed by [QuickView](/guides/quickview/index) {#scream}
 
