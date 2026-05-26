@@ -15,7 +15,7 @@ QuickView's Python- and
 provides intuitive access to [ParaView](https://www.paraview.org/)'s powerful
 analysis and visualization capabilities without requiring a steep learning curve.
 
-Useful links: see [Quickstart](./quickstart).
+Useful resources: see [linked page](./getting_started).
 
 ## Why QuickView?
 

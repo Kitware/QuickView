@@ -27,7 +27,7 @@ export default defineConfig({
         {
           text: "At NERSC",
           items: [
-            { text: "Quickstart", link: "/nersc/index" },
+            { text: "Getting Started", link: "/nersc/index" },
             {
               text: "Developers' Installation",
               link: "/nersc/developers_installation",
@@ -61,7 +61,7 @@ export default defineConfig({
           text: "QuickView",
           items: [
             { text: "What is QuickView?", link: "/guides/quickview/index" },
-            { text: "Quickstart", link: "/guides/quickview/quickstart" },
+            { text: "Getting Started", link: "/guides/quickview/getting_started" },
             { text: "UI Overview", link: "/guides/quickview/ui_overview" },
             { text: "Keyboard Shortcuts", link: "/guides/quickview/shortcuts" },
             { text: "File Selection", link: "/guides/quickview/file_selection", },
@@ -76,7 +76,7 @@ export default defineConfig({
           text: "QuickCompare",
           items: [
             { text: "What is QuickCompare?", link: "/guides/quickcompare/index", },
-            { text: "Quickstart",            link: "/guides/quickcompare/quickstart" },
+            { text: "Getting Started",            link: "/guides/quickcompare/getting_started" },
             { text: "UI Overview",           link: "/guides/quickcompare/ui_overview_and_shortcuts" },
             { text: "Modes of Comparison",   link: "/guides/quickcompare/modes_of_comparison", },
             { text: "Variables and Slices",  link: "/guides/quickcompare/variable_and_slice_selection", },
