@@ -12,5 +12,5 @@ to a control simulation.
 Like [QuickView](/guides/quickview/index.md),
 QuickCompare can present multiple variables simultaneously.
 
-Useful links: see [Quickstart](./quickstart).
+Useful resources: see [linked page](./getting_started).
 

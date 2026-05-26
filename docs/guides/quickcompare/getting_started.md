@@ -1,4 +1,4 @@
-# Quickstart
+# Getting Started
 
 - Install and launch the app [on a personal computer](../install_and_launch) 
   or use it [at NERSC](/nersc/index).
