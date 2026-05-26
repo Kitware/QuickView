@@ -1,7 +1,7 @@
 # Customizing Viewport Layout
 
 ::: tip Tip for users of QuickView version 1
-QuickView version 1 allowed the user to change the sizes and sequence
+QuickView version 1 allowed the user to change the sizes and locations
 of different contour plots in the viewport by drag-and-drop.
 Users' feedback indicated that arbitrary drag-and-drop can get confusing,
 and it was inconvenient to not have a way to reapply the same size to all views.
@@ -30,6 +30,8 @@ shown in the same color as the corresponding group tab in
 the [variable selection](./variable_selection) control panel.
 The screenshot above shows three variable groups.
 
+![Grouped or ungrouped views](./screenshots/viewport_grouped_ungrouped.png){ width="12%", align=right }
+
 This grouping in the viewport can be canceled (or reapplied) by using
 the `G` key or a "Grouped" versus "Ungrouped" toggle.
 
@@ -53,7 +55,8 @@ to swap contents.
 
 The viewport layout control panel has a few other toggles that, upon click,
 reveal additional sliders or buttons for simultaneously
-adjusting all views in the viewport, as shown in the screenshots below. 
+adjusting all views in the viewport, as shown in the screenshot below
+and explained in more detail in the subsequent subsections.
 
 
 ![toggles](./screenshots/viewport_adjustment_toggles_central.png){ width="100%", align=center }
@@ -78,5 +81,7 @@ with respect to the view frames. A click on the auto-zoom button resets the size
 
 A set of four buttons is provided for moving the plots left, right, up, or down
 with respect to the view frames, an operation commonly referred to as panning in graphical user interfaces.
+When the pan menu is expanded as in the screenshot below, the four arrow keys on
+the keyboard can also be used for panning.
 
 ![toggles](./screenshots/viewport_pan.png){ width="100%", align=center }
