@@ -3,7 +3,6 @@
 
 - Horizontal mesh: ne30pg2 (~165 km)
 - Simulation performed and visualization created by: Hui Wan (PNNL)
-- [State file](/gallery/quickview-state_gallery_aerosols.json)
 
 ![EAMv2 aerosols](/gallery/gallery_eamv2_aerosols_ne30.png){ width="100%", align=center }
 
@@ -13,7 +12,6 @@
 
 - Horizontal mesh:ne30pg2 (~165 km)
 - Simulation performed and visualization created by: Hui Wan (PNNL)
-- [State file](/gallery/quickview-state_gallery_elmv2_ne30pg2.json)
 
 ![ELMv2 soil and lake variables](/gallery/gallery_elmv2_ne30pg2.png){ width="100%", align=center }
 
