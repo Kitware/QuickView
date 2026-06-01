@@ -10,7 +10,7 @@
 
 
 
-## A few ELM output variables displayed by [QuickView](/guides/quickview/index) {#eamv2-aerosols}
+## A few ELM output variables displayed by [QuickView](/guides/quickview/index) {#elmv2}
 
 - Horizontal mesh:ne30pg2 (~165 km)
 - Simulation performed by: Hui Wan (PNNL)
