@@ -52,6 +52,7 @@ class VariableView(TrameComponent):
         input = source.data_reader.vtk_geometry
         self.mapper = vtkPolyDataMapper(input_connection=input.output_port)
         self.actor = vtkActor(mapper=self.mapper)
+        self.actor.ForceOpaqueOn()
         self.renderer.AddActor(self.actor)
 
         # Add annotation to the view (continents, gridlines)
