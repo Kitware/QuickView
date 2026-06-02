@@ -2,7 +2,6 @@
 
 # Customizing Individual Views
 
-![pop-up panel](./screenshots/single_view_pop-up_panel.png){ width="75%", align=right }
 
 Each view in the viewport (i.e., each contour plot shown on a global or regional map)
 can be customized individually by clicking the associated colorbar.
@@ -10,6 +9,8 @@ The click brings up a small control panel like in the screenshot here,
 allowing the user to control various properties of the mapping between
 the variable values and the contour colors.
 Only one panel can be open at a time — opening one automatically closes any other.
+
+![pop-up panel](./screenshots/single_view_pop-up_panel.png){ width="80%" }
 
 Each control panel contains up to three sections arranged from top to bottom:
 
@@ -56,7 +57,7 @@ as well as an ε tolerance so that values within the range of [-ε, ε] are cons
 effectively zeros and are displayed in the color at the center of the colormap,
 as demonstrated in the right half of the screenshot below.
 
-![delta difference mode](./screenshots/delta_difference_mode.png){ width="80%" }
+![delta difference mode](./screenshots/delta_difference_mode.png){ width="100%" }
 
 Additional notes:
 
@@ -72,16 +73,17 @@ The following icon buttons are provided for selecting and adjusting colormaps:
 
 | Icon |  Short name | Description |
 |------|-------------|-------------|
-| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/palette.svg" width="24"> 
-| Colormap category
-| Opens a dropdown for user to select from one of the supported categories: Sequential, Multi-Sequential, Diverging, and Cyclic). Default is Sequential. This button is disabled in Δ difference mode, as the category is automatically set to diverging in that mode. |
-| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/blinds.svg" width="24">
-| Colorblind-safe
-| Limits the displayed *colormap list* to colorblind-safe options within the active category. |
-| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/invert-colors.svg" width="24">
-| Invert colormap
-| Reverses the colormap direction, both in the *colorbar* and in the displayed *colormap list*). |
-| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/crosshairs-question.svg" width="24">
-| NaN color
-| Opens a dropdown for the user to select the color for NaN/missing data. Default is transparent. Shows a scrollable list. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/palette.svg" width="24"> | Colormap category | Opens a dropdown for user to select from one of the supported categories: Sequential, Multi-Sequential, Diverging, and Cyclic). Default is Sequential. This button is disabled in Δ difference mode, as the category is automatically set to diverging in that mode. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/blinds.svg" width="24"> | Colorblind-safe | Limits the displayed *colormap list* to colorblind-safe options within the active category. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/invert-colors.svg" width="24"> | Invert colormap | Reverses the colormap direction, both in the *colorbar* and in the displayed *colormap list*). |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/crosshairs-question.svg" width="24"> | NaN color | Opens a dropdown for the user to select the color for NaN/missing data. Default is transparent. Shows a scrollable list. |
+| | | |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/gradient-horizontal.svg" width="24"> | Discrete bins | Switches between continuous gradient and discrete color banding. Exposes band count in *Settings panel*. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/pencil.svg" width="24"> | Custom range | Toggles between min/max bounds find in data or specified by user. Disabled in Δ mode, as a |max| value and an ε tolerance are used in that mode. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/scissors-cutting.svg" width="24"> | Cut or clamp | Switches between clamp mode (where out-of-range values get endpoint colors) and cut mode (where out-of-range values get the NaN color). Disabled unless Custom Range or Δ difference mode is active. |
+
+## Further reading
+
+The functionalities described above are made available in QuickView through the [trame-colormaps package](https://github.com/Kitware/trame-colormaps#). Further information about that package can be found in its separate [GitHub repo](https://github.com/Kitware/trame-colormaps#).
+
 
