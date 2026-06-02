@@ -76,9 +76,9 @@ The following icon buttons are provided for selecting and adjusting colormaps:
 | <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/palette.svg" width="24"> | Colormap category | Opens a dropdown for user to select from one of the supported categories: Sequential, Multi-Sequential, Diverging, and Cyclic). Default is Sequential. This button is disabled in Δ difference mode, as the category is automatically set to diverging in that mode. |
 | <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/blinds.svg" width="24"> | Colorblind-safe | Limits the displayed *colormap list* to colorblind-safe options within the active category. |
 | <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/invert-colors.svg" width="24"> | Invert colormap | Reverses the colormap direction, both in the *colorbar* and in the displayed *colormap list*). |
-| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/crosshairs-question.svg" width="24"> | NaN color | Opens a dropdown for the user to select the color for NaN/missing data. Default is transparent. Shows a scrollable list. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/crosshairs-question.svg" width="24"> | NaN color | Opens a dropdown for the user to select the color for NaN/missing data. Default is transparent. Color list is pretty long and is scrollable. |
 | | | |
-| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/gradient-horizontal.svg" width="24"> | Discrete bins | Switches between continuous gradient and discrete color banding. Exposes band count in *Settings panel*. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/gradient-horizontal.svg" width="24"> | Discrete bands | Switches between continuous gradient and discrete color banding. When activated, the number of color bands can be adjusted in *Settings panel*. |
 | <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/pencil.svg" width="24"> | Custom range | Toggles between min/max bounds found in data or specified by user. Disabled in Δ mode, as a maximum absolute value value and an ε tolerance are used in that mode. |
 | <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/scissors-cutting.svg" width="24"> | Cut or clamp | Switches between clamp mode (where out-of-range values get endpoint colors) and cut mode (where out-of-range values get the NaN color). Disabled unless Custom Range or Δ difference mode is active. |
 
