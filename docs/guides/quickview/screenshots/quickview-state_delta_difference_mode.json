@@ -1,0 +1,116 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-06-01 18:37:02.987891",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202604_documentation/v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202604_documentation/connectivity_ne30pg2_TEMPEST.scrip.nc"
+  },
+  "variables-selection": [
+    "LHFLX",
+    "SHFLX"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 10001718.431446416,
+      "position": [
+        0.0,
+        0.0,
+        77928734.37784009
+      ],
+      "focal_point": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        76152899.10840534,
+        80352112.78238666
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -180,
+      180
+    ],
+    "crop_latitude": [
+      -90,
+      90
+    ],
+    "projection": [
+      "Mollweide"
+    ],
+    "animation_track": null
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "LHFLX",
+      "config": {
+        "order": 1,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Blue Orange (divergent)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          -286.8717346191406,
+          286.8717346191406
+        ],
+        "color_value_min": "-286.8717346191406",
+        "color_value_max": "286.8717346191406"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "SHFLX",
+      "config": {
+        "order": 2,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Blue Orange (divergent)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          -100.0,
+          100.0
+        ],
+        "color_value_min": "-100.0",
+        "color_value_max": "100.0"
+      }
+    }
+  ]
+}
