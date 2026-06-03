@@ -7,7 +7,7 @@ Each view in the viewport (i.e., each contour plot shown on a global or regional
 can be customized individually by clicking the associated colorbar.
 The click brings up a small control panel like in the screenshot here,
 allowing the user to control various properties of the mapping between
-the variable values and the contour colors.
+the variable's values and the colors.
 Only one panel can be open at a time — opening one automatically closes any other.
 
 ![pop-up panel](./screenshots/single_view_pop-up_panel.png){ width="80%" }
@@ -27,7 +27,8 @@ Each control panel contains up to three sections arranged from top to bottom:
 Tips:
 
 - Most of the icon buttons are toggles, i.e., switches between two options.
-  Activated modes are highlighted with blue frames.
+  When the activated mode matches the meaning depicted by the icon, the icon
+  is highlighted with a blue frame.
 - A few of the icon buttons open dropdown menus upon click. Once the user makes
   a selection, the dropdown closes automatically.
 - Some of the buttons correspond to incompatible functionalities, hence activating
@@ -44,9 +45,15 @@ QuickView supports linear, logarithmic, and symmetric logarithmic color scaling.
 
 - By default, a **linear scale** is used, indicated by a staircase-style icon in the pop-up panel.
 
-- A click on the staircase icon changes the scaling to **logarithmic** to enhance the visibility of variations across multiple orders of magnitude.
+- A click on the staircase icon changes the scaling to **logarithmic** to enhance the visibility of variations across multiple orders of magnitude. In this mode, zeros and negative values are displayed in the NaN color (<img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/crosshairs-question.svg" width="18"> button) explained below.
 
-- Because standard logarithmic scaling is only defined for positive values, QuickView also provides a **symmetric logarithmic (“symlog”)** scale, which accommodates negative values and zero. The symlog scale behaves linearly in a small region around zero and logarithmically away from zero, enabling consistent visualization of fields that include both positive and negative values.
+- Because standard logarithmic scaling is only defined for positive values, QuickView also provides a **symmetric logarithmic (“symlog”)** scale, which accommodates negative values and zero. The symlog scale behaves linearly in a small region around zero and logarithmically away from zero, enabling consistent visualization of fields that include both positive and negative values. More details can be found in the info box below.
+
+::: info `linthresh` in symmetric log scale
+In the symmetric log scale, the parameter `linthresh` defines the boundary between the linear and logarithmic regions of the transformation used for color mapping. Values with absolute values smaller than `linthresh` are treated quasi-linearly, while values with absolute values equal to or greater than `linthresh` are spaced logarithmically in the colormap. In the [trame-colormaps package](https://github.com/Kitware/trame-colormaps#) used by QuickView, `linthresh` is set to the smallest absolute value among all nonzero elements of an array, with "nonzero" defined as having a magnitude larger than machine zero. This ensures the log region begins exactly where the data's smallest meaningful magnitude starts.
+:::
+
+
 
 ## Delta difference mode
 
