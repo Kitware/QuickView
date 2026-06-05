@@ -2,6 +2,68 @@
 
 <!-- version list -->
 
+## v2.7.8 (2026-06-05)
+
+### Bug Fixes
+
+- NaN transparency, preset click, and tick rendering
+  ([#103](https://github.com/Kitware/QuickView/pull/103),
+  [`2e9650e`](https://github.com/Kitware/QuickView/commit/2e9650e96bf403c415b362cd22515c5354b84c02))
+
+- **package**: Collect colormaps web part
+  ([`4511e12`](https://github.com/Kitware/QuickView/commit/4511e1240f47b7ab4651cac50511dc4c29b644a6))
+
+### Documentation
+
+- Add image example of aerosols shown by quickview
+  ([#101](https://github.com/Kitware/QuickView/pull/101),
+  [`c89c8a2`](https://github.com/Kitware/QuickView/commit/c89c8a2b06f14b75e6e22e70fcaf025eb53c2d1d))
+
+- Minor edits ([#101](https://github.com/Kitware/QuickView/pull/101),
+  [`c89c8a2`](https://github.com/Kitware/QuickView/commit/c89c8a2b06f14b75e6e22e70fcaf025eb53c2d1d))
+
+- Update news page ([#101](https://github.com/Kitware/QuickView/pull/101),
+  [`c89c8a2`](https://github.com/Kitware/QuickView/commit/c89c8a2b06f14b75e6e22e70fcaf025eb53c2d1d))
+
+- **quickview**: Add explanation of linthresh
+  ([`d83575a`](https://github.com/Kitware/QuickView/commit/d83575a922f03bc47f6b1922a1dfc6a3452175b1))
+
+- **quickview**: Attempt to resolve state file link issue
+  ([`c6acf8f`](https://github.com/Kitware/QuickView/commit/c6acf8f9df7ef2f077ebb74144ec2084b7987899))
+
+- **quickview**: Colormap utils - corrections
+  ([`9a92b81`](https://github.com/Kitware/QuickView/commit/9a92b8193db1f2d8b73e296a2e4a1822e41936bb))
+
+- **quickview**: Colormap utils - corrections and more contents
+  ([`c422ac2`](https://github.com/Kitware/QuickView/commit/c422ac2ed9208e41fa16c9ab76272fac01cf0bce))
+
+- **quickview**: Colormap utils - minor edits
+  ([`09f96e4`](https://github.com/Kitware/QuickView/commit/09f96e4ec18632001528f52bee7a3df1bd44de2a))
+
+- **quickview**: Colormap utils - typo
+  ([`97941d4`](https://github.com/Kitware/QuickView/commit/97941d40aaa321236841db6d7e9a9b1994c2bf4f))
+
+- **quickview**: Colormap utils, work in progress
+  ([`0fc4646`](https://github.com/Kitware/QuickView/commit/0fc4646e960883674a5b2d32a629e6c8946a3b45))
+
+- **quickview**: Correct link in README and update news page
+  ([`d34726c`](https://github.com/Kitware/QuickView/commit/d34726c91fba70c5b7df01209d185a84d9efe3a6))
+
+- **quickview**: Remove links to state files on gallery page
+  ([`00211d6`](https://github.com/Kitware/QuickView/commit/00211d6a3ddd0768375cfcf16a16583ebe9a357e))
+
+- **quickview**: Resolve issue of non-unique ID
+  ([`69c3c9d`](https://github.com/Kitware/QuickView/commit/69c3c9d5fc675f91c8e6bb445ddd23c270bbae8d))
+
+- **quickview**: Update doc on viewport control
+  ([#101](https://github.com/Kitware/QuickView/pull/101),
+  [`c89c8a2`](https://github.com/Kitware/QuickView/commit/c89c8a2b06f14b75e6e22e70fcaf025eb53c2d1d))
+
+- **quickview**: Update gallery to include land model example
+  ([#104](https://github.com/Kitware/QuickView/pull/104),
+  [`b6ce56a`](https://github.com/Kitware/QuickView/commit/b6ce56acbf284be1ddb695408147f903a5cd8db4))
+
+
 ## v2.7.7 (2026-05-20)
 
 ### Bug Fixes
