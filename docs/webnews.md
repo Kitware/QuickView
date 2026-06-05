@@ -1,7 +1,7 @@
 
 ## May 2026
 
-QuickView has been updated to version 2.7.7 with refined [viewport control](/guides/quickview/viewport_layout), a more compact [slice selection panel](/guides/quickview/slice_selection), and various other small improvments in the UI.
+QuickView has been updated to version 2.7.7 with refined [viewport control](/guides/quickview/viewport_layout), a more compact [slice selection panel](/guides/quickview/slice_selection), more comprehensive [colormap customization](guides/quickview/individual_views), and various other small improvments in the UI.
 
 ## April 2026
 

@@ -31,9 +31,9 @@ analysis and visualization capabilities without requiring a steep learning curve
   as well as the E3SM land model ELM's input and output files
   on ne*pg2 grids.
 
-## Quick Start
+## Getting Started 
 
-See [documentation page](https://kitware.github.io/QuickView/guides/quickview/quickstart.html).
+See [documentation page](https://kitware.github.io/QuickView/guides/quickview/getting_started.html).
 
 ## Project Background
 
