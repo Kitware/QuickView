@@ -14,3 +14,37 @@ QuickCompare can present multiple variables simultaneously.
 
 Useful resources: see [linked page](./getting_started).
 
+## Key Features
+
+- Intuitive, minimalist interface tailored for Earth system modeling.
+- Multi-variable visualization.
+- Differences and relative differences displayed with colors that can facilitate interpretation.
+- Persistent sessions—pick up where you left off.
+- Support for EAM v2, v3, and upcoming v4 output formats
+  as well as the E3SM land model ELM's input and output files
+  on ne*pg2 grids.
+
+## Project Background
+
+The lead developer of QuickView version 2 is
+[Will Dunklin](https://www.kitware.com/will-dunklin/)
+at [Kitware](https://www.kitware.com/).
+Other key contributors include
+Sebastien Joudain, Patrick O'Leary, Berk Geveci, and Dan Lipsa at [Kitware](https://www.kitware.com/)
+as well as
+Hui Wan and Kai Zhang at
+[Pacific Northwest National Laboratory](https://www.pnnl.gov/atmospheric-climate-and-earth-sciences-division).
+
+QuickCompare is a product of an interdisciplinary collaboration supported by
+the U.S. Department of Energy Office of Science’s
+[Advanced Scientific Computing Research (ASCR)](https://www.energy.gov/science/ascr/advanced-scientific-computing-research)
+and
+[Biological and Environmental Research (BER)](https://www.energy.gov/science/ber/biological-and-environmental-research)
+via the
+[Scientific Discovery through Advanced Computing (SciDAC](https://www.scidac.gov/))
+program.
+
+The development of QuickCompare used resources of the National Energy Research Scientific Computing Center
+([NERSC](https://www.nersc.gov/)), a U.S. Department of Energy User Facility.
+
+![SciDAC, Kitware, and PNNL](/logos/SciDAC-Kitware-PNNL.png){ width="75%", align=center }

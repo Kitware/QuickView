@@ -57,8 +57,8 @@ The lead developer of QuickView version 2 is
 [Sebastien Jourdain](https://www.kitware.com/sebastien-jourdain/)
 at [Kitware](https://www.kitware.com/).
 Other key contributors include
-Berk Geveci, Dan Lipsa, Patrick O'Leary and Will Dunklin at [Kitware](https://www.kitware.com/)
-and
+Patrick O'Leary, Berk Geveci, Dan Lipsa, and Will Dunklin at [Kitware](https://www.kitware.com/)
+as well as
 Hui Wan and Kai Zhang at
 [Pacific Northwest National Laboratory](https://www.pnnl.gov/atmospheric-climate-and-earth-sciences-division).
 
