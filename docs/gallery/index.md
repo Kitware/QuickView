@@ -7,14 +7,6 @@
 ![EAMv2 aerosols](/gallery/gallery_eamv2_aerosols_ne30.png){ width="100%", align=center }
 
 
-## A pair of PD and PI simulations depicted by [QuickCompare](/guides/quickcompare/index) {#compare-pd-pi}
-
-- Horizontal mesh: ne30pg2 (~165 km)
-- Simulation performed and visualization created by: Hui Wan (PNNL)
-- There are some small display issues (e.g., global averages) that we are actively working on. Stay tuned.
-
-![EAMv2 PD and PI](/gallery/gallery_eamv2_pd_pi_ne30.png){ width="100%", align=center }
-
 ## A few ELM output variables displayed by [QuickView](/guides/quickview/index) {#elmv2}
 
 - Horizontal mesh:ne30pg2 (~165 km)
