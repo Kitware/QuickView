@@ -2,6 +2,31 @@
 
 <!-- version list -->
 
+## v2.7.9 (2026-06-10)
+
+### Bug Fixes
+
+- Bump trame-colormaps to >=1.4.3 to include updates for NaN color dropdown
+  ([`23c304a`](https://github.com/Kitware/QuickView/commit/23c304aa94b3f4fb92e6a46a42d873bb6ad70d3a))
+
+### Documentation
+
+- Remove quickcompare example from gallery for now
+  ([`94fc6b9`](https://github.com/Kitware/QuickView/commit/94fc6b90375e4651344d45760f21d8ff90c2b907))
+
+- Update images on webnews page
+  ([`f7e9449`](https://github.com/Kitware/QuickView/commit/f7e94491b76aca7d436bab146383e414c47c388c))
+
+- Update images on webnews page again
+  ([`0895b7e`](https://github.com/Kitware/QuickView/commit/0895b7e563c81dfeb88aa26c9423a89e9c23b394))
+
+- Update quickview's and quickcompare's main pages; add gallery image for quickcompare
+  ([`d58ff9f`](https://github.com/Kitware/QuickView/commit/d58ff9f5c5bf2f24ec58966ab64dded3eb8b4c90))
+
+- Update webnews page for QuickView 2.7.8
+  ([`4cf344f`](https://github.com/Kitware/QuickView/commit/4cf344fbc5325796282d8330d10fcc3693d91843))
+
+
 ## v2.7.8 (2026-06-05)
 
 ### Bug Fixes
