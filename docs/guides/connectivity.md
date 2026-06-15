@@ -21,9 +21,10 @@ grids" or "GLL grids").
 
 ## Connectivity file download
 
-A collection of connectivity files can
-be found on [Zenodo](https://doi.org/10.5281/zenodo.16908566). The archive is
-continually updated as more users inform us about the grids they use.
+Collections of connectivity files can be found on Zenodo for
+[quasi-uniform meshes](https://doi.org/10.5281/zenodo.16908566)
+and [regionally refined meshes](https://doi.org/10.5281/zenodo.20707895).
+These collections are continually updated as more users inform us about the grids they use.
 
 
 ## Generating connectivity files
@@ -35,12 +36,12 @@ Users can generate connectivity files with
 [this script](https://github.com/mt5555/remap-ncl/blob/master/makeSE.sh) shared
 by Mark A. Taylor at Sandia National Laboratories.
 
-::: info
+::: tip Paths in Mark's script
 Before using Mark's script, please set `exepath` therein to where TempestRemap is installed
 and change `wdir` to the location where the newly generated connectivity files should be written to.
 :::
 
-::: info
+::: tip TempestRemap
 `TempestRemap` is available
 as a part of the [`E3SM-Unified`](https://github.com/E3SM-Project/e3sm-unified)
 conda environment. It can also be installed following the instructions provided
