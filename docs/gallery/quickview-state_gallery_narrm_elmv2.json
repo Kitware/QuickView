@@ -1,0 +1,87 @@
+{
+  "origin": {
+    "user": "wanh895",
+    "created": "2026-06-15 10:30:11.435609",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202606_NARRM/v2.NA.F20TR.6h.f1.2010aer.elm.h0.2010-01.nc",
+    "connectivity": "/Users/wanh895/Downloads/recent_files/Hui/viz/202606_NARRM/connectivity_northamericax4v1pg2.scrip.nc"
+  },
+  "variables-selection": [
+    "TSOI_10CM"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 5173012.495361152,
+      "position": [
+        -4818013.75,
+        4306456.2705078125,
+        39805406.514134265
+      ],
+      "focal_point": [
+        -4818013.75,
+        4306456.2705078125,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        38894597.5493139,
+        41047939.25696987
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -150,
+      30
+    ],
+    "crop_latitude": [
+      0,
+      90
+    ],
+    "projection": [
+      "Robinson"
+    ],
+    "animation_track": null
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "lndgrid"
+      ],
+      "name": "TSOI_10CM",
+      "config": {
+        "order": 1,
+        "size": 12,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Yellow - Gray - Blue",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          247.32717895507812,
+          305.2561340332031
+        ],
+        "color_value_min": "247.32717895507812",
+        "color_value_max": "305.2561340332031"
+      }
+    }
+  ]
+}

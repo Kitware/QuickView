@@ -15,6 +15,16 @@
 ![ELMv2 soil and lake variables](/gallery/gallery_elmv2_ne30pg2.png){ width="100%", align=center }
 
 
+## Atmosphere and land model output from the E3SMv2 Regionally Refined Model (RRM)
+
+- Horizontal mesh: ne30pg2 with 4x refinement in North America, see Figure 1 in [Tang et al. (2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html) 
+- Simulation data: from [Tang et al. (2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html)
+- Visualization created by: Hui Wan (PNNL)
+
+![NARRM EAM](/gallery/gallery_narrm_eamv2.png){ width="100%", align=center }
+![NARRM ELM](/gallery/gallery_narrm_elmv2.png){ width="100%", align=center }
+
+
 
 ## SCREAM simulation output displayed by [QuickView](/guides/quickview/index) {#scream}
 

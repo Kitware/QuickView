@@ -1,0 +1,87 @@
+{
+  "origin": {
+    "user": "wanh895",
+    "created": "2026-06-15 10:24:21.453521",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202606_NARRM/v2.NA.F20TR.6h.f1.2010aer.eam.h0.2010-01.nc",
+    "connectivity": "/Users/wanh895/Downloads/recent_files/Hui/viz/202606_NARRM/connectivity_northamericax4v1pg2.scrip.nc"
+  },
+  "variables-selection": [
+    "TREFHT"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 5171536.088720681,
+      "position": [
+        -4818013.75,
+        4306456.2705078125,
+        39805406.514134265
+      ],
+      "focal_point": [
+        -4818013.75,
+        4306456.2705078125,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        38891623.54140709,
+        41051682.92018925
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -150,
+      30
+    ],
+    "crop_latitude": [
+      0,
+      90
+    ],
+    "projection": [
+      "Robinson"
+    ],
+    "animation_track": null
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "TREFHT",
+      "config": {
+        "order": 4,
+        "size": 12,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          237.0,
+          306.0
+        ],
+        "color_value_min": "237",
+        "color_value_max": "306"
+      }
+    }
+  ]
+}
