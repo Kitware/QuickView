@@ -33,12 +33,23 @@ Users can generate connectivity files with
 ([Ullrich and Taylor, 2015](https://doi.org/10.1175/MWR-D-14-00343.1);
 [Ullrich et al., 2016](https://doi.org/10.1175/MWR-D-15-0301.1)) using
 [this script](https://github.com/mt5555/remap-ncl/blob/master/makeSE.sh) shared
-by Mark A. Taylor at Sandia National Laboratories. (`TempestRemap` is available
+by Mark A. Taylor at Sandia National Laboratories.
+
+::: info
+Before using Mark's script, please set `exepath` therein to where TempestRemap is installed
+and change `wdir` to the location where the newly generated connectivity files should be written to.
+:::
+
+::: info
+`TempestRemap` is available
 as a part of the [`E3SM-Unified`](https://github.com/E3SM-Project/e3sm-unified)
 conda environment. It can also be installed following the instructions provided
-in its [repo](https://github.com/ClimateGlobalChange/tempestremap).)
+in its [repo](https://github.com/ClimateGlobalChange/tempestremap).
+:::
 
-For example, using Mark's script, the command
+### Quasi-uniform meshes
+
+Using Mark's script, the command
 
 ```
 ./makeSE.sh 30
@@ -50,3 +61,16 @@ will generate several different files for the `ne30pg2` grid, including, e.g.,
 - `TEMPEST_ne30pg2.scrip.nc` (SCRIP format).
 
 The QuickView family uses the **SCRIP** format.
+
+### Regionally refined meshes
+
+Each configuration of the [E3SM Regionally Refined Model (RRM, see, e.g., Tang et al., 2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html) has a corresponding grid file in the Exodus format (a `.g` file). The `.g` file can be used to generate the SCRIP-format connectivity file needed by the QuickView family.
+
+
+For example, a connectivity file for the NARRM grid described in [Tang et al., 2023](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html) can be generated using Mark's script via the following command, assuming the paths in the script have been adapted as needed and the grid file `northamericax4v1.g` is available in the current directory:
+
+
+```
+./makeSE.sh northamericax4v1.g
+```
+
