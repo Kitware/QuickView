@@ -1,3 +1,5 @@
+const isTauri = !!__TAURI__;
+
 // ZIP - start
 // CRC-32 lookup table
 const crc32Table = (() => {
@@ -238,6 +240,17 @@ function downloadURL(dataURL, filename) {
   document.body.removeChild(a);
 }
 
+async function tauriSave(title, dataURLOrBlob, filename) {
+  let binaryContent = null;
+  if (dataURLOrBlob instanceof Blob) {
+    binaryContent = await dataURLOrBlob.arrayBuffer();
+  } else {
+    const base64 = dataURLOrBlob.split(",")[1];
+    binaryContent = Uint8Array.fromBase64(base64).buffer;
+  }
+  window.trame.trigger("tauri_save", [title, filename, binaryContent]);
+}
+
 async function download(
   fileName,
   content,
@@ -323,7 +336,11 @@ window.trame.utils.quickview = {
     const fileName = getFileName(fieldName);
     const canvas = await html2canvas(findContainerToCapture(fieldName));
     const dataURL = canvas.toDataURL("image/png");
-    downloadURL(dataURL, fileName);
+    if (isTauri) {
+      tauriSave("Save screenshot", dataURL, fileName);
+    } else {
+      downloadURL(dataURL, fileName);
+    }
   },
   async captureAnimation(selectedFields) {
     const entries = [];
@@ -357,7 +374,15 @@ window.trame.utils.quickview = {
         entries.push({ name, data });
       }
     }
-    trame.utils.download("quickview-animation.zip", buildZipBlob(entries));
+    if (isTauri) {
+      tauriSave(
+        "Save animation",
+        buildZipBlob(entries),
+        "quickview-animation.zip",
+      );
+    } else {
+      trame.utils.download("quickview-animation.zip", buildZipBlob(entries));
+    }
     trame.state.set("animation_export", false);
   },
   async saveState(download_name) {

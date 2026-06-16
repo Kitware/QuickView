@@ -101,6 +101,20 @@ class EAMApp(TrameApp):
     # Tauri adapter
     # -------------------------------------------------------------------------
 
+    @trigger("tauri_save")
+    def _save_file(
+        self,
+        title,
+        filename,
+        binaryContent,
+    ):
+        asynchronous.create_task(self._async_save_file(title, filename, binaryContent))
+        return "ok"
+
+    async def _async_save_file(self, title, filename, binaryContent):
+        export_path = await self.ctrl.save(title, str(Path(filename).resolve()))
+        Path(export_path).write_bytes(binaryContent)
+
     @life_cycle.server_ready
     def _tauri_ready(self, **_):
         jupyter_url_prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX")
@@ -409,9 +423,16 @@ class EAMApp(TrameApp):
 
         # Update view states
         _COLORMAP_KEYS = {
-            "preset", "invert", "color_blind", "use_log_scale",
-            "discrete_log", "n_discrete_colors", "override_range",
-            "color_range", "color_value_min", "color_value_max",
+            "preset",
+            "invert",
+            "color_blind",
+            "use_log_scale",
+            "discrete_log",
+            "n_discrete_colors",
+            "override_range",
+            "color_range",
+            "color_value_min",
+            "color_value_max",
         }
         for view_state in state_content["views"]:
             view_type = view_state["type"]
