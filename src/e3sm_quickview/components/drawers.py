@@ -158,6 +158,7 @@ class FieldSelection(v3.VNavigationDrawer):
                     messages=[
                         "['Show selected and unselected variables','Show only selected variables', 'Show only unselected variables'][visible_selection_icon_idx]"
                     ],
+                    spellcheck=False,
                 )
                 with html.Div(style="margin:1px;padding:1px;", classes="flex-fill"):
                     with client.SizeObserver("var_selection_size"):
