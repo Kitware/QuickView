@@ -115,6 +115,8 @@ class VariableView(TrameComponent):
                 ),
                 tile=("active_layout !== 'auto_layout'",),
                 raw_attrs=[f'data-field-name="{self.variable_name}"'],
+                v_on_mouseenter=f"hover_info = '{self.variable_name}'",
+                v_on_mouseleave="hover_info = null",
             ):
                 with v3.VRow(
                     dense=True,
@@ -175,22 +177,37 @@ class VariableView(TrameComponent):
                         classes="text-caption px-1 text-no-wrap",
                     )
 
-                with html.Div(
-                    style=(
-                        """
-                        {
+                with v3.VTooltip(classes="tooltip-no-padding"):
+                    with v3.Template(v_slot_activator="{props}"):
+                        with html.Div(
+                            v_bind="props",
+                            style=(
+                                f"""
+                        {{
                             aspectRatio: active_layout === 'auto_layout' ? (1.0 / aspect_ratio) : null,
                             height: active_layout !== 'auto_layout' ? 'calc(100% - 2.4rem)' : null,
-                            pointerEvents: 'none',
-                        }
+                            pointerEvents: hover_info === '{self.variable_name}' ? 'all' : 'none',
+                        }}
                         """,
-                    ),
-                ):
-                    rca.ImageRegion(
-                        enable_interaction=False,
-                        bounds=(self._bounds_key, (0, 0, 1, 1)),
-                        size=(self.update_size, "[$event]"),
-                    )
+                            ),
+                        ):
+                            rca.ImageRegion(
+                                enable_interaction=False,
+                                bounds=(self._bounds_key, (0, 0, 1, 1)),
+                                size=(self.update_size, "[$event]"),
+                                send_mouse_move=(
+                                    f"hover_info === '{self.variable_name}'",
+                                ),
+                            )
+
+                    with v3.VTable(density="compact", theme="dark", striped="even"):
+                        with html.Tbody():
+                            with html.Tr(
+                                v_for="v, k in hover_tooltip || {}",
+                                key="k",
+                            ):
+                                html.Td("{{k}}")
+                                html.Td("{{v[0]}}")
 
                 with self.colormap.provide_as(self.name):
                     colormaps.HorizontalScalarBar(self.name, popup_location="top")
