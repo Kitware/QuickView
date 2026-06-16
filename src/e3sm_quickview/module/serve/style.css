@@ -18,3 +18,7 @@
 .user-select-none {
   user-select: none;
 }
+
+.tooltip-no-padding.v-tooltip > .v-overlay__content {
+  padding: 0;
+}

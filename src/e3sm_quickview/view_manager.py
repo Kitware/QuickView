@@ -14,11 +14,12 @@ from trame.widgets import client, colormaps, rca
 from trame.widgets import vuetify3 as v3
 from vtkmodules.vtkRenderingCore import (
     vtkCamera,
+    vtkCellPicker,
     vtkRenderWindow,
     vtkRenderWindowInteractor,
 )
 
-from e3sm_quickview.utils import perf
+from e3sm_quickview.utils import debounce, perf
 from e3sm_quickview.view_panel import VariableView
 
 
@@ -57,6 +58,7 @@ class ViewManager(TrameComponent):
         self._camera = vtkCamera(parallel_projection=1)
         self._render_window = vtkRenderWindow()
         self._render_window.OffScreenRenderingOn()
+        self._picker = vtkCellPicker(tolerance=0.0005)
 
         # Perf: time the actual VTK render on the shared render window.
         # Emits `view.shared.render_window` with the elapsed time for
@@ -91,6 +93,7 @@ class ViewManager(TrameComponent):
             interactor_style=self._style
         )
         self._render_window_interactor.SetRenderWindow(self._render_window)
+        self._render_window_interactor.AddObserver("ModifiedEvent", self._on_hover)
 
         self.loop = asyncio.get_event_loop()
         self.layout_dirty = True
@@ -105,6 +108,10 @@ class ViewManager(TrameComponent):
         rca.initialize(self.server)
         colormaps.initialize(self.server)
 
+        # Initialize state for picking
+        self.state.hover_info = None
+        self.state.hover_tooltip = None
+
     def _on_render_start(self, *_):
         if perf.is_enabled():
             self._render_t0 = time.perf_counter()
@@ -114,6 +121,34 @@ class ViewManager(TrameComponent):
             dt_ms = (time.perf_counter() - self._render_t0) * 1000.0
             perf.log("view.shared.render_window", dt_ms)
             self._render_t0 = None
+
+    @debounce.debounce(0.2)
+    def _on_hover(self, *_):
+        with self.state:
+            if not self.state.hover_info:
+                self.state.hover_tooltip = None
+                return
+
+            x, y = self._render_window_interactor.GetEventPosition()
+            renderer = self.get_view(self.state.hover_info, None).renderer
+            self._picker.Pick(x, y, 0, renderer)
+            if self._picker.cell_id < 0:
+                self.state.hover_tooltip = None
+                return
+
+            # world_position = self._picker.pick_position
+            cell_id = self._picker.cell_id
+            data_info = {}  #  {"cell_id": cell_id, "xyz": world_position}
+            ds = self._picker.GetDataSet()
+            if ds:
+                cell_data = ds.cell_data
+                n_arrays = cell_data.number_of_arrays
+
+                for i in range(n_arrays):
+                    array = cell_data.GetArray(i)
+                    data_info[array.name] = array.GetTuple(cell_id)
+
+            self.state.hover_tooltip = data_info
 
     def refresh_ui(self, **_):
         for view in self._var2view.values():
