@@ -1,4 +1,4 @@
-const isTauri = !!__TAURI__;
+const isTauri = !!window.__TAURI__;
 
 // ZIP - start
 // CRC-32 lookup table
