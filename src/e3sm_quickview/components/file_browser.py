@@ -173,6 +173,7 @@ class ParaViewFileBrowser(TrameComponent):
     def open_entry(self, entry):
         entry_type = entry.get("type")
         if entry_type == "directory":
+            self.set("filter", "")  # Reset filter when opening new directory
             self._current_path = self._current_path / entry.get("name")
             self.update_listing()
             return entry_type, str(self._current_path)
