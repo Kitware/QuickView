@@ -1,6 +1,6 @@
 [project]
 name = "e3sm-quickview"
-version = "2.7.9"
+version = "2.8.0"
 description = "An application to explore/analyze data for atmosphere component for E3SM"
 authors = [
     {name = "Kitware Inc."},
@@ -53,6 +53,7 @@ quickview-chunk = "e3sm_quickview.cli.chunk:main"
 
 [project.entry-points."jupyter_serverproxy_servers"]
 quickview = "e3sm_quickview.jupyter:setup_quickview"
+
 
 
 

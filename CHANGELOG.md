@@ -2,6 +2,47 @@
 
 <!-- version list -->
 
+## v2.8.0 (2026-06-17)
+
+### Bug Fixes
+
+- **cache**: Prevent web caching
+  ([`4e59361`](https://github.com/Kitware/QuickView/commit/4e59361ca904177aa3408bd480d0917f788ff1b1))
+
+- **file-dialog**: Reset filter after directory change
+  ([`1d2da6b`](https://github.com/Kitware/QuickView/commit/1d2da6bdec17811b2200e2d468a6b8f401c710c2))
+
+- **js**: Prevent error in conda
+  ([`c13762f`](https://github.com/Kitware/QuickView/commit/c13762ffc0d501dbfdd74782f8c240b135317326))
+
+- **spellcheck**: Remove check in field filtering
+  ([`91a8723`](https://github.com/Kitware/QuickView/commit/91a8723c3eed7f0fbb9f9d5b26d78dd10c3894e1))
+
+- **tauri**: Screenshot and animation download
+  ([`3c34019`](https://github.com/Kitware/QuickView/commit/3c340199614b9c0f3894ae6a172c63f4308070e6))
+
+### Continuous Integration
+
+- Update setup-miniconda to v4
+  ([`315ae21`](https://github.com/Kitware/QuickView/commit/315ae21208019ec9cfc89d314f2f31d9878b3a1b))
+
+### Documentation
+
+- Add RRM example to gallery
+  ([`b3d1676`](https://github.com/Kitware/QuickView/commit/b3d1676fef7323d0716706f24479bb273a590d10))
+
+- Add zenodo link for RRM connectivity files
+  ([`0b7abde`](https://github.com/Kitware/QuickView/commit/0b7abde79c6cc2a8da33e8c43ed10f6d4c163678))
+
+- Update doc on generating connectivity files for RRM
+  ([`71b07e8`](https://github.com/Kitware/QuickView/commit/71b07e8855f0c935f0eb61e56b5a276b22b4c55e))
+
+### Features
+
+- **hover**: Show data information under pointer
+  ([`e44dc61`](https://github.com/Kitware/QuickView/commit/e44dc618692ccac721b2589c704ba1941c5a5ec7))
+
+
 ## v2.7.9 (2026-06-10)
 
 ### Bug Fixes
