@@ -2,11 +2,17 @@ from pathlib import Path
 
 from e3sm_quickview import __version__
 
-__all__ = ["serve", "scripts"]
+__all__ = ["serve", "scripts", "styles"]
 
-serve = {f"quick_view_{__version__}": str(Path(__file__).with_name("serve").resolve())}
+BASE_URL = f"quick_view_{__version__}"
+
+serve = {
+    BASE_URL: str(Path(__file__).with_name("serve").resolve()),
+}
 scripts = [
-    f"quick_view_{__version__}/html2canvas.js",
-    f"quick_view_{__version__}/utils.js",
+    f"{BASE_URL}/html2canvas.js",
+    f"{BASE_URL}/utils.js",
 ]
-styles = [f"quick_view_{__version__}/style.css"]
+styles = [
+    f"{BASE_URL}/style.css",
+]
