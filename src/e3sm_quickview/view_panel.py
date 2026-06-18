@@ -201,13 +201,32 @@ class VariableView(TrameComponent):
                             )
 
                     with v3.VTable(density="compact", theme="dark", striped="even"):
-                        with html.Tbody():
+                        with html.Tbody(v_if="!!hover_tooltip"):
+                            with html.Tr():
+                                with html.Td():
+                                    v3.VIcon("mdi-target")
+                                with html.Td(
+                                    classes="d-flex justify-space-between align-center"
+                                ):
+                                    html.Div(
+                                        "lat: {{hover_tooltip?.lat?.[0]?.toFixed(4)}}"
+                                    )
+                                    html.Div(
+                                        "lon: {{hover_tooltip?.lon?.[0]?.toFixed(4)}}"
+                                    )
+
+                            with html.Tr():
+                                html.Td(self.variable_name)
+                                html.Td(
+                                    f"{{{{hover_tooltip?.['{self.variable_name}']?.[0]}}}}"
+                                )
                             with html.Tr(
                                 v_for="v, k in hover_tooltip || {}",
                                 key="k",
+                                v_show=f"!{{lat:1,lon:1,'{self.variable_name}':1}}[k]",
                             ):
                                 html.Td("{{k}}")
-                                html.Td("{{v[0]}}")
+                                html.Td("{{v?.[0]}}")
 
                 with self.colormap.provide_as(self.name):
                     colormaps.HorizontalScalarBar(self.name, popup_location="top")
