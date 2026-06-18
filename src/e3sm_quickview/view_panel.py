@@ -182,12 +182,11 @@ class VariableView(TrameComponent):
                         with html.Div(
                             v_bind="props",
                             style=(
-                                f"""
-                        {{
+                                """
+                        {
                             aspectRatio: active_layout === 'auto_layout' ? (1.0 / aspect_ratio) : null,
                             height: active_layout !== 'auto_layout' ? 'calc(100% - 2.4rem)' : null,
-                            pointerEvents: hover_info === '{self.variable_name}' ? 'all' : 'none',
-                        }}
+                        }
                         """,
                             ),
                         ):
@@ -198,6 +197,7 @@ class VariableView(TrameComponent):
                                 send_mouse_move=(
                                     f"hover_info === '{self.variable_name}'",
                                 ),
+                                v_on_wheel="window.scrollBy(0, $event.deltaY)",
                             )
 
                     with v3.VTable(density="compact", theme="dark", striped="even"):
