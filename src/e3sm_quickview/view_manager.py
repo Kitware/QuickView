@@ -93,7 +93,6 @@ class ViewManager(TrameComponent):
             interactor_style=self._style
         )
         self._render_window_interactor.SetRenderWindow(self._render_window)
-        self._render_window_interactor.AddObserver("ModifiedEvent", self._on_hover)
 
         self.loop = asyncio.get_event_loop()
         self.layout_dirty = True
@@ -111,6 +110,13 @@ class ViewManager(TrameComponent):
         # Initialize state for picking
         self.state.hover_info = None
         self.state.hover_tooltip = None
+
+        # Register listener once the server is running
+        self.ctrl.on_server_ready.add(self._post_init)
+
+    def _post_init(self, *_, **__):
+        # Need event loop for debounce callback
+        self._render_window_interactor.AddObserver("ModifiedEvent", self._on_hover)
 
     def _on_render_start(self, *_):
         if perf.is_enabled():
