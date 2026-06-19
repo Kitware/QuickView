@@ -20,7 +20,8 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "trame>=3.12",
+    "wslink>=2.5.7",
+    "trame>=3.13.2",
     "trame-vuetify>=3.1",
     "trame-rca[turbo]>=2.5.1",
     "pyproj>=3.6.1",
