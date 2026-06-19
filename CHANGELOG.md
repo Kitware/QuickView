@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.8.2 (2026-06-19)
+
+### Bug Fixes
+
+- **dep**: Properly describe required dependencies
+  ([`c7880b5`](https://github.com/Kitware/QuickView/commit/c7880b51ea7d25fc1f9e3a94f0ca000a5c3a7892))
+
+
 ## v2.8.1 (2026-06-19)
 
 ### Bug Fixes

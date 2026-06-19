@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "2.8.1"
+version = "2.8.2"
 description = "QuickView: Visual Analyis for E3SM Atmosphere Data"
 authors = ["Kitware"]
 license = ""
