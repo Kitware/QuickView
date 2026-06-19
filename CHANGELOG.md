@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v2.8.1 (2026-06-19)
+
+### Bug Fixes
+
+- Event loop missing in debounce
+  ([`b8bc690`](https://github.com/Kitware/QuickView/commit/b8bc69077f50ff565097706b746f443bb33d483a))
+
+- **hover**: Improve tooltip layout
+  ([`154c459`](https://github.com/Kitware/QuickView/commit/154c459b8d19f39328605ef65bc54cc148d5e874))
+
+- **module**: Export styles
+  ([`a97194d`](https://github.com/Kitware/QuickView/commit/a97194dbf4863041091672b636f63ac06dbcc257))
+
+- **scroll**: Allow scroll to work on 3D view
+  ([`48c4415`](https://github.com/Kitware/QuickView/commit/48c44159b601783bf1ac4c00f7507b3cccfe0463))
+
+
 ## v2.8.0 (2026-06-17)
 
 ### Bug Fixes
