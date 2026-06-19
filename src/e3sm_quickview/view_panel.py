@@ -150,6 +150,31 @@ class VariableView(TrameComponent):
                         click=f"utils.quickview.capturePanel('{self.variable_name}')",
                         style="transform: scale(0.75);",
                     )
+                    self.state.setdefault("picking_mode", None)
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Extract information on click'",
+                        icon="mdi-cursor-default-click-outline",
+                        size="small",
+                        base_variant="plain",
+                        active_variant="tonal",
+                        click="picking_mode = (picking_mode === 'click' ? null : 'click')",
+                        active=("picking_mode === 'click'",),
+                        active_color="white",
+                        hide_overlay=True,
+                        rounded=False,
+                    )
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Extract information on hover'",
+                        icon="mdi-cursor-default-gesture-outline",
+                        size="small",
+                        base_variant="plain",
+                        active_variant="tonal",
+                        click="picking_mode = (picking_mode === 'hover' ? null : 'hover')",
+                        active=("picking_mode === 'hover'",),
+                        active_color="white",
+                        hide_overlay=True,
+                        rounded=False,
+                    )
 
                     v3.VSpacer()
                     html.Div(
@@ -194,8 +219,11 @@ class VariableView(TrameComponent):
                                 enable_interaction=False,
                                 bounds=(self._bounds_key, (0, 0, 1, 1)),
                                 size=(self.update_size, "[$event]"),
+                                send_mouse_click=(
+                                    f"picking_mode === 'click' && hover_info === '{self.variable_name}'",
+                                ),
                                 send_mouse_move=(
-                                    f"hover_info === '{self.variable_name}'",
+                                    f"picking_mode === 'hover' && hover_info === '{self.variable_name}'",
                                 ),
                                 v_on_wheel="window.scrollBy(0, $event.deltaY)",
                             )
