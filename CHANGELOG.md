@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v2.8.3 (2026-06-22)
+
+### Bug Fixes
+
+- **colormaps**: Use dialog to prevent data hiding
+  ([`8c3c8ff`](https://github.com/Kitware/QuickView/commit/8c3c8ff4391ff02a0cd987b895d471b8cb5af3f9))
+
+- **hover**: Disable tooltip when picking is disabled
+  ([`8da307c`](https://github.com/Kitware/QuickView/commit/8da307ced78dd6c414eb39893b56f3439c2819c7))
+
+- **lat/lon**: Always load lat/lon
+  ([`b7b9c59`](https://github.com/Kitware/QuickView/commit/b7b9c5933411c8d2c290bfa94e53557f3773517a))
+
+- **picking**: Add option on click/hover
+  ([`bafd370`](https://github.com/Kitware/QuickView/commit/bafd370e2bef44f8ae5cafe486e4440930cf4e09))
+
+
 ## v2.8.2 (2026-06-19)
 
 ### Bug Fixes
