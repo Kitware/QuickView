@@ -257,4 +257,11 @@ class VariableView(TrameComponent):
                                 html.Td("{{v?.[0]}}")
 
                 with self.colormap.provide_as(self.name):
-                    colormaps.HorizontalScalarBar(self.name, popup_location="top")
+                    colormaps.HorizontalScalarBar(
+                        self.name,
+                        has_menu=False,
+                        click=(
+                            self.ctrl.edit_lookup_table,
+                            f"[{self.name}._id, '{self.variable_name}']",
+                        ),
+                    )

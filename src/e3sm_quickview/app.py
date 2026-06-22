@@ -258,6 +258,7 @@ class EAMApp(TrameApp):
                                     encoder="turbo-jpeg",
                                     ctx_name="view",
                                 ):
+                                    dialogs.ColorMapEditor()
                                     # To debug vtkRenderWindow content
                                     # html.Img(src=["image?.src"], height="300px")
                                     client.ServerTemplate(
