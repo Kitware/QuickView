@@ -229,7 +229,7 @@ class VariableView(TrameComponent):
                             )
 
                     with v3.VTable(density="compact", theme="dark", striped="even"):
-                        with html.Tbody(v_if="!!hover_tooltip"):
+                        with html.Tbody(v_if="picking_mode && !!hover_tooltip"):
                             with html.Tr():
                                 with html.Td():
                                     v3.VIcon("mdi-target")
