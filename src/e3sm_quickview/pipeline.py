@@ -305,7 +305,8 @@ class EAMVisSource:
     def LoadVariables(self, vars):
         if not self.valid:
             return
-        self.data_reader.reader.Variables = vars
+
+        self.data_reader.reader.Variables = list(set([*vars, "lat", "lon"]))
 
 
 if __name__ == "__main__":
