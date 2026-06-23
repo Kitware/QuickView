@@ -1,6 +1,37 @@
 # Miscellaneous Features 
 
-This page summarizes several additional convenient features in QuickView.
+QuickView includes various convenient features tailored to Earth system modelers' analysis workflow.
+
+[[toc]]
+
+
+## Cursor probe {#cursor-probe}
+
+Starting in version 2.8.3, QuickView provides a Cursor Probe for inspecting data values at the cursor location. Two modes are available:
+
+| Icon | Mode | Description |
+|------|------|-------------|
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/cursor-default-gesture-outline.svg" width="24"> | Hover Mode | Updates continuously as the cursor moves over contour plots in the viewport. |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/cursor-default-click-outline.svg" width="24"> | Click Mode | Updates only when the user clicks a location in a contour plot. This mode may provide better responsiveness when working with very large datasets. |
+
+![cursor probe information panel](./screenshots/cursor_probe_information_panel.png){ width="50%" }
+
+In both modes, information associated with the cursor location is displayed in
+an *Information Panel*, as shown in the screenshot here.
+The latitude and longitude of the cursor location are shown at the top,
+followed by the name and value of the variable in the current view, as well as
+the names and values of the other variables displayed in the viewport.
+If a variable has non-horizontal dimensions, the value shown in the Information Panel
+is the value at the cursor-selected lat-lon location in the currently data slice. 
+
+![cursor probe icons](./screenshots/probe_icons_in_viewport.png){ width="30%" }
+
+The Cursor Probe is inactive by default and can be activated by clicking either the
+Hover Mode or Click Mode icon in any viewport panel.
+These icons are available in all views for convenient access.
+However, the probe's activate/inactive state applies to the entire viewport
+and is shared across all views. As a result, the Cursor Probe cannot be enabled
+for some views (variables) while remaining disabled for others.
 
 ## Choosing map projection and geographical region {#maps}
 
@@ -10,7 +41,6 @@ activated by a click on the Earth icon in the vertical tool bar—or by keyboard
 - `C` for cylindrical equidistant,
 - `R` for Robinson, and
 - `M` for Mollweide.
-
 
 The geographical region, i.e., the latitude and longitude bounds to be displayed in the contour plots,
 can be adjusted using the sliders in the lat/lon cropping panel activated by a click on
