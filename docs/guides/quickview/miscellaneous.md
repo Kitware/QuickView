@@ -24,7 +24,7 @@ the names and values of the other variables displayed in the viewport.
 If a variable has non-horizontal dimensions, the value shown in the Information Panel
 is the value at the cursor-selected lat-lon location in the currently data slice. 
 
-![cursor probe icons](./screenshots/cursor_probe_icons_in_viewport.png){ width="35%", align=right }
+![cursor probe icons](./screenshots/cursor_probe_icons_in_viewport.png){ width="25%", align=right }
 
 The Cursor Probe is inactive by default and can be activated by clicking either the
 Hover Mode or Click Mode icon in any viewport panel.
