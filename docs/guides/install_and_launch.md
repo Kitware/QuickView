@@ -56,6 +56,7 @@ then install QuickView and QuickCompare, we can use the following commands:
 ```sh
 conda create --name quickview-env python=3.13
 conda activate quickview-env
+pip install typing_extensions
 conda install conda-forge::e3sm-quickview
 conda install conda-forge::e3sm_compareview
 ```
@@ -68,8 +69,8 @@ then use the following commands, replacing the version numbers by what you need:
 
 ```sh
 conda activate quickview-env
-conda install "e3sm-quickview>=2.1.1"
-conda install "e3sm_compareview>=1.3.4"
+conda install "e3sm-quickview>=2.8.3"
+conda install "e3sm_compareview>=1.8.3"
 ```
 
 ### Launching a tool installed via conda
