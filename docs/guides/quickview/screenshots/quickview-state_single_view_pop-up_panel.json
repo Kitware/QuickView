@@ -1,0 +1,90 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-06-23 08:59:08.085139",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202508_EAM_QuickView_test_data/small/EAMv2_ne30pg2_small_cld.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202508_EAM_QuickView_test_data/connectivity/connectivity_ne30pg2_TEMPEST.scrip.nc"
+  },
+  "variables-selection": [
+    "PBLH"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": true,
+    "active": "auto_layout",
+    "tools": [
+      "animation-controls",
+      "select-slice-time"
+    ],
+    "help": false,
+    "camera": {
+      "zoom": 10002421.836638866,
+      "position": [
+        0.0,
+        0.0,
+        77928734.37784009
+      ],
+      "focal_point": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        76153284.25089186,
+        80351627.96734709
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -180,
+      180
+    ],
+    "crop_latitude": [
+      -90,
+      90
+    ],
+    "projection": [
+      "Mollweide"
+    ],
+    "animation_track": null
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "PBLH",
+      "config": {
+        "order": 5,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          69.74378967285156,
+          2957.526611328125
+        ],
+        "color_value_min": "69.74378967285156",
+        "color_value_max": "2957.526611328125"
+      }
+    }
+  ]
+}

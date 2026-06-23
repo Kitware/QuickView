@@ -2,17 +2,16 @@
 
 # Customizing Individual Views
 
+Each viewport panel (i.e., each contour plot displayed on a global or regional map)
+can be customized independently by clicking its colorbar. This opens a pop-up panel,
+as illustrated in the screenshot below, with the selected plot shown on the right and a control panel on the left.
 
-Each view in the viewport (i.e., each contour plot shown on a global or regional map)
-can be customized individually by clicking the associated colorbar.
-The click brings up a small control panel like in the screenshot here,
-allowing the user to control various properties of the mapping between
-the variable's values and the colors.
-Only one panel can be open at a time — opening one automatically closes any other.
+The control panel provides options for modifying how variable values are mapped to colors.
+The cross (✕) icon in the upper-right corner closes the pop-up panel.
 
 ![pop-up panel](./screenshots/single_view_pop-up_panel.png){ width="80%" }
 
-Each control panel contains up to three sections arranged from top to bottom:
+The color map control panel contains up to three sections arranged from top to bottom:
 
 - **Toolbar** — This includes a row of icon buttons across the top (explained in more detail below),
   a colormap search field showing the name of the colormap currently in use,
