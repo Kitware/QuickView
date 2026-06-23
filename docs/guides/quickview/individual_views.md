@@ -5,11 +5,10 @@
 Each viewport panel (i.e., each contour plot displayed on a global or regional map)
 can be customized independently by clicking its colorbar. This opens a pop-up panel,
 as illustrated in the screenshot below, with the selected plot shown on the right and a control panel on the left.
-
 The control panel provides options for modifying how variable values are mapped to colors.
 The cross (✕) icon in the upper-right corner closes the pop-up panel.
 
-![pop-up panel](./screenshots/single_view_pop-up_panel.png){ width="80%" }
+![pop-up panel](./screenshots/single_view_pop-up_panel.png){ width="100%" }
 
 The color map control panel contains up to three sections arranged from top to bottom:
 
@@ -44,7 +43,7 @@ QuickView supports linear, logarithmic, and symmetric logarithmic color scaling.
 
 - By default, a **linear scale** is used, indicated by a staircase-style icon in the pop-up panel.
 
-- A click on the staircase icon changes the scaling to **logarithmic** to enhance the visibility of variations across multiple orders of magnitude. In this mode, zeros and negative values are displayed in the NaN color (<img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/crosshairs-question.svg" width="18"> button) explained below.
+- A click on the staircase icon changes the scaling to **logarithmic** to enhance the visibility of variations across multiple orders of magnitude. In this mode, zeros and negative values are displayed in the NaN color explained below.
 
 - Because standard logarithmic scaling is only defined for positive values, QuickView also provides a **symmetric logarithmic (“symlog”)** scale, which accommodates negative values and zero. The symlog scale behaves linearly in a small region around zero and logarithmically away from zero, enabling consistent visualization of fields that include both positive and negative values. More details can be found in the info box below.
 
