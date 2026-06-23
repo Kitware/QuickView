@@ -234,13 +234,14 @@ class VariableView(TrameComponent):
                                 with html.Td():
                                     v3.VIcon("mdi-target")
                                 with html.Td(
-                                    classes="d-flex justify-space-between align-center"
+                                    classes="d-flex justify-space-between align-center",
                                 ):
                                     html.Div(
-                                        "lat: {{hover_tooltip?.lat?.[0]?.toFixed(4)}}"
+                                        "lat: {{hover_tooltip?.lat?.[0]?.toFixed(4)}}",
+                                        classes="pr-4",
                                     )
                                     html.Div(
-                                        "lon: {{hover_tooltip?.lon?.[0]?.toFixed(4)}}"
+                                        "lon: {{hover_tooltip?.lon?.[0]?.toFixed(4)}}",
                                     )
 
                             with html.Tr():
