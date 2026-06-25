@@ -1,10 +1,10 @@
-# Graphical UI and Keyboard Shortcuts in QuickCompare
+# QuickCompare's Graphical UI
 
 
 ![QuickCompare UI](./screenshots/quickcompare_ui.png){ width="100%" }
 
 
-## UI overview
+## UI components
 
 QuickCompare's UI closely resembles the [UI in QuickView](/guides/quickview/ui_overview):
 
@@ -29,9 +29,9 @@ to do with the fact that QuickCompare displays multiple simulations and,
 optionally, their differences.
 
 
-![Comparison Control icon](https://cdn.jsdelivr.net/npm/@mdi/svg/svg/database-cog-outline.svg){ width="15%", align=righ }
-
-A **Comparison** button is included in the Main Toolbar,
+A **Comparison** button
+![Comparison Control icon](https://cdn.jsdelivr.net/npm/@mdi/svg/svg/database-cog-outline.svg)
+is included in the Main Toolbar,
 and the corresponding control panel shows different contents
 depending on whether the user has chosen a two-simulation comparison mode or
 a multi-simulation (ensemble) comparison mode.
