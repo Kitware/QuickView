@@ -11,7 +11,17 @@
   - [Simulation files: what is supported?](../simulation_data)
   - State files: how to use them? Description coming soon.
 
-- How to use QuickCompare: coming soon
+- How to use QuickCompare (1): core features shared with QuickView
+  - [File loading](/guides/quickview/file_selection)
+  - [Variables search and load](/guides/quickview/variable_selection)
+  - [Map projections](/guides/quickview/miscellaneous#maps)
+  - [Images/animation export](/guides/quickview/miscellaneous#save-vis)
+  - [Keyboard shortcuts](/guides/quickview/shortcuts)
+
+<!--  - [Cursor probe](/guides/quickview/miscellaneous#cursor-probe) -->
+
+- How to use QuickCompare (2): comparing two or more Simulations
+  - [The graphical UI](/guides/quickcompare/ui_overview)
 
 - Visit the GitHub [repository](https://github.com/Kitware/E3SMQuickCompare)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/E3SMQuickCompare/issues)

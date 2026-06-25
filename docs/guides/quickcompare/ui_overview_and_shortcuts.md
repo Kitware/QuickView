@@ -28,12 +28,13 @@ The only differences between the QuickCompare UI and the QuickView UI have
 to do with the fact that QuickCompare displays multiple simulations and,
 optionally, their differences.
 
-![Comparison Control icon](./screenshots/database-cog-outline.png){ width="5%", align=right }
+![Comparison Control icon](./screenshots/database-cog-outline.png){ width="10%", align=right }
 
 A **Comparison** button is included in the Main Toolbar,
 and the corresponding control panel shows different contents
 depending on whether the user has chosen a two-simulation comparison mode or
-a multi-simulation (ensemble) comparison mode.
+a multi-simulation (ensemble) comparison mode, as shown
+by the two screenshots below.
 Contents in the viewport are organized differently in these two modes.
 
 ![Comparison Control Panel in two-simulation mode](./screenshots/comparison_control_panel_two_sim.png){ width="100%" }

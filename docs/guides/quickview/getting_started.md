@@ -21,6 +21,7 @@
   - [Customization of individual views](./individual_views)
   - [Map projections](./miscellaneous#maps)
   - [Images/animation export](./miscellaneous#save-vis)
+  - [Cursor probe](./miscellaneous#cursor-probe)
 
 - Visit the GitHub [repository](https://github.com/Kitware/QuickView)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/QuickView/issues)
