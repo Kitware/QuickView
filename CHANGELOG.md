@@ -2,6 +2,58 @@
 
 <!-- version list -->
 
+## v2.8.4 (2026-06-25)
+
+### Bug Fixes
+
+- **file-browser**: Reset filter on home and parent action
+  ([`2f02148`](https://github.com/Kitware/QuickView/commit/2f021482d55582fbe308e878a49df44855c922de))
+
+- **lat/lon**: Add spacing between them
+  ([`ee5b3ff`](https://github.com/Kitware/QuickView/commit/ee5b3ffb13e51306e60d908e2b5523a9eab464b9))
+
+### Documentation
+
+- Update guide for local installation
+  ([`13734e4`](https://github.com/Kitware/QuickView/commit/13734e4a52fedf7a548eeb0f74804dc7f6fb1e8f))
+
+- **quickcompare**: Correct image link
+  ([`697dea2`](https://github.com/Kitware/QuickView/commit/697dea232f2860e404c54161e342a9470f1347f0))
+
+- **quickcompare**: Main page and UI overview
+  ([`28eff31`](https://github.com/Kitware/QuickView/commit/28eff318381f2ac0922d3cfd7e04ee01f34abebd))
+
+- **quickcompare**: Update image again
+  ([`322e13a`](https://github.com/Kitware/QuickView/commit/322e13a28411fa1e55f99f9677a1383a1c62baaa))
+
+- **quickcompare**: Update images
+  ([`8ba7854`](https://github.com/Kitware/QuickView/commit/8ba785452b91a3c13fc4d2819d6e31d81d8d6e30))
+
+- **quickview**: Add description and screenshots for data probe
+  ([`5331524`](https://github.com/Kitware/QuickView/commit/5331524c9ffc3018a3234a4a1009b20f336c54ea))
+
+- **quickview**: Adjust screenshots
+  ([`c81ed2c`](https://github.com/Kitware/QuickView/commit/c81ed2c302d5211fbcb18db9a7657cfab240c2cc))
+
+- **quickview**: Adjust screenshots
+  ([`8898b38`](https://github.com/Kitware/QuickView/commit/8898b381b186de7923c8d702ddbc224c34fcfa5f))
+
+- **quickview**: Adjust screenshots again
+  ([`03585ff`](https://github.com/Kitware/QuickView/commit/03585ff982aa3896136dfba40da8721714386f8e))
+
+- **quickview**: Correct screenshot size again
+  ([`9dd8c82`](https://github.com/Kitware/QuickView/commit/9dd8c8267499d795c576d588c8323e4d3e7e99a5))
+
+- **quickview**: Minor update
+  ([`e53deba`](https://github.com/Kitware/QuickView/commit/e53deba63346a7a7d010084412beb4750b67877d))
+
+- **quickview**: Reduce screenshot size
+  ([`f267e4d`](https://github.com/Kitware/QuickView/commit/f267e4d1b3d0988ec27a1d0d0c08addd587fddd2))
+
+- **quickview**: Update screenshot and description of color map control panel
+  ([`4da66cd`](https://github.com/Kitware/QuickView/commit/4da66cdcf3cf4432475583f07bac5ab15e361a2a))
+
+
 ## v2.8.3 (2026-06-22)
 
 ### Bug Fixes
