@@ -2,23 +2,24 @@
 
 ![QuickCompare logo](./screenshots/QuickCompare_app_icon_with_text.png){ width="18%", align=right }
 
-QuickCompare is an offshoot of [QuickView](/guides/quickview/index.md).
+QuickCompare is an offshoot of [QuickView](/guides/quickview/index.md),
+an interactive tool for inspecting data files produced by Earth system simulations.
 Instead of presenting a single simulation,
 QuickCompare contrasts two or more simulations that
-use the same horizontal mesh (and hence the same connectivity file).
+use the same horizontal mesh (and hence the same connectivity information).
 Plots can be shown for the user-selected physical quantities themselves
-as well as differences and/or relative differences with respect
-to a control simulation.
+as well as differences and relative differences between simulations.
 Like [QuickView](/guides/quickview/index.md),
-QuickCompare can present multiple variables simultaneously.
+QuickCompare is designed to present multiple variables simultaneously
+to help identify potential relationships.
 
 Useful resources: see [linked page](./getting_started).
 
 ## Key Features
 
 - Intuitive, minimalist interface tailored for Earth system modeling.
+- Physical quantities displayed together with differences and/or relative differences between simulations.
 - Multi-variable visualization.
-- Differences and relative differences displayed with colors that can facilitate interpretation.
 - Persistent sessions—pick up where you left off.
 - Support for EAM v2, v3, and upcoming v4 output formats
   as well as the E3SM land model ELM's input and output files
@@ -26,12 +27,11 @@ Useful resources: see [linked page](./getting_started).
 
 ## Project Background
 
-The lead developer of QuickView version 2 is
+The lead developer of QuickCompare is
 [Will Dunklin](https://www.kitware.com/will-dunklin/)
 at [Kitware](https://www.kitware.com/).
 Other key contributors include
-Sebastien Joudain, Patrick O'Leary, Berk Geveci, and Dan Lipsa at [Kitware](https://www.kitware.com/)
-as well as
+Sebastien Joudain, Patrick O'Leary, Berk Geveci, and Dan Lipsa at [Kitware](https://www.kitware.com/) as well as
 Hui Wan and Kai Zhang at
 [Pacific Northwest National Laboratory](https://www.pnnl.gov/atmospheric-climate-and-earth-sciences-division).
 
