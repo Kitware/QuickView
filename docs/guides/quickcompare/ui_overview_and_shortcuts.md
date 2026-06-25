@@ -29,7 +29,7 @@ to do with the fact that QuickCompare displays multiple simulations and,
 optionally, their differences.
 
 
-![Comparison Control icon](<img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/database-cog-outline.svg" width="24">){ width="15%", align=righ }
+![Comparison Control icon](https://cdn.jsdelivr.net/npm/@mdi/svg/svg/database-cog-outline.svg){ width="15%", align=righ }
 
 A **Comparison** button is included in the Main Toolbar,
 and the corresponding control panel shows different contents
