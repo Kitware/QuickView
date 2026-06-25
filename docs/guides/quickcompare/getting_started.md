@@ -21,7 +21,7 @@
 <!--  - [Cursor probe](/guides/quickview/miscellaneous#cursor-probe) -->
 
 - How to use QuickCompare (2): comparing two or more Simulations
-  - [The graphical UI](/guides/quickcompare/ui_overview)
+  - [The graphical UI](/guides/quickcompare/ui_overview_and_shortcuts)
 
 - Visit the GitHub [repository](https://github.com/Kitware/E3SMQuickCompare)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/E3SMQuickCompare/issues)
