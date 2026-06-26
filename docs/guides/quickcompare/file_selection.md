@@ -62,7 +62,7 @@ so that fewer clicks are needed in the file search.
 
 ## Resume mode: picking up where you left off {#state-files}
 
-![State explort and import](./screenshots/state_export_import.png){ width="28%", align=right }
+![State explort and import](/guides/quickview/screenshots/state_export_import.png){ width="28%", align=right }
 
 Just like in QuickView, the current state of the analysis session in QuickCompare
 can be saved—and reloaded later to resume the inspection—using
