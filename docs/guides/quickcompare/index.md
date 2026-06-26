@@ -31,7 +31,7 @@ The lead developer of QuickCompare is
 [Will Dunklin](https://www.kitware.com/will-dunklin/)
 at [Kitware](https://www.kitware.com/).
 Other key contributors include
-Sebastien Joudain, Patrick O'Leary, Berk Geveci, and Dan Lipsa at [Kitware](https://www.kitware.com/) as well as
+Sebastien Jourdain, Patrick O'Leary, Berk Geveci, and Dan Lipsa at [Kitware](https://www.kitware.com/) as well as
 Hui Wan and Kai Zhang at
 [Pacific Northwest National Laboratory](https://www.pnnl.gov/atmospheric-climate-and-earth-sciences-division).
 

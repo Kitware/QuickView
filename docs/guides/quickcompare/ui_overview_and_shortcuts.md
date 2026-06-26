@@ -35,10 +35,15 @@ and the corresponding control panel shows different contents
 depending on whether the user has chosen a two-simulation comparison mode or
 a multi-simulation (ensemble) comparison mode, as shown
 by the two screenshots below.
-Contents in the viewport are organized differently in these two modes.
 
 ![Comparison Control Panel in two-simulation mode](./screenshots/comparison_control_panel_two_sim.png){ width="100%" }
 ![Comparison Control Panel in multi-simulation mode](./screenshots/comparison_control_panel_multi_sim.png){ width="100%" }
+
+Contents in the viewport are organized differently in these two modes.
+More details can be found through the following links:
+- [Comparing two simulations](./two-sim_comparison)
+- [Comparing multiple simulations](./multi-sim_comparison)
+
 
 ## Keyboard shortcuts
 

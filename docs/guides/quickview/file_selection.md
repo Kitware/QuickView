@@ -3,7 +3,7 @@
 QuickView can be used in two modes:
 - a [**new-vis mode**](#new-analysis) for starting a new visualization or
 - a [**resume mode**](#state-files) for continuing an earlier analysis saved in a state file.
-These are explained below.
+Both are explained below.
 
 ## New-vis mode: starting a new analysis {#new-analysis}
 
@@ -12,8 +12,8 @@ These are explained below.
 When QuickView is launched using a shell command or the desktop bundle,
 or when the user clicks the "File Loading" icon on the toolbar,
 a dialogue window like the screenshot below is brought up.
-The user is expected to select a connectivity file and at least one simulation data file
-from the file system.
+The user is expected to select a connectivity file and a simulation data file
+from the file browser in this window.
 
 ![File loading window](./screenshots/file_loading_dialogue.png){ width="100%", align=center }
 
@@ -41,14 +41,15 @@ The user can now start to search for and load variables to inspect.
 ::: tip Tip: File system navigation
 ![Nav buttons](./screenshots/file_loading_start_and_parent_dirs.png){ width="12%", align=right }
 For QuickView installed through conda,
-the start directory is the directory in which the app is launched.
+the *start directory* is the directory in which the app is launched.
 After launch, the File Loading dialogue window
 shows the contents in that directory, and the user can double click
-the listed subfolders or use the folder icon with an upward arrow to
-go to the parent directory. A click on the house icon switches
+the listed subdirectories to go in–or use the folder icon with an upward arrow
+to go to the parent directory. A click on the house icon brings the file browser 
 back to the start directory.
-This concept of the start directory is why we recommend that
-users launch QuickView in a directory close to their data.
+Because of this concept of the start directory, we recommend that
+users launch QuickView in a directory close to their data
+so that fewer clicks are needed in the file search.
 :::
 
 
