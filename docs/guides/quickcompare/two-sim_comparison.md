@@ -1,1 +1,1 @@
-# Comparing Two Simualtions Using QuickCompare
+# Comparing Two Simualtions

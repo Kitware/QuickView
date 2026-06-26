@@ -32,7 +32,7 @@ changes to bright blue. A single click starts file loading.
 
 If the files are loaded correctly, the UI changes into a layout like
 the example below, with the [Variable Selection control panel](./variable_selection)
-on the **left** showing a **list of parsed variables** in the simulation file(s)
+on the **left** showing a **list of parsed variables**
 and the viewport on the **right** showing a **brief introduction to QuickView**.
 The user can now start to search for and load variables to inspect.
 

@@ -27,7 +27,7 @@ from the file browser in this window.
   the "Add Simulation" button in the bottom-left corner, or, alternatively,
   double-click a filename (as long as it does *not* start with "connectivity").
   The selected files are listed in gray tabs
-  under "Simulation Files" (see screenshot below);
+  under "Simulation Files" (see screenshot above);
   each tab contains a cross button for deselecting the file.
 
 When both connectivity and simulation files have been selected,
@@ -35,13 +35,13 @@ the pale-blue `Load Files` button in the bottom-right corner of screenshot above
 changes to bright blue; a single click starts file loading.
 If successful, the UI changes into a layout like
 the example below, with the [Variable Selection control panel](/guides/quickview/variable_selection)
-on the **left** showing a **list of parsed variables** in the simulation files
+on the **left** showing a **list of parsed variables**
 and the viewport on the **right** showing a **brief introduction to QuickCompare**.
 The user can now start to
 [select variables and data slices](/guides/quickcompare/variable_and_slice_selection) to inspect.
 Depending on whether two or more simulations have been selected,
 the app will enter into a [two-simulation](./two-sim_comparison)
-or [multi-simulation (ensemble)](./multi-sim_comparison) mode.
+or [multi-simulation (ensemble)](./multi-sim_comparison) comparison mode.
 
 ![File loaded](/guides/quickcompare/screenshots/file_loaded_quickcompare.png){ width="100%", align=center }
 

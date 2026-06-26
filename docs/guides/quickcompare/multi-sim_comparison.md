@@ -1,1 +1,1 @@
-# Comparing Multiple Simulations Using QuickCompare
+# Comparing Multiple Simulations
