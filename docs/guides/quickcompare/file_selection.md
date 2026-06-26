@@ -34,7 +34,7 @@ When both connectivity and simulation files have been selected,
 the pale-blue `Load Files` button in the bottom-right corner of screenshot above 
 changes to bright blue; a single click starts file loading.
 If successful, the UI changes into a layout like
-the example below, with the [Variable Selection control panel](./variable_selection)
+the example below, with the [Variable Selection control panel](/guides/quickview/variable_selection)
 on the **left** showing a **list of parsed variables** in the simulation files
 and the viewport on the **right** showing a **brief introduction to QuickCompare**.
 The user can now start to
