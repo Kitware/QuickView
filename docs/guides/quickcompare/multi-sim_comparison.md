@@ -7,7 +7,7 @@ the rest of the loaded ensemble as test simulations.
 ## Control and test simulations to be displayed
 
 By default, QuickCompare assumes the first simulated selected by by the user
-in the [File Loading](./file_loading) dialogue is the control simulation while
+in the [File Loading](./file_selection) dialogue is the control simulation while
 all the other selected simulations ought to be displayed as test simulations.
 
 This specification can be modified through the "organize simulation collection"
