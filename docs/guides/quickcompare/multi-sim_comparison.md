@@ -4,14 +4,19 @@ For inspecting an ensemble of simulations, QuickCompare assumes
 the user has specified a control simulation, and it treats
 the rest of the loaded ensemble as test simulations.
 
-## Control and test simulations to be displayed
+## Ctr and tests to be displayed
 
 By default, QuickCompare assumes the first simulated selected by by the user
 in the [File Loading](./file_selection) dialogue is the control simulation while
 all the other selected simulations ought to be displayed as test simulations.
 
-This specification can be modified through the "organize simulation collection"
-menu. 
+This specification can be modified through the "Organize simulation collection"
+menu, which allows the user to
+
+- exclude any already-loaded simulations from the display in viewport,
+- specify the control simulation,
+- specify a custom label for each simulation, to be used as a part of the plot titles in the viewport, and
+- change the sequence of the simulations to be displayed.
 
 ![Multi-sim comparison: organize simulation collection](/guides/quickcompare/screenshots/multi-sim_organize_simulation_collection.png){ width="100%", align=center }
 
@@ -22,7 +27,7 @@ Four types of comparison can be displayed:
 1. **Value**: physical physical quantities from different simulations.
 2. **Diff**:  differences of the other simulations with respect to ctrl, i.e., `test - ctrl`.
 3. **Rel Diff (w.r.t. ctrl)**: `(test - ctrl)/ctrl`.
-4. **Rel Diff (w.r.t. mean)**: `(test - ctrl)/[0.5(test+ctrl)`.
+4. **Rel Diff (w.r.t. mean)**: `(test - ctrl)/[0.5(test+ctrl)]`.
 
 In 2-4, a "value" plot (i.e., the physical quantity itself) from the ctrl simulation
 is also shown for reference.
@@ -35,12 +40,11 @@ is used to switch among types.
 
 ## View size and layout 
 
-Assuming the user has loaded $N_v$ variables and $N_s$ simulations.
-The $N_v\cdot N_s$ plots in the viewport are grouped by variable.
+Assuming the user has loaded `Nv` variables and `Ns` simulations.
+The `Nv*Ns` plots in the viewport are grouped by variable.
 
-- The number of plots per row can be changed using the [Viewport Layout](/guides/quickview/viewport_layout)
-  control panel or using the number keys `1`, `2`, `3`, `4`, or `6`.
-- Like in the [two-simulation mode](./two-sim_comparison) mode, a click on
+- The number of plots per row can be changed using the number keys `1`, `2`, `3`, `4`, or `6`.
+- Like in the [two-simulation comparison](./two-sim_comparison) mode, a click on
   a variable name in the top-left corner of a plot group activates a drop-down
   menu to replace the current group by the corresponding plots of another variable
   on the list.
