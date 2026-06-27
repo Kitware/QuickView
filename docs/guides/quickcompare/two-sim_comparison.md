@@ -34,7 +34,7 @@ i.e., variables from the simulation files.
   [Variable Selection control panel](/guides/quickview/variable_selection#variable-groups)
   that indicates the shape (dimension combination) of the current variable.
 
-![Two-sim comparison: variable rows](/guides/quickcompare/screenshots/two-sim_variable_rows.png){ width="100%", align=center }
+![Two-sim comparison: variable rows](/guides/quickcompare/screenshots/two-sim_variable_rows.png){ width="90%", align=center }
 
 - A click on a variable name activates a drop-down menu, allowing a different
   variable to be moved to the current row.
