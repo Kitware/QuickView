@@ -48,7 +48,7 @@ or [multi-simulation (ensemble)](./multi-sim_comparison) comparison mode.
 ::: tip Tip: File system navigation
 ![Nav buttons](/guides/quickview/screenshots/file_loading_start_and_parent_dirs.png){ width="12%", align=right }
 For QuickCompare installed through conda,
-the *start directory* is the directory in which the app is launched.
+the *start directory* is the directory in which the app is launched via a shell command or script.
 After launch, the File Loading dialogue window
 shows the contents in that directory, and the user can double click
 the listed subdirectories to go in–or use the folder icon with an upward arrow

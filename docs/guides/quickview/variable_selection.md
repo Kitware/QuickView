@@ -20,7 +20,7 @@ looks like after a simulation file has been loaded.
 - The first checkbox, to the left of "Name" and below the eye icon,
   can be used to select or unselect all variables on the list.
 
-## Variable groups
+## Variable groups {#variable-groups}
 
 ![File loaded](./screenshots/variable_list_all_selected.png){ width="55%", align=right }
 QuickView sorts variables into different groups according to their dimensions
