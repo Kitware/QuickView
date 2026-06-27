@@ -1,16 +1,16 @@
-# Comparing Two Simualtions
+# Comparing Two Simulations
 
-The two-simulation comparison mode in QuickCompare displays two–potentially out of
-many–smulations in a relatively compact way. Below is an example of the default layout.
+The two-simulation comparison mode in QuickCompare displays two (potentially out of
+many) simulations in a compact way. Below is an example of the default layout.
 
 ![Two-sim comparison: typical layout](/guides/quickcompare/screenshots/two-sim_typical_layout.png){ width="100%", align=center }
 
-Depending on whether two or more simulations are loaded using the
+When two (or more) simulations are loaded using the
 [File Loading](./file_selection.md) dialogue,
-QuickCompare automatically enters into either the two-simulation or multi-simulation
-mode by default. However, in the latter case, the user can manually switch
-to a two-simulation mode by clicking the "Two Sim" tab near the left end of the
-Comparison Control panel. In both modes, drop-down menus titled
+QuickCompare enters the two-simulation (or multi-simulation) mode as the default.
+The user can manually switch to a two-simulation mode by
+clicking the "Two Sim" tab near the left end of the
+Comparison Control panel. In this mode, drop-down menus titled
 "Choose ctrl" and "Choose test" allow the user to select
 the control and test simulations to be compared in the viewport.
 
@@ -24,7 +24,7 @@ i.e., different variables from the simulation files.
 - The variable names are shown in the top-left corner of each row.
 - A click on a variable name activates a drop-down menu, allowing a different
   variable to be moved to the current row.
-  Note that in order for a variable to to be listed in the drop-down,
+  Note that in order for a variable to be listed in the drop-down,
   that variable needs to have been selected and loaded using the
   [Variable Selection control panel](/guides/quickview/variable_selection). 
 
@@ -32,7 +32,7 @@ i.e., different variables from the simulation files.
 
 ## Columns of plots
 
-There can be up to five columns in the viewport displaying the following metrics:
+There can be up to five columns in the viewport displaying the following quantities:
   1. **Ctrl**: the variable in the control simulation;
   2. **Test**: the variable in the test simulating;
   3. **Diff**: the difference, `test - ctrl`;
