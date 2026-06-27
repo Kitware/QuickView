@@ -70,11 +70,12 @@ The remaining views show either the values from the test simulations or their di
 The **control simulation** can be changed either using the *Organize simulation collection*
 dialogue described above or through the *Choose ctrl* drop-down menu near the top of the viewport.
 Changing the control simulation does not alter the display order of the simulations.
-Instead, the views and their titles are updated to reflect the new control simulation.
+Instead, the views and their titles are updated to reflect the new control simulation,
+as demonstrated by the example screenshot below.
 
 ![Multi-sim comparison: change ctrl](/guides/quickcompare/screenshots/multi-sim_change_ctrl.png){ width="100%", align=center }
 
-The display order of simulations within each section
+The **display order of simulations within each section**
 can be changed either by using the up/down buttons in the *Organize simulation collection* dialogue
 or by clicking a simulation label in any view.
 Clicking a label opens a drop-down menu from which a different simulation can be selected for that position.
