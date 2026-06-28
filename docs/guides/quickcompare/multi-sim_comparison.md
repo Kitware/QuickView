@@ -51,7 +51,7 @@ The number of views per row can be changed using the number keys `1`, `2`, `3`, 
 Each section in a viewport is identified by a vertical bar 
 in the color that matches the corresponding variable shape tab
 shown near the top of the
-[Variable Selection control panel](/guides/quickview/variable_selection#variable-groups).
+[Variable Selection](/guides/quickview/variable_selection#variable-groups) control panel.
 The variable name appears in the top-left corner of the section.
 
 ![Multi-sim comparison: variable sections](/guides/quickcompare/screenshots/multi-sim_variable_sections.png){ width="90%", align=center }
@@ -61,7 +61,7 @@ a variable name in the viewport activates a drop-down
 menu to replace the current section by a different variable.
 (A variable appears in the drop-down menu only if it has already
 been selected and loaded using the
-[Variable Selection control panel](/guides/quickview/variable_selection).)
+[Variable Selection](/guides/quickview/variable_selection#variable-groups) control panel.
 
 ![Multi-sim comparison: rearrange variables](/guides/quickcompare/screenshots/multi-sim_rearrange_variables.png){ width="100%", align=center }
 
