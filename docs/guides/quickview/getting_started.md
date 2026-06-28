@@ -17,10 +17,11 @@
   - [Keyboard shortcuts](./shortcuts)
   - [File loading](./file_selection)
   - [Variables search and load](./variable_selection)
+  - [Data slice selection](./slice_selection)
   - [Viewport layout options](./viewport_layout)
   - [Customization of individual views](./individual_views)
   - [Map projections](./miscellaneous#maps)
-  - [Images/animation export](./miscellaneous#save-vis)
+  - [Image/animation export](./miscellaneous#save-vis)
   - [Cursor probe](./miscellaneous#cursor-probe)
 
 - Visit the GitHub [repository](https://github.com/Kitware/QuickView)

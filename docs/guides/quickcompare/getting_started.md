@@ -7,21 +7,29 @@
   [sample simulation files](https://portal.nersc.gov/project/m4359/huiwan/vis/202601_group_compare/) to test the app.
 
 - Concepts 
-  - [Connectivity files: what are they?](../connectivity)
-  - [Simulation files: what is supported?](../simulation_data)
-  - State files: how to use them? Description coming soon.
+  - [Connectivity files: what are they?](/guides/connectivity)
+  - [Simulation files: what is supported?](/guides/simulation_data)
+  - [State files: how to use them?](/guides/quickcompare/file_selection#state-files)
 
-- How to use QuickCompare (1): core features shared with QuickView
-  - [File loading](/guides/quickview/file_selection)
+- How to use QuickCompare: core features shared with QuickView
   - [Variables search and load](/guides/quickview/variable_selection)
-  - [Map projections](/guides/quickview/miscellaneous#maps)
-  - [Images/animation export](/guides/quickview/miscellaneous#save-vis)
+  - [Data slice selection](/guides/quickview/slice_selection)
+  - [Map projections](/guides/quickcompare/miscellaneous#maps)
   - [Keyboard shortcuts](/guides/quickview/shortcuts)
 
-<!--  - [Cursor probe](/guides/quickview/miscellaneous#cursor-probe) -->
+<!--
+  - [Cursor probe](/guides/quickcompare/miscellaneous#cursor-probe)
+-->
 
-- How to use QuickCompare (2): comparing two or more Simulations
+- How to use QuickCompare: comparing two or more Simulations
   - [The graphical UI](/guides/quickcompare/ui_overview_and_shortcuts)
+  - [File loading](/guides/quickcompare/file_selection)
+  - [Two-simulaiton comparison](/guides/quickcompare/two-sim_comparison)
+  - [Multi-simulaiton comparison](/guides/quickcompare/multi-sim_comparison)
+
+<!--
+  - [Image export](/guides/quickcompare/miscellaneous#save-vis)
+-->
 
 - Visit the GitHub [repository](https://github.com/Kitware/E3SMQuickCompare)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/E3SMQuickCompare/issues)
