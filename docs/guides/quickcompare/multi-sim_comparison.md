@@ -23,9 +23,11 @@ This designation can be changed through the **Organize simulation collection** d
 Four types of comparison are available:
 
 1. **Value**: the values of the physical quantities loaded from simulation files.
-2. **Diff**:  the differences between the other simulations and ctrl, i.e., `test - ctrl`.
-3. **Rel Diff (w.r.t. ctrl)**: the differences normalized by ctrl, i.e., `(test - ctrl)/ctrl`.
-4. **Rel Diff (w.r.t. mean)**: the differences normalized by the mean of the test simulation and the control one, i.e., `(test - ctrl)/[0.5(test+ctrl)]`.
+2. **Diff**:  the differences between the test simulations and the control simulation, i.e., `test - ctrl`.
+3. **Rel Diff**: the relative differences with respect to the control simulation, i.e., `(test - ctrl)/ctrl`.
+4. **Sym Rel Diff**: the symmetric counterpart of **Rel Diff**, defined as `2(test - ctrl)/(test+ctrl)`.
+   It normalizes the difference by the average of the control and test simulations
+   and therefore treats the two simulations symmetrically.
 
 For comparison types 2–4, the value plot from the control simulation is also displayed for reference.
 
