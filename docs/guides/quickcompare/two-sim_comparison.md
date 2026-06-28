@@ -6,6 +6,7 @@
 
 The two-simulation comparison mode in QuickCompare displays any two simulations
 selected from the loaded ensemble in a compact layout.
+The screenshot below shows an example of the viewport in its default layout.
 
 ![Two-sim comparison: typical layout](/guides/quickcompare/screenshots/two-sim_typical_layout.png){ width="100%", align=center }
 
@@ -19,7 +20,13 @@ In this mode, drop-down menus titled
 choose which simulations serve as the control and test simulations displayed in the viewport.
 
 ![Two-sim comparison: choose ctrl](/guides/quickcompare/screenshots/two-sim_choose_ctrl.png){ width="100%", align=center }
- 
+
+The viewport in the screenshot above shows a short introductory text.
+After the user [selects and loads variables](/guides/quickview/variable_selection),
+the viewport changes to a number of contour plots organized into rows and columns.
+Each row represents a different variable, while each column represents a different comparison metric.
+The following sections describe how to customize each.
+
 ## Rows of plots
 
 The rows in the viewport correspond to different physical quantities,
@@ -73,7 +80,7 @@ comparison mode in QuickCompare uses the following default color mapping choices
   and contour levels, allowing values to be compared directly by color.
 - Difference and relative difference plots use diverging colormaps centered at zero.
 - Difference and relative difference plots use different colormaps to
-  distinguish signed absolute differences from normalized (relative) differences.
+  distinguish signed (positive or negative) absolute differences from normalized (relative) differences.
 
 Beyond these defaults, QuickCompare provides the same color-mapping
 functionality as QuickView. Each plot in the viewport can be customized

@@ -38,8 +38,10 @@ The **Comparison type** drop-down menu shown in the screenshot below is used to 
 
 ## Viewport layout basics
 
-Let us assume the user has loaded `Ns` simulations and `Nv` variables.
-The viewport contains `Nv × Ns` plots (views), grouped by variable.
+The viewport in the screenshot above shows a short introductory text.
+Let us assume the user has loaded `Ns` simulations and then
+[selects and loads](/guides/quickview/variable_selection) `Nv` variables,
+resulting in a viewport displaying `Ns × Nv` plots (views) grouped by variable.
 Each variable occupies a section consisting of `Ns` views, one for each simulation.
 Since `Ns` may be large, a section can span multiple rows. 
 The number of views per row can be changed using the number keys `1`, `2`, `3`, `4`, or `6`.
