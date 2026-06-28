@@ -62,3 +62,23 @@ by clicking the panel titles ("Ctrl", "Test", "Diff", etc.).
 Any change in the column order is applied consistently to every row in the viewport.
 
 ![Two-sim comparison: rearrange columns](/guides/quickcompare/screenshots/two-sim_rearrange_columns.png){ width="100%", align=center }
+
+
+## Color mapping
+
+To facilitate quantitative comparisons between simulations, the two-simulation
+comparison mode in QuickCompare uses the following default color mapping choices:
+
+- When both are displayed, the control and test variables share the same colormap
+  and contour levels, allowing values to be compared directly by color.
+- Difference and relative difference plots use diverging colormaps centered at zero.
+- Difference and relative difference plots use different colormaps to
+  distinguish signed absolute differences from normalized (relative) differences.
+
+Beyond these defaults, QuickCompare provides the same color-mapping
+functionality as QuickView. Each plot in the viewport can be customized
+individually through the dialogue window opened by clicking its colorbar, as
+described in the
+[QuickView user guide](/guides/quickview/individual_views).
+
+

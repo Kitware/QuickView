@@ -1,6 +1,6 @@
 # Comparing Multiple Simulations
 
-For inspecting an ensemble of simulations, QuickCompare assumes that one simulation is designated as the control simulation (ctrl) and treats all remaining simulations as test simulations.
+For inspecting an ensemble of simulations, QuickCompare assumes that one simulation is designated as the control simulation (ctrl) and treats all remaining simulations as test simulations. The following sections on this page explain how the viewport is organized and how the user can interact with it.
 
 [[toc]]
 
@@ -87,3 +87,19 @@ i.e., the corresponding *Include* box in the *Organize simulation collection* di
 Any change to the display order is applied consistently to every variable section in the viewport.
 
 ![Multi-sim comparison: swap sims](/guides/quickcompare/screenshots/multi-sim_swap_sims.png){ width="100%", align=center }
+
+To facilitate quantitative comparisons between simulations, the multi-simulation
+comparison mode in QuickCompare uses the following default color mapping choices:
+  
+- Within each variable section, all plots of the same comparison type 
+  share the same colormap and contour levels, allowing values to be compared directly by color.
+- Difference and relative difference plots use diverging colormaps centered at zero.
+- Difference and relative difference plots use different colormaps to
+  distinguish signed absolute differences from normalized (relative) differences.
+
+Beyond these defaults, QuickCompare provides the same color-mapping
+functionality as QuickView. Each plot in the viewport can be customized
+individually through the dialogue window opened by clicking its colorbar, as
+described in the
+[QuickView user guide](/guides/quickview/individual_views).
+
