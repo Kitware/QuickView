@@ -18,6 +18,10 @@ This designation can be changed through the **Organize simulation collection** d
 
 ![Multi-sim comparison: organize simulation collection](/guides/quickcompare/screenshots/multi-sim_organize_simulation_collection.png){ width="100%", align=center }
 
+The simulation to be used as control can also be specified using the **Change ctrl** drop-down menu highlighted in the screenshot below.
+
+![Multi-sim comparison: choose ctrl drop-down](/guides/quickcompare/screenshots/multi-sim_choose_ctrl_drop-down.png){ width="100%", align=center }
+
 ## Comparison types
  
 Four types of comparison are available:
@@ -35,6 +39,7 @@ At any given time, all views in the viewport use the same comparison type.
 The **Comparison type** drop-down menu shown in the screenshot below is used to switch among types.
 
 ![Multi-sim comparison: comparison type](/guides/quickcompare/screenshots/multi-sim_comparison_type_drop-down.png){ width="100%", align=center }
+
 
 ## Viewport layout basics
 
