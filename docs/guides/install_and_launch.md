@@ -69,8 +69,8 @@ then use the following commands, replacing the version numbers by what you need:
 
 ```sh
 conda activate quickview-env
-conda install "e3sm-quickview>=2.8.3"
-conda install "e3sm_compareview>=1.8.3"
+conda install conda-forge::"e3sm-quickview>=2.8.4"
+conda install conda-forge::"e3sm_compareview>=1.8.4"
 ```
 
 ### Launching a tool installed via conda

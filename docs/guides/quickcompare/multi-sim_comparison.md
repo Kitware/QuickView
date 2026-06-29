@@ -59,7 +59,7 @@ The variable name appears in the top-left corner of the section.
 Like in the [two-simulation comparison](./two-sim_comparison) mode, a click on
 a variable name in the viewport activates a drop-down
 menu to replace the current section by a different variable.
-(A variable appears in the drop-down menu only if it has already
+A variable appears in the drop-down menu only if it has already
 been selected and loaded using the
 [Variable Selection](/guides/quickview/variable_selection#variable-groups) control panel.
 
@@ -91,7 +91,7 @@ Any change to the display order is applied consistently to every variable sectio
 ![Multi-sim comparison: swap sims](/guides/quickcompare/screenshots/multi-sim_swap_sims.png){ width="100%", align=center }
 
 To facilitate quantitative comparisons between simulations, the multi-simulation
-comparison mode in QuickCompare uses the following default color mapping choices:
+mode in QuickCompare uses the following default color mapping choices:
   
 - Within each variable section, all plots of the same comparison type 
   share the same colormap and contour levels, allowing values to be compared directly by color.

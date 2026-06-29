@@ -74,7 +74,7 @@ Any change in the column order is applied consistently to every row in the viewp
 ## Color mapping
 
 To facilitate quantitative comparisons between simulations, the two-simulation
-comparison mode in QuickCompare uses the following default color mapping choices:
+mode in QuickCompare uses the following default color mapping choices:
 
 - When both are displayed, the control and test variables share the same colormap
   and contour levels, allowing values to be compared directly by color.
