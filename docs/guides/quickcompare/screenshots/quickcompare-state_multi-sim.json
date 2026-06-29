@@ -1,11 +1,11 @@
 {
   "origin": {
     "user": "wanh895",
-    "created": "2026-06-27 15:02:34.244067",
+    "created": "2026-06-28 20:42:51.307780",
     "comment": ""
   },
   "files": {
-    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
+    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
     "simulations": [
       "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
       "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
@@ -69,9 +69,15 @@
     "aspect-ratio": 0.5,
     "active": "auto_layout",
     "tools": [
-      "simulation-controls"
+      "simulation-controls",
+      "select-slice-time"
     ],
-    "help": false
+    "help": false,
+    "variable-order": [
+      "num_a1",
+      "AODBC",
+      "CLDLIQ"
+    ]
   },
   "data-selection": {
     "time_idx": 0,
@@ -89,7 +95,9 @@
       "Robinson"
     ],
     "crop_slider_edit": true,
-    "slice_slider_edit": true
+    "slice_slider_edit": true,
+    "animation_track": "lev",
+    "lev_idx": 53
   },
   "views": [
     {

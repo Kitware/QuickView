@@ -1,16 +1,18 @@
 {
   "origin": {
     "user": "wanh895",
-    "created": "2026-06-26 13:35:21.894814",
+    "created": "2026-06-28 20:45:12.746279",
     "comment": ""
   },
   "files": {
-    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
+    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
     "simulations": [
       "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
       "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
       "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
-      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc"
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc"
     ],
     "connectivity": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
   },
@@ -42,8 +44,18 @@
         "include": true
       },
       {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s6",
+        "include": true
+      },
+      {
         "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
         "label": "amicphys_s4",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s3",
         "include": true
       }
     ]
@@ -57,11 +69,15 @@
     "aspect-ratio": 0.5,
     "active": "auto_layout",
     "tools": [
-      "adjust-layout",
-      "select-slice-time",
-      "simulation-controls"
+      "simulation-controls",
+      "select-slice-time"
     ],
-    "help": false
+    "help": false,
+    "variable-order": [
+      "num_a1",
+      "CLDLIQ",
+      "AODBC"
+    ]
   },
   "data-selection": {
     "time_idx": 0,
@@ -79,7 +95,9 @@
       "Robinson"
     ],
     "crop_slider_edit": true,
-    "slice_slider_edit": true
+    "slice_slider_edit": true,
+    "animation_track": "lev",
+    "lev_idx": 53
   },
   "views": [
     {
@@ -92,7 +110,7 @@
       "array_name": "num_a1__control",
       "config": {
         "order": 1,
-        "size": 4,
+        "size": 3,
         "offset": 0,
         "break_row": false
       },
@@ -152,7 +170,7 @@
       "array_name": "num_a1__diff__1",
       "config": {
         "order": 3,
-        "size": 4,
+        "size": 3,
         "offset": 0,
         "break_row": false
       },
@@ -212,7 +230,7 @@
       "array_name": "CLDLIQ__control",
       "config": {
         "order": 5,
-        "size": 4,
+        "size": 3,
         "offset": 0,
         "break_row": false
       },
@@ -272,7 +290,7 @@
       "array_name": "CLDLIQ__diff__1",
       "config": {
         "order": 7,
-        "size": 4,
+        "size": 3,
         "offset": 0,
         "break_row": false
       },
@@ -315,11 +333,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -10.0,
-          10.0
+          -14515494.003380466,
+          14515494.003380466
         ],
-        "color_value_min": "-10.0",
-        "color_value_max": "10.0"
+        "color_value_min": "-14515494.003380466",
+        "color_value_max": "14515494.003380466"
       }
     },
     {
@@ -331,7 +349,7 @@
       "array_name": "AODBC__control",
       "config": {
         "order": 9,
-        "size": 4,
+        "size": 3,
         "offset": 0,
         "break_row": false
       },
@@ -389,7 +407,7 @@
       "array_name": "AODBC__diff__1",
       "config": {
         "order": 11,
-        "size": 4,
+        "size": 3,
         "offset": 0,
         "break_row": false
       },
