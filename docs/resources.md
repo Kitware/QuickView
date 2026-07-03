@@ -12,6 +12,12 @@
 
 ## Data files
 
-- [Connectivity files](https://doi.org/10.5281/zenodo.16908566)
-- [Sample simulation files](https://zenodo.org/records/16922607)
+- For EAM's cubed-sphere grids
+  - [Quasi-uniform `ne*pg2` meshes](https://doi.org/10.5281/zenodo.16908566)
+  - [Regionally refined meshes](https://doi.org/10.5281/zenodo.20707895).
+
+- Sample simulation files
+  - [Miscellaneous simulations at different resolutions](https://zenodo.org/records/16922607)
+  - [A group of sensitivity experiment at the `ne30` resolution](https://portal.nersc.gov/project/m4359/huiwan/vis/202601_group_compare/)
+
 
