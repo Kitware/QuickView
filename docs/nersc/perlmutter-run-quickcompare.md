@@ -8,41 +8,32 @@ users need to first connect to NERSC using JupyterHub, as described
 
 Once connected,
 
-- Start a terminal from the Launcher options of JupyterHub.
+- Start a Terminal from the Launcher in JupyterHub.
   You will likely need to scroll down in the Launcher in order to
-  see the "Other" section and the terminal icon there, as shown in the screenshot below.
-  Click on the terminal icon, and the Launcher window should turn into a shell.
+  see the "Other" section and the Terminal icon there, as shown in the screenshot below.
+  Click on the Terminal icon, and the Launcher window should turn into a shell.
   !["Other" section of JupyterHub Launcher window](./jupyter_launcher_terminal.png)
 
 - *Optional but recommended*: in the shell, use the `cd` command to go to
   the directory where your data files are located (or a directory closer to the data files than your home directory).
-  While that step is optional, it may save you quite some clicks later in the graphical UI.
+  While this step is optional, it may save you quite some clicks later in the graphical UI.
 
-- Starting QuickCompare using the command `/global/common/software/m4359/quickcompare` in the shell.
+- Starting QuickCompare using the command `/global/common/software/m4359/quickcompare`.
 
-- After some seconds, the terminal window will provide a URL, similar to the screenshot below.
+- After some seconds, a URL is provided in the Terminal, similar to the screenshot below.
   A click on the URL will bring up the graphical UI in a separate brower window or tab.
-  <!-- ![](./quickview/quickview-terminal-with-url.png) -->
-
-:::danger FIXME - image
-:::
+  ![QuickCompare Terminal with URL](./quickcompare/quickcompare-terminal-with-url.png)
 
 - The graphical UI will prompt you to choose connectivity and simulation files, see example below.
-  Double click your connectivity file and then the simulation files, then
+  Double click your connectivity file and then some simulation files, then
   click on the blue "Load Files" button in the bottom-right corner
-  <!-- ![](./quickview/quickview-file-loading.png) -->
+  ![QuickCompare File Loading](./quickcompare/quickcompare-file-loading.png) -->
 
-:::danger FIXME - image
-:::
+- Select the variables to load and inspect.
+  The [variable search and selection functionalities](/guides/quickview/variable_selection)
+  are the same in QuickCompare and QuickView.
 
-- Choosing between two-simulation or multi-simulation comparisons
-
-:::danger FIXME - image
-:::
-
-- Finally, select the variables you want to load and inspect.
-  The variable search and selection functionalities are the same
-  in QuickCompare and QuickView.
+A detailed User's Guide for using QuickCompare can be found through [this link](/guides/quickcompare/index).
 
 ## Shutting down the server
 

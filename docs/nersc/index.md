@@ -20,7 +20,7 @@ on separate pages:
 
 ## Quickstart for NERSC users familiar with JupyterHub
 
-- Login to [JupytherHub](https://jupyter.nersc.gov/hub/login) and start a terminal window (shell).
+- Login to [JupyterHub](https://jupyter.nersc.gov/hub/login) and start a terminal window (shell).
 
 - *Optional but recommended*: in the terminal, use the `cd` command to go to the directory
   where your data files are located (or a directory closer to the data files than your home directory).
@@ -40,12 +40,11 @@ on separate pages:
   A click on the URL will bring up the graphical UI in a separate browser window or tab.
 
 ::: tip Tip 1: Choosing a server for your analysis session.
-JupyterHub's control panel provides NERSC users access to several different types of resources (nodes),
-including, e.g., login node, shared GPU node, exclusive nodes, as explained in
+JupyterHub's control panel offers access to different types of resources,
+including, e.g., login nodes, shared GPU nodes, exclusive nodes, as explained in
 [NERSC's documentation](https://docs.nersc.gov/services/jupyter/reference/).
-Since login nodes are shared by users and hence can get very busy or run into memory constraints,
-and since our tools can make use of GPUs for interactive rendering,
-**we recommend** that users choose a **shared GPU node**.
+Since login nodes may become crowded and hence hit memory constraints,
+for large datasets, we recommend using a shared or exclusive GPU node.
 Keep in mind, though, that time spent on shared GPU nodes or exclusive nodes
 will be charged to your project's allocation.
 :::

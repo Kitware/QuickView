@@ -32,6 +32,8 @@ Once connected,
 - Finally, select the variables you want to load and inspect.
   ![](./quickview/quickview-variable-selection.png)
 
+A detailed User's Guide for using QuickView can be found through [this link](/guides/quickview/index).
+
 ## Shutting down the server
 
 ::: warning ATTENTION: Shut down the server when you are done!
