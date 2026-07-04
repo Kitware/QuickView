@@ -58,7 +58,8 @@ export default defineConfig({
           ],
         },
         {
-          text: "QuickView",
+          text: "QuickView User's Guide",
+          collapsed: true,
           items: [
             { text: "What is QuickView?", link: "/guides/quickview/index" },
             { text: "Getting Started",    link: "/guides/quickview/getting_started" },
@@ -73,7 +74,8 @@ export default defineConfig({
           ],
         },
         {
-          text: "QuickCompare",
+          text: "QuickCompare User's Guide",
+          collapsed: true,
           items: [
             { text: "What is QuickCompare?", link: "/guides/quickcompare/index", },
             { text: "Getting Started",       link: "/guides/quickcompare/getting_started" },
