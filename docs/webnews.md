@@ -1,6 +1,12 @@
 
 ## June 2026
 
+![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="8%", align=right }
+
+2026-06-28: QuickCompare version 1.8.4 was released, sharing most of the core functionalities with QuickView and offering quantitative comparisons
+[between two simulations](/guides/quickcompare/two-sim_comparison)
+and [across an ensemble of more simulations](/guides/quickcompare/multi-sim_comparison).
+
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
 
 2026-06-25: QuickView version 2.8.4 was released, providing a [cursor probe](/guides/quickview/miscellaneous#cursor-probe) for inspecting data values at selected locations in the visualization.

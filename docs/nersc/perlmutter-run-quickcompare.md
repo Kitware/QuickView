@@ -27,7 +27,7 @@ Once connected,
 - The graphical UI will prompt you to choose connectivity and simulation files, see example below.
   Double click your connectivity file and then some simulation files, then
   click on the blue "Load Files" button in the bottom-right corner
-  ![QuickCompare File Loading](./quickcompare/quickcompare-file-loading.png) -->
+  ![QuickCompare File Loading](./quickcompare/quickcompare-file-loading.png)
 
 - Select the variables to load and inspect.
   The [variable search and selection functionalities](/guides/quickview/variable_selection)
