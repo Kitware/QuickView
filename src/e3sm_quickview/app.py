@@ -734,6 +734,7 @@ class EAMApp(TrameApp):
 # -------------------------------------------------------------------------
 def main():
     app = EAMApp()
+    app.server.cli.set_defaults(port=0)
     app.server.start(show_connection_info=False, open_browser=False)
 
 
