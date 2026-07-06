@@ -2,6 +2,112 @@
 
 <!-- version list -->
 
+## v2.8.5 (2026-07-06)
+
+### Bug Fixes
+
+- **port**: Make it dynamic by default
+  ([`4a8f29b`](https://github.com/Kitware/QuickView/commit/4a8f29bdff08fe769a4958e66f285a0c085fc2da))
+
+- **screenshot**: Add infrastructure to enable scaling
+  ([`8ef8268`](https://github.com/Kitware/QuickView/commit/8ef82680149453db6e800ccef08638a3a8d12b74))
+
+- **toolbar**: Make the toolbar sticky to the top
+  ([`9df58ee`](https://github.com/Kitware/QuickView/commit/9df58ee9e6a170580bb00f7cd527202050b3b0a0))
+
+### Documentation
+
+- Commit images files
+  ([`1d55c4f`](https://github.com/Kitware/QuickView/commit/1d55c4f2e0dc9cee2c529049055c7ebb5cff31fa))
+
+- Correct another file path
+  ([`474cf76`](https://github.com/Kitware/QuickView/commit/474cf764fb8884edfd59f7c818abbc9571d12269))
+
+- Correct dead link
+  ([`0f299ef`](https://github.com/Kitware/QuickView/commit/0f299efdf51260c564823f60d815c20afb5bfa09))
+
+- Correct file path
+  ([`3257fd1`](https://github.com/Kitware/QuickView/commit/3257fd178f49a5fc38f24a65ebae469030520018))
+
+- File loading in QuickCompare; minor edits for QuickView
+  ([`a2d50c7`](https://github.com/Kitware/QuickView/commit/a2d50c7a1af0b2ab67d16b4cb8aa0e67df8313de))
+
+- Minor edits
+  ([`ffb307a`](https://github.com/Kitware/QuickView/commit/ffb307a496a75b812e70ab914604e4c04776ced0))
+
+- Minor edits
+  ([`3f02ab4`](https://github.com/Kitware/QuickView/commit/3f02ab492e9208f9f94945c3c0519d080bbc2367))
+
+- Misc small edits and addtitions
+  ([`769f17e`](https://github.com/Kitware/QuickView/commit/769f17e886bcc0b1fe8da7b951ecf80d8e903c55))
+
+- Update 'getting started' pages and an image
+  ([`662be6f`](https://github.com/Kitware/QuickView/commit/662be6f39ac388d4db2eb4964e383394a64a2f59))
+
+- Update data download links
+  ([`75fb2cb`](https://github.com/Kitware/QuickView/commit/75fb2cbd26a7e32265daf595450c53eedf84eb58))
+
+- Update sidebar settings
+  ([`339e281`](https://github.com/Kitware/QuickView/commit/339e28145417f84fe6471c2eaa42c3ca312ad516))
+
+- Update webnews for QuickCompare 1.8.4
+  ([`cc22c1c`](https://github.com/Kitware/QuickView/commit/cc22c1c3c5ae5412a159d8a17f8595751b2fdb6b))
+
+- Update webnews page for QuickView 2.8.4 (data probe)
+  ([`c1c2d1d`](https://github.com/Kitware/QuickView/commit/c1c2d1dba6e20f4882c3b6baf3b76c7b95e2dac6))
+
+- **nersc**: Add previously missing screenshots; minor edits
+  ([`f87f6cb`](https://github.com/Kitware/QuickView/commit/f87f6cbbc2a870f696e5d423fd891461e0d134e7))
+
+- **quickcompare**: Add 'miscellaneous' page
+  ([`9666f46`](https://github.com/Kitware/QuickView/commit/9666f46e15c8673d33962fc4992dc6db48f86271))
+
+- **quickcompare**: Add a screenshot back to multi-sim page
+  ([`7fb815f`](https://github.com/Kitware/QuickView/commit/7fb815f60332cf55e60fb8108a06328dafd5cc16))
+
+- **quickcompare**: Add contents to two-sim comparison page
+  ([`4ce7a82`](https://github.com/Kitware/QuickView/commit/4ce7a8232571e8b58a46ad31f072eaf16c81d72c))
+
+- **quickcompare**: Add documentation on color mapping
+  ([`69e4138`](https://github.com/Kitware/QuickView/commit/69e41388fa4813ea32c64ad5f19b01f9806003eb))
+
+- **quickcompare**: Correct dead link
+  ([`9e85ccc`](https://github.com/Kitware/QuickView/commit/9e85ccc614d8e9ea5ecdd568f82e3e33d8d56f2e))
+
+- **quickcompare**: Correct screenshots
+  ([`6175721`](https://github.com/Kitware/QuickView/commit/6175721badca848d32e350bbd41c655fb23aba5b))
+
+- **quickcompare**: Edits on multi-sim comparison
+  ([`bc15cfe`](https://github.com/Kitware/QuickView/commit/bc15cfefdde278e4220f46480fc197b082ee92a0))
+
+- **quickcompare**: Improve terminology for two-sim and multi-sim comparisons
+  ([`81427e8`](https://github.com/Kitware/QuickView/commit/81427e887f636a13744656ec4d15ba862030e34f))
+
+- **quickcompare**: More minor edits on multi-sim comparison
+  ([`6a4022d`](https://github.com/Kitware/QuickView/commit/6a4022db92669a8125d9769e19e327fe0a566d90))
+
+- **quickcompare**: More on multi-sim comparison
+  ([`0e4c21e`](https://github.com/Kitware/QuickView/commit/0e4c21e40e6aa5b1fd3a2dea4b68eedf6e21aa54))
+
+- **quickcompare**: Multi-sim mode, some edits
+  ([`647586f`](https://github.com/Kitware/QuickView/commit/647586f2524d0a713a722335026ca85bffd9a2fd))
+
+- **quickcompare**: Multi-sim mode, unfinished
+  ([`523a679`](https://github.com/Kitware/QuickView/commit/523a67967ac379b2b1049e637f7634ab5fd1cedd))
+
+- **quickcompare**: Two-sim mode
+  ([`afa306d`](https://github.com/Kitware/QuickView/commit/afa306d970316d560e4c1fddee6e9adc4815439e))
+
+- **quickcompare**: Two-sim mode, minor edits
+  ([`fb7c619`](https://github.com/Kitware/QuickView/commit/fb7c619e439e587d596f725bb1e84fb60ce54d4b))
+
+- **quickcompare**: Update state files
+  ([`1672d76`](https://github.com/Kitware/QuickView/commit/1672d76e4a8d0b364c5a4c438d111a219d7cc4fd))
+
+- **quickview**: Update screenshots to 1.8.4
+  ([`3e33489`](https://github.com/Kitware/QuickView/commit/3e334898bcc1e6ecd3ff69c911e8acf0a02155c2))
+
+
 ## v2.8.4 (2026-06-25)
 
 ### Bug Fixes
