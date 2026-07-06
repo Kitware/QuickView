@@ -168,7 +168,10 @@ class Bold(html.B):
 
 class LandingPage(v3.VContainer):
     def __init__(self):
-        super().__init__(classes="pa-6 pa-md-12")
+        super().__init__(
+            classes="pa-6 pa-md-12 overflow-auto",
+            style=("`height: calc(100vh - ${toolbar_size?.size?.height || 0}px`",),
+        )
 
         with self:
             with html.P(
@@ -188,23 +191,22 @@ class LandingPage(v3.VContainer):
                 The physical quantities are presented in the form of global or regional maps.
                 Currently, QuickView supports only the cubed-sphere "physics" grids,
                 i.e., the ne*pg2 meshes used by the atmosphere component of the
-                {Link("Energy Exascale Earth System Model (E3SM)","https://e3sm.org/")},
-                but extensions to other grids are underway. 
+                {Link("Energy Exascale Earth System Model (E3SM)", "https://e3sm.org/")},
+                but extensions to other grids are underway.
                 QuickView's Python and {Link("trame", "https://www.kitware.com/trame/")}-based
                 graphical User Interface (UI) provides the users with intuitive access to
                 {Link("ParaView", "https://www.paraview.org/")}'s powerful analysis
                 and visualization capabilities without requiring a steep learning curve.
                 A detailed {Bold("User's Guide")} can be found through
-                {Link("this link","https://kitware.github.io/QuickView/guides/quickview/")}.
+                {Link("this link", "https://kitware.github.io/QuickView/guides/quickview/")}.
                 {Bold("Bug reports")} and feature requests can be submitted on
-                {Link("GitHub","https://github.com/Kitware/QuickView/issues")}.
+                {Link("GitHub", "https://github.com/Kitware/QuickView/issues")}.
             """)
 
-#           v3.VImg(
-#               classes="rounded-lg",
-#               src=ASSETS.banner,
-#           )
-
+            # v3.VImg(
+            #     classes="rounded-lg",
+            #     src=ASSETS.banner,
+            # )
 
             Title("Toolbar Icons")
 
@@ -236,10 +238,10 @@ class LandingPage(v3.VContainer):
                         v3.VSpacer()
                         v3.VHotkey(keys="z", variant="contained", inline=True)
 
-            #       with v3.VRow(classes="ma-0 pb-4"):
-            #           v3.VLabel("Toggle view interaction lock")
-            #           v3.VSpacer()
-            #           v3.VHotkey(keys="space", variant="contained", inline=True)
+                    # with v3.VRow(classes="ma-0 pb-4"):
+                    #     v3.VLabel("Toggle view interaction lock")
+                    #     v3.VSpacer()
+                    #     v3.VHotkey(keys="space", variant="contained", inline=True)
 
                     v3.VDivider(classes="mb-4")
 
@@ -347,16 +349,22 @@ class LandingPage(v3.VContainer):
                 {Link("Pacific Northwest National Laboratory", "https://www.pnnl.gov/")}
                 using funding from the U.S. Department of Energy's SciDAC program
                 through a partnership between
-                the {Link("Advanced Scientific Computing Reaserch (ASCR)",
-                "https://www.energy.gov/science/ascr/advanced-scientific-computing-research")} program and
-                the {Link("Biological and Environmental Research (BER)",
-                "https://www.energy.gov/science/ber/biological-and-environmental-research")} program.
-            """
-            )
+                the {
+                Link(
+                    "Advanced Scientific Computing Reaserch (ASCR)",
+                    "https://www.energy.gov/science/ascr/advanced-scientific-computing-research",
+                )
+            } program and
+                the {
+                Link(
+                    "Biological and Environmental Research (BER)",
+                    "https://www.energy.gov/science/ber/biological-and-environmental-research",
+                )
+            } program.
+            """)
 
             Paragraph(f"""
                 The development of QuickView used resources of the
-                {Link("National Energy Research Scientific Computing Center (NERSC)","https://www.nersc.gov/")},
+                {Link("National Energy Research Scientific Computing Center (NERSC)", "https://www.nersc.gov/")},
                 a U.S. Department of Energy User Facility.
-            """
-            )
+            """)

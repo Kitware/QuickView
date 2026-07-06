@@ -404,7 +404,11 @@ class ViewManager(TrameComponent):
         # Vuetify color per dimension type (e.g. midpoint, interface) via utils/colors.py
         type_to_color = {vt["name"]: vt["color"] for vt in self.state.variable_types}
         with DivLayout(self.server, template_name="auto_layout") as self.ui:
-            self.ui.root.classes = "all-variables"
+            self.ui.root.classes = "all-variables overflow-auto"
+            self.ui.root.style = (
+                "`height: calc(100vh - ${toolbar_size?.size?.height || 0}px`",
+            )
+
             if self.state.layout_grouped:
                 with v3.VCol(classes="pa-1"):
                     for var_type in variables.keys():
