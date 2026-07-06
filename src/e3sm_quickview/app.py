@@ -234,23 +234,27 @@ class EAMApp(TrameApp):
                     drawers.FieldSelection(load_variables=self.data_load_variables)
 
                     with v3.VContainer(classes="h-100 pa-0", fluid=True):
-                        with client.SizeObserver("main_size"):
-                            # Sticky toolbar overlay
-                            with html.Div(style=css.TOOLBARS_FIXED_OVERLAY):
-                                client.SizeObserver(
-                                    "toolbar_size",
-                                    style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;",
-                                )
-                                toolbars.Layout(
-                                    apply_size=self.view_manager.apply_size,
-                                    zoom=self.view_manager.zoom,
-                                    pan=self.view_manager.pan,
-                                    reset_camera=self.view_manager.reset_camera,
-                                )
-                                toolbars.Cropping()
-                                toolbars.DataSelection()
-                                toolbars.Animation()
+                        # Sticky toolbar overlay
+                        with html.Div(style=css.TOOLBARS_FIXED_OVERLAY):
+                            client.SizeObserver(
+                                "toolbar_size",
+                                style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;",
+                            )
+                            toolbars.Layout(
+                                apply_size=self.view_manager.apply_size,
+                                zoom=self.view_manager.zoom,
+                                pan=self.view_manager.pan,
+                                reset_camera=self.view_manager.reset_camera,
+                            )
+                            toolbars.Cropping()
+                            toolbars.DataSelection()
+                            toolbars.Animation()
 
+                        with html.Div(
+                            style=(
+                                "`height: calc(100vh - ${toolbar_size?.size?.height || 0}px`",
+                            )
+                        ):
                             # View of all the variables
                             if self.view_manager.use_image_stream:
                                 with rca.ImageStream(

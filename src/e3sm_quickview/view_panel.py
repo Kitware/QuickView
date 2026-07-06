@@ -111,7 +111,7 @@ class VariableView(TrameComponent):
             with v3.VCard(
                 variant="tonal",
                 style=(
-                    "active_layout !== 'auto_layout' ? `height: calc(100% - ${toolbar_size?.size?.height || 0}px)` : 'overflow-hidden'",
+                    "active_layout !== 'auto_layout' ? `height: 100%` : 'overflow-hidden'",
                 ),
                 tile=("active_layout !== 'auto_layout'",),
                 raw_attrs=[f'data-field-name="{self.variable_name}"'],
@@ -225,7 +225,7 @@ class VariableView(TrameComponent):
                                 send_mouse_move=(
                                     f"picking_mode === 'hover' && hover_info === '{self.variable_name}'",
                                 ),
-                                v_on_wheel="window.scrollBy(0, $event.deltaY)",
+                                v_on_wheel="window.document.querySelector('.all-variables')?.scrollBy(0, $event.deltaY)",
                             )
 
                     with v3.VTable(density="compact", theme="dark", striped="even"):

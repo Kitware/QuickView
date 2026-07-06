@@ -4,7 +4,7 @@ NAV_BAR_BOTTOM = (
 )
 
 TOOLBARS_FIXED_OVERLAY = (
-    "`position:sticky;top:0;width:${Math.floor(main_size?.size?.width || 0)}px;z-index:1;background:rgb(var(--v-theme-surface));`",
+    "position:relative;width:100%;z-index:1;background:rgb(var(--v-theme-surface));"
 )
 
 
