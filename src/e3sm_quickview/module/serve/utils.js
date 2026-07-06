@@ -334,7 +334,9 @@ window.trame.utils.quickview = {
   },
   async capturePanel(fieldName) {
     const fileName = getFileName(fieldName);
-    const canvas = await html2canvas(findContainerToCapture(fieldName));
+    const canvas = await html2canvas(findContainerToCapture(fieldName), {
+      // scale: trame.state.state.scale,
+    });
     const dataURL = canvas.toDataURL("image/png");
     if (isTauri) {
       tauriSave("Save screenshot", dataURL, fileName);

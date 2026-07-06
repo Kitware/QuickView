@@ -61,6 +61,8 @@ class EAMApp(TrameApp):
                 "timestamps": [],
                 # Fields summaries
                 "fields_avgs": {},
+                # Screenshot scaling
+                "scale": 1,
             }
         )
 

@@ -304,6 +304,7 @@ class ViewManager(TrameComponent):
 
         views = []
         view_size = [0, 0]
+        scale = self.state.scale
         fullscreen_view = None
         fullscreen_view_name = self.state.active_layout
         for var_type, var_names in variables.items():
@@ -335,8 +336,8 @@ class ViewManager(TrameComponent):
         width_count = math.ceil(math.sqrt(size))
         height_count = math.ceil(size / width_count)
         full_size = [
-            view_size[0] * width_count,
-            view_size[1] * height_count,
+            view_size[0] * width_count * scale,
+            view_size[1] * height_count * scale,
         ]
 
         # Update RenderView
