@@ -35,7 +35,7 @@ class VariableView(TrameComponent):
         self.variable_name = variable_name
         self.variable_type = variable_type
         self.disable_render = False
-        self.name = f"view_{self.variable_name}"
+        self.name = f"view_{self.variable_name.replace('.', '_')}"
         self._bounds_key = f"{self.name}_bounds"
         self.config = ViewConfiguration(server, variable=variable_name)
         self._size = (0, 0)
