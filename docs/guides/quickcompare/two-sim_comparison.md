@@ -27,7 +27,7 @@ the viewport changes to a number of contour plots organized into rows and column
 Each row represents a different variable, while each column represents a different comparison metric.
 The following sections describe how to customize each.
 
-## Rows of plots
+## Rows of plots {#rows}
 
 The rows in the viewport correspond to different physical quantities,
 i.e., different variables from the simulation files.
@@ -48,7 +48,7 @@ i.e., different variables from the simulation files.
 
 ![Two-sim comparison: rearrange rows](/guides/quickcompare/screenshots/two-sim_rearrange_rows.png){ width="100%", align=center }
 
-## Columns of plots
+## Columns of plots {#columns}
 
 The viewport can display up to five columns, corresponding to the following quantities:
   1. **Ctrl**: the variable from the control simulation;

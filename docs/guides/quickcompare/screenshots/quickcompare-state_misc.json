@@ -1,0 +1,282 @@
+{
+  "origin": {
+    "user": "wanh895",
+    "created": "2026-07-12 14:07:08.782934",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
+    "simulations": [
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc"
+    ],
+    "connectivity": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
+  },
+  "comparisons": {
+    "control": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+    "target": "",
+    "mode": "multi-sim",
+    "type": "diff",
+    "columns": [
+      "ctrl",
+      "test",
+      "diff",
+      "comp1"
+    ],
+    "simulations": [
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_r8",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s10",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s8",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s6",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s4",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s3",
+        "include": true
+      }
+    ]
+  },
+  "variables-selection": [
+    "num_a1"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "active": "auto_layout",
+    "tools": [
+      "adjust-layout",
+      "select-slice-time",
+      "simulation-controls",
+      "adjust-databounds"
+    ],
+    "help": false,
+    "variable-order": [
+      "num_a1"
+    ]
+  },
+  "data-selection": {
+    "time_idx": 0,
+    "midpoint_idx": 0,
+    "interface_idx": 0,
+    "crop_longitude": [
+      -30,
+      180
+    ],
+    "crop_latitude": [
+      -30,
+      90
+    ],
+    "projection": [
+      "Robinson"
+    ],
+    "crop_slider_edit": true,
+    "slice_slider_edit": true,
+    "animation_track": "lev",
+    "lev_idx": 55
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__control",
+      "config": {
+        "order": 1,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          72478288.0,
+          1873360128.0
+        ],
+        "color_value_min": "72478288.0",
+        "color_value_max": "1873360128.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__1",
+      "config": {
+        "order": 2,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -538797184.0,
+          538797184.0
+        ],
+        "color_value_min": "-538797184.0",
+        "color_value_max": "538797184.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__2",
+      "config": {
+        "order": 3,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -538797184.0,
+          538797184.0
+        ],
+        "color_value_min": "-538797184.0",
+        "color_value_max": "538797184.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__3",
+      "config": {
+        "order": 4,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -538797184.0,
+          538797184.0
+        ],
+        "color_value_min": "-538797184.0",
+        "color_value_max": "538797184.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__4",
+      "config": {
+        "order": 5,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -538797184.0,
+          538797184.0
+        ],
+        "color_value_min": "-538797184.0",
+        "color_value_max": "538797184.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__5",
+      "config": {
+        "order": 6,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -538797184.0,
+          538797184.0
+        ],
+        "color_value_min": "-538797184.0",
+        "color_value_max": "538797184.0"
+      }
+    }
+  ]
+}

@@ -51,7 +51,7 @@ Each variable occupies a section consisting of `Ns` views, one for each simulati
 Since `Ns` may be large, a section can span multiple rows. 
 The number of views per row can be changed using the number keys `1`, `2`, `3`, `4`, or `6`.
 
-## Variable sections
+## Variable sections {#sections}
 
 Each section in a viewport is identified by a vertical bar 
 in the color that matches the corresponding variable shape tab
@@ -70,7 +70,7 @@ been selected and loaded using the
 
 ![Multi-sim comparison: rearrange variables](/guides/quickcompare/screenshots/multi-sim_rearrange_variables.png){ width="100%", align=center }
 
-## Layout within each section
+## Layout within each section {#within-each-section}
 
 By default, the first view (the top-left plot) shows the values from the control simulation (ctrl).
 The remaining views show either the values from the test simulations or their differences
