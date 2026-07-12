@@ -1,180 +1,117 @@
 {
   "origin": {
     "user": "wanh895",
-    "created": "2026-06-24 16:26:41.817004",
+    "created": "2026-07-12 14:57:03.166878",
     "comment": ""
   },
   "files": {
-    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pd.eam.h0.2011-01.nc",
+    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
     "simulations": [
-      "/Users/wanh895/Downloads/viz/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pi.eam.h0.2011-01.nc",
-      "/Users/wanh895/Downloads/viz/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pd.eam.h0.2011-01.nc"
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
+      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc"
     ],
-    "connectivity": "/Users/wanh895/Downloads/recent_files/Hui/viz/202511_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
+    "connectivity": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
   },
   "comparisons": {
-    "control": "/Users/wanh895/Downloads/viz/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pi.eam.h0.2011-01.nc",
-    "target": "/Users/wanh895/Downloads/viz/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pd.eam.h0.2011-01.nc",
-    "mode": "two-sim",
+    "control": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+    "target": "",
+    "mode": "multi-sim",
     "type": "diff",
     "columns": [
+      "ctrl",
       "test",
       "diff",
       "comp1"
     ],
     "simulations": [
       {
-        "path": "/Users/wanh895/Downloads/viz/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pi.eam.h0.2011-01.nc",
-        "label": "v2_ndg_cdnc_ssat_diag_simple_pi",
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_r8",
         "include": true
       },
       {
-        "path": "/Users/wanh895/Downloads/viz/202511_compare/v2_ndg_cdnc_ssat_diag_simple_pd.eam.h0.2011-01.nc",
-        "label": "v2_ndg_cdnc_ssat_diag_simple_pd",
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s10",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s8",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s6",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s4",
+        "include": true
+      },
+      {
+        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s3",
         "include": true
       }
     ]
   },
   "variables-selection": [
-    "BURDENBC",
-    "SHFLX",
-    "CLDLIQ",
-    "CFAD_SR532_CAL",
-    "CLD_CAL",
-    "CLD_MISR",
-    "FISCCP1_COSP",
-    "RFL_PARASOL",
-    "WP2_CLUBB",
-    "WP3_CLUBB"
+    "num_a1",
+    "BURDEN1"
   ],
   "layout": {
     "aspect-ratio": 0.5,
     "active": "auto_layout",
     "tools": [
+      "adjust-layout",
+      "select-slice-time",
       "simulation-controls",
       "adjust-databounds",
-      "adjust-layout",
       "select-fields",
-      "animation-controls",
-      "select-slice-time"
+      "animation-controls"
     ],
-    "help": false
+    "help": false,
+    "variable-order": [
+      "num_a1",
+      "BURDEN1"
+    ]
   },
   "data-selection": {
     "time_idx": 0,
     "midpoint_idx": 0,
     "interface_idx": 0,
     "crop_longitude": [
-      -30,
+      -180,
       180
     ],
     "crop_latitude": [
-      -30,
+      -90,
       90
     ],
     "projection": [
       "Robinson"
     ],
     "crop_slider_edit": true,
-    "slice_slider_edit": true
+    "slice_slider_edit": true,
+    "animation_track": "lev",
+    "lev_idx": 36
   },
   "views": [
     {
       "type": [
         "time",
+        "lev",
         "ncol"
       ],
-      "name": "BURDENBC",
-      "array_name": "BURDENBC__test__1",
+      "name": "num_a1",
+      "array_name": "num_a1__control",
       "config": {
         "order": 1,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Yellow - Gray - Blue",
-        "invert": true,
-        "color_blind": false,
-        "use_log_scale": "log",
-        "discrete_log": true,
-        "n_discrete_colors": 10,
-        "override_range": true,
-        "color_range": [
-          0.0,
-          1e-05
-        ],
-        "color_value_min": "0.0",
-        "color_value_max": "1e-05"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ncol"
-      ],
-      "name": "BURDENBC",
-      "array_name": "BURDENBC__diff__1",
-      "config": {
-        "order": 2,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": true,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -9.240559393219883e-06,
-          9.240559393219883e-06
-        ],
-        "color_value_min": "-9.240559393219883e-06",
-        "color_value_max": "9.240559393219883e-06"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ncol"
-      ],
-      "name": "BURDENBC",
-      "array_name": "BURDENBC__comp1__1",
-      "config": {
-        "order": 3,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": true,
-        "n_discrete_colors": 8,
-        "override_range": false,
-        "color_range": [
-          -9.639813215571696,
-          9.639813215571696
-        ],
-        "color_value_min": "-9.639813215571696",
-        "color_value_max": "9.639813215571696"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ncol"
-      ],
-      "name": "SHFLX",
-      "array_name": "SHFLX__test__1",
-      "config": {
-        "order": 4,
         "size": 4,
         "offset": 0,
         "break_row": false
@@ -188,20 +125,111 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -42.78340148925781,
-          232.8860321044922
+          70553744.0,
+          357089568.0
         ],
-        "color_value_min": "-42.78340148925781",
-        "color_value_max": "232.8860321044922"
+        "color_value_min": "70553744.0",
+        "color_value_max": "357089568.0"
       }
     },
     {
       "type": [
         "time",
+        "lev",
         "ncol"
       ],
-      "name": "SHFLX",
-      "array_name": "SHFLX__diff__1",
+      "name": "num_a1",
+      "array_name": "num_a1__diff__1",
+      "config": {
+        "order": 2,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -106902840.0,
+          106902840.0
+        ],
+        "color_value_min": "-106902840.0",
+        "color_value_max": "106902840.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__2",
+      "config": {
+        "order": 3,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -106902840.0,
+          106902840.0
+        ],
+        "color_value_min": "-106902840.0",
+        "color_value_max": "106902840.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__3",
+      "config": {
+        "order": 4,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -106902840.0,
+          106902840.0
+        ],
+        "color_value_min": "-106902840.0",
+        "color_value_max": "106902840.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__4",
       "config": {
         "order": 5,
         "size": 4,
@@ -217,40 +245,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -42.10041522979736,
-          42.10041522979736
+          -106902840.0,
+          106902840.0
         ],
-        "color_value_min": "-42.10041522979736",
-        "color_value_max": "42.10041522979736"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ncol"
-      ],
-      "name": "SHFLX",
-      "array_name": "SHFLX__comp1__1",
-      "config": {
-        "order": 6,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -446.5508472025762,
-          446.5508472025762
-        ],
-        "color_value_min": "-446.5508472025762",
-        "color_value_max": "446.5508472025762"
+        "color_value_min": "-106902840.0",
+        "color_value_max": "106902840.0"
       }
     },
     {
@@ -259,8 +258,37 @@
         "lev",
         "ncol"
       ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__test__1",
+      "name": "num_a1",
+      "array_name": "num_a1__diff__5",
+      "config": {
+        "order": 6,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -106902840.0,
+          106902840.0
+        ],
+        "color_value_min": "-106902840.0",
+        "color_value_max": "106902840.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "BURDEN1",
+      "array_name": "BURDEN1__control",
       "config": {
         "order": 7,
         "size": 4,
@@ -276,21 +304,20 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          0.0,
-          0.0
+          2.6628911200532457e-06,
+          0.00010036844469141215
         ],
-        "color_value_min": "0.0",
-        "color_value_max": "0.0"
+        "color_value_min": "2.6628911200532457e-06",
+        "color_value_max": "0.00010036844469141215"
       }
     },
     {
       "type": [
         "time",
-        "lev",
         "ncol"
       ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__diff__1",
+      "name": "BURDEN1",
+      "array_name": "BURDEN1__diff__1",
       "config": {
         "order": 8,
         "size": 4,
@@ -306,21 +333,20 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.0,
-          0.0
+          -3.3805314160417765e-05,
+          3.3805314160417765e-05
         ],
-        "color_value_min": "-0.0",
-        "color_value_max": "0.0"
+        "color_value_min": "-3.3805314160417765e-05",
+        "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
       "type": [
         "time",
-        "lev",
         "ncol"
       ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__comp1__1",
+      "name": "BURDEN1",
+      "array_name": "BURDEN1__diff__2",
       "config": {
         "order": 9,
         "size": 4,
@@ -328,7 +354,7 @@
         "break_row": false
       },
       "colormap": {
-        "preset": "Blue Orange (divergent)",
+        "preset": "Cool to Warm (Extended)",
         "invert": false,
         "color_blind": false,
         "use_log_scale": "linear",
@@ -336,22 +362,20 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -1e+299,
-          1e+299
+          -3.3805314160417765e-05,
+          3.3805314160417765e-05
         ],
-        "color_value_min": "-1e+299",
-        "color_value_max": "1e+299"
+        "color_value_min": "-3.3805314160417765e-05",
+        "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
       "type": [
         "time",
-        "cosp_ht",
-        "cosp_sr",
         "ncol"
       ],
-      "name": "CFAD_SR532_CAL",
-      "array_name": "CFAD_SR532_CAL__test__1",
+      "name": "BURDEN1",
+      "array_name": "BURDEN1__diff__3",
       "config": {
         "order": 10,
         "size": 4,
@@ -359,7 +383,7 @@
         "break_row": false
       },
       "colormap": {
-        "preset": "Rainbow Desaturated",
+        "preset": "Cool to Warm (Extended)",
         "invert": false,
         "color_blind": false,
         "use_log_scale": "linear",
@@ -367,22 +391,20 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          0.0,
-          0.0
+          -3.3805314160417765e-05,
+          3.3805314160417765e-05
         ],
-        "color_value_min": "0.0",
-        "color_value_max": "0.0"
+        "color_value_min": "-3.3805314160417765e-05",
+        "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
       "type": [
         "time",
-        "cosp_ht",
-        "cosp_sr",
         "ncol"
       ],
-      "name": "CFAD_SR532_CAL",
-      "array_name": "CFAD_SR532_CAL__diff__1",
+      "name": "BURDEN1",
+      "array_name": "BURDEN1__diff__4",
       "config": {
         "order": 11,
         "size": 4,
@@ -398,22 +420,20 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.0,
-          0.0
+          -3.3805314160417765e-05,
+          3.3805314160417765e-05
         ],
-        "color_value_min": "-0.0",
-        "color_value_max": "0.0"
+        "color_value_min": "-3.3805314160417765e-05",
+        "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
       "type": [
         "time",
-        "cosp_ht",
-        "cosp_sr",
         "ncol"
       ],
-      "name": "CFAD_SR532_CAL",
-      "array_name": "CFAD_SR532_CAL__comp1__1",
+      "name": "BURDEN1",
+      "array_name": "BURDEN1__diff__5",
       "config": {
         "order": 12,
         "size": 4,
@@ -421,66 +441,6 @@
         "break_row": false
       },
       "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1e+299,
-          1e+299
-        ],
-        "color_value_min": "-1e+299",
-        "color_value_max": "1e+299"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_ht",
-        "ncol"
-      ],
-      "name": "CLD_CAL",
-      "array_name": "CLD_CAL__test__1",
-      "config": {
-        "order": 13,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          0.0,
-          0.0
-        ],
-        "color_value_min": "0.0",
-        "color_value_max": "0.0"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_ht",
-        "ncol"
-      ],
-      "name": "CLD_CAL",
-      "array_name": "CLD_CAL__diff__1",
-      "config": {
-        "order": 14,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
         "preset": "Cool to Warm (Extended)",
         "invert": false,
         "color_blind": false,
@@ -489,497 +449,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.0,
-          0.0
+          -3.3805314160417765e-05,
+          3.3805314160417765e-05
         ],
-        "color_value_min": "-0.0",
-        "color_value_max": "0.0"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_ht",
-        "ncol"
-      ],
-      "name": "CLD_CAL",
-      "array_name": "CLD_CAL__comp1__1",
-      "config": {
-        "order": 15,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1e+299,
-          1e+299
-        ],
-        "color_value_min": "-1e+299",
-        "color_value_max": "1e+299"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_htmisr",
-        "cosp_tau",
-        "ncol"
-      ],
-      "name": "CLD_MISR",
-      "array_name": "CLD_MISR__test__1",
-      "config": {
-        "order": 16,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          0.0,
-          31.66666603088379
-        ],
-        "color_value_min": "0.0",
-        "color_value_max": "31.66666603088379"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_htmisr",
-        "cosp_tau",
-        "ncol"
-      ],
-      "name": "CLD_MISR",
-      "array_name": "CLD_MISR__diff__1",
-      "config": {
-        "order": 17,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -31.66666603088379,
-          31.66666603088379
-        ],
-        "color_value_min": "-31.66666603088379",
-        "color_value_max": "31.66666603088379"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_htmisr",
-        "cosp_tau",
-        "ncol"
-      ],
-      "name": "CLD_MISR",
-      "array_name": "CLD_MISR__comp1__1",
-      "config": {
-        "order": 18,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -50.00000018477441,
-          50.00000018477441
-        ],
-        "color_value_min": "-50.00000018477441",
-        "color_value_max": "50.00000018477441"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_prs",
-        "cosp_tau",
-        "ncol"
-      ],
-      "name": "FISCCP1_COSP",
-      "array_name": "FISCCP1_COSP__test__1",
-      "config": {
-        "order": 19,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          0.0,
-          8.602150917053223
-        ],
-        "color_value_min": "0.0",
-        "color_value_max": "8.602150917053223"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_prs",
-        "cosp_tau",
-        "ncol"
-      ],
-      "name": "FISCCP1_COSP",
-      "array_name": "FISCCP1_COSP__diff__1",
-      "config": {
-        "order": 20,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -6.210526347160339,
-          6.210526347160339
-        ],
-        "color_value_min": "-6.210526347160339",
-        "color_value_max": "6.210526347160339"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_prs",
-        "cosp_tau",
-        "ncol"
-      ],
-      "name": "FISCCP1_COSP",
-      "array_name": "FISCCP1_COSP__comp1__1",
-      "config": {
-        "order": 21,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -27.999999620020397,
-          27.999999620020397
-        ],
-        "color_value_min": "-27.999999620020397",
-        "color_value_max": "27.999999620020397"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_sza",
-        "ncol"
-      ],
-      "name": "RFL_PARASOL",
-      "array_name": "RFL_PARASOL__test__1",
-      "config": {
-        "order": 22,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          0.0,
-          0.8953832387924194
-        ],
-        "color_value_min": "0.0",
-        "color_value_max": "0.8953832387924194"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_sza",
-        "ncol"
-      ],
-      "name": "RFL_PARASOL",
-      "array_name": "RFL_PARASOL__diff__1",
-      "config": {
-        "order": 23,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -0.2408246099948883,
-          0.2408246099948883
-        ],
-        "color_value_min": "-0.2408246099948883",
-        "color_value_max": "0.2408246099948883"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "cosp_sza",
-        "ncol"
-      ],
-      "name": "RFL_PARASOL",
-      "array_name": "RFL_PARASOL__comp1__1",
-      "config": {
-        "order": 24,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1.2568360707328243,
-          1.2568360707328243
-        ],
-        "color_value_min": "-1.2568360707328243",
-        "color_value_max": "1.2568360707328243"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
-      "name": "WP2_CLUBB",
-      "array_name": "WP2_CLUBB__test__1",
-      "config": {
-        "order": 25,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          0.00039999998989515007,
-          0.00039999998989515007
-        ],
-        "color_value_min": "0.00039999998989515007",
-        "color_value_max": "0.00039999998989515007"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
-      "name": "WP2_CLUBB",
-      "array_name": "WP2_CLUBB__diff__1",
-      "config": {
-        "order": 26,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -0.0,
-          0.0
-        ],
-        "color_value_min": "-0.0",
-        "color_value_max": "0.0"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
-      "name": "WP2_CLUBB",
-      "array_name": "WP2_CLUBB__comp1__1",
-      "config": {
-        "order": 27,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -0.0,
-          0.0
-        ],
-        "color_value_min": "-0.0",
-        "color_value_max": "0.0"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
-      "name": "WP3_CLUBB",
-      "array_name": "WP3_CLUBB__test__1",
-      "config": {
-        "order": 28,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          0.0,
-          0.0
-        ],
-        "color_value_min": "0.0",
-        "color_value_max": "0.0"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
-      "name": "WP3_CLUBB",
-      "array_name": "WP3_CLUBB__diff__1",
-      "config": {
-        "order": 29,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -0.0,
-          0.0
-        ],
-        "color_value_min": "-0.0",
-        "color_value_max": "0.0"
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
-      "name": "WP3_CLUBB",
-      "array_name": "WP3_CLUBB__comp1__1",
-      "config": {
-        "order": 30,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Blue Orange (divergent)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1e+299,
-          1e+299
-        ],
-        "color_value_min": "-1e+299",
-        "color_value_max": "1e+299"
+        "color_value_min": "-3.3805314160417765e-05",
+        "color_value_max": "3.3805314160417765e-05"
       }
     }
   ]

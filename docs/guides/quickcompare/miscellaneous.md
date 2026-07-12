@@ -66,8 +66,8 @@ QuickCompare provides three ways for the user to save the visualization as image
 - A click on the **camera icon next to the variable name** in the upper-left corner of
   each row of plots in the [two-simulation mode](./two-sim_comparison#rows) mode—or
   each section of plots in the [multi-simulation mode](./multi-sim_comparison#sections) mode—
-  saves that row or section of plots as a `.png` file.
-  The file name starts with the variable name;
+  saves that row or section as a `.png` file.
+  The filename starts with the variable name;
   dimension names and indices are appended when relevant.
 
 - A click on the **camera icon above each plot**
@@ -77,4 +77,4 @@ Given the large amount of views (plots) typically involved in a QuickCompare ses
 resulting from loading multiple simulations and variables as well as the different
 metrics (i.e., physical quantities themselves and various differences),
 QuickCompare currently does not offer animation download,
-but we, the developers, are open to user feedback and suggestions in that regard. 
+but the developers are open to user feedback.
