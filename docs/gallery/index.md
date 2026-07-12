@@ -7,6 +7,32 @@
 ![EAMv2 aerosols](/gallery/gallery_eamv2_aerosols_ne30.png){ width="100%", align=center }
 
 
+## Aerosol number concentrations in sensitivity experiments displayed by [QuickCompare](/guides/quickcompare/index) {#quickcompare-aerosols}
+
+- Horizontal mesh:ne30pg2 (~165 km)
+- Simulation performed and visualization created by: Hui Wan (PNNL)
+
+<figure>
+  <figcaption>
+   The following screenshot shows the accumulation-mode aerosol number mixing ratio from six EAMv2 simulations. By default, QuickCompare displays all simulations using the same colormap and contour levels, enabling direct visual comparison of the values.
+  </figcaption>
+  <img
+    src="/gallery/gallery_quickcompare_multi-sim_value.png"
+    alt="QuickCompare, value"
+    width="100%">
+</figure>
+
+<figure>
+  <figcaption>
+   The following screenshot shows the accumulation-mode aerosol number mixing ratio from the control simulation, followed by the difference between each of five sensitivity experiments and the control simulation. By default, QuickCompare displays all difference plots using the same colormap and contour levels, enabling direct visual comparison of the values. The default colormap for difference plots is a diverging colormap centered at zero.
+  </figcaption>
+  <img
+    src="/gallery/gallery_quickcompare_multi-sim_diff.png"
+    alt="QuickCompare, diff"
+    width="100%">
+</figure>
+
+
 ## A few ELM output variables displayed by [QuickView](/guides/quickview/index) {#elmv2}
 
 - Horizontal mesh:ne30pg2 (~165 km)
