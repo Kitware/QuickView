@@ -2,6 +2,33 @@
 
 <!-- version list -->
 
+## v2.9.0 (2026-07-14)
+
+### Bug Fixes
+
+- **view**: Sanitize variable name
+  ([`06d12d5`](https://github.com/Kitware/QuickView/commit/06d12d51634ad9012604e5e6734668f5550aa2ac))
+
+### Documentation
+
+- Add QuickCompare sample screenshots to gallery
+  ([`4629a84`](https://github.com/Kitware/QuickView/commit/4629a848ee94633f56a7bf78f367b7931b299ad2))
+
+- **quickcompare**: Add section on image download
+  ([`061ceb6`](https://github.com/Kitware/QuickView/commit/061ceb65405fb05bf071282c168dab4361f73b77))
+
+- **quickcompare**: Update screenshots for multi-sim comparison page
+  ([`675d0c8`](https://github.com/Kitware/QuickView/commit/675d0c8d63bdb5a69a749ba07c3a6babe3b36f5e))
+
+- **quickcompare**: Update screenshots for two-sim comparison page
+  ([`0a290b0`](https://github.com/Kitware/QuickView/commit/0a290b0edeb6af4876fbd9ce3437de288e00387a))
+
+### Features
+
+- **Spherical**: Add spherical projection ([#124](https://github.com/Kitware/QuickView/pull/124),
+  [`a2a1f4d`](https://github.com/Kitware/QuickView/commit/a2a1f4d4909b1a18a4b83432bd52ad1af0330046))
+
+
 ## v2.8.5 (2026-07-06)
 
 ### Bug Fixes
