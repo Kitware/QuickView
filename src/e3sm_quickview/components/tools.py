@@ -264,6 +264,11 @@ class MapProjection(v3.VTooltip):
                 "value": "Mollweide",
                 "key": "m",
             },
+            {
+                "title": "Spherical",
+                "value": "Spherical",
+                "key": "n",
+            },
         ]
 
 

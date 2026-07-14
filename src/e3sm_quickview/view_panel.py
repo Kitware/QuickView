@@ -82,6 +82,7 @@ class VariableView(TrameComponent):
 
     def reset_camera(self):
         self.renderer.ResetCameraScreenSpace(0.9)
+        self.renderer.ResetCameraClippingRange()
 
     def update_size(self, size):
         new_size = (int(size["w"] * size["p"]), int(size["h"] * size["p"]))

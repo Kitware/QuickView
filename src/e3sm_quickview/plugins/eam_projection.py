@@ -35,6 +35,7 @@ from paraview import print_error
 from vtkmodules.util import numpy_support, vtkConstants
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 
+
 # Number of threads for the projection fan-out. pyproj releases the GIL
 # inside Transformer.transform, so chunking the input across threads
 # scales nearly linearly (7.4x on 8 threads in our bench). Default is
@@ -74,6 +75,7 @@ def _threaded_transform(xformer, x, y):
     x_out = np.concatenate([r[0] for r in results])
     y_out = np.concatenate([r[1] for r in results])
     return x_out, y_out
+
 
 try:
     import warnings
@@ -204,7 +206,7 @@ def add_cell_arrays(inData, outData, cached_output):
                 out_np = numpy_support.vtk_to_numpy(out_array)
                 for s, e in zip(starts, ends):
                     src_off = int(pid_np[s])
-                    out_np[s:e] = in_np[src_off:src_off + (e - s)]
+                    out_np[s:e] = in_np[src_off : src_off + (e - s)]
                 out_array.Modified()
 
 
@@ -381,6 +383,7 @@ class EAMLineSource(VTKPythonAlgorithmBase):
                         <Entry value="0" text="Cyl. Equidistant"/>
                         <Entry value="1" text="Robinson"/>
                         <Entry value="2" text="Mollweide"/>
+                        <Entry value="3" text="Spherical"/>
                     </EnumerationDomain>
                 </IntVectorProperty>
                 """
@@ -446,26 +449,42 @@ class EAMProject(VTKPythonAlgorithmBase):
                     x = flat[0::3] - 180.0 if self.translate else flat[0::3]
                     y = flat[1::3]
 
-                    try:
-                        # Use proj4 string for WGS84 instead of EPSG code to avoid database dependency
-                        latlon = Proj(proj="latlong", datum="WGS84")
-                        if self.project == 1:
-                            proj = Proj(proj="robin")
-                        elif self.project == 2:
-                            proj = Proj(proj="moll")
-                        else:
-                            # Should not reach here, but return without transformation
+                    if self.project == 3:
+                        # Spherical
+                        to_rad = np.pi / 180
+                        x_rad = x * to_rad
+                        y_rad = y * to_rad
+                        cos_y_rad = np.cos(y_rad)
+                        xs = np.cos(x_rad) * cos_y_rad
+                        zs = np.sin(x_rad) * cos_y_rad
+                        ys = np.sin(y_rad)
+                        flat[0::3] = xs
+                        flat[1::3] = ys
+                        flat[2::3] = zs
+                    else:
+                        try:
+                            # Use proj4 string for WGS84 instead of EPSG code to avoid database dependency
+                            latlon = Proj(proj="latlong", datum="WGS84")
+                            if self.project == 1:
+                                proj = Proj(proj="robin")
+                            elif self.project == 2:
+                                proj = Proj(proj="moll")
+                            else:
+                                # Should not reach here, but return without transformation
+                                return 1
+
+                            xformer = Transformer.from_proj(
+                                latlon, proj, always_xy=True
+                            )
+                            with _perf.timed("project.pyproj_transform"):
+                                res = _threaded_transform(xformer, x, y)
+                        except Exception as e:
+                            print(f"Projection error: {e}")
+                            # If projection fails, return without modifying coordinates
                             return 1
 
-                        xformer = Transformer.from_proj(latlon, proj, always_xy=True)
-                        with _perf.timed("project.pyproj_transform"):
-                            res = _threaded_transform(xformer, x, y)
-                    except Exception as e:
-                        print(f"Projection error: {e}")
-                        # If projection fails, return without modifying coordinates
-                        return 1
-                    flat[0::3] = np.array(res[0])
-                    flat[1::3] = np.array(res[1])
+                        flat[0::3] = np.array(res[0])
+                        flat[1::3] = np.array(res[1])
 
                     outPoints = flat.reshape(out_points_np.shape)
                     _coords = numpy_support.numpy_to_vtk(outPoints, deep=True)
@@ -473,7 +492,9 @@ class EAMProject(VTKPythonAlgorithmBase):
                     # the previous cached_points, if any, is available for
                     # garbage collection after this assignment
                     self.cached_points = out_points_vtk
-                    self._cached_input_points = in_points  # hold ref so id() stays valid
+                    self._cached_input_points = (
+                        in_points  # hold ref so id() stays valid
+                    )
                     self._cached_key = cache_key
 
             return 1
