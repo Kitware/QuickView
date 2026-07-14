@@ -89,6 +89,9 @@ class Continent:
         self._projection = value
         self.proj.Projection = value
 
+    def update(self):
+        self.geometry.UpdatePipeline()
+
 
 class GridLines:
     def __init__(self, projection="Mollweide"):
@@ -122,6 +125,10 @@ class GridLines:
     def projection(self, value):
         self._projection = value
         self.proj.Projection = value
+
+    def update(self):
+        self.geometry.UpdatePipeline()
+        self.mapper.Update()
 
 
 class DataReader:
@@ -286,6 +293,9 @@ class EAMVisSource:
             self.data_reader.projection = proj
             self.grid_lines.projection = proj
             self.continent.projection = proj
+            self.data_reader.update()
+            self.grid_lines.update()
+            self.continent.update()
 
     def UpdatePipeline(self, time=0.0):
         self.data_reader.update(time)
@@ -307,6 +317,14 @@ class EAMVisSource:
             return
 
         self.data_reader.reader.Variables = list(set([*vars, "lat", "lon"]))
+
+    def Clip(self, plane=None):
+        self.grid_lines.mapper.RemoveAllClippingPlanes()
+        self.continent.mapper.RemoveAllClippingPlanes()
+
+        if plane:
+            self.grid_lines.mapper.AddClippingPlane(plane)
+            self.continent.mapper.AddClippingPlane(plane)
 
 
 if __name__ == "__main__":

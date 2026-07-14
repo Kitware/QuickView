@@ -12,6 +12,7 @@ from trame.decorators import controller
 from trame.ui.html import DivLayout
 from trame.widgets import client, colormaps, rca
 from trame.widgets import vuetify3 as v3
+from vtkmodules.vtkCommonDataModel import vtkPlane
 from vtkmodules.vtkRenderingCore import (
     vtkCamera,
     vtkCellPicker,
@@ -56,6 +57,7 @@ class ViewManager(TrameComponent):
         super().__init__(server)
         self.use_image_stream = True
         self._camera = vtkCamera(parallel_projection=1)
+        self._clip_plane = vtkPlane()
         self._render_window = vtkRenderWindow()
         self._render_window.OffScreenRenderingOn()
         self._picker = vtkCellPicker(tolerance=0.0005)
@@ -159,6 +161,28 @@ class ViewManager(TrameComponent):
     def refresh_ui(self, **_):
         for view in self._var2view.values():
             view._build_ui()
+
+    def camera_projection(self):
+        self._camera.focal_point = (0, 0, 0)
+        self._camera.position = (0, 0, 1)
+        self._camera.view_up = (0, 1, 0)
+        self.reset_camera()
+
+    def center_camera(self, lat, lon):
+        x = math.cos(lon * math.pi / 180) * math.cos(lat * math.pi / 180)
+        z = math.sin(lon * math.pi / 180) * math.cos(lat * math.pi / 180)
+        y = math.sin(lat * math.pi / 180)
+        self._camera.focal_point = (0, 0, 0)
+        self._camera.position = (x, y, z)
+        self._camera.view_up = (
+            -math.cos(lon * math.pi / 180),
+            2,
+            -math.sin(lon * math.pi / 180),
+        )
+
+        self._clip_plane.origin = (0, 0, 0)
+        self._clip_plane.normal = (x, y, z)
+        self.reset_camera()
 
     def reset_camera(self, render=True):
         if self.layout_dirty or not self._last_vars:

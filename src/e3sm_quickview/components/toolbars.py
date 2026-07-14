@@ -26,11 +26,60 @@ class Layout(v3.VToolbar):
         self.state.setdefault("show_zoom_controls", False)
         self.state.setdefault("show_pan_controls", False)
         self.state.setdefault("show_aspect_ratio", False)
+        self.state.setdefault("show_spherical_center", False)
 
         with self:
             v3.VIcon("mdi-view-module", classes="px-6 opacity-50")
             v3.VSpacer()
             with html.Div(classes="d-flex ga-2 align-center"):
+                # --- Spherical projection center ---
+                with v3.VSheet(
+                    classes="d-flex align-center rounded px-1 ga-1 py-1",
+                    color=("show_spherical_center ? 'grey-lighten-3' : 'transparent'",),
+                    v_if="projection[0] === 'Spherical'",
+                ):
+                    v3.VIconBtn(
+                        v_tooltip_bottom="'Toggle Spherical center'",
+                        icon="mdi-target",
+                        flat=True,
+                        click="show_spherical_center = !show_spherical_center",
+                        color=("show_spherical_center ? 'primary' : ''",),
+                        size=("show_spherical_center ? 'small' : 'default'",),
+                        classes=("show_spherical_center ? 'ml-1' : 'rounded'",),
+                    )
+                    with (
+                        v3.VExpandXTransition(),
+                        html.Div(
+                            v_if="show_spherical_center",
+                            classes="d-flex align-center ga-1",
+                        ),
+                    ):
+                        v3.VDivider(vertical=True, classes="mx-1")
+                        v3.VNumberInput(
+                            label="Latitude",
+                            v_model=("spherical_center_lat", 0),
+                            precision=1,
+                            min=("-90",),
+                            max=("90",),
+                            step=("0.5",),
+                            hide_details=True,
+                            density="compact",
+                            variant="plain",
+                            style="min-width: 10rem;",
+                        )
+                        v3.VNumberInput(
+                            label="Longitude",
+                            v_model=("spherical_center_lon", 0),
+                            precision=1,
+                            min=("-180",),
+                            max=("180",),
+                            step=("0.5",),
+                            hide_details=True,
+                            density="compact",
+                            variant="plain",
+                            style="min-width: 10rem;",
+                        )
+
                 # --- Aspect ratio toggle + slider ---
                 with v3.VSheet(
                     classes="d-flex align-center rounded px-1 ga-1 py-1",

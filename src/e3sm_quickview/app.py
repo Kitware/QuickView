@@ -173,6 +173,7 @@ class EAMApp(TrameApp):
                 ProjectionEquidistant="projection = ['Cyl. Equidistant']",
                 ProjectionRobinson="projection = ['Robinson']",
                 ProjectionMollweide="projection = ['Mollweide']",
+                ProjectionSpherical="projection = ['Spherical']",
                 FileOpen=(self.toggle_toolbar, "['load-data']"),
                 SaveState="trigger('download_state_dialog')",
                 UploadState="utils.get('document').querySelector('#fileUpload').click()",
@@ -196,6 +197,7 @@ class EAMApp(TrameApp):
                 mt.bind("c", "ProjectionEquidistant")
                 mt.bind("r", "ProjectionRobinson")
                 mt.bind("m", "ProjectionMollweide")
+                mt.bind("n", "ProjectionSpherical")
 
                 mt.bind("f", "FileOpen")
                 mt.bind("e", "SaveState")
@@ -648,12 +650,16 @@ class EAMApp(TrameApp):
         self.source.UpdatePipeline()
         self.view_manager.reset_camera()
 
-        # Hack to force reset_camera for "cyl mode"
-        # => may not be needed if we switch to rca
-        if " " in proj_str:
-            for _ in range(2):
-                await asyncio.sleep(0.1)
-                self.view_manager.reset_camera()
+    @change("spherical_center_lat", "spherical_center_lon", "projection")
+    def _on_center(self, spherical_center_lat, spherical_center_lon, projection, **_):
+        if projection == ["Spherical"]:
+            self.source.Clip(self.view_manager._clip_plane)
+            self.view_manager.center_camera(
+                float(spherical_center_lat), float(spherical_center_lon)
+            )
+        else:
+            self.source.Clip()
+            self.view_manager.camera_projection()
 
     def _on_slicing_change(self, var, ind_var, **_):
         with perf.timed(f"tick.{var}={self.state[ind_var]}.total"):

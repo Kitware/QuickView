@@ -1,7 +1,6 @@
 from trame.widgets import html
 from trame.widgets import vuetify3 as v3
 
-from e3sm_quickview.assets import ASSETS
 
 # -----------------------------------------------------------------------------
 # Tools
@@ -72,12 +71,13 @@ class ToolMapProjection(Tool):
         super().__init__(
             icon="mdi-earth",
             title="Map Projection",
-            description="Select projection to use for the visualizations: cylindrical equidistant, Robinson, Mollweide.",
+            description="Select projection to use for the visualizations: cylindrical equidistant, Robinson, Mollweide, Spherical.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="c", variant="contained", inline=True)
             v3.VHotkey(keys="r", variant="contained", inline=True)
             v3.VHotkey(keys="m", variant="contained", inline=True)
+            v3.VHotkey(keys="n", variant="contained", inline=True)
 
 
 class ToolLayoutManagement(Tool):
