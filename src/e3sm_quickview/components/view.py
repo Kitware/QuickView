@@ -1,4 +1,3 @@
-from trame.widgets import html
 from trame.widgets import vuetify3 as v3
 
 
@@ -105,5 +104,3 @@ def create_size_menu(name, config):
                         subtitle="1/6 width",
                         click="active_layout = 'auto_layout';config.size = 2",
                     )
-
-
