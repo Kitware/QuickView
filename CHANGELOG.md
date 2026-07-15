@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v2.9.1 (2026-07-15)
+
+### Bug Fixes
+
+- **center**: Move to crop toolbar
+  ([`b2f741d`](https://github.com/Kitware/QuickView/commit/b2f741d6a1843daf2a54d6af5aa22569d80f8697))
+
+- **format**: Ran ruff
+  ([`14e1aa6`](https://github.com/Kitware/QuickView/commit/14e1aa684bcd8b60c5efe7117fbd59e48cd6ed2d))
+
+- **spherical**: Properly project data
+  ([`aa3c156`](https://github.com/Kitware/QuickView/commit/aa3c1569194361b7f3083e83393e8ab729da9c74))
+
+
 ## v2.9.0 (2026-07-14)
 
 ### Bug Fixes
