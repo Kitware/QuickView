@@ -455,8 +455,8 @@ class EAMProject(VTKPythonAlgorithmBase):
                         x_rad = x * to_rad
                         y_rad = y * to_rad
                         cos_y_rad = np.cos(y_rad)
-                        xs = np.cos(x_rad) * cos_y_rad
-                        zs = np.sin(x_rad) * cos_y_rad
+                        zs = np.cos(x_rad) * cos_y_rad
+                        xs = np.sin(x_rad) * cos_y_rad
                         ys = np.sin(y_rad)
                         flat[0::3] = xs
                         flat[1::3] = ys

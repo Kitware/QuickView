@@ -169,15 +169,15 @@ class ViewManager(TrameComponent):
         self.reset_camera()
 
     def center_camera(self, lat, lon):
-        x = math.cos(lon * math.pi / 180) * math.cos(lat * math.pi / 180)
-        z = math.sin(lon * math.pi / 180) * math.cos(lat * math.pi / 180)
+        z = math.cos(lon * math.pi / 180) * math.cos(lat * math.pi / 180)
+        x = math.sin(lon * math.pi / 180) * math.cos(lat * math.pi / 180)
         y = math.sin(lat * math.pi / 180)
         self._camera.focal_point = (0, 0, 0)
         self._camera.position = (x, y, z)
         self._camera.view_up = (
-            -math.cos(lon * math.pi / 180),
-            2,
             -math.sin(lon * math.pi / 180),
+            2,
+            -math.cos(lon * math.pi / 180),
         )
 
         self._clip_plane.origin = (0, 0, 0)
