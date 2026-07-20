@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v2.9.2 (2026-07-20)
+
+### Bug Fixes
+
+- **crop**: Crop variable field by absolute lat/lon range
+  ([`47f3da2`](https://github.com/Kitware/QuickView/commit/47f3da250d73ca04a103784fd84c3694b479b5ec))
+
+- **spherical-center**: Update icon
+  ([`0d90192`](https://github.com/Kitware/QuickView/commit/0d9019247faab0e225782ba5804d3a7c828a5333))
+
+
 ## v2.9.1 (2026-07-15)
 
 ### Bug Fixes
