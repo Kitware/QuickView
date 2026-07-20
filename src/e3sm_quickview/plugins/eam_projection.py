@@ -596,15 +596,15 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
 @smdomain.datatype(dataTypes=["vtkPolyData"], composite_data_supported=False)
 @smproperty.xml(
     """
-                <DoubleVectorProperty name="Trim Longitude"
-                      command="SetTrimLongitude"
+                <DoubleVectorProperty name="Longitude Range"
+                      command="SetLongitudeRange"
                       number_of_elements="2"
-                      default_values="0 0">
+                      default_values="-180 180">
                  </DoubleVectorProperty>
-                <DoubleVectorProperty name="Trim Latitude"
-                      command="SetTrimLatitude"
+                <DoubleVectorProperty name="Latitude Range"
+                      command="SetLatitudeRange"
                       number_of_elements="2"
-                      default_values="0 0">
+                      default_values="-90 90">
                  </DoubleVectorProperty>
                 """
 )
@@ -613,44 +613,44 @@ class EAMExtract(VTKPythonAlgorithmBase):
         super().__init__(
             nInputPorts=1, nOutputPorts=1, outputType="vtkUnstructuredGrid"
         )
-        self.trim_lon = [0, 0]
-        self.trim_lat = [0, 0]
+        self.lon_range = [-180.0, 180.0]
+        self.lat_range = [-90.0, 90.0]
         self.cached_cell_centers = None
         self._cached_output = None
-        self._last_was_trimmed = False
+        self._last_was_cropped = False
 
-    def SetTrimLongitude(self, left, right):
-        if left < 0 or left > 360 or right < 0 or right > 360 or left > (360 - right):
+    def SetLongitudeRange(self, min, max):
+        if min < -180 or max > 180 or min > max:
             print_error(
-                f"SetTrimLongitude called with invalid parameters: {left=}, {right=}"
+                f"SetLongitudeRange called with invalid parameters: {min=}, {max=}"
             )
             return
-        if self.trim_lon[0] != left or self.trim_lon[1] != right:
-            self.trim_lon = [left, right]
+        if self.lon_range[0] != min or self.lon_range[1] != max:
+            self.lon_range = [min, max]
             self.Modified()
 
-    def SetTrimLatitude(self, left, right):
-        if left < 0 or left > 180 or right < 0 or right > 180 or left > (180 - right):
+    def SetLatitudeRange(self, min, max):
+        if min < -90 or max > 90 or min > max:
             print_error(
-                f"SetTrimLatitude called with invalid parameters: {left=}, {right=}"
+                f"SetLatitudeRange called with invalid parameters: {min=}, {max=}"
             )
             return
-        if self.trim_lat[0] != left or self.trim_lat[1] != right:
-            self.trim_lat = [left, right]
+        if self.lat_range[0] != min or self.lat_range[1] != max:
+            self.lat_range = [min, max]
             self.Modified()
 
     def RequestData(self, request, inInfo, outInfo):
         with _perf.timed("extract.RequestData"):
             inData = self.GetInputData(inInfo, 0, 0)
             outData = self.GetOutputData(outInfo, 0)
-            if self.trim_lon == [0, 0] and self.trim_lat == [0, 0]:
+            if self.lon_range == [-180.0, 180.0] and self.lat_range == [-90.0, 90.0]:
                 outData.ShallowCopy(inData)
                 # Only invalidate the shared points when transitioning *out* of a
-                # trimmed state — the original code did it unconditionally, which
+                # cropped state — the original code did it unconditionally, which
                 # defeated EAMProject's cache on every pipeline update.
-                if self._last_was_trimmed:
+                if self._last_was_cropped:
                     outData.GetPoints().Modified()
-                    self._last_was_trimmed = False
+                    self._last_was_cropped = False
                 return 1
 
             if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
@@ -699,20 +699,20 @@ class EAMExtract(VTKPythonAlgorithmBase):
                         cell_types.DeepCopy(outData.GetCellTypesArray())
                         outData.SetCells(cell_types, cells)
 
-                    # compute the new bounds by trimming the inData bounds
-                    bounds = list(inData.GetBounds())
-                    bounds[0] = bounds[0] + self.trim_lon[0]
-                    bounds[1] = bounds[1] - self.trim_lon[1]
-                    bounds[2] = bounds[2] + self.trim_lat[0]
-                    bounds[3] = bounds[3] - self.trim_lat[1]
+                    # Crop against absolute lon/lat ranges, in the same
+                    # [-180, 180] x [-90, 90] frame as EAMTransformAndExtract,
+                    # so the result is independent of the data's own extent
+                    # (regional meshes no longer get mis-cropped).
+                    lon_min, lon_max = self.lon_range
+                    lat_min, lat_max = self.lat_range
 
-                    # add HIDDENCELL based on bounds
+                    # add HIDDENCELL based on ranges
                     with _perf.timed("extract.ghost_mask"):
                         outside_mask = (
-                            (cc[:, 0] < bounds[0])
-                            | (cc[:, 0] > bounds[1])
-                            | (cc[:, 1] < bounds[2])
-                            | (cc[:, 1] > bounds[3])
+                            (cc[:, 0] < lon_min)
+                            | (cc[:, 0] > lon_max)
+                            | (cc[:, 1] < lat_min)
+                            | (cc[:, 1] > lat_max)
                         )
                         # Create ghost array (0 = visible, HIDDENCELL = invisible)
                         ghost_np = np.where(
@@ -728,7 +728,7 @@ class EAMExtract(VTKPythonAlgorithmBase):
 
                     self._cached_output = outData.NewInstance()
                     self._cached_output.ShallowCopy(outData)
-            self._last_was_trimmed = True
+            self._last_was_cropped = True
             return 1
 
 
