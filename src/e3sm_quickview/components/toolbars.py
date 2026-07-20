@@ -338,7 +338,7 @@ class Cropping(v3.VToolbar):
                 ):
                     v3.VIconBtn(
                         v_tooltip_bottom="'Toggle Spherical center'",
-                        icon="mdi-target",
+                        icon="mdi-image-filter-center-focus-strong",
                         flat=True,
                         click="show_spherical_center = !show_spherical_center",
                         color=("show_spherical_center ? 'primary' : ''",),
