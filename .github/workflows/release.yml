@@ -31,6 +31,21 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Append Fixed Footer to GitHub Release
+        if: steps.release.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: v${{ steps.release.outputs.version }}
+        run: |
+          # 1. Download the release text python-semantic-release just generated
+          gh release view "$TAG" --json body --jq '.body' > original_notes.md
+
+          # 2. Add your static footer text
+          echo -e "\n\n### Tip for Mac users\n\nThe `.dmg` files listed under Assets below have not been signed using an Apple Developer ID. Hence, after downloading to your Mac, please use the following command to remove quarantine.\n\nxattr -d com.apple.quarantine <your_filename>.dmg\n" >> original_notes.md
+
+          # 3. Push the updated notes back to the GitHub Release page
+          gh release edit "$TAG" --notes-file original_notes.md
+
       - name: Generate artifact attestation for sdist and wheel
         if: steps.release.outputs.released == 'true'
         uses: actions/attest-build-provenance@v2.2.3
