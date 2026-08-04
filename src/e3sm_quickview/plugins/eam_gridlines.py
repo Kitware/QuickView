@@ -7,6 +7,8 @@ from vtkmodules.util import numpy_support, vtkConstants
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 import numpy as np
 
+POINTS_PER_LINE = 100
+
 # Optional import that may be used in future versions
 # try:
 #     from vtkmodules.vtkFiltersGeneral import vtkCleanUnstructuredGrid as uGridFilter
@@ -98,30 +100,30 @@ class EAMGridLines(VTKPythonAlgorithmBase):
 
         # Getting Longitude lines
         longs = int(xextent / interval) + 1
-        lonpoints = 100 * longs  # 100 points per longitude line
+        lonpoints = POINTS_PER_LINE * longs
 
         # Getting Latitude lines
         lats = int(yextent / interval) + 1
-        latpoints = 10 * lats  # 10 points per latitude line
+        latpoints = POINTS_PER_LINE * lats
 
         shape = (lonpoints + latpoints, 3)
         coords = np.empty(shape, dtype=np.float64)
 
         # Generate longitude line x-coordinates (longitude values)
         lonx = np.linspace(llon, hlon, longs)
-        lonx = np.repeat(lonx, 100)  # Each longitude line has 100 points
+        lonx = np.repeat(lonx, POINTS_PER_LINE)
 
         # Generate longitude line y-coordinates (latitude values)
-        lony = np.linspace(llat, hlat, 100)
+        lony = np.linspace(llat, hlat, POINTS_PER_LINE)
         lony = np.tile(lony, longs)  # Repeat for each longitude line
 
         # Generate latitude line x-coordinates (longitude values)
-        latx = np.linspace(llon, hlon, 10)  # 10 points per latitude line
+        latx = np.linspace(llon, hlon, POINTS_PER_LINE)
         latx = np.tile(latx, lats)  # Repeat for each latitude line
 
         # Generate latitude line y-coordinates (latitude values)
         laty = np.linspace(llat, hlat, lats)
-        laty = np.repeat(laty, 10)  # Each latitude line has 10 points
+        laty = np.repeat(laty, POINTS_PER_LINE)
 
         # Verify array sizes before assignment
         assert len(lonx) == lonpoints, f"lonx size {len(lonx)} != expected {lonpoints}"
@@ -146,13 +148,13 @@ class EAMGridLines(VTKPythonAlgorithmBase):
         # Build cell offsets array
         offsets = np.empty(ncells + 1, dtype=np.int64)
 
-        # Longitude line offsets (each line has 100 points)
+        # Longitude line offsets
         for i in range(longs):
-            offsets[i] = i * 100
+            offsets[i] = i * POINTS_PER_LINE
 
-        # Latitude line offsets (each line has 10 points)
+        # Latitude line offsets
         for i in range(lats):
-            offsets[longs + i] = lonpoints + i * 10
+            offsets[longs + i] = lonpoints + i * POINTS_PER_LINE
 
         # Final offset
         offsets[-1] = lonpoints + latpoints
