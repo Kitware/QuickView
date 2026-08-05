@@ -75,13 +75,16 @@ This can be useful for controlling the blank spaces, especially for
 A pair of zoom-in and zoom-out buttons are provided for changing the plot sizes
 with respect to the view frames. A click on the auto-zoom button resets the sizes to fit the frames.
 
+When (and only when) the zoom-in/zoom-out button group is expanded, the keyboard combinations
+`shift + ↑` and `shift + ↓` can be used as shortcuts for zooming in and out, respectively.
+
 ![toggles](./screenshots/viewport_zoom_in_out_auto.png){ width="100%", align=center }
 
 ### Plot location inside view frame
 
 A set of four buttons is provided for moving the plots left, right, up, or down
 with respect to the view frames, an operation commonly referred to as panning in graphical user interfaces.
-When the pan menu is expanded as in the screenshot below, the four arrow keys on
+When (and only when) the pan menu is expanded as shown in the screenshot below, the four arrow keys on
 the keyboard can also be used for panning.
 
 ![toggles](./screenshots/viewport_pan.png){ width="100%", align=center }
