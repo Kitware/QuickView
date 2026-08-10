@@ -22,6 +22,7 @@ class ColorMapEditor(html.Div):
     def __init__(self):
         super().__init__(style=css.FULLSCREEN_OVERLAY)
         self.state.setdefault("color_map_editor_field_name", None)
+        self.state.setdefault("color_map_editor_field_label", None)
         with self:
             with (
                 v3.VDialog(
@@ -40,7 +41,7 @@ class ColorMapEditor(html.Div):
                     with v3.VCardItem(
                         density="compact",
                         title=(
-                            "`Adjust color map for ${ color_map_editor_field_name }`",
+                            "`Adjust color map for ${ color_map_editor_field_label }`",
                         ),
                     ):
                         with v3.Template(v_slot_append=True):
@@ -68,9 +69,10 @@ class ColorMapEditor(html.Div):
                             )
 
     @controller.set("edit_lookup_table")
-    def edit_lookup_table(self, colormap_id=None, field_name=None):
+    def edit_lookup_table(self, colormap_id=None, field_name=None, field_label=None):
         self.state.color_map_editor = colormap_id
         self.state.color_map_editor_field_name = field_name
+        self.state.color_map_editor_field_label = field_label or field_name
 
 
 class StateDownload(html.Div):
