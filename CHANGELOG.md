@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v2.9.3 (2026-08-10)
+
+### Bug Fixes
+
+- Lat lines no longer clip into spherical projection
+  ([`bd8ee78`](https://github.com/Kitware/QuickView/commit/bd8ee78cae6487a7c1d51f13e300c57e830ba954))
+
+### Continuous Integration
+
+- Add static footer to release note
+  ([`609a3da`](https://github.com/Kitware/QuickView/commit/609a3da57906e62cc0a4e617300e15521be1e5d2))
+
+### Documentation
+
+- **quickview**: Add note on shortcuts for zoom-in/out
+  ([`dfb3555`](https://github.com/Kitware/QuickView/commit/dfb3555674c90358596490d3e23ec50864ff47f8))
+
+- **quickview**: Update gallery example of aerosols to include data probe
+  ([`08c7e4b`](https://github.com/Kitware/QuickView/commit/08c7e4bb6d49d88ab46113947b5091d8e76c68e1))
+
+
 ## v2.9.2 (2026-07-20)
 
 ### Bug Fixes
