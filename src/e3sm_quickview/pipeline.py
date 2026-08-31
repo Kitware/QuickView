@@ -103,6 +103,9 @@ class GridLines:
         self.actor.property.diffuse_color = (0.67, 0.67, 0.67)
         self.actor.property.opacity = 0.4
 
+    def set_interval(self, interval):
+        self.grid_lines.Interval = interval
+
     def crop(self, longitude_min_max, latitude_min_max):
         self.grid_lines.LongitudeRange = longitude_min_max
         self.grid_lines.LatitudeRange = latitude_min_max
@@ -265,6 +268,9 @@ class EAMVisSource:
     @property
     def dimensions(self):
         return self.data_reader.dimensions
+
+    def UpdateGridInterval(self, interval):
+        self.grid_lines.set_interval(interval)
 
     def ApplyClipping(self, cliplong, cliplat):
         if not self.valid:
