@@ -5,3 +5,4 @@ dependencies:
   - python=3.13
   - pip
   - paraview>=6
+  - hdf5<2 # conda-forge paraview links libhdf5.so.310 (hdf5 1.14); hdf5 2.x ships .so.320
