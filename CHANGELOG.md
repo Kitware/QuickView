@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v2.9.4 (2026-09-02)
+
+### Bug Fixes
+
+- **grid**: Add control for grid interval
+  ([`bbd232e`](https://github.com/Kitware/QuickView/commit/bbd232e5e1dfcd3f69522b3d0c9e7fb22bdb6a64))
+
+- **gridSpacing**: Use projection menu to drive gid spacing
+  ([`bf3b31e`](https://github.com/Kitware/QuickView/commit/bf3b31e3fcbb0112e07e2ac80e5939282bda50ba))
+
+### Build System
+
+- **deps**: Bump the actions group with 8 updates
+  ([`846ed7c`](https://github.com/Kitware/QuickView/commit/846ed7cee0a837ae86ee99f11bdc9066e891b71d))
+
+### Continuous Integration
+
+- Pin hdf5<2
+  ([`4959b9f`](https://github.com/Kitware/QuickView/commit/4959b9f441fa89126ce11e121ea3af9996e6924f))
+
+
 ## v2.9.3 (2026-08-10)
 
 ### Bug Fixes
