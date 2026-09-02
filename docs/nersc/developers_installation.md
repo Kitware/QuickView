@@ -19,13 +19,13 @@ respectively.
 
 For installing the tools at a location of the user's choice,
 an example is provided on [this page](./users_installation.md).
-The remainder of this page documents how the developers' installation was done.
+The remainder of this page explains how the developers' installation was done.
 
 
 ## Setting default permissions
 
-To allow any developer in project m4359 to install, uninstall, or update,
-and to allow all NERSC users to use the installation, we set the default permission using
+To allow any developer in project m4359 to install, uninstall, or update the tools
+and to allow all NERSC users to use our installation, we set the default permission using
 ```
 umask 002
 ```
@@ -67,8 +67,8 @@ conda install "e3sm_compareview>=1.3.5"
 ## Shortcuts to the executables
 
 The commands listed at the beginning of this page are in fact scripts
-with the following contents. These scripts were created to allow
-the users to start any tool in the QuickView family using a single command.
+that allow NERSC users to start a tool in the QuickView family using a single command
+without having to explicitly load system modules or programming environments.
 
 `/global/common/software/m4359/quickview2` is a script with the following contents
 
@@ -77,7 +77,7 @@ the users to start any tool in the QuickView family using a single command.
 
 module load conda
 conda activate /global/common/software/m4359/conda-envs/quickview-family
-quickview -p 0
+quickview
 ```
 
 Similarly, `/global/common/software/m4359/quickcompare` is a script with the following contents
@@ -87,5 +87,5 @@ Similarly, `/global/common/software/m4359/quickcompare` is a script with the fol
 
 module load conda
 conda activate /global/common/software/m4359/conda-envs/quickview-family
-quickcompare -p 0
+quickcompare
 ```

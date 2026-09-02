@@ -1,7 +1,7 @@
 # Installing a User's Copy of the QuickView Family at NERSC 
 
 The steps described below follow the same logic as documented on
-[this page](./developers_installation.md),
+[the other page](./developers_installation.md),
 expect that
 
 - the tools are installed to a different path, `/global/cfs/projectdirs/m4359/tools/`,
@@ -46,25 +46,16 @@ conda install conda-forge::e3sm_compareview
 
 ## Using the installed applications
 
-At this point, the user should be able to use the following commands to launch
-the individual tools, assuming the conda environment has been activated.
+At this point, the user should be able to use the commands `quickview` and `quickcompare` to launch
+the respective tools, assuming the conda environment has been activated.
 (But read the [next section](#recommended-shortcuts) if you expect to use the tools often.)
 
-QuickView:
-```
-quickview -p 0
-``` 
-QuickCompare:
-```
-quickcompare -p 0
-```
- 
 ## Recommended shortcuts
 
 Since the conda environment and tools are installed in custom paths, it will
-be useful to create shortcuts so that the tools can be launched using very short 1-line commands.
+be useful to create shortcuts so that the tools can be launched using short one-line commands.
 
-### Setup step 1
+### Setup-step 1
 
 We can create a script `${pathRoot}/quickview2` with the following contents:
 ```sh
@@ -75,9 +66,9 @@ envName="quickview-env"
 
 module load conda
 conda activate ${pathRoot}/conda-envs/${envName} 
-quickview -p 0
+quickview
 ```
-And to make the shortcut executable, we do
+and then, make the shortcut executable using
 ```sh
 chmod +x ${pathRoot}/quickview2
 ```
@@ -91,14 +82,14 @@ envName="quickview-env"
 
 module load conda
 conda activate ${pathRoot}/conda-envs/${envName}
-quickcompare -p 0
+quickcompare
 ```
-And to make the shortcut executable, we do
+and then, make the shortcut executable using
 ```sh
 chmod +x ${pathRoot}/quickcompare
 ```
 
-### Setup step 2
+### Setup-step 2
 
 In the `.bashrc` or `.cshrc` file in your home directory, add something like
 ```sh
@@ -107,11 +98,11 @@ alias quickc='/global/cfs/projectdirs/m4359/tools/quickcompare'
 ```
 ### Using the tools through shortcuts
 
-After the two setup steps have been completed, the user should be able
+After the two setup-steps have been completed, the user should be able
 to launch the tools by simply typing `quickv` or `quickc`
-in a terminal window in the JupyterHub.
-Again, the same commands can be used regardless of whether the terminal
-window is connected to a login node or a shared GPU node etc. 
+in a terminal window in JupyterHub.
+It is worth emphasizing again that the same commands can be used regardless of whether the terminal
+window is connected to a login node, a shared CPU or GPU node, or a dedicated node.
 
 
 ## Updating the installations 

@@ -86,11 +86,11 @@ Then, in the same window, use one of the following depending on
 which tool you'd like to use
 
 ```
-quickview -p 0
+quickview
 ```
 
 ```
-quickcompare -p 0
+quickcompare
 ```
 
 After some seconds, the Terminal window should indicate that the app has
