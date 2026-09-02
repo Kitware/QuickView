@@ -221,30 +221,45 @@ class MapProjection(v3.VTooltip):
                         activator="parent",
                         location="end",
                         offset=10,
+                        close_on_content_click=False,
                     ):
-                        with v3.VList(
-                            mandatory=True,
-                            v_model_selected=(
-                                "projection",
-                                ["Mollweide"],
-                            ),
-                            density="compact",
-                            # items=("projections", self.options),
-                        ):
-                            for entry in self.options:
-                                with (
-                                    v3.VListItem(
-                                        title=entry.get("title"),
-                                        value=entry.get("value"),
-                                    ),
-                                    v3.Template(v_slot_append=True),
+                        with v3.VList():
+                            with v3.VList(
+                                mandatory=True,
+                                v_model_selected=(
+                                    "projection",
+                                    ["Mollweide"],
+                                ),
+                                density="compact",
+                                # items=("projections", self.options),
+                            ):
+                                for entry in self.options:
+                                    with (
+                                        v3.VListItem(
+                                            title=entry.get("title"),
+                                            value=entry.get("value"),
+                                        ),
+                                        v3.Template(v_slot_append=True),
+                                    ):
+                                        v3.VHotkey(
+                                            keys=entry.get("key"),
+                                            variant="contained",
+                                            inline=True,
+                                            classes="ml-4 mn-2",
+                                        )
+                            v3.VDivider()
+                            with v3.VListItem(title="Grid spacing"):
+                                with v3.VBtnToggle(
+                                    v_model=("grid_interval", 30),
+                                    border=True,
+                                    divided=True,
                                 ):
-                                    v3.VHotkey(
-                                        keys=entry.get("key"),
-                                        variant="contained",
-                                        inline=True,
-                                        classes="ml-4 mn-2",
-                                    )
+                                    v3.VBtn("1°", value=[1])
+                                    v3.VBtn("2°", value=[2])
+                                    v3.VBtn("5°", value=[5])
+                                    v3.VBtn("10°", value=[10])
+                                    v3.VBtn("15°", value=[15])
+                                    v3.VBtn("30°", value=[30])
 
     @property
     def options(self):

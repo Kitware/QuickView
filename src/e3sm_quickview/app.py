@@ -661,13 +661,11 @@ class EAMApp(TrameApp):
             self.source.Clip()
             self.view_manager.camera_projection()
 
-    @change("projection", "grid_interval")
-    def _on_grid_spacing(self, projection, grid_interval, **_):
-        if projection == ["Spherical"]:
-            self.source.UpdateGridInterval(grid_interval)
-            self.view_manager.reset_camera()
-        else:
-            self.source.UpdateGridInterval(30)
+    @change("grid_interval")
+    def _on_grid_spacing(self, grid_interval, **_):
+        self.source.UpdateGridInterval(grid_interval)
+        # self.view_manager.reset_camera()
+        self.view_manager.render()
 
     def _on_slicing_change(self, var, ind_var, **_):
         with perf.timed(f"tick.{var}={self.state[ind_var]}.total"):

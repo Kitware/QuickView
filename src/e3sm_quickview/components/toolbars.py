@@ -388,44 +388,6 @@ class Cropping(v3.VToolbar):
                     v_if="projection[0] === 'Spherical' && show_grid_spacing && show_spherical_center",
                 )
 
-                # --- Grid spacing ---
-                with v3.VSheet(
-                    classes="d-flex align-center rounded px-1 ga-1 py-1",
-                    color=("show_grid_spacing ? 'grey-lighten-3' : 'transparent'",),
-                    v_if="projection[0] === 'Spherical'",
-                ):
-                    v3.VIconBtn(
-                        v_tooltip_bottom="'Toggle Grid Spacing'",
-                        icon="mdi-grid",
-                        flat=True,
-                        click="show_grid_spacing = !show_grid_spacing",
-                        color=("show_grid_spacing ? 'primary' : ''",),
-                        size=("show_grid_spacing ? 'small' : 'default'",),
-                        classes=("show_grid_spacing ? 'ml-1' : 'rounded'",),
-                    )
-                    with (
-                        v3.VExpandXTransition(),
-                        html.Div(
-                            v_if=("show_grid_spacing", False),
-                            classes="d-flex align-center ga-1",
-                        ),
-                    ):
-                        v3.VDivider(vertical=True, classes="mx-1")
-                        v3.VNumberInput(
-                            label="Spacing",
-                            v_model=("grid_interval", 30),
-                            min=("1",),
-                            max=("30",),
-                            step=("1",),
-                            hide_details=True,
-                            density="compact",
-                            variant="plain",
-                            flat=True,
-                            control_variant="stacked",
-                            inset=True,
-                            style="min-width: 6rem;",
-                        )
-
                 with v3.VCol():
                     with v3.VRow(classes="mx-2 my-0"):
                         v3.VLabel(
