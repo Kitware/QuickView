@@ -665,7 +665,15 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
 
                 if invalid_slices:
                     print_error(f"Invalid slice indices: {', '.join(invalid_slices)}")
-                else:
+
+                # Mark modified whenever a *valid* slice changed, even if some
+                # other dimension in the same request was out of range. The
+                # valid values have already been stored, so skipping Modified()
+                # would leave the reader's state ahead of its output -- and
+                # because the caller resends the whole slicing dict every time,
+                # one stale out-of-range index would otherwise suppress every
+                # later change.
+                if self._changed_dims:
                     self.Modified()
 
             except (json.JSONDecodeError, ValueError) as e:

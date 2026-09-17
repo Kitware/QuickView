@@ -562,10 +562,12 @@ class EAMApp(TrameApp):
                 # Initialize dynamic index variables for each dimension
                 for dim_name in available_tracks:
                     index_var = f"{dim_name}_idx"
-                    if "time" in index_var:
-                        self.state[index_var] = 50
-                    else:
-                        self.state[index_var] = 0
+                    default_idx = 50 if "time" in index_var else 0
+                    # Clamp to the dimension: an index past the end is rejected
+                    # by the reader, and most files have far fewer than 50 steps.
+                    self.state[index_var] = min(
+                        default_idx, self.source.dimensions[dim_name].size - 1
+                    )
                     self.state.change(index_var)(
                         partial(self._on_slicing_change, dim_name, index_var)
                     )
