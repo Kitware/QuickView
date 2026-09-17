@@ -133,55 +133,118 @@ def ProcessPoint(point, radius):
     return [x, y, z]
 
 
-def add_cell_arrays(inData, outData, cached_output):
+def _translated(dataset, shift):
+    """dataset moved `shift` degrees in longitude (returned as-is when shift is 0)."""
+    if shift == 0.0:
+        return dataset
+    transform = vtkTransform()
+    transform.Translate(shift, 0, 0)
+    transform_filter = vtkTransformFilter()
+    transform_filter.SetInputData(dataset)
+    transform_filter.SetTransform(transform)
+    transform_filter.Update()
+    return transform_filter.GetOutput()
+
+
+def _longitude_window(origin, input_origin=0.0):
+    """Cut meridian and the two shifts that move [input_origin, +360) to [origin, +360).
+
+    Everything below the cut is translated by one turn relative to everything
+    above it, and a whole-turn offset then places the seam exactly at `origin`.
+    With an input running [0, 360) and origin = -180 this reduces to the
+    historical behaviour: cut at 180, right half shifted by -360.
     """
-    Adds arrays not modified in inData to outData.
-    New arrays (or arrays modified) values are set using the PedigreeIds
-    because the number of values in the new array (just read from the file)
-    is different than the number of values in the arrays already processed
-    through the pipeline.
+    cut = input_origin + (origin - input_origin) % 360.0
+    return cut, origin + 360.0 - cut, origin - cut
+
+
+def _remap_arrays(in_attrs, cached_attrs, out_attrs, pedigree_vtk, label):
+    """Rebuild out_attrs from in_attrs, permuted through a pedigree map.
+
+    The number of values in a freshly read array differs from the number that
+    came out of the pipeline, so values are gathered through the pedigree
+    permutation recorded when the geometry was last built.
 
     A single fancy-index gather does this. An earlier version walked the
     permutation as a list of monotonic run slices, assuming the runs were
     thousands of entries long. Measured against the permutations this pipeline
-    actually produces — mean run 55-110 — that loop is 8-16x *slower* than one
-    numpy gather, because the per-run Python overhead dominates.
+    actually produces — mean run 13 for point ids, 55-110 for cell ids — that
+    loop is 8-66x *slower* than one numpy gather, because the per-run Python
+    overhead dominates.
     """
-    pedigreeIds = cached_output.cell_data["PedigreeIds"]
-    if pedigreeIds is None:
-        print_error("Error: no PedigreeIds array")
-        return
-
-    pedigree_vtk = cached_output.GetCellData().GetArray("PedigreeIds")
     pid_np = numpy_support.vtk_to_numpy(pedigree_vtk)
-
-    cached_cell_data = cached_output.GetCellData()
-    in_cell_data = inData.GetCellData()
-    outData.ShallowCopy(cached_output)
-    out_cell_data = outData.GetCellData()
-
-    out_cell_data.Initialize()
-    for i in range(in_cell_data.GetNumberOfArrays()):
-        in_array = in_cell_data.GetArray(i)
-        cached_array = cached_cell_data.GetArray(in_array.GetName())
+    n_tuples = pedigree_vtk.GetNumberOfTuples()
+    out_attrs.Initialize()
+    for i in range(in_attrs.GetNumberOfArrays()):
+        in_array = in_attrs.GetArray(i)
+        cached_array = cached_attrs.GetArray(in_array.GetName())
         if cached_array and cached_array.GetMTime() >= in_array.GetMTime():
             # This scalar has been seen before — reuse cached copy.
-            out_cell_data.AddArray(cached_array)
+            out_attrs.AddArray(cached_array)
         else:
-            with _perf.timed(f"add_cell_arrays.pedigree_copy.{in_array.GetName()}"):
-                array0 = cached_cell_data.GetArray(0)
-                n_comp = array0.GetNumberOfComponents()
-                n_tuples = array0.GetNumberOfTuples()
+            with _perf.timed(f"{label}.pedigree_copy.{in_array.GetName()}"):
                 out_array = in_array.NewInstance()
-                out_array.SetNumberOfComponents(n_comp)
+                out_array.SetNumberOfComponents(in_array.GetNumberOfComponents())
                 out_array.SetNumberOfTuples(n_tuples)
                 out_array.SetName(in_array.GetName())
-                out_cell_data.AddArray(out_array)
+                out_attrs.AddArray(out_array)
 
                 in_np = numpy_support.vtk_to_numpy(in_array)
                 out_np = numpy_support.vtk_to_numpy(out_array)
                 out_np[...] = in_np[pid_np]
                 out_array.Modified()
+
+
+def add_cell_arrays(inData, outData, cached_output):
+    """Refresh cell arrays only — for filters that interpolate point data.
+
+    A clip creates new points by interpolation, so an output point has no
+    single source point to gather from and the pedigree trick cannot work
+    for point data. Cells are only ever kept or dropped, so they can.
+    """
+    pedigree_vtk = cached_output.GetCellData().GetArray("PedigreeIds")
+    if pedigree_vtk is None:
+        print_error("Error: no PedigreeIds array")
+        return
+
+    outData.ShallowCopy(cached_output)
+    _remap_arrays(
+        inData.GetCellData(),
+        cached_output.GetCellData(),
+        outData.GetCellData(),
+        pedigree_vtk,
+        "add_cell_arrays",
+    )
+
+
+def add_cell_and_point_arrays(inData, outData, cached_output):
+    """Refresh cell *and* point arrays through their respective pedigree maps.
+
+    Usable only where the filter subsets whole cells and never interpolates —
+    then every output point is a copy of an input point, so its pedigree id is
+    an exact gather index. EAMExtract qualifies; a clip does not.
+    """
+    outData.ShallowCopy(cached_output)
+
+    cell_pedigree = cached_output.GetCellData().GetArray("PedigreeIds")
+    if cell_pedigree is not None and inData.GetCellData().GetNumberOfArrays():
+        _remap_arrays(
+            inData.GetCellData(),
+            cached_output.GetCellData(),
+            outData.GetCellData(),
+            cell_pedigree,
+            "add_cell_arrays",
+        )
+
+    point_pedigree = cached_output.GetPointData().GetArray("PointPedigreeIds")
+    if point_pedigree is not None and inData.GetPointData().GetNumberOfArrays():
+        _remap_arrays(
+            inData.GetPointData(),
+            cached_output.GetPointData(),
+            outData.GetPointData(),
+            point_pedigree,
+            "add_point_arrays",
+        )
 
 
 @smproxy.filter()
@@ -230,16 +293,10 @@ class EAMSphere(VTKPythonAlgorithmBase):
         else:
             outData.DeepCopy(inData)
 
-        inPoints = numpy_support.vtk_to_numpy(inData.GetPoints().GetData())
+        inPoints = inData.points
         pRadius = (self.radius + 1) if self.isData else self.radius
         outPoints = np.array(list(map(lambda x: ProcessPoint(x, pRadius), inPoints)))
-        vtk_coords = vtkPoints()
-        vtk_coords.SetData(
-            numpy_support.numpy_to_vtk(
-                outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT
-            )
-        )
-        outData.SetPoints(vtk_coords)
+        outData.points = outPoints
 
         return 1
 
@@ -366,6 +423,12 @@ class EAMLineSource(VTKPythonAlgorithmBase):
                         <Entry value="3" text="Spherical"/>
                     </EnumerationDomain>
                 </IntVectorProperty>
+                <DoubleVectorProperty name="Longitude Origin"
+                      command="SetLongitudeOrigin"
+                      number_of_elements="1"
+                      default_values="-180">
+                    <Documentation>Left edge of the map; the projection is centred half a turn east of it.</Documentation>
+                 </DoubleVectorProperty>
                 """
 )
 class EAMProject(VTKPythonAlgorithmBase):
@@ -382,6 +445,8 @@ class EAMProject(VTKPythonAlgorithmBase):
         self._cached_input_points = None
         self._cached_key = None
 
+        self.longitude_origin = -180.0
+
     def _invalidate_cache(self):
         self.cached_points = None
         self._cached_input_points = None
@@ -396,6 +461,14 @@ class EAMProject(VTKPythonAlgorithmBase):
     def SetProjection(self, project):
         if self.project != int(project):
             self.project = int(project)
+            self._invalidate_cache()
+            self.Modified()
+
+    def SetLongitudeOrigin(self, origin):
+        """Left edge of the map. The projection is centred half a turn east of
+        it, so a rotated window still maps onto the middle of the figure."""
+        if self.longitude_origin != origin:
+            self.longitude_origin = origin
             self._invalidate_cache()
             self.Modified()
 
@@ -423,6 +496,9 @@ class EAMProject(VTKPythonAlgorithmBase):
                         out_points_vtk = vtkPoints()
                         out_points_vtk.DeepCopy(outData.GetPoints())
                         outData.SetPoints(out_points_vtk)
+                    # Go through numpy_support rather than the pythonic
+                    # `.points`: VTK 9.7 returns a vtkPoints subclass there,
+                    # where earlier versions handed back a numpy array.
                     out_points_np = numpy_support.vtk_to_numpy(
                         outData.GetPoints().GetData()
                     )
@@ -454,6 +530,18 @@ class EAMProject(VTKPythonAlgorithmBase):
                             else:
                                 # Should not reach here, but return without transformation
                                 return 1
+
+                            # Re-centre on the middle of the window here rather
+                            # than through PROJ's lon_0. PROJ normalises its
+                            # input into [-180, 180) *before* subtracting lon_0,
+                            # which sends the window's right edge to the left
+                            # rim -- drawing coastlines and cells straight
+                            # across the map. The data is already confined to
+                            # the window, so the offset lands in range on its
+                            # own and PROJ never has to wrap anything.
+                            x = np.clip(
+                                x - (self.longitude_origin + 180.0), -180.0, 180.0
+                            )
 
                             xformer = Transformer.from_proj(
                                 latlon, proj, always_xy=True
@@ -494,6 +582,12 @@ class EAMProject(VTKPythonAlgorithmBase):
                       number_of_elements="2"
                       default_values="-180 180">
                  </DoubleVectorProperty>
+                <DoubleVectorProperty name="Longitude Origin"
+                      command="SetLongitudeOrigin"
+                      number_of_elements="1"
+                      default_values="-180">
+                    <Documentation>Left edge of the map; the right edge is 360 degrees east of it.</Documentation>
+                 </DoubleVectorProperty>
                 <DoubleVectorProperty name="Latitude Range"
                       command="SetLatitudeRange"
                       number_of_elements="2"
@@ -509,6 +603,13 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
         self.project = 0
         self.longrange = [-180.0, 180.0]
         self.latrange = [-90.0, 90.0]
+        self.longitude_origin = -180.0
+
+    def SetLongitudeOrigin(self, origin):
+        """Left edge of the map, so the overlay follows the data's window."""
+        if self.longitude_origin != origin:
+            self.longitude_origin = origin
+            self.Modified()
 
     def SetLongitudeRange(self, min, max):
         if self.longrange[0] != min or self.longrange[1] != max:
@@ -524,8 +625,10 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
         inData = self.GetInputData(inInfo, 0, 0)
         outData = self.GetOutputData(outInfo, 0)
 
+        cut, shift_low, shift_high = _longitude_window(self.longitude_origin)
+
         planeL = vtkPlane()
-        planeL.SetOrigin([180.0, 0.0, 0.0])
+        planeL.SetOrigin([cut, 0.0, 0.0])
         planeL.SetNormal([-1, 0, 0])
         clipL = vtkTableBasedClipDataSet()
         clipL.SetClipFunction(planeL)
@@ -533,23 +636,16 @@ class EAMTransformAndExtract(VTKPythonAlgorithmBase):
         clipL.Update()
 
         planeR = vtkPlane()
-        planeR.SetOrigin([180.0, 0.0, 0.0])
+        planeR.SetOrigin([cut, 0.0, 0.0])
         planeR.SetNormal([1, 0, 0])
         clipR = vtkTableBasedClipDataSet()
         clipR.SetClipFunction(planeR)
         clipR.SetInputData(inData)
         clipR.Update()
 
-        transFunc = vtkTransform()
-        transFunc.Translate(-360, 0, 0)
-        transform = vtkTransformFilter()
-        transform.SetInputData(clipR.GetOutput())
-        transform.SetTransform(transFunc)
-        transform.Update()
-
         append = vtkAppendFilter()
-        append.AddInputData(clipL.GetOutput())
-        append.AddInputData(transform.GetOutput())
+        append.AddInputData(_translated(clipL.GetOutput(), shift_low))
+        append.AddInputData(_translated(clipR.GetOutput(), shift_high))
         append.Update()
 
         box = vtkPVBox()
@@ -602,7 +698,9 @@ class EAMExtract(VTKPythonAlgorithmBase):
         self._last_was_cropped = False
 
     def SetLongitudeRange(self, min, max):
-        if min < -180 or max > 180 or min > max:
+        # Ranges arrive in whichever 360-degree window the map is using, so
+        # only the ordering and the width are meaningful here.
+        if min > max or (max - min) > 360.0:
             print_error(
                 f"SetLongitudeRange called with invalid parameters: {min=}, {max=}"
             )
@@ -625,7 +723,8 @@ class EAMExtract(VTKPythonAlgorithmBase):
         with _perf.timed("extract.RequestData"):
             inData = self.GetInputData(inInfo, 0, 0)
             outData = self.GetOutputData(outInfo, 0)
-            if self.lon_range == [-180.0, 180.0] and self.lat_range == [-90.0, 90.0]:
+            spans_full_turn = (self.lon_range[1] - self.lon_range[0]) >= 359.999
+            if spans_full_turn and self.lat_range == [-90.0, 90.0]:
                 outData.ShallowCopy(inData)
                 # Only invalidate the shared points when transitioning *out* of a
                 # cropped state — the original code did it unconditionally, which
@@ -661,14 +760,17 @@ class EAMExtract(VTKPythonAlgorithmBase):
                 self.GetMTime(), inData.GetPoints().GetMTime(), cell_centers.GetMTime()
             ):
                 with _perf.timed("extract.cache_hit"):
-                    outData.ShallowCopy(self._cached_output)
-                    add_cell_arrays(inData, outData, self._cached_output)
+                    add_cell_and_point_arrays(inData, outData, self._cached_output)
             else:
                 with _perf.timed("extract.rebuild_trim"):
                     # add PedigreeIds
                     generate_ids = vtkGenerateIds()
                     generate_ids.SetInputData(inData)
-                    generate_ids.PointIdsOff()
+                    # Point ids as well: RemoveGhostCells only ever drops whole
+                    # cells, so a surviving point keeps an exact source index
+                    # and nodal formats can be refreshed from the cache too.
+                    generate_ids.PointIdsOn()
+                    generate_ids.SetPointIdsArrayName("PointPedigreeIds")
                     generate_ids.SetCellIdsArrayName("PedigreeIds")
                     generate_ids.Update()
                     outData.ShallowCopy(generate_ids.GetOutput())
@@ -690,9 +792,13 @@ class EAMExtract(VTKPythonAlgorithmBase):
 
                     # add HIDDENCELL based on ranges
                     with _perf.timed("extract.ghost_mask"):
+                        # Compare longitudes as offsets from lon_min taken
+                        # modulo a turn, so the test is independent of which
+                        # 360-degree window the data happens to live in and
+                        # still works for a range that spans the seam.
+                        lon_offset = (cc[:, 0] - lon_min) % 360.0
                         outside_mask = (
-                            (cc[:, 0] < lon_min)
-                            | (cc[:, 0] > lon_max)
+                            (lon_offset > ((lon_max - lon_min) % 360.0 or 360.0))
                             | (cc[:, 1] < lat_min)
                             | (cc[:, 1] > lat_max)
                         )
@@ -734,6 +840,19 @@ class EAMExtract(VTKPythonAlgorithmBase):
     - 20: Often used to center Europe and Africa.
                 </Documentation>
                 </IntVectorProperty>
+
+                <DoubleVectorProperty name="Longitude Origin"
+                      command="SetLongitudeOrigin"
+                      number_of_elements="1"
+                      default_values="-180">
+                    <Documentation>Left edge of the map; the right edge is 360 degrees east of it.</Documentation>
+                 </DoubleVectorProperty>
+                <DoubleVectorProperty name="Input Longitude Origin"
+                      command="SetInputLongitudeOrigin"
+                      number_of_elements="1"
+                      default_values="0">
+                    <Documentation>Left edge of the window the input already uses.</Documentation>
+                 </DoubleVectorProperty>
                 """
 )
 @smdomain.datatype(
@@ -752,6 +871,7 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
         )
         # common values:
         self._center_meridian = 0
+        self._input_origin = 0.0
         self._cached_output = None
 
     def SetMeridian(self, meridian_):
@@ -768,6 +888,34 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
         self._center_meridian = meridian_
         self.Modified()
 
+    def SetLongitudeOrigin(self, origin):
+        """Left edge of the map; the right edge is 360 degrees further east."""
+        if origin < -180 or origin > 180:
+            print_error(
+                f"SetLongitudeOrigin called with parameter outside [-180, 180]: {origin}"
+            )
+            return
+        meridian = origin + 180.0
+        if self._center_meridian != meridian:
+            self._center_meridian = meridian
+            self._cached_output = None
+            self.Modified()
+
+    def GetLongitudeOrigin(self):
+        return self._center_meridian - 180.0
+
+    def SetInputLongitudeOrigin(self, origin):
+        """Left edge of the window the *input* already uses.
+
+        The pg2 reader emits [0, 360); the dycore reader emits [-180, 180).
+        Without this the cut lands outside the data and the rotation silently
+        does nothing.
+        """
+        if self._input_origin != origin:
+            self._input_origin = origin
+            self._cached_output = None
+            self.Modified()
+
     def GetMeridian(self):
         """
         Returns the central meridian
@@ -779,13 +927,29 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
             inData = self.GetInputData(inInfo, 0, 0)
 
             outData = self.GetOutputData(outInfo, 0)
-            if (
+
+            # Nothing to do when the input already sits in the requested
+            # window -- the dycore reader's default case. Clipping here would
+            # be a no-op that still rebuilds the points every pass, which also
+            # costs EAMProject its cache downstream.
+            origin = self._center_meridian - 180.0
+            if (origin - self._input_origin) % 360.0 == 0.0:
+                with _perf.timed("center_meridian.passthrough"):
+                    outData.ShallowCopy(inData)
+                return 1
+            # A clip makes new points by interpolation, so an output point has
+            # no single source to gather from and the pedigree cache cannot
+            # refresh point data. Nodal formats therefore re-clip every pass;
+            # it costs a few milliseconds and is always correct.
+            has_point_arrays = inData.GetPointData().GetNumberOfArrays() > 0
+            geometry_cached = bool(
                 self._cached_output
                 and self._cached_output.GetPoints().GetMTime()
                 >= inData.GetPoints().GetMTime()
                 and self._cached_output.GetCells().GetMTime()
                 >= inData.GetCells().GetMTime()
-            ):
+            )
+            if geometry_cached and not has_point_arrays:
                 with _perf.timed("center_meridian.cache_hit"):
                     add_cell_arrays(inData, outData, self._cached_output)
             else:
@@ -795,9 +959,11 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
                     generate_ids.PointIdsOff()
                     generate_ids.SetCellIdsArrayName("PedigreeIds")
 
-                    cut_meridian = self._center_meridian + 180
+                    cut, shift_low, shift_high = _longitude_window(
+                        self._center_meridian - 180.0, self._input_origin
+                    )
                     plane = vtkPlane()
-                    plane.SetOrigin([cut_meridian, 0.0, 0.0])
+                    plane.SetOrigin([cut, 0.0, 0.0])
                     plane.SetNormal([-1, 0, 0])
                     # vtkClipPolyData hangs
                     clipL = vtkTableBasedClipDataSet()
@@ -813,21 +979,40 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
                     with _perf.timed("center_meridian.clip_right"):
                         clipR.Update()
 
-                    transFunc = vtkTransform()
-                    transFunc.Translate(-360, 0, 0)
-                    transform = vtkTransformFilter()
-                    transform.SetInputData(clipR.GetOutput())
-                    transform.SetTransform(transFunc)
                     with _perf.timed("center_meridian.transform"):
-                        transform.Update()
+                        halves = [
+                            _translated(clipL.GetOutput(), shift_low),
+                            _translated(clipR.GetOutput(), shift_high),
+                        ]
 
                     append = vtkAppendFilter()
-                    append.AddInputData(clipL.GetOutput())
-                    append.AddInputData(transform.GetOutput())
+                    for half in halves:
+                        append.AddInputData(half)
                     with _perf.timed("center_meridian.append"):
                         append.Update()
                     outData.ShallowCopy(append.GetOutput())
-                    # previous _cached_output is available for garbage collection
-                    self._cached_output = outData.NewInstance()
-                    self._cached_output.ShallowCopy(outData)
+
+                    # The clip is deterministic, so when only the values
+                    # changed the geometry it just produced is identical to the
+                    # cached one. Hand the *same* points and cells objects
+                    # downstream: EAMProject keys its cache on the identity of
+                    # the incoming points, and EAMExtract on their modified
+                    # time, so fresh copies would make both rebuild for nothing.
+                    if (
+                        geometry_cached
+                        and self._cached_output.GetNumberOfPoints()
+                        == outData.GetNumberOfPoints()
+                        and self._cached_output.GetNumberOfCells()
+                        == outData.GetNumberOfCells()
+                    ):
+                        with _perf.timed("center_meridian.reuse_geometry"):
+                            outData.SetPoints(self._cached_output.GetPoints())
+                            outData.SetCells(
+                                _cell_types_array(self._cached_output),
+                                self._cached_output.GetCells(),
+                            )
+                    else:
+                        # previous _cached_output is available for garbage collection
+                        self._cached_output = outData.NewInstance()
+                        self._cached_output.ShallowCopy(outData)
             return 1

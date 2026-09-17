@@ -64,7 +64,9 @@ class VariableView(TrameComponent):
             server,
             mapper=self.mapper,
             data_array_fn=lambda: self.data_array,
-        ).set_data_array(variable_name, lambda: self.data_array, "cell")
+        ).set_data_array(
+            variable_name, lambda: self.data_array, source.data_reader.association
+        )
         self.colormap.watch(["mapper_change"], lambda *_: self.render())
 
         # GUI
@@ -100,8 +102,11 @@ class VariableView(TrameComponent):
 
     @property
     def data_array(self):
-        self.source.data_reader.vtk_geometry.Update()
-        ds = self.source.data_reader.vtk_geometry.GetOutput()
+        data_reader = self.source.data_reader
+        data_reader.vtk_geometry.Update()
+        ds = data_reader.vtk_geometry.GetOutput()
+        if data_reader.association == "point":
+            return ds.GetPointData().GetArray(self.variable_name)
         return ds.GetCellData().GetArray(self.variable_name)
 
     def _build_ui(self):

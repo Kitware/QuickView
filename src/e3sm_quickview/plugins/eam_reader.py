@@ -197,62 +197,18 @@ def createModifiedCallback(anobject):
     return _markmodified
 
 
-@smproxy.reader(
-    name="EAMSliceSource",
-    label="EAM Slice Data Reader",
-    extensions="nc",
-    file_description="NETCDF files for EAM",
-)
-@smproperty.xml("""<OutputPort name="Mesh"  index="0" />""")
-@smproperty.xml(
+class _EAMReaderBase(VTKPythonAlgorithmBase):
+    """Shared plumbing for the EAM readers: files, variable metadata,
+    dimension slicing and timesteps.
+
+    This is deliberately left undecorated. ParaView's decorators replace the
+    class they wrap with a function, so a decorated reader cannot be used as
+    a base class -- the shared code has to live here instead.
+
+    The geometry and data-placement methods below are the pg2 physics-grid
+    behaviour; EAMDycoreSource overrides them.
     """
-                <StringVectorProperty command="SetDataFileName"
-                      name="FileName1"
-                      label="Data File"
-                      number_of_elements="1">
-                    <FileListDomain name="files" />
-                    <Documentation>Specify the NetCDF data file name.</Documentation>
-                </StringVectorProperty>
-                """
-)
-@smproperty.xml(
-    """
-                <StringVectorProperty command="SetConnFileName"
-                      name="FileName2"
-                      label="Connectivity File"
-                      number_of_elements="1">
-                    <FileListDomain name="files" />
-                    <Documentation>Specify the NetCDF connecticity file name.</Documentation>
-                </StringVectorProperty>
-                """
-)
-@smproperty.xml(
-    """
-                <StringVectorProperty command="SetSlicing"
-                      name="Slicing"
-                      label="Slicing"
-                      number_of_elements="1"
-                      animateable="0"
-                      default_values="">
-                    <Documentation>JSON representing dimension slices (e.g. {"lev": 0, "ilev": 1})</Documentation>
-                </StringVectorProperty>
-                """
-)
-@smproperty.xml(
-    """
-<IntVectorProperty command="SetForceFloatPoints"
-                         name="ForceFloatPoints"
-                         default_values="1"
-                         number_of_elements="1">
-        <BooleanDomain name="bool" />
-        <Documentation>
-           If True, the points of the dataset will be float, otherwise they will be float or double depending
-           on the type of corner_lat and corner_lon variables in the connectivity file.
-        </Documentation>
-      </IntVectorProperty>
-                """
-)
-class EAMSliceSource(VTKPythonAlgorithmBase):
+
     def __init__(self):
         VTKPythonAlgorithmBase.__init__(
             self, nInputPorts=0, nOutputPorts=1, outputType="vtkUnstructuredGrid"
@@ -819,6 +775,530 @@ class EAMSliceSource(VTKPythonAlgorithmBase):
 
         for var_name in to_remove:
             output_mesh.CellData.RemoveArray(var_name)
+
+        output = vtkUnstructuredGrid.GetData(outInfo, 0)
+        output.ShallowCopy(self._output)
+
+        return 1
+
+
+@smproxy.reader(
+    name="EAMSliceSource",
+    label="EAM Slice Data Reader",
+    extensions="nc",
+    file_description="NETCDF files for EAM",
+)
+@smproperty.xml("""<OutputPort name="Mesh"  index="0" />""")
+@smproperty.xml(
+    """
+                <StringVectorProperty command="SetDataFileName"
+                      name="FileName1"
+                      label="Data File"
+                      number_of_elements="1">
+                    <FileListDomain name="files" />
+                    <Documentation>Specify the NetCDF data file name.</Documentation>
+                </StringVectorProperty>
+                """
+)
+@smproperty.xml(
+    """
+                <StringVectorProperty command="SetConnFileName"
+                      name="FileName2"
+                      label="Connectivity File"
+                      number_of_elements="1">
+                    <FileListDomain name="files" />
+                    <Documentation>Specify the NetCDF connecticity file name.</Documentation>
+                </StringVectorProperty>
+                """
+)
+@smproperty.xml(
+    """
+                <StringVectorProperty command="SetSlicing"
+                      name="Slicing"
+                      label="Slicing"
+                      number_of_elements="1"
+                      animateable="0"
+                      default_values="">
+                    <Documentation>JSON representing dimension slices (e.g. {"lev": 0, "ilev": 1})</Documentation>
+                </StringVectorProperty>
+                """
+)
+@smproperty.xml(
+    """
+<IntVectorProperty command="SetForceFloatPoints"
+                         name="ForceFloatPoints"
+                         default_values="1"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>
+           If True, the points of the dataset will be float, otherwise they will be float or double depending
+           on the type of corner_lat and corner_lon variables in the connectivity file.
+        </Documentation>
+      </IntVectorProperty>
+                """
+)
+class EAMSliceSource(_EAMReaderBase):
+    """ne*pg2 physics grid: cell values on an unshared SCRIP corner mesh."""
+
+    # ParaView builds a proxy's XML from the methods in the class's own
+    # __dict__, so these have to be declared on each decorated reader rather
+    # than inherited from the shared base.
+    @smproperty.doublevector(
+        name="TimestepValues", information_only="1", si_class="vtkSITimeStepsProperty"
+    )
+    def GetTimestepValues(self):
+        return self._timeSteps
+
+    @smproperty.dataarrayselection(name="Variables")
+    def GetSurfaceVariables(self):
+        return self._variable_selection
+
+
+# ---------------------------------------------------------------------------
+# Dycore reader: native spectral-element (ne*np4 / GLL) grids
+# ---------------------------------------------------------------------------
+
+
+@smproxy.reader(
+    name="EAMDycoreSource",
+    label="EAM Dycore Reader",
+    extensions="nc",
+    file_description="NETCDF files for the EAM dynamical core (np4/GLL)",
+)
+@smproperty.xml("""<OutputPort name="Mesh"  index="0" />""")
+@smproperty.xml(
+    """
+                <StringVectorProperty command="SetDataFileName"
+                      name="FileName1"
+                      label="Data File"
+                      number_of_elements="1">
+                    <FileListDomain name="files" />
+                    <Documentation>Specify the NetCDF data file name.</Documentation>
+                </StringVectorProperty>
+                """
+)
+@smproperty.xml(
+    """
+                <StringVectorProperty command="SetConnFileName"
+                      name="FileName2"
+                      label="Connectivity File"
+                      number_of_elements="1">
+                    <FileListDomain name="files" />
+                    <Documentation>Specify the HOMME np4 grid file (lat/lon + element_corners).</Documentation>
+                </StringVectorProperty>
+                """
+)
+@smproperty.xml(
+    """
+                <StringVectorProperty command="SetSlicing"
+                      name="Slicing"
+                      label="Slicing"
+                      number_of_elements="1"
+                      animateable="0"
+                      default_values="">
+                    <Documentation>JSON representing dimension slices (e.g. {"lev": 0, "time": 1})</Documentation>
+                </StringVectorProperty>
+                """
+)
+@smproperty.xml(
+    """
+<IntVectorProperty command="SetForceFloatPoints"
+                         name="ForceFloatPoints"
+                         default_values="1"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>
+           If True, the points of the dataset will be float, otherwise double.
+        </Documentation>
+      </IntVectorProperty>
+                """
+)
+@smproperty.xml(
+    """
+<DoubleVectorProperty command="SetLongitudeOrigin"
+                         name="LongitudeOrigin"
+                         default_values="-180.0"
+                         number_of_elements="1">
+        <Documentation>
+           Left edge of the map in degrees. -180 places the seam on the date
+           line, where the ne*np4 element boundaries fall, so the split cells
+           tile the map with no overhang and no gap.
+        </Documentation>
+      </DoubleVectorProperty>
+                """
+)
+class EAMDycoreSource(_EAMReaderBase):
+    """Read EAM/CAM-SE native spectral-element (ne*np4) output.
+
+    The dynamical core runs on Gauss-Lobatto-Legendre quadrature nodes: 4x4
+    nodes per spectral element, with edge and corner nodes *shared* between
+    neighbouring elements. Values are nodal point samples, not cell averages --
+    the opposite of the ne*pg2 physics grid that ``EAMSliceSource`` reads.
+
+    This is the "tier 1" representation: each element is split into
+    (np-1)^2 = 9 bilinear quads whose vertices are the GLL nodes themselves.
+    That connectivity is read straight from the grid file's ``element_corners``
+    array, so no topology is reconstructed and no points are invented -- the
+    subdivision vertices *are* the data locations. Variables are therefore
+    attached as **point data**.
+
+    Grid file (e.g. ne30np4_latlon.nc, written by HOMME2META.ncl):
+        lat(ncol), lon(ncol)              GLL node positions, degrees
+        element_corners(ncorners, ncells) 1-based, element-major
+
+    The reader lays the sphere flat itself, duplicating nodes at the date line
+    and at the poles rather than clipping, so every cell stays whole and no
+    value is ever interpolated. Output is in [lon_origin, lon_origin+360) and
+    feeds EAMProject directly.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._lon_origin = -180.0
+        # GLL grid state
+        self._gll_lat = None  # (ncol,) degrees
+        self._gll_lon = None  # (ncol,) degrees
+        self._cell_verts = None  # (ncells, 4) indices into ncol
+        self._node_source = None  # (npoints,) -> ncol index, for gathering
+        self._winding_flipped = False
+
+    # ParaView builds a proxy's XML from the methods in the class's own
+    # __dict__, so these have to be declared here rather than inherited.
+    @smproperty.doublevector(
+        name="TimestepValues", information_only="1", si_class="vtkSITimeStepsProperty"
+    )
+    def GetTimestepValues(self):
+        return self._timeSteps
+
+    @smproperty.dataarrayselection(name="Variables")
+    def GetSurfaceVariables(self):
+        return self._variable_selection
+
+    # -- properties ----------------------------------------------------
+
+    def SetLongitudeOrigin(self, origin):
+        if self._lon_origin != origin:
+            self._lon_origin = origin
+            self._clear_geometry_cache()
+            self._dirty = True
+            self.Modified()
+
+    def GetNodeSource(self):
+        """Map from output point id to GLL node id (None before execution)."""
+        return self._node_source
+
+    # -- overrides -----------------------------------------------------
+
+    def _clear_geometry_cache(self):
+        super()._clear_geometry_cache()
+        self._gll_lat = None
+        self._gll_lon = None
+        self._cell_verts = None
+        self._node_source = None
+
+    def _identify_horizontal_dimension(self, meshdata, vardata):
+        """Identify the GLL node dimension (ncol) and match it in the data file.
+
+        The base class takes the first dimension of the connectivity file,
+        which happens to be ``ncol`` for ne30np4_latlon.nc but is not something
+        to rely on -- take it from the ``lat`` variable instead.
+        """
+        if self._horizontal_dim and self._data_horizontal_dim:
+            return
+
+        if "lat" not in meshdata.variables:
+            print_error("Grid file has no 'lat' variable; not an np4 grid file")
+            return
+
+        self._horizontal_dim = meshdata.variables["lat"].dimensions[0]
+        n_nodes = meshdata.dimensions[self._horizontal_dim].size
+
+        # Prefer a same-named dimension in the data file, else match by size.
+        dim = vardata.dimensions.get(self._horizontal_dim)
+        if dim is not None and dim.size == n_nodes:
+            self._data_horizontal_dim = self._horizontal_dim
+            return
+
+        for dim_name, dim_obj in vardata.dimensions.items():
+            if dim_obj.size == n_nodes:
+                self._data_horizontal_dim = dim_name
+                return
+
+        print_error(
+            f"Could not match GLL node count {n_nodes} to any dimension in the data file"
+        )
+
+    def _read_grid(self, meshdata):
+        """Read GLL node positions and the 9-subcell connectivity."""
+        lat = np.asarray(meshdata["lat"][:]).reshape(-1).astype(np.float64)
+        lon = np.asarray(meshdata["lon"][:]).reshape(-1).astype(np.float64)
+
+        if "element_corners" not in meshdata.variables:
+            print_error("Grid file has no 'element_corners'; not an np4 grid file")
+            return False
+
+        # element_corners is (ncorners, ncells), 1-based -> (ncells, 4), 0-based
+        ec = np.asarray(meshdata["element_corners"][:]).astype(np.int64)
+        verts = np.ascontiguousarray(ec.T) - 1
+
+        if verts.min() < 0 or verts.max() >= len(lat):
+            print_error(
+                f"element_corners indexes outside [0, {len(lat)}) after converting "
+                "from 1-based; grid file may use a different convention"
+            )
+            return False
+
+        self._gll_lat = lat
+        self._gll_lon = lon
+        self._cell_verts = verts
+        return True
+
+    def _orient_outward(self):
+        """Reverse subcell winding if HOMME's corner order faces normals inward.
+
+        A quad's normal is taken from the cross product of its diagonals and
+        compared with the outward radial direction at its centroid. HOMME winds
+        ``element_corners`` inward uniformly, so one whole-mesh test settles it.
+        """
+        lat_r = np.radians(self._gll_lat)
+        lon_r = np.radians(self._gll_lon)
+        cos_lat = np.cos(lat_r)
+        xyz = np.column_stack(
+            [cos_lat * np.cos(lon_r), cos_lat * np.sin(lon_r), np.sin(lat_r)]
+        )
+
+        v = self._cell_verts
+        normals = np.cross(xyz[v[:, 2]] - xyz[v[:, 0]], xyz[v[:, 3]] - xyz[v[:, 1]])
+        outward = (normals * xyz[v].mean(axis=1)).sum(axis=1)
+        n_inward = int((outward < 0).sum())
+
+        if n_inward == v.shape[0]:
+            self._cell_verts = np.ascontiguousarray(v[:, ::-1])
+            self._winding_flipped = True
+        elif n_inward:
+            print_warning(
+                f"subcell winding is not consistent ({n_inward} of {v.shape[0]} "
+                "cells wind inward); leaving orientation as found"
+            )
+
+    def _latlon_mesh(self):
+        """Lay the sphere flat, splitting the date line and the poles.
+
+        Two degeneracies have to be dealt with, and both are fixed by
+        duplicating nodes rather than by clipping -- so every cell stays whole
+        and no value is interpolated.
+
+        *Date line.* A cell whose corners fall either side of the seam would
+        stretch across the whole map. Its low-side corners get a duplicate
+        shifted +360 degrees, leaving the cell whole at the right-hand edge.
+
+        *Poles.* Longitude is undefined at a pole, so the file stores an
+        arbitrary one (0). Every cell touching a pole node is dragged toward
+        that meridian. Each such cell gets its own copy of the pole node at the
+        mean longitude of its other corners, which turns the pole from a single
+        point into the top edge of the map.
+
+        Sets ``self._node_source``, mapping each output point back to its GLL
+        node so field arrays can be gathered with a single fancy index.
+        """
+        lon_origin = self._lon_origin
+        lon = lon_origin + np.mod(self._gll_lon - lon_origin, 360.0)
+        lat = self._gll_lat
+        v = self._cell_verts
+        n0 = len(lat)
+
+        extra_lon = []
+        extra_src = []
+        new_verts = v.copy()
+
+        def add(orig, lon_value):
+            extra_lon.append(float(lon_value))
+            extra_src.append(int(orig))
+            return n0 + len(extra_src) - 1
+
+        def lon_of(idx):
+            return lon[idx] if idx < n0 else extra_lon[idx - n0]
+
+        pole = np.where(np.abs(np.abs(lat) - 90.0) < 1e-9)[0]
+        is_pole_node = np.zeros(n0, dtype=bool)
+        is_pole_node[pole] = True
+
+        # 1. date line
+        #
+        # A pole node's longitude is arbitrary (the file stores 0), so it must
+        # take no part in deciding whether a cell straddles the seam -- it is
+        # replaced below anyway. Including it makes a polar cell's span read as
+        # a full half-turn, and float noise then tips the comparison over and
+        # flings a legitimate corner a whole turn out of the map.
+        cl = np.where(is_pole_node[v], np.nan, lon[v])
+        real_span = np.nanmax(cl, axis=1) - np.nanmin(cl, axis=1)
+        seam = real_span > 180.0
+        midline = lon_origin + 180.0
+        shifted = {}
+        for c in np.where(seam)[0]:
+            for k in range(4):
+                n = int(v[c, k])
+                if is_pole_node[n]:
+                    continue
+                if lon[n] < midline:
+                    if n not in shifted:
+                        shifted[n] = add(n, lon[n] + 360.0)
+                    new_verts[c, k] = shifted[n]
+
+        # 2. poles
+        if pole.size:
+            orig_all = np.concatenate(
+                [
+                    np.arange(n0, dtype=np.int64),
+                    np.array(extra_src, dtype=np.int64)
+                    if extra_src
+                    else np.empty(0, dtype=np.int64),
+                ]
+            )
+            is_pole = np.isin(orig_all, pole)
+            for c in np.where(is_pole[new_verts].any(axis=1))[0]:
+                for k in range(4):
+                    idx = int(new_verts[c, k])
+                    orig = idx if idx < n0 else extra_src[idx - n0]
+                    if orig in pole:
+                        others = [
+                            lon_of(int(new_verts[c, j])) for j in range(4) if j != k
+                        ]
+                        new_verts[c, k] = add(orig, np.mean(others))
+
+        if extra_src:
+            src_extra = np.array(extra_src, dtype=np.int64)
+            source = np.concatenate([np.arange(n0, dtype=np.int64), src_extra])
+            out_lon = np.concatenate([lon, np.array(extra_lon, dtype=np.float64)])
+            out_lat = np.concatenate([lat, lat[src_extra]])
+        else:
+            source = np.arange(n0, dtype=np.int64)
+            out_lon, out_lat = lon, lat
+
+        self._node_source = source
+        return out_lon, out_lat, new_verts
+
+    def _build_geometry(self, meshdata):
+        """Build and cache the tier-1 subdivided-element mesh."""
+        if self._cached_points is not None:
+            return
+
+        if not self._read_grid(meshdata):
+            return
+
+        self._orient_outward()
+        lon, lat, verts = self._latlon_mesh()
+
+        n_cells = verts.shape[0]
+        self._cached_ncells2D = n_cells
+
+        points_type = np.float32 if self._ForceFloatPoints else np.float64
+        coords = np.empty((len(lon), 3), dtype=points_type)
+        coords[:, 0] = lon
+        coords[:, 1] = lat
+        coords[:, 2] = 0.0
+
+        vtk_coords = vtkPoints()
+        vtk_coords.SetData(dsa.numpyTovtkDataArray(coords))
+        self._cached_points = vtk_coords
+
+        cellTypes = np.empty(n_cells, dtype=np.uint8)
+        cellTypes.fill(vtkConstants.VTK_QUAD)
+        self._cached_cell_types = numpy_support.numpy_to_vtk(
+            num_array=cellTypes.ravel(),
+            deep=True,
+            array_type=vtkConstants.VTK_UNSIGNED_CHAR,
+        )
+
+        offsets = np.arange(0, (4 * n_cells) + 1, 4, dtype=np.int64)
+        self._cached_offsets = numpy_support.numpy_to_vtk(
+            num_array=offsets.ravel(), deep=True, array_type=vtkConstants.VTK_ID_TYPE
+        )
+
+        self._cached_cells = numpy_support.numpy_to_vtk(
+            num_array=np.ascontiguousarray(verts).ravel(),
+            deep=True,
+            array_type=vtkConstants.VTK_ID_TYPE,
+        )
+
+    def _RequestDataImpl(self, request, inInfo, outInfo):
+        if (
+            self._ConnFileName is None
+            or self._ConnFileName == "None"
+            or self._DataFileName is None
+            or self._DataFileName == "None"
+        ):
+            print_error(
+                "Either one or both, the data file or connectivity file, are not provided!"
+            )
+            return 0
+        if not _has_deps:
+            print_error("Required Python module 'netCDF4' or 'numpy' missing!")
+            return 0
+
+        meshdata = self._get_mesh_dataset()
+        vardata = self._get_var_dataset()
+
+        self._identify_horizontal_dimension(meshdata, vardata)
+        if not self._horizontal_dim or not self._data_horizontal_dim:
+            print_error("Could not identify required dimensions from files")
+            return 0
+
+        self._build_geometry(meshdata)
+        if self._cached_points is None:
+            print_error("Could not build geometry from the np4 grid file")
+            return 0
+
+        output_mesh = dsa.WrapDataObject(self._output)
+
+        if self._dirty:
+            self._output = vtkUnstructuredGrid()
+            output_mesh = dsa.WrapDataObject(self._output)
+            output_mesh.SetPoints(self._cached_points)
+            cellArray = vtkCellArray()
+            cellArray.SetData(self._cached_offsets, self._cached_cells)
+            output_mesh.VTKObject.SetCells(self._cached_cell_types, cellArray)
+            self._dirty = False
+
+        # Values are nodal, so they are gathered onto the split point set
+        # through the node source map rather than used directly.
+        source = self._node_source
+
+        to_remove = set()
+        for i in range(output_mesh.PointData.GetNumberOfArrays()):
+            to_remove.add(output_mesh.PointData.GetArrayName(i))
+
+        changed_dims = self._changed_dims
+        for name, varmeta in self._variables.items():
+            if self._variable_selection.ArrayIsEnabled(name):
+                if output_mesh.PointData.HasArray(name):
+                    to_remove.remove(name)
+                    if changed_dims and not changed_dims.intersection(
+                        varmeta.dimensions
+                    ):
+                        continue
+                data = self._load_variable(vardata, varmeta)
+                if data.size != len(source) and data.size == len(self._gll_lat):
+                    data = np.ascontiguousarray(data[source])
+                output_mesh.PointData.append(data, name)
+
+        self._changed_dims = set()
+
+        # CAM-SE files carry area(ncol): the GLL quadrature weight for each
+        # node. That is the correct weight for averaging nodal values, and it
+        # has to sit in PointData beside them to line up.
+        area_var_name = "area"
+        if self._areavar and not output_mesh.PointData.HasArray(area_var_name):
+            data = self._get_cached_area(vardata)
+            if data is not None and data.size == len(self._gll_lat):
+                output_mesh.PointData.append(
+                    np.ascontiguousarray(data[source]), area_var_name
+                )
+        if area_var_name in to_remove:
+            to_remove.remove(area_var_name)
+
+        for var_name in to_remove:
+            output_mesh.PointData.RemoveArray(var_name)
 
         output = vtkUnstructuredGrid.GetData(outInfo, 0)
         output.ShallowCopy(self._output)

@@ -324,8 +324,8 @@ class Cropping(v3.VToolbar):
                         )
                     v3.VRangeSlider(
                         v_model=("crop_longitude", [-180, 180]),
-                        min=-180,
-                        max=180,
+                        min=("longitude_origin",),
+                        max=("longitude_origin + 360",),
                         step=1,
                         density="compact",
                         hide_details=True,
@@ -407,11 +407,31 @@ class Cropping(v3.VToolbar):
                         density="compact",
                         hide_details=True,
                     )
+
+                with v3.VCol():
+                    with v3.VRow(classes="mx-2 my-0"):
+                        v3.VLabel(
+                            "Map origin",
+                            classes="text-subtitle-2",
+                        )
+                        v3.VSpacer()
+                        v3.VLabel(
+                            "{{ longitude_origin }} to {{ longitude_origin + 360 }}",
+                            classes="text-body-2",
+                        )
+                    v3.VSlider(
+                        v_model=("longitude_origin", -180),
+                        min=-180,
+                        max=180,
+                        step=1,
+                        density="compact",
+                        hide_details=True,
+                    )
             with v3.VRow(classes="ma-0 pl-6 pr-2 align-center ga-4", v_else=True):
                 v3.VNumberInput(
                     label="Longitude (min)",
                     v_model=("crop_longitude_min", -180),
-                    min=[-180],
+                    min=("longitude_origin",),
                     max=("crop_longitude_max", 180),
                     step=[1],
                     hide_details=True,
@@ -424,7 +444,7 @@ class Cropping(v3.VToolbar):
                     label="Longitude (max)",
                     v_model=("crop_longitude_max", 180),
                     min=("crop_longitude_min", -180),
-                    max=[180],
+                    max=("longitude_origin + 360",),
                     step=[1],
                     hide_details=True,
                     density="comfortable",

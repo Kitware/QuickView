@@ -493,6 +493,11 @@ class EAMApp(TrameApp):
             conn_file=connectivity,
         )
 
+        # A different format means a different pipeline; existing views are
+        # still wired to the old one.
+        if self.source.path_changed:
+            self.view_manager.drop_views()
+
         self.file_browser.loading_completed(self.source.valid)
 
         if self.source.valid:
@@ -687,8 +692,29 @@ class EAMApp(TrameApp):
                 geom_filter.Update()
                 data = geom_filter.GetOutput()
                 self.state.fields_avgs = compute.extract_avgs(
-                    data, self.selected_variable_names
+                    data, self.selected_variable_names, self.source.association
                 )
+
+    @change("longitude_origin")
+    def _on_longitude_origin(self, longitude_origin, **_):
+        """Rotate the map so its left edge sits at the chosen longitude."""
+        if not self.source.valid:
+            return
+
+        origin = float(longitude_origin)
+        with perf.timed("longitude_origin.total"):
+            self.source.SetLongitudeOrigin(origin)
+            # The crop is expressed in the map's own longitudes, so rotating the
+            # map invalidates the previous selection -- a stale one would sit
+            # partly outside the window, or straddle its seam, which the box
+            # crop used for the continents and the graticule cannot represent.
+            with self.state as s:
+                s.crop_longitude = [origin, origin + 360]
+                s.crop_longitude_min = origin
+                s.crop_longitude_max = origin + 360
+            self.view_manager.update_color_range()
+            self.view_manager.reset_camera()
+            self.view_manager.render()
 
     @change(
         "variables_loaded",
@@ -725,7 +751,7 @@ class EAMApp(TrameApp):
                 geom_filter.Update()
                 data = geom_filter.GetOutput()
                 self.state.fields_avgs = compute.extract_avgs(
-                    data, self.selected_variable_names
+                    data, self.selected_variable_names, self.source.association
                 )
 
     def toggle_toolbar(self, toolbar_name=None):
