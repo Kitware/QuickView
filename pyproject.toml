@@ -55,6 +55,12 @@ quickview-chunk = "e3sm_quickview.cli.chunk:main"
 [project.entry-points."jupyter_serverproxy_servers"]
 quickview = "e3sm_quickview.jupyter:setup_quickview"
 
+[tool.uv]
+# ParaView's pvpython supplies its own vtkmodules built against its libraries.
+# trame-colormaps>=1.6 pulls in the standalone pip `vtk` wheel, whose vtkmodules
+# collide with ParaView's and crash the app at startup. Keep it out of the venv.
+override-dependencies = ["vtk; sys_platform == 'never'"]
+
 
 
 
