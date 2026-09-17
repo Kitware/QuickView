@@ -110,6 +110,16 @@ except ImportError:
             yield
 
 
+def _cell_types_array(grid):
+    """Per-cell type array, across VTK versions.
+
+    VTK 9.7 dropped `GetCellTypesArray()`; `GetCellTypes()` now returns that
+    array, where it used to fill a vtkCellTypes passed in by the caller.
+    """
+    getter = getattr(grid, "GetCellTypesArray", None)
+    return getter() if getter is not None else grid.GetCellTypes()
+
+
 def ProcessPoint(point, radius):
     # theta = math.radians(point[0] - 180.)
     # phi   = math.radians(point[1])
@@ -256,10 +266,16 @@ class EAMSphere(VTKPythonAlgorithmBase):
         else:
             outData.DeepCopy(inData)
 
-        inPoints = inData.points
+        inPoints = numpy_support.vtk_to_numpy(inData.GetPoints().GetData())
         pRadius = (self.radius + 1) if self.isData else self.radius
         outPoints = np.array(list(map(lambda x: ProcessPoint(x, pRadius), inPoints)))
-        outData.points = outPoints
+        vtk_coords = vtkPoints()
+        vtk_coords.SetData(
+            numpy_support.numpy_to_vtk(
+                outPoints, deep=True, array_type=vtkConstants.VTK_FLOAT
+            )
+        )
+        outData.SetPoints(vtk_coords)
 
         return 1
 
@@ -443,7 +459,9 @@ class EAMProject(VTKPythonAlgorithmBase):
                         out_points_vtk = vtkPoints()
                         out_points_vtk.DeepCopy(outData.GetPoints())
                         outData.SetPoints(out_points_vtk)
-                    out_points_np = outData.points
+                    out_points_np = numpy_support.vtk_to_numpy(
+                        outData.GetPoints().GetData()
+                    )
 
                     flat = out_points_np.flatten()
                     x = flat[0::3] - 180.0 if self.translate else flat[0::3]
@@ -696,7 +714,7 @@ class EAMExtract(VTKPythonAlgorithmBase):
                         cells = vtkCellArray()
                         cell_types = vtkUnsignedCharArray()
                         cells.DeepCopy(outData.GetCells())
-                        cell_types.DeepCopy(outData.GetCellTypesArray())
+                        cell_types.DeepCopy(_cell_types_array(outData))
                         outData.SetCells(cell_types, cells)
 
                     # Crop against absolute lon/lat ranges, in the same
