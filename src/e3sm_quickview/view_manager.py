@@ -4,8 +4,8 @@ import time
 
 from paraview.modules.vtkPVVTKExtensionsInteractionStyle import (
     vtkPVInteractorStyle,
+    vtkPVTrackballPan,
     vtkPVTrackballZoom,
-    vtkTrackballPan,
 )
 from trame.app import TrameComponent
 from trame.decorators import controller
@@ -84,7 +84,7 @@ class ViewManager(TrameComponent):
             )
         )
         self._style.AddManipulator(
-            vtkTrackballPan(
+            vtkPVTrackballPan(
                 button=1,
                 shift=0,
                 control=0,
