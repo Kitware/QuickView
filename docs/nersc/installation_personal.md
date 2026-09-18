@@ -1,7 +1,7 @@
-# Installing a User's Copy of the QuickView Family at NERSC 
+# Installing a Personal Copy
 
 The steps described below follow the same logic as documented on
-[the other page](./developers_installation.md),
+the page that documents [a public installation](./public_installation.md),
 expect that
 
 - the tools are installed to a different path, `/global/cfs/projectdirs/m4359/tools/`,

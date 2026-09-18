@@ -18,32 +18,25 @@ export default defineConfig({
       { text: "News", link: "/webnews" },
       { text: "Gallery", link: "/gallery/" },
       { text: "User's Guide", link: "/guides/reminders" },
-      { text: "At NERSC", link: "/nersc/index" },
-      { text: "Resources", link: "/resources" },
+      { text: "At NERSC", link: "/nersc/launching" },
     ],
 
     sidebar: {
       "/nersc/": [
         {
-          text: "At NERSC",
+          text: "Installation at NERSC",
           items: [
-            { text: "Getting Started", link: "/nersc/index" },
-            {
-              text: "Developers' Installation",
-              link: "/nersc/developers_installation",
-            },
-            { text: "User's Installation", link: "/nersc/users_installation" },
-          ],
+            { text: "Public installation",  link: "/nersc/installation_public" },
+            { text: "Personal installation",link: "/nersc/installation_personal" },
+            { text: "E3SM-Unified",         link: "/nersc/installation_E3SM-unified" },
+         ],
         },
         {
-          text: "Step-by-step Guides",
+          text: "Launching at NERSC",
           items: [
-            { text: "JupyterHub", link: "/nersc/jupyter_at_nersc" },
-            { text: "QuickView", link: "/nersc/perlmutter-run-quickview" },
-            {
-              text: "QuickCompare",
-              link: "/nersc/perlmutter-run-quickcompare",
-            },
+            { text: "Overview",   link: "/nersc/launching" },
+            { text: "VS Code",    link: "/nersc/login_vscode" },
+            { text: "JupyterHub", link: "/nersc/login_jupyter" },
           ],
         },
       ],

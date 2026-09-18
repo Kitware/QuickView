@@ -17,7 +17,7 @@ hero:
       link: /guides/reminders
     - theme: brand 
       text: Using it at NERSC
-      link: /nersc/index
+      link: /nersc/launching
 
 features:
   - title: Purpose

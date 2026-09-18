@@ -1,0 +1,1 @@
+As of September 2026, we are working with the E3SM team to include QuickView and QuickCompare in the next release of the [E3SM-Unified](https://github.com/E3SM-Project/e3sm-unified) analysis and post-processing environment.

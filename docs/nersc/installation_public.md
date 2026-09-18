@@ -1,25 +1,8 @@
-# Developers' Installation at NERSC
+# A Public Installation at NERSC
 
 The QuickView family of tools are Python packages.
 They have been installed and are frequently updated at NERSC under project m4359.
-
-NERSC users who would like to **use** the developers' installation
-can start a terminal (shell) window through NERSC's JupyterHub
-(see step-by-step guide [here](./jupyter_at_nersc))
-and then use the following commands to start QuickView and QuickCompare,
-respectively.
-
-```
-/global/common/software/m4359/quickview2
-```
-
-```
-/global/common/software/m4359/quickcompare
-```
-
-For installing the tools at a location of the user's choice,
-an example is provided on [this page](./users_installation.md).
-The remainder of this page explains how the developers' installation was done.
+The installation process is explained below.
 
 
 ## Setting default permissions
