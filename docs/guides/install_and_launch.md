@@ -14,9 +14,9 @@ and bundles can be found.
 :::tip Note: The contents below were written with desktop and laptop computers in mind.
 
 Users who would like to **use** our tools installed at NERSC can find information in
-[a quickstart guide](/nersc/index.md).
+[a quickstart guide](/nersc/launching.md).
 Users who would like to **install** their own copy at NERSC
-can follow [this example](/nersc/users_installation.md).
+can follow [this example](/nersc/installation_personal.md).
 :::
 
 ## Desktop bundles {#desktop-bundles}

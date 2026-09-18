@@ -1,7 +1,7 @@
 # Installing a Personal Copy
 
 The steps described below follow the same logic as documented on
-the page that documents [a public installation](./public_installation.md),
+the page that documents [a public installation](./installation_public.md),
 expect that
 
 - the tools are installed to a different path, `/global/cfs/projectdirs/m4359/tools/`,
