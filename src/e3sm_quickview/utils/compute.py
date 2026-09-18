@@ -35,11 +35,21 @@ def calculate_weighted_average(
         return float(np.mean(data))
 
 
-def extract_avgs(vtk_data, array_names):
+def extract_avgs(vtk_data, array_names, association="cell"):
+    """Average each named array, weighted by "area" when the format supplies it.
+
+    ``association`` says where the active format keeps its variables: "cell"
+    for the pg2 physics grid, "point" for the np4 dynamical core. The weights
+    have to come from the same attribute set as the values, or they would not
+    line up.
+    """
     results = {}
-    area_array = vtk_data.GetCellData().GetArray("area")
+    attributes = (
+        vtk_data.GetPointData() if association == "point" else vtk_data.GetCellData()
+    )
+    area_array = attributes.GetArray("area")
     for name in array_names:
-        vtk_array = vtk_data.GetCellData().GetArray(name)
+        vtk_array = attributes.GetArray(name)
         if vtk_array is None:
             results[name] = np.nan
             continue
