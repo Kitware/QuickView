@@ -1,4 +1,10 @@
 
+## September 2026
+
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
+
+2026-09-02: QuickView version 2.9.4 was released, supporting [spherical map projection](/guides/quickview/map_related) with user-specified map center, lat-lon bounds, and lat-lon grid line spacing.
+
 ## June 2026
 
 ![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="8%", align=right }
