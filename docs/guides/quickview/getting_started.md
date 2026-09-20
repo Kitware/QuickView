@@ -20,9 +20,9 @@
   - [Data slice selection](./slice_selection)
   - [Viewport layout options](./viewport_layout)
   - [Customization of individual views](./individual_views)
-  - [Map projections](./miscellaneous#maps)
-  - [Image/animation export](./miscellaneous#save-vis)
-  - [Cursor probe](./miscellaneous#cursor-probe)
+  - [Map-related features](./map_related)
+  - [Image/animation export](./saving_images)
+  - [Cursor probe](./cursor_probe)
 
 - Visit the GitHub [repository](https://github.com/Kitware/QuickView)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/QuickView/issues)

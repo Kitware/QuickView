@@ -9,7 +9,7 @@ and [across an ensemble of more simulations](/guides/quickcompare/multi-sim_comp
 
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
 
-2026-06-25: QuickView version 2.8.4 was released, providing a [cursor probe](/guides/quickview/miscellaneous#cursor-probe) for inspecting data values at selected locations in the visualization.
+2026-06-25: QuickView version 2.8.4 was released, providing a [cursor probe](/guides/quickview/cursor_probe) for inspecting data values at selected locations in the visualization.
 
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
 
@@ -27,7 +27,7 @@ and [across an ensemble of more simulations](/guides/quickcompare/multi-sim_comp
 
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
 
-2026-04-28: QuickView version 2.6.1 was released, providing long-desired features like [image download](/guides/quickview/miscellaneous#save-vis), [symmetric logarithmic scale](/guides/quickview/individual_views#linear-and-log-scales) for colorbars, generalized support for [arbitrarily dimensioned arrays](/guides/simulation_data#nd-vars), and substantially improved performance for [SCREAM output](/gallery/index#scream).
+2026-04-28: QuickView version 2.6.1 was released, providing long-desired features like [image download](/guides/quickview/saving_images), [symmetric logarithmic scale](/guides/quickview/individual_views#linear-and-log-scales) for colorbars, generalized support for [arbitrarily dimensioned arrays](/guides/simulation_data#nd-vars), and substantially improved performance for [SCREAM output](/gallery/index#scream).
 
 
 ## March 2026

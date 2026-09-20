@@ -1,7 +1,7 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-05-11 19:47:37.569618",
+    "created": "2026-09-20 11:32:30.087638",
     "comment": ""
   },
   "files": {
@@ -15,50 +15,51 @@
     "num_a2"
   ],
   "layout": {
-    "aspect-ratio": 0.5,
+    "aspect-ratio": 0.75,
     "grouped": false,
     "active": "auto_layout",
     "tools": [
-      "adjust-databounds"
+      "adjust-databounds",
+      "adjust-layout"
     ],
     "help": false,
     "camera": {
-      "zoom": 4777405.644235796,
+      "zoom": 1.1104142233145087,
       "position": [
-        5668611.25,
-        4312577.5,
-        36836702.20333518
+        0.0,
+        0.0,
+        6.6921304299024635
       ],
       "focal_point": [
-        5668611.25,
-        4312577.5,
-        0.5
-      ],
-      "view_up": [
         0.0,
-        1.0,
+        0.0,
         0.0
       ],
+      "view_up": [
+        -0.0,
+        0.8944271909999159,
+        -0.4472135954999579
+      ],
       "clipping_range": [
-        35992073.55422117,
-        37988766.87002192
+        4.6352091256034385,
+        9.297512386351
       ]
     }
   },
   "data-selection": {
     "crop_longitude": [
-      -29,
-      150
+      -180,
+      180
     ],
     "crop_latitude": [
-      1,
+      -90,
       90
     ],
     "projection": [
-      "Robinson"
+      "Spherical"
     ],
     "animation_track": "lev",
-    "lev_idx": 0
+    "lev_idx": 56
   },
   "views": [
     {
@@ -68,22 +69,24 @@
       ],
       "name": "AODALL",
       "config": {
-        "preset": "BuGnYl",
+        "order": 1,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
         "invert": false,
         "color_blind": false,
         "use_log_scale": "linear",
         "discrete_log": false,
         "n_discrete_colors": 1,
-        "order": 1,
-        "size": 6,
-        "offset": 0,
-        "break_row": false,
         "override_range": false,
         "color_range": [
-          0.042987335473299026,
+          0.01264046598225832,
           1.01161527633667
         ],
-        "color_value_min": "0.042987335473299026",
+        "color_value_min": "0.01264046598225832",
         "color_value_max": "1.01161527633667"
       }
     },
@@ -94,22 +97,24 @@
       ],
       "name": "AODBC",
       "config": {
-        "preset": "BuGnYl",
+        "order": 2,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
         "invert": false,
         "color_blind": false,
         "use_log_scale": "linear",
         "discrete_log": false,
         "n_discrete_colors": 1,
-        "order": 2,
-        "size": 6,
-        "offset": 0,
-        "break_row": false,
         "override_range": false,
         "color_range": [
-          0.001972629688680172,
+          0.0006716852076351643,
           0.08890804648399353
         ],
-        "color_value_min": "0.001972629688680172",
+        "color_value_min": "0.0006716852076351643",
         "color_value_max": "0.08890804648399353"
       }
     },
@@ -121,23 +126,25 @@
       ],
       "name": "num_a1",
       "config": {
-        "preset": "BuGnYl",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 1,
         "order": 3,
         "size": 6,
         "offset": 0,
-        "break_row": false,
-        "override_range": false,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Yellow - Gray - Blue",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
+        "override_range": true,
         "color_range": [
-          30360974.0,
-          4228730624.0
+          2000000.0,
+          2000000000.0
         ],
-        "color_value_min": "30360974.0",
-        "color_value_max": "4228730624.0"
+        "color_value_min": "2e6",
+        "color_value_max": "2e9"
       }
     },
     {
@@ -148,23 +155,25 @@
       ],
       "name": "num_a2",
       "config": {
-        "preset": "BuGnYl",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 1,
         "order": 4,
         "size": 6,
         "offset": 0,
-        "break_row": false,
-        "override_range": false,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Yellow - Gray - Blue",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "log",
+        "discrete_log": false,
+        "n_discrete_colors": 10,
+        "override_range": true,
         "color_range": [
-          13090005.0,
-          15063609344.0
+          10000.0,
+          4191089664.0
         ],
-        "color_value_min": "13090005.0",
-        "color_value_max": "15063609344.0"
+        "color_value_min": "1e4",
+        "color_value_max": "4191089664.0"
       }
     }
   ]

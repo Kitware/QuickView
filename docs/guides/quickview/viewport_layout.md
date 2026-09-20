@@ -66,7 +66,7 @@ and explained in more detail in the subsequent subsections.
 
 A slider is provided for adjusting the aspect ratio of the view frames by changing their heights.
 This can be useful for controlling the blank spaces, especially for
-[regional plots](./miscellaneous#maps).
+[the spherical projection](./map_related#map-projections) and for [regional plots](./map_related#geographical-region).
 
 ![toggles](./screenshots/viewport_aspect_ratio.png){ width="100%", align=center }
 

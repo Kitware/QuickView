@@ -35,6 +35,6 @@ a slider and a set of forward and backward buttons for manually stepping through
 as well as a two play/pause toggles for automatically stepping through the selected dimension
 in forward or backward order.
 The rightmost button in the panel, showing a downward arrow above two horizontal lines,
-is for exporting animations and is explained on [a separate page](./miscellaneous#save-vis)
+is for exporting animations and is explained on [a separate page](./saving_images)
 
 ![](./screenshots/animation_control_panel_and_menu.png){ width="100%" }

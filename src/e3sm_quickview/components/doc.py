@@ -312,6 +312,9 @@ class LandingPage(v3.VContainer):
                         with v3.VListItem(subtitle="Mollweide"):
                             with v3.Template(v_slot_append="True"):
                                 v3.VHotkey(keys="m", variant="contained", inline=True)
+                        with v3.VListItem(subtitle="Spherical"):
+                            with v3.Template(v_slot_append="True"):
+                                v3.VHotkey(keys="z", variant="contained", inline=True)
 
                     v3.VDivider(classes="my-4")
 

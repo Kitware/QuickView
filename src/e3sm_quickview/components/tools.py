@@ -248,7 +248,7 @@ class MapProjection(v3.VTooltip):
                                             classes="ml-4 mn-2",
                                         )
                             v3.VDivider()
-                            with v3.VListItem(title="Grid spacing"):
+                            with v3.VListItem(title="Lat-lon grid line spacing"):
                                 with v3.VBtnToggle(
                                     v_model=("grid_interval", 30),
                                     border=True,

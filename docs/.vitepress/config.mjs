@@ -63,7 +63,9 @@ export default defineConfig({
             { text: "Slice Selection",    link: "/guides/quickview/slice_selection", },
             { text: "Viewport Layout",    link: "/guides/quickview/viewport_layout", },
             { text: "Individual Views",   link: "/guides/quickview/individual_views", },
-            { text: "Miscellaneous",      link: "/guides/quickview/miscellaneous" },
+            { text: "Map-related Features", link: "/guides/quickview/map_projections" },
+            { text: "Cursor Probe",       link: "/guides/quickview/cursor_probe" },
+            { text: "Saving Images",      link: "/guides/quickview/saving_images" },
           ],
         },
         {
