@@ -306,6 +306,18 @@ class ViewManager(TrameComponent):
         for view in list(self._var2view.values()):
             view.colormap.update_color_range()  # colormaps module
 
+    def drop_views(self):
+        """Discard every view so the next layout rebinds to the active pipeline.
+
+        A view's mapper is connected to the tail of whichever data path was
+        active when the view was built, so switching format leaves it pointing
+        at the wrong pipeline. compute_layout() rebuilds what is needed.
+        """
+        for renderer in list(self._render_window.GetRenderers()):
+            self._render_window.RemoveRenderer(renderer)
+        self._var2view.clear()
+        self.layout_dirty = True
+
     def get_view(self, variable_name, variable_type):
         view = self._var2view.get(variable_name)
         if view is None:
