@@ -1,9 +1,13 @@
 
 ## September 2026
 
+![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="8%", align=right }
+
+2026-09-14: QuickCompare version 1.11.0 was released, adding [cursor probe](/guides/quickcompare/cursor_probe) and [spherical map projection](/guides/quickcompare/map_related) capabilities consistent with those available in QuickView.
+
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
 
-2026-09-02: QuickView version 2.9.4 was released, supporting [spherical map projection](/guides/quickview/map_related) with user-specified map center, lat-lon bounds, and lat-lon grid line spacing.
+2026-09-02: QuickView version 2.9.4 was released, adding support for the [spherical map projection](/guides/quickview/map_related), with user-specified map center, latitude–longitude bounds, and grid-line spacing.
 
 ## June 2026
 
