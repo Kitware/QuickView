@@ -20,8 +20,8 @@ multi-simulation comparison modes.
 
 In the two-simulation mode, the table in the Information Panel presents the
 user-selected **comparison metrics**—such as Ctrl, Test, Diff, and Rel Diff—as
-rows and up to five **output variables** as columns. If more than five variables
-have been selected, the table includes the first five currently displayed in the
+rows and up to four **output variables** as columns. If more than four variables
+have been selected, the table includes the first four currently displayed in the
 viewport.
 
 ![cursor probe in two-sim mode](./screenshots/probe_two-sim.png){ width="100%" }
