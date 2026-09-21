@@ -1,61 +1,37 @@
 {
   "origin": {
-    "user": "wanh895",
-    "created": "2026-06-28 20:45:12.746279",
+    "user": "huiwan",
+    "created": "2026-09-20 14:26:24.778144",
     "comment": ""
   },
   "files": {
-    "simulation": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
     "simulations": [
-      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
-      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
-      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
-      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
-      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
-      "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc"
+      "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+      "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc"
     ],
-    "connectivity": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
   },
   "comparisons": {
-    "control": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
-    "target": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
+    "control": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+    "target": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
     "mode": "two-sim",
     "type": "diff",
     "columns": [
       "ctrl",
       "test",
       "diff",
-      "comp1"
+      "comp2"
     ],
     "simulations": [
       {
-        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+        "path": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
         "label": "amicphys_r8",
         "include": true
       },
       {
-        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
-        "label": "amicphys_s10",
-        "include": true
-      },
-      {
-        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
+        "path": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s8_prog.eam.h0.2010_2019.ANN.nc",
         "label": "amicphys_s8",
-        "include": true
-      },
-      {
-        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s6_prog.eam.h0.2010_2019.ANN.nc",
-        "label": "amicphys_s6",
-        "include": true
-      },
-      {
-        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s4_prog.eam.h0.2010_2019.ANN.nc",
-        "label": "amicphys_s4",
-        "include": true
-      },
-      {
-        "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
-        "label": "amicphys_s3",
         "include": true
       }
     ]
@@ -94,6 +70,7 @@
     "projection": [
       "Robinson"
     ],
+    "grid_interval": 30,
     "crop_slider_edit": true,
     "slice_slider_edit": true,
     "animation_track": "lev",
@@ -110,7 +87,7 @@
       "array_name": "num_a1__control",
       "config": {
         "order": 1,
-        "size": 3,
+        "size": 4,
         "offset": 0,
         "break_row": false
       },
@@ -127,7 +104,11 @@
           1605004544.0
         ],
         "color_value_min": "10241004.0",
-        "color_value_max": "1605004544.0"
+        "color_value_max": "1605004544.0",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -157,7 +138,11 @@
           1605004544.0
         ],
         "color_value_min": "10241004.0",
-        "color_value_max": "1605004544.0"
+        "color_value_max": "1605004544.0",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -170,7 +155,7 @@
       "array_name": "num_a1__diff__1",
       "config": {
         "order": 3,
-        "size": 3,
+        "size": 4,
         "offset": 0,
         "break_row": false
       },
@@ -187,7 +172,11 @@
           58502080.0
         ],
         "color_value_min": "-58502080.0",
-        "color_value_max": "58502080.0"
+        "color_value_max": "58502080.0",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -197,7 +186,7 @@
         "ncol"
       ],
       "name": "num_a1",
-      "array_name": "num_a1__comp1__1",
+      "array_name": "num_a1__comp2__1",
       "config": {
         "order": 4,
         "size": 4,
@@ -217,7 +206,11 @@
           0.1087062834860001
         ],
         "color_value_min": "-0.1087062834860001",
-        "color_value_max": "0.1087062834860001"
+        "color_value_max": "0.1087062834860001",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -230,7 +223,7 @@
       "array_name": "CLDLIQ__control",
       "config": {
         "order": 5,
-        "size": 3,
+        "size": 4,
         "offset": 0,
         "break_row": false
       },
@@ -247,7 +240,11 @@
           7.659620314370841e-05
         ],
         "color_value_min": "9.565433486022794e-25",
-        "color_value_max": "7.659620314370841e-05"
+        "color_value_max": "7.659620314370841e-05",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -277,7 +274,11 @@
           7.659620314370841e-05
         ],
         "color_value_min": "9.565433486022794e-25",
-        "color_value_max": "7.659620314370841e-05"
+        "color_value_max": "7.659620314370841e-05",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -290,7 +291,7 @@
       "array_name": "CLDLIQ__diff__1",
       "config": {
         "order": 7,
-        "size": 3,
+        "size": 4,
         "offset": 0,
         "break_row": false
       },
@@ -307,7 +308,11 @@
           7.97044594946783e-06
         ],
         "color_value_min": "-7.97044594946783e-06",
-        "color_value_max": "7.97044594946783e-06"
+        "color_value_max": "7.97044594946783e-06",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -317,7 +322,7 @@
         "ncol"
       ],
       "name": "CLDLIQ",
-      "array_name": "CLDLIQ__comp1__1",
+      "array_name": "CLDLIQ__comp2__1",
       "config": {
         "order": 8,
         "size": 4,
@@ -337,7 +342,11 @@
           14515494.003380466
         ],
         "color_value_min": "-14515494.003380466",
-        "color_value_max": "14515494.003380466"
+        "color_value_max": "14515494.003380466",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -349,7 +358,7 @@
       "array_name": "AODBC__control",
       "config": {
         "order": 9,
-        "size": 3,
+        "size": 4,
         "offset": 0,
         "break_row": false
       },
@@ -366,7 +375,11 @@
           0.08948536217212677
         ],
         "color_value_min": "0.000635978882201016",
-        "color_value_max": "0.08948536217212677"
+        "color_value_max": "0.08948536217212677",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -395,7 +408,11 @@
           0.08948536217212677
         ],
         "color_value_min": "0.000635978882201016",
-        "color_value_max": "0.08948536217212677"
+        "color_value_max": "0.08948536217212677",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -407,7 +424,7 @@
       "array_name": "AODBC__diff__1",
       "config": {
         "order": 11,
-        "size": 3,
+        "size": 4,
         "offset": 0,
         "break_row": false
       },
@@ -424,7 +441,11 @@
           0.0021169260144233704
         ],
         "color_value_min": "-0.0021169260144233704",
-        "color_value_max": "0.0021169260144233704"
+        "color_value_max": "0.0021169260144233704",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     },
     {
@@ -433,7 +454,7 @@
         "ncol"
       ],
       "name": "AODBC",
-      "array_name": "AODBC__comp1__1",
+      "array_name": "AODBC__comp2__1",
       "config": {
         "order": 12,
         "size": 4,
@@ -453,7 +474,11 @@
           0.09231276729862922
         ],
         "color_value_min": "-0.09231276729862922",
-        "color_value_max": "0.09231276729862922"
+        "color_value_max": "0.09231276729862922",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
       }
     }
   ]

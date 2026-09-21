@@ -79,7 +79,9 @@ export default defineConfig({
             { text: "Variables and Slices",  link: "/guides/quickcompare/variable_and_slice_selection", },
             { text: "Two-sim. Comparison",   link: "/guides/quickcompare/two-sim_comparison", },
             { text: "Multi-sim. Comparison", link: "/guides/quickcompare/multi-sim_comparison", },
-            { text: "Miscellaneous",         link: "/guides/quickcompare/miscellaneous" },
+            { text: "Map-related Features", link: "/guides/quickcompare/map_related" },
+            { text: "Cursor Probe",       link: "/guides/quickcompare/cursor_probe" },
+            { text: "Saving Images",      link: "/guides/quickcompare/saving_images" },
           ],
         },
         {

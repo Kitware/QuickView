@@ -1,6 +1,6 @@
 # The Cursor Probe in QuickView {#cursor-probe}
 
-Starting in version 2.8.3, QuickView provides a Cursor Probe for inspecting data values at the cursor location. Two modes are available:
+Starting with version 2.8.3, QuickView provides a Cursor Probe for inspecting data values at the cursor location. Two probe modes are available:
 
 | Icon | Mode | Description |
 |------|------|-------------|

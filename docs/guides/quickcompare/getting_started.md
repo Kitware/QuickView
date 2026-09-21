@@ -14,8 +14,9 @@
 - How to use QuickCompare: core features shared with QuickView
   - [Variables search and load](/guides/quickview/variable_selection)
   - [Data slice selection](/guides/quickview/slice_selection)
-  - [Map projections](/guides/quickcompare/miscellaneous#maps)
+  - [Map-related features](/guides/quickcompare/map_related)
   - [Keyboard shortcuts](/guides/quickview/shortcuts)
+  - [Image export](/guides/quickcompare/saving_images)
 
 <!--
   - [Cursor probe](/guides/quickcompare/miscellaneous#cursor-probe)
@@ -26,10 +27,7 @@
   - [File loading](/guides/quickcompare/file_selection)
   - [Two-simulaiton comparison](/guides/quickcompare/two-sim_comparison)
   - [Multi-simulaiton comparison](/guides/quickcompare/multi-sim_comparison)
-
-<!--
-  - [Image export](/guides/quickcompare/miscellaneous#save-vis)
--->
+  - [Cursor probe](/guides/quickcompare/cursor_probe)
 
 - Visit the GitHub [repository](https://github.com/Kitware/E3SMQuickCompare)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/E3SMQuickCompare/issues)

@@ -16,7 +16,7 @@ when more than two simulations are loaded, the default is to enter the multi-sim
 but the user can manually switch to two-simulation mode by
 clicking the **Two Sim** button near the left end of the Comparison Control panel highlighted in the screenshot below.
 In this mode, drop-down menus titled
-**"Choose ctrl"** and **"Choose test"**, also highlighted in the screenshot below, allow the user to
+**"Ctrl:"** and **"Test:"**, also highlighted in the screenshot below, allow the user to
 choose which simulations serve as the control and test simulations displayed in the viewport.
 
 ![Two-sim comparison: choose ctrl](/guides/quickcompare/screenshots/two-sim_choose_ctrl.png){ width="100%", align=center }

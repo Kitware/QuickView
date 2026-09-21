@@ -1,11 +1,11 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-09-20 15:26:18.669823",
+    "created": "2026-09-20 14:08:20.152195",
     "comment": ""
   },
   "files": {
-    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s3_prog.eam.h0.2010_2019.ANN.nc",
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
     "simulations": [
       "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
       "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
@@ -18,14 +18,14 @@
   },
   "comparisons": {
     "control": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
-    "target": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+    "target": "",
     "mode": "multi-sim",
     "type": "diff",
     "columns": [
       "ctrl",
       "test",
       "diff",
-      "comp2"
+      "comp1"
     ],
     "simulations": [
       {
@@ -62,21 +62,22 @@
   },
   "variables-selection": [
     "num_a1",
-    "CLDLIQ",
-    "AODBC"
+    "num_a2",
+    "num_a3",
+    "num_a4"
   ],
   "layout": {
     "aspect-ratio": 0.5,
     "active": "auto_layout",
     "tools": [
-      "simulation-controls",
-      "select-slice-time"
+      "simulation-controls"
     ],
     "help": false,
     "variable-order": [
       "num_a1",
-      "AODBC",
-      "CLDLIQ"
+      "num_a2",
+      "num_a3",
+      "num_a4"
     ]
   },
   "data-selection": {
@@ -84,11 +85,11 @@
     "midpoint_idx": 0,
     "interface_idx": 0,
     "crop_longitude": [
-      -180,
+      -30,
       180
     ],
     "crop_latitude": [
-      -90,
+      -30,
       90
     ],
     "projection": [
@@ -98,7 +99,7 @@
     "crop_slider_edit": true,
     "slice_slider_edit": true,
     "animation_track": "lev",
-    "lev_idx": 53
+    "lev_idx": 54
   },
   "views": [
     {
@@ -124,11 +125,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          10241004.0,
-          1605004544.0
+          78873400.0,
+          1753695488.0
         ],
-        "color_value_min": "10241004.0",
-        "color_value_max": "1605004544.0",
+        "color_value_min": "78873400.0",
+        "color_value_max": "1753695488.0",
         "diverging": false,
         "abs_max": "",
         "epsilon": "0",
@@ -158,11 +159,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -480986240.0,
-          480986240.0
+          -530127232.0,
+          530127232.0
         ],
-        "color_value_min": "-480986240.0",
-        "color_value_max": "480986240.0",
+        "color_value_min": "-530127232.0",
+        "color_value_max": "530127232.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -192,11 +193,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -480986240.0,
-          480986240.0
+          -530127232.0,
+          530127232.0
         ],
-        "color_value_min": "-480986240.0",
-        "color_value_max": "480986240.0",
+        "color_value_min": "-530127232.0",
+        "color_value_max": "530127232.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -226,11 +227,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -480986240.0,
-          480986240.0
+          -530127232.0,
+          530127232.0
         ],
-        "color_value_min": "-480986240.0",
-        "color_value_max": "480986240.0",
+        "color_value_min": "-530127232.0",
+        "color_value_max": "530127232.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -260,11 +261,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -480986240.0,
-          480986240.0
+          -530127232.0,
+          530127232.0
         ],
-        "color_value_min": "-480986240.0",
-        "color_value_max": "480986240.0",
+        "color_value_min": "-530127232.0",
+        "color_value_max": "530127232.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -294,11 +295,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -480986240.0,
-          480986240.0
+          -530127232.0,
+          530127232.0
         ],
-        "color_value_min": "-480986240.0",
-        "color_value_max": "480986240.0",
+        "color_value_min": "-530127232.0",
+        "color_value_max": "530127232.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -311,211 +312,8 @@
         "lev",
         "ncol"
       ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__control",
-      "config": {
-        "order": 13,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Rainbow Desaturated",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          1.2313576299284677e-15,
-          7.518445636378601e-05
-        ],
-        "color_value_min": "1.2313576299284677e-15",
-        "color_value_max": "7.518445636378601e-05",
-        "diverging": false,
-        "abs_max": "",
-        "epsilon": "0",
-        "cut_outside_range": false
-      }
-    },
-    {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__diff__1",
-      "config": {
-        "order": 14,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1.2136260920669883e-05,
-          1.2136260920669883e-05
-        ],
-        "color_value_min": "-1.2136260920669883e-05",
-        "color_value_max": "1.2136260920669883e-05",
-        "diverging": true,
-        "abs_max": "",
-        "epsilon": "0",
-        "cut_outside_range": false
-      }
-    },
-    {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__diff__2",
-      "config": {
-        "order": 15,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1.2136260920669883e-05,
-          1.2136260920669883e-05
-        ],
-        "color_value_min": "-1.2136260920669883e-05",
-        "color_value_max": "1.2136260920669883e-05",
-        "diverging": true,
-        "abs_max": "",
-        "epsilon": "0",
-        "cut_outside_range": false
-      }
-    },
-    {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__diff__3",
-      "config": {
-        "order": 16,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1.2136260920669883e-05,
-          1.2136260920669883e-05
-        ],
-        "color_value_min": "-1.2136260920669883e-05",
-        "color_value_max": "1.2136260920669883e-05",
-        "diverging": true,
-        "abs_max": "",
-        "epsilon": "0",
-        "cut_outside_range": false
-      }
-    },
-    {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__diff__4",
-      "config": {
-        "order": 17,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1.2136260920669883e-05,
-          1.2136260920669883e-05
-        ],
-        "color_value_min": "-1.2136260920669883e-05",
-        "color_value_max": "1.2136260920669883e-05",
-        "diverging": true,
-        "abs_max": "",
-        "epsilon": "0",
-        "cut_outside_range": false
-      }
-    },
-    {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
-      "name": "CLDLIQ",
-      "array_name": "CLDLIQ__diff__5",
-      "config": {
-        "order": 18,
-        "size": 4,
-        "offset": 0,
-        "break_row": false
-      },
-      "colormap": {
-        "preset": "Cool to Warm (Extended)",
-        "invert": false,
-        "color_blind": false,
-        "use_log_scale": "linear",
-        "discrete_log": false,
-        "n_discrete_colors": 4,
-        "override_range": false,
-        "color_range": [
-          -1.2136260920669883e-05,
-          1.2136260920669883e-05
-        ],
-        "color_value_min": "-1.2136260920669883e-05",
-        "color_value_max": "1.2136260920669883e-05",
-        "diverging": true,
-        "abs_max": "",
-        "epsilon": "0",
-        "cut_outside_range": false
-      }
-    },
-    {
-      "type": [
-        "time",
-        "ncol"
-      ],
-      "name": "AODBC",
-      "array_name": "AODBC__control",
+      "name": "num_a2",
+      "array_name": "num_a2__control",
       "config": {
         "order": 7,
         "size": 4,
@@ -531,11 +329,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          0.0006716852076351643,
-          0.08890804648399353
+          17061450.0,
+          4151782656.0
         ],
-        "color_value_min": "0.0006716852076351643",
-        "color_value_max": "0.08890804648399353",
+        "color_value_min": "17061450.0",
+        "color_value_max": "4151782656.0",
         "diverging": false,
         "abs_max": "",
         "epsilon": "0",
@@ -545,10 +343,11 @@
     {
       "type": [
         "time",
+        "lev",
         "ncol"
       ],
-      "name": "AODBC",
-      "array_name": "AODBC__diff__1",
+      "name": "num_a2",
+      "array_name": "num_a2__diff__1",
       "config": {
         "order": 8,
         "size": 4,
@@ -564,11 +363,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.020395785570144653,
-          0.020395785570144653
+          -2656844544.0,
+          2656844544.0
         ],
-        "color_value_min": "-0.020395785570144653",
-        "color_value_max": "0.020395785570144653",
+        "color_value_min": "-2656844544.0",
+        "color_value_max": "2656844544.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -578,10 +377,11 @@
     {
       "type": [
         "time",
+        "lev",
         "ncol"
       ],
-      "name": "AODBC",
-      "array_name": "AODBC__diff__2",
+      "name": "num_a2",
+      "array_name": "num_a2__diff__2",
       "config": {
         "order": 9,
         "size": 4,
@@ -597,11 +397,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.020395785570144653,
-          0.020395785570144653
+          -2656844544.0,
+          2656844544.0
         ],
-        "color_value_min": "-0.020395785570144653",
-        "color_value_max": "0.020395785570144653",
+        "color_value_min": "-2656844544.0",
+        "color_value_max": "2656844544.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -611,10 +411,11 @@
     {
       "type": [
         "time",
+        "lev",
         "ncol"
       ],
-      "name": "AODBC",
-      "array_name": "AODBC__diff__3",
+      "name": "num_a2",
+      "array_name": "num_a2__diff__3",
       "config": {
         "order": 10,
         "size": 4,
@@ -630,11 +431,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.020395785570144653,
-          0.020395785570144653
+          -2656844544.0,
+          2656844544.0
         ],
-        "color_value_min": "-0.020395785570144653",
-        "color_value_max": "0.020395785570144653",
+        "color_value_min": "-2656844544.0",
+        "color_value_max": "2656844544.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -644,10 +445,11 @@
     {
       "type": [
         "time",
+        "lev",
         "ncol"
       ],
-      "name": "AODBC",
-      "array_name": "AODBC__diff__4",
+      "name": "num_a2",
+      "array_name": "num_a2__diff__4",
       "config": {
         "order": 11,
         "size": 4,
@@ -663,11 +465,11 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.020395785570144653,
-          0.020395785570144653
+          -2656844544.0,
+          2656844544.0
         ],
-        "color_value_min": "-0.020395785570144653",
-        "color_value_max": "0.020395785570144653",
+        "color_value_min": "-2656844544.0",
+        "color_value_max": "2656844544.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",
@@ -677,10 +479,11 @@
     {
       "type": [
         "time",
+        "lev",
         "ncol"
       ],
-      "name": "AODBC",
-      "array_name": "AODBC__diff__5",
+      "name": "num_a2",
+      "array_name": "num_a2__diff__5",
       "config": {
         "order": 12,
         "size": 4,
@@ -696,11 +499,419 @@
         "n_discrete_colors": 4,
         "override_range": false,
         "color_range": [
-          -0.020395785570144653,
-          0.020395785570144653
+          -2656844544.0,
+          2656844544.0
         ],
-        "color_value_min": "-0.020395785570144653",
-        "color_value_max": "0.020395785570144653",
+        "color_value_min": "-2656844544.0",
+        "color_value_max": "2656844544.0",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a3",
+      "array_name": "num_a3__control",
+      "config": {
+        "order": 13,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          26482.01171875,
+          9791541.0
+        ],
+        "color_value_min": "26482.01171875",
+        "color_value_max": "9791541.0",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a3",
+      "array_name": "num_a3__diff__1",
+      "config": {
+        "order": 14,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -2270585.5,
+          2270585.5
+        ],
+        "color_value_min": "-2270585.5",
+        "color_value_max": "2270585.5",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a3",
+      "array_name": "num_a3__diff__2",
+      "config": {
+        "order": 15,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -2270585.5,
+          2270585.5
+        ],
+        "color_value_min": "-2270585.5",
+        "color_value_max": "2270585.5",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a3",
+      "array_name": "num_a3__diff__3",
+      "config": {
+        "order": 16,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -2270585.5,
+          2270585.5
+        ],
+        "color_value_min": "-2270585.5",
+        "color_value_max": "2270585.5",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a3",
+      "array_name": "num_a3__diff__4",
+      "config": {
+        "order": 17,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -2270585.5,
+          2270585.5
+        ],
+        "color_value_min": "-2270585.5",
+        "color_value_max": "2270585.5",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a3",
+      "array_name": "num_a3__diff__5",
+      "config": {
+        "order": 18,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -2270585.5,
+          2270585.5
+        ],
+        "color_value_min": "-2270585.5",
+        "color_value_max": "2270585.5",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a4",
+      "array_name": "num_a4__control",
+      "config": {
+        "order": 19,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          880.511962890625,
+          974637376.0
+        ],
+        "color_value_min": "880.511962890625",
+        "color_value_max": "974637376.0",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a4",
+      "array_name": "num_a4__diff__1",
+      "config": {
+        "order": 20,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -342965376.0,
+          342965376.0
+        ],
+        "color_value_min": "-342965376.0",
+        "color_value_max": "342965376.0",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a4",
+      "array_name": "num_a4__diff__2",
+      "config": {
+        "order": 21,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -342965376.0,
+          342965376.0
+        ],
+        "color_value_min": "-342965376.0",
+        "color_value_max": "342965376.0",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a4",
+      "array_name": "num_a4__diff__3",
+      "config": {
+        "order": 22,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -342965376.0,
+          342965376.0
+        ],
+        "color_value_min": "-342965376.0",
+        "color_value_max": "342965376.0",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a4",
+      "array_name": "num_a4__diff__4",
+      "config": {
+        "order": 23,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -342965376.0,
+          342965376.0
+        ],
+        "color_value_min": "-342965376.0",
+        "color_value_max": "342965376.0",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a4",
+      "array_name": "num_a4__diff__5",
+      "config": {
+        "order": 24,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -342965376.0,
+          342965376.0
+        ],
+        "color_value_min": "-342965376.0",
+        "color_value_max": "342965376.0",
         "diverging": true,
         "abs_max": "",
         "epsilon": "0",

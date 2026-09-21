@@ -18,7 +18,7 @@ This designation can be changed through the **Organize simulation collection** d
 
 ![Multi-sim comparison: organize simulation collection](/guides/quickcompare/screenshots/multi-sim_organize_simulation_collection.png){ width="100%", align=center }
 
-The simulation to be used as control can also be specified using the **Change ctrl** drop-down menu highlighted in the screenshot below.
+The simulation to be used as control can also be specified using the **Choose Ctrl** drop-down menu highlighted in the screenshot below.
 
 ![Multi-sim comparison: choose ctrl drop-down](/guides/quickcompare/screenshots/multi-sim_choose_ctrl_drop-down.png){ width="100%", align=center }
 
