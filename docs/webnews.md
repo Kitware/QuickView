@@ -1,6 +1,10 @@
 
 ## September 2026
 
+![NERSC logo](/logos/nersc.png){width="18%", align=right}
+
+2026-09-17: Information was added to this website, explaining how to use our tools [at NERSC through VS Code](https://kitware.github.io/QuickView/nersc/login_vscode.html).
+
 ![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="8%", align=right }
 
 2026-09-14: QuickCompare version 1.11.0 was released, adding [cursor probe](/guides/quickcompare/cursor_probe) and [spherical map projection](/guides/quickcompare/map_related) capabilities consistent with those available in QuickView.
