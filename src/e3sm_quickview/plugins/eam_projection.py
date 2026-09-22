@@ -694,7 +694,12 @@ class EAMExtract(VTKPythonAlgorithmBase):
         self.lon_range = [-180.0, 180.0]
         self.lat_range = [-90.0, 90.0]
         self.cached_cell_centers = None
+        self._cached_geometry_key = None
+        #: Strong ref to the geometry the caches were built from, so nothing
+        #: else can be allocated at the same address while its id() is a key.
+        self._cached_geometry = None
         self._cached_output = None
+        self._cached_crop_key = None
         self._last_was_cropped = False
 
     def SetLongitudeRange(self, min, max):
@@ -734,8 +739,25 @@ class EAMExtract(VTKPythonAlgorithmBase):
                     self._last_was_cropped = False
                 return 1
 
-            if self.cached_cell_centers and self.cached_cell_centers.GetMTime() >= max(
-                inData.GetPoints().GetMTime(), inData.GetCells().GetMTime()
+            # Name the incoming geometry by identity as well as by modified
+            # time. Modified times only order events within one object, and
+            # upstream can legitimately hand back an *older* object than the
+            # one these caches were built from: EAMCenterMeridian passes the
+            # reader's own points straight through whenever the map already
+            # sits in the reader's window. Comparing times alone then made a
+            # cache built from a rotated mesh look fresh, and the cell centres
+            # of one mesh were used to mask the cells of another.
+            in_points = inData.GetPoints()
+            in_cells = inData.GetCells()
+            geometry_key = (
+                id(in_points),
+                in_points.GetMTime(),
+                id(in_cells),
+                in_cells.GetMTime(),
+            )
+            if (
+                self.cached_cell_centers is not None
+                and self._cached_geometry_key == geometry_key
             ):
                 cell_centers = self.cached_cell_centers
             else:
@@ -752,13 +774,14 @@ class EAMExtract(VTKPythonAlgorithmBase):
                     # previous cached_cell_centers, if any,
                     # is available for garbage collection after this assignment
                     self.cached_cell_centers = cell_centers
+                    self._cached_geometry_key = geometry_key
+                    self._cached_geometry = (in_points, in_cells)
 
             # get the numpy array for cell centers
             cc = numpy_support.vtk_to_numpy(cell_centers)
 
-            if self._cached_output and self._cached_output.GetMTime() >= max(
-                self.GetMTime(), inData.GetPoints().GetMTime(), cell_centers.GetMTime()
-            ):
+            crop_key = (geometry_key, tuple(self.lon_range), tuple(self.lat_range))
+            if self._cached_output is not None and self._cached_crop_key == crop_key:
                 with _perf.timed("extract.cache_hit"):
                     add_cell_and_point_arrays(inData, outData, self._cached_output)
             else:
@@ -816,6 +839,7 @@ class EAMExtract(VTKPythonAlgorithmBase):
 
                     self._cached_output = outData.NewInstance()
                     self._cached_output.ShallowCopy(outData)
+                    self._cached_crop_key = crop_key
             self._last_was_cropped = True
             return 1
 
@@ -885,8 +909,10 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
                 )
             )
             return
-        self._center_meridian = meridian_
-        self.Modified()
+        if self._center_meridian != meridian_:
+            self._center_meridian = meridian_
+            self._cached_output = None
+            self.Modified()
 
     def SetLongitudeOrigin(self, origin):
         """Left edge of the map; the right edge is 360 degrees further east."""
@@ -931,9 +957,13 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
             # Nothing to do when the input already sits in the requested
             # window -- the dycore reader's default case. Clipping here would
             # be a no-op that still rebuilds the points every pass, which also
-            # costs EAMProject its cache downstream.
+            # costs EAMProject its cache downstream. The two origins have to
+            # agree exactly: a window a whole turn away covers the same
+            # meridians but names them 360 degrees apart, and everything
+            # downstream -- the crop ranges, the projection's re-centring --
+            # reads coordinates, not residues.
             origin = self._center_meridian - 180.0
-            if (origin - self._input_origin) % 360.0 == 0.0:
+            if origin == self._input_origin:
                 with _perf.timed("center_meridian.passthrough"):
                     outData.ShallowCopy(inData)
                 return 1
@@ -960,30 +990,39 @@ class EAMCenterMeridian(VTKPythonAlgorithmBase):
                     generate_ids.SetCellIdsArrayName("PedigreeIds")
 
                     cut, shift_low, shift_high = _longitude_window(
-                        self._center_meridian - 180.0, self._input_origin
+                        origin, self._input_origin
                     )
-                    plane = vtkPlane()
-                    plane.SetOrigin([cut, 0.0, 0.0])
-                    plane.SetNormal([-1, 0, 0])
-                    # vtkClipPolyData hangs
-                    clipL = vtkTableBasedClipDataSet()
-                    clipL.SetClipFunction(plane)
-                    clipL.SetInputConnection(generate_ids.GetOutputPort())
-                    with _perf.timed("center_meridian.clip_left"):
-                        clipL.Update()
+                    if (origin - self._input_origin) % 360.0 == 0.0:
+                        # A whole turn away: the cut falls on the window's own
+                        # edge, so one side comes back empty and there is
+                        # nothing to rearrange. Sliding the whole mesh over is
+                        # cheaper than clipping it and keeps every cell intact.
+                        generate_ids.Update()
+                        with _perf.timed("center_meridian.transform"):
+                            halves = [_translated(generate_ids.GetOutput(), shift_high)]
+                    else:
+                        plane = vtkPlane()
+                        plane.SetOrigin([cut, 0.0, 0.0])
+                        plane.SetNormal([-1, 0, 0])
+                        # vtkClipPolyData hangs
+                        clipL = vtkTableBasedClipDataSet()
+                        clipL.SetClipFunction(plane)
+                        clipL.SetInputConnection(generate_ids.GetOutputPort())
+                        with _perf.timed("center_meridian.clip_left"):
+                            clipL.Update()
 
-                    plane.SetNormal([1, 0, 0])
-                    clipR = vtkTableBasedClipDataSet()
-                    clipR.SetClipFunction(plane)
-                    clipR.SetInputConnection(generate_ids.GetOutputPort())
-                    with _perf.timed("center_meridian.clip_right"):
-                        clipR.Update()
+                        plane.SetNormal([1, 0, 0])
+                        clipR = vtkTableBasedClipDataSet()
+                        clipR.SetClipFunction(plane)
+                        clipR.SetInputConnection(generate_ids.GetOutputPort())
+                        with _perf.timed("center_meridian.clip_right"):
+                            clipR.Update()
 
-                    with _perf.timed("center_meridian.transform"):
-                        halves = [
-                            _translated(clipL.GetOutput(), shift_low),
-                            _translated(clipR.GetOutput(), shift_high),
-                        ]
+                        with _perf.timed("center_meridian.transform"):
+                            halves = [
+                                _translated(clipL.GetOutput(), shift_low),
+                                _translated(clipR.GetOutput(), shift_high),
+                            ]
 
                     append = vtkAppendFilter()
                     for half in halves:
