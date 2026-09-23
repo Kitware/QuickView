@@ -2,6 +2,74 @@
 
 <!-- version list -->
 
+## v2.10.0 (2026-09-23)
+
+### Bug Fixes
+
+- **origin**: Correct the map window at +180 and after rotating back
+  ([`ce9e2c1`](https://github.com/Kitware/QuickView/commit/ce9e2c1357c4cfcb233c1f9554bdb6e56134525e))
+
+- **paraview**: Keep plugins working on newer ParaView/VTK
+  ([`536cc7c`](https://github.com/Kitware/QuickView/commit/536cc7c126f59346b2b65ddc9075305e677edb43))
+
+- **reader**: Apply valid slice changes even when another index is stale
+  ([`e03198c`](https://github.com/Kitware/QuickView/commit/e03198cc0398991c0b10bffc3c7c3353750fa3d0))
+
+### Documentation
+
+- Add web news for QuickCompare
+  ([`9680eae`](https://github.com/Kitware/QuickView/commit/9680eae1a440ec9a808202daffce388ec2fc050d))
+
+- Add webnews item for VSCode
+  ([`9adea50`](https://github.com/Kitware/QuickView/commit/9adea5052c1f64b33b2ec4c5e99bceb0c21a31e7))
+
+- Correct dead links
+  ([`1282b37`](https://github.com/Kitware/QuickView/commit/1282b37a1696ee4f2ccfc62f1299e8d7be156fcc))
+
+- Remove mentions of '-p 0' as the flag is no longer needed
+  ([`78e3b7d`](https://github.com/Kitware/QuickView/commit/78e3b7d04f8f0c1c2338d53a427a0bac2708ad66))
+
+- Remove old files to avoid build issues
+  ([`df36a12`](https://github.com/Kitware/QuickView/commit/df36a12ad175318003cc48d5666a489c4c6d0b81))
+
+- Simplify and update documentation for NERSC
+  ([`3d24705`](https://github.com/Kitware/QuickView/commit/3d24705413ca3437495e754566baa0a4bf246881))
+
+- Update webnews for quickview
+  ([`b34124c`](https://github.com/Kitware/QuickView/commit/b34124cf7277cf86a6cc533775809787dd2d6b92))
+
+- **nersc**: Add vscode connection information
+  ([`031cf78`](https://github.com/Kitware/QuickView/commit/031cf782513514a1e24373ded08db946ea9eec9d))
+
+- **quickcompare**: Add descriptions of data probe and spherical projection; update many screenshots
+  ([`8c97aff`](https://github.com/Kitware/QuickView/commit/8c97affa714b296c0ec09aa10b82377487fc8bd6))
+
+- **quickcompare**: Correct note on max column number in probe table
+  ([`86de359`](https://github.com/Kitware/QuickView/commit/86de359611df2715e95ef35ba6f276c5d921fe23))
+
+- **quickview**: Correct filename in docs/.vitepress/config.mjs
+  ([`9f8931a`](https://github.com/Kitware/QuickView/commit/9f8931a0eea88295049808859696efcaee611429))
+
+- **quickview**: Reorg and update pages on map related features
+  ([`a087793`](https://github.com/Kitware/QuickView/commit/a087793440bb12367c78daef1b1491ab6addea95))
+
+### Features
+
+- **background**: Add menu to select bg color
+  ([`f0cd3c2`](https://github.com/Kitware/QuickView/commit/f0cd3c2265bd6e7f59c63c60ebd3fb6b40fa1f08))
+
+- **dycore**: Read EAM native spectral-element grids, and make formats pluggable
+  ([`6b099e4`](https://github.com/Kitware/QuickView/commit/6b099e4e4ad873b4703beb648035184ae8a8ed1f))
+
+- **origin**: Better control to drive map center
+  ([`78fe57c`](https://github.com/Kitware/QuickView/commit/78fe57ceddcc137c72f918c8ac2c8f95c25aa0be))
+
+### Performance Improvements
+
+- **projection**: Gather pedigree values with one numpy index
+  ([`ce85572`](https://github.com/Kitware/QuickView/commit/ce85572c8336a8d16611ddeb2fed5c58f0f8751c))
+
+
 ## v2.9.4 (2026-09-02)
 
 ### Bug Fixes
