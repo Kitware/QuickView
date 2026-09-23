@@ -61,6 +61,7 @@ class ViewManager(TrameComponent):
         self._render_window = vtkRenderWindow()
         self._render_window.OffScreenRenderingOn()
         self._picker = vtkCellPicker(tolerance=0.0005)
+        self._bg_color = None
 
         # Perf: time the actual VTK render on the shared render window.
         # Emits `view.shared.render_window` with the elapsed time for
@@ -161,6 +162,13 @@ class ViewManager(TrameComponent):
     def refresh_ui(self, **_):
         for view in self._var2view.values():
             view._build_ui()
+
+    def update_background(self, color):
+        self._bg_color = color
+        for view in self._var2view.values():
+            view.update_background(color)
+
+        self.render()
 
     def camera_projection(self):
         self._camera.focal_point = (0, 0, 0)
@@ -325,6 +333,7 @@ class ViewManager(TrameComponent):
                 self.server, self.source, variable_name, variable_type, self._camera
             )
             self._var2view[variable_name] = view
+            view.update_background(self._bg_color)
 
         return view
 

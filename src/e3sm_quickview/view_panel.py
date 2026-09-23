@@ -100,6 +100,24 @@ class VariableView(TrameComponent):
         if self.ctx.view:
             self.ctx.view.update()
 
+    def update_background(self, color):
+        if color is None:
+            return
+
+        size = len(color)
+        if size == 3:
+            self.renderer.background = tuple(color)
+            self.renderer.gradient_background = 0
+        elif size == 6:
+            self.renderer.background = tuple(color[0:3])
+            self.renderer.background2 = tuple(color[3:6])
+            self.renderer.gradient_background = 1
+        else:
+            msg = f"Invalid background color: {color}"
+            raise ValueError(msg)
+
+        self.render()
+
     @property
     def data_array(self):
         data_reader = self.source.data_reader

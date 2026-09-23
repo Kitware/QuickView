@@ -8,7 +8,7 @@ from e3sm_quickview.utils import constants, js
 
 
 class Tools(v3.VNavigationDrawer):
-    def __init__(self, reset_camera=None):
+    def __init__(self, reset_camera=None, update_background=None):
         super().__init__(
             permanent=True,
             rail=("compact_drawer", True),
@@ -50,6 +50,7 @@ class Tools(v3.VNavigationDrawer):
                     v3.VDivider(classes="my-1")  # ---------------------
 
                     tools.CaptureFullPanel(click="utils.quickview.capturePanel()")
+                    tools.BackgroundColors(update_background=update_background)
 
                     # dev add-on ui reload
                     if self.server.hot_reload:

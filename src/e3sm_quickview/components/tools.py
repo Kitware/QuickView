@@ -343,3 +343,77 @@ class StateImportExport(v3.VTooltip):
         txt_content = self.ctrl.download_state()
         Path(export_path).write_text(txt_content)
         self._pending_task = None
+
+
+class BackgroundColors(v3.VTooltip):
+    def __init__(
+        self,
+        compact="compact_drawer",
+        title="Background Colors",
+        update_background=None,
+    ):
+        super().__init__(
+            text=title,
+            disabled=(f"!{compact}",),
+        )
+        self._pending_task = None
+        with self:
+            with v3.Template(v_slot_activator="{ props }"):
+                with v3.VListItem(
+                    v_bind="props",
+                    prepend_icon="mdi-format-color-fill",
+                    title=(f"{compact} ? null : '{title}'",),
+                ):
+                    with v3.VMenu(
+                        activator="parent",
+                        location="end",
+                        offset=10,
+                    ):
+                        with v3.VList(density="compact"):
+                            v3.VListItem(
+                                title="Dark gradient background",
+                                click=(
+                                    update_background,
+                                    "[[84 / 255, 89 / 255, 109 / 255, 0, 0, 42 / 255]]",
+                                ),
+                            )
+                            v3.VListItem(
+                                title="Soft Black",
+                                click=(update_background, "[[0.071,0.071,0.071]]"),
+                            )
+                            v3.VListItem(
+                                title="Charcoal",
+                                click=(update_background, "[[0.118,0.118,0.118]]"),
+                            )
+                            v3.VListItem(
+                                title="Dark Gray",
+                                click=(update_background, "[[0.169,0.169,0.169]]"),
+                            )
+                            v3.VListItem(
+                                title="Graphite",
+                                click=(update_background, "[[0.200,0.200,0.200]]"),
+                            )
+                            v3.VListItem(
+                                title="Perceptual Mid-Gray",
+                                click=(update_background, "[[0.467,0.467,0.467]]"),
+                            )
+                            v3.VListItem(
+                                title="Medium Gray",
+                                click=(update_background, "[[0.502,0.502,0.502]]"),
+                            )
+                            v3.VListItem(
+                                title="Light Gray",
+                                click=(update_background, "[[0.851,0.851,0.851]]"),
+                            )
+                            v3.VListItem(
+                                title="Off-White",
+                                click=(update_background, "[[0.949,0.949,0.949]]"),
+                            )
+                            v3.VListItem(
+                                title="White",
+                                click=(update_background, "[[1,1,1]]"),
+                            )
+                            v3.VListItem(
+                                title="Deep Space Blue",
+                                click=(update_background, "[[0.043,0.063,0.125]]"),
+                            )

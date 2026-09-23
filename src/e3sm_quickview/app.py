@@ -232,6 +232,7 @@ class EAMApp(TrameApp):
             with v3.VLayout():
                 drawers.Tools(
                     reset_camera=self.view_manager.reset_camera,
+                    update_background=self.view_manager.update_background,
                 )
 
                 with v3.VMain():
