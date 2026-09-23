@@ -63,6 +63,8 @@ class EAMApp(TrameApp):
                 "fields_avgs": {},
                 # Screenshot scaling
                 "scale": 1,
+                # Default longitude origin
+                "longitude_origin": -180,
             }
         )
 
@@ -660,11 +662,15 @@ class EAMApp(TrameApp):
     @change("spherical_center_lat", "spherical_center_lon", "projection")
     def _on_center(self, spherical_center_lat, spherical_center_lon, projection, **_):
         if projection == ["Spherical"]:
+            if self.state.longitude_origin != -180:
+                self.state.longitude_origin = -180
+
             self.source.Clip(self.view_manager._clip_plane)
             self.view_manager.center_camera(
                 float(spherical_center_lat), float(spherical_center_lon)
             )
         else:
+            self.state.longitude_origin = (spherical_center_lon + 360) % 360 - 180
             self.source.Clip()
             self.view_manager.camera_projection()
 
@@ -704,14 +710,6 @@ class EAMApp(TrameApp):
         origin = float(longitude_origin)
         with perf.timed("longitude_origin.total"):
             self.source.SetLongitudeOrigin(origin)
-            # The crop is expressed in the map's own longitudes, so rotating the
-            # map invalidates the previous selection -- a stale one would sit
-            # partly outside the window, or straddle its seam, which the box
-            # crop used for the continents and the graticule cannot represent.
-            with self.state as s:
-                s.crop_longitude = [origin, origin + 360]
-                s.crop_longitude_min = origin
-                s.crop_longitude_max = origin + 360
             self.view_manager.update_color_range()
             self.view_manager.reset_camera()
             self.view_manager.render()
@@ -721,6 +719,7 @@ class EAMApp(TrameApp):
         "crop_longitude",
         "crop_latitude",
         "projection",
+        "longitude_origin",
     )
     def _on_downstream_change(
         self,
@@ -728,14 +727,26 @@ class EAMApp(TrameApp):
         crop_longitude,
         crop_latitude,
         projection,
+        longitude_origin,
         **_,
     ):
         if not variables_loaded:
             return
 
+        # Keep NumberInput in Sync
+        crop_longitude_min = crop_longitude[0] + longitude_origin + 180
+        crop_longitude_max = crop_longitude[1] + longitude_origin + 180
+        if self.state.crop_longitude_min != crop_longitude_min:
+            self.state.crop_longitude_min = crop_longitude_min
+        if self.state.crop_longitude_max != crop_longitude_max:
+            self.state.crop_longitude_max = crop_longitude_max
+
         with perf.timed("downstream_change.total"):
             with perf.timed("downstream_change.pipeline"):
-                self.source.ApplyClipping(crop_longitude, crop_latitude)
+                self.source.ApplyClipping(
+                    (crop_longitude_min, crop_longitude_max),
+                    crop_latitude,
+                )
                 self.source.UpdateProjection(projection[0])
                 self.source.UpdatePipeline()
 
