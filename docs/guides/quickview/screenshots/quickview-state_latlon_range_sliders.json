@@ -1,0 +1,119 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-09-26 14:20:19.939310",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
+  },
+  "variables-selection": [
+    "AODALL",
+    "AODBC"
+  ],
+  "layout": {
+    "aspect-ratio": 0.75,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [
+      "adjust-databounds",
+      "adjust-layout"
+    ],
+    "help": false,
+    "camera": {
+      "zoom": 8194213.526315636,
+      "position": [
+        8194213.854084191,
+        3391149.87719297,
+        69568934.74486278
+      ],
+      "focal_point": [
+        8194213.854084191,
+        3391149.87719297,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        67464364.38013269,
+        72385958.56422168
+      ]
+    }
+  },
+  "data-selection": {
+    "crop_longitude": [
+      0,
+      180
+    ],
+    "crop_latitude": [
+      -21,
+      90
+    ],
+    "projection": [
+      "Robinson"
+    ],
+    "animation_track": "lev"
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "AODALL",
+      "config": {
+        "order": 1,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
+        "override_range": false,
+        "color_range": [
+          0.060237374156713486,
+          1.01161527633667
+        ],
+        "color_value_min": "0.060237374156713486",
+        "color_value_max": "1.01161527633667"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "AODBC",
+      "config": {
+        "order": 2,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 1,
+        "override_range": false,
+        "color_range": [
+          0.0012727646389976144,
+          0.08890804648399353
+        ],
+        "color_value_min": "0.0012727646389976144",
+        "color_value_max": "0.08890804648399353"
+      }
+    }
+  ]
+}

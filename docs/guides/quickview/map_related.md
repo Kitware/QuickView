@@ -26,15 +26,44 @@ For other projections, changing the background may help distinguish regions
 whose data colors are similar to the default background.
 
 Starting in version 2.10.0, the plot background color can be changed through
-the mini-menu opened by clicking the background-color icon in the main toolbar.
+the mini-menu opened by clicking the background-color icon in the vertical toolbar.
 
 ![Plot background color choices](./screenshots/plot_background_color.png){ width="100%" }
 
+
+
 ## Geographical region {#geographical-region}
 
-The geographical region displayed in the contour plots—defined by its latitude and longitude bounds—can be adjusted using the range sliders in the latitude–longitude cropping panel. The panel is opened by clicking the Earth-grid icon in the vertical toolbar.
+The geographical region displayed in the contour plots—defined by its latitude
+and longitude bounds—can be adjusted using the range sliders in the
+latitude–longitude cropping panel. The panel is opened by clicking the Earth-grid
+icon in the vertical toolbar.
 
-A set of text boxes and arrow buttons located between the latitude and longitude range sliders allows the user to specify the geographical location at which the map is centered.
+On each slider, the full available range is shown in gray, while the range
+being displayed is shown in black and reported numerically above the slider.
 
-![Latitude and longitude range sliders and map-centering controls](./screenshots/latlon_sliders.png){ width="100%" }
+![Latitude and longitude range sliders](./screenshots/latlon_range_sliders.png){ width="100%" }
 
+
+## Map center {#map-center}
+
+The controls between the latitude and longitude range sliders allow the user
+to specify the **"map center"**:
+
+- With the **spherical projection**, QuickView rotates the globe so that the
+  specified geographical location (longitude and latitude) faces the viewer
+  and appears at the center of the visible globe. The UI therefore allows
+  both its longitude and latitude to be adjusted.
+
+  ![map center, spherical projection](./screenshots/map_center_spherical.png){ width="100%" }
+
+- For the **cylindrical equidistant, Robinson, and Mollweide projections**,
+  the projection remains centered on the equator. The center-*latitude* control
+  is therefore grayed out, but the user can still specify a *longitude* for
+  the center of the map presented to the viewer.
+
+  ![map center, Robinson projection](./screenshots/map_center_Robinson.png){ width="100%" }
+
+When the center longitude is changed, the full available range of the longitude
+slider automatically adjusts to span 180° west and east of the new center
+longitude. The latitude slider always spans from 90°S to 90°N.
