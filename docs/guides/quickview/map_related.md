@@ -1,6 +1,8 @@
 
 # Map-Related Features
 
+[[toc]]
+
 ## Map projection {#map-projections}
 
 ![Map projections and latitude–longitude grid-line spacing](./screenshots/map_projections_and_grid_line_spacing.png){ width="60%", align=right }
@@ -13,6 +15,20 @@ The map projection used for the contour plots can be changed through the mini-me
 - `N`: spherical.
 
 The bottom section of the same mini-menu allows the user to adjust the spacing of the latitude–longitude grid lines shown on the map.
+
+## Plot background color {#plot-background-color}
+
+QuickView uses ParaView's "dark gradient" as the default plot background.
+Depending on the map projection and colormap, however, a different background
+color may improve visual contrast. For example, with the spherical projection,
+a lighter background can make the boundary of the globe easier to distinguish.
+For other projections, changing the background may help distinguish regions
+whose data colors are similar to the default background.
+
+Starting in version 2.10.0, the plot background color can be changed through
+the mini-menu opened by clicking the background-color icon in the main toolbar.
+
+![Plot background color choices](./screenshots/plot_background_color.png){ width="100%" }
 
 ## Geographical region {#geographical-region}
 
