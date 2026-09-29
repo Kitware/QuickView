@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v2.10.1 (2026-09-29)
+
+### Bug Fixes
+
+- **colormaps**: Use 1.7.2 or newer
+  ([`ab43db9`](https://github.com/Kitware/QuickView/commit/ab43db9ef8d788824f157aced8c0de31ae5c52ce))
+
+- **state**: Add bg, interval and center to state
+  ([`b599299`](https://github.com/Kitware/QuickView/commit/b599299c3666bcb25615959bf4ba35d1e8a54fcd))
+
+### Build System
+
+- **deps**: Bump python-semantic-release/python-semantic-release
+  ([`997a29a`](https://github.com/Kitware/QuickView/commit/997a29a9f1b37ca6f7c45dd592a81d1964ca3e4d))
+
+### Documentation
+
+- **quickview**: Add section on plot background color
+  ([`471ae30`](https://github.com/Kitware/QuickView/commit/471ae30c90410bd061d6c7142dbcbdc263ac1218))
+
+- **quickview**: Documentation on map center and cropping
+  ([`f7f39bc`](https://github.com/Kitware/QuickView/commit/f7f39bc6b650e6972f2679bb447bd009b6ad22e9))
+
+
 ## v2.10.0 (2026-09-23)
 
 ### Bug Fixes
