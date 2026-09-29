@@ -1,35 +1,29 @@
+
 # The QuickView Family
 
-The QuickView family is a collection of tools for interactive
-visualization and analysis of Earth system simulation data.
-Compared to standardized and formalized diagnostic packages
-that produce hundreds of static figures for comprehensive and
-in-depth analysis for model evaluation, the focus of the QuickView
-family is on interactive explorations that often happen
-during the initial stage of an investigation or code debugging,
-using simulation output on the model's native grid.
+![app icons](/guides/QuickView_family_app_icons_with_text.png){ width="55%", align=right }
 
-Each tool in the family focuses on a small set of actions
-that we believe are frequently taken by Earth system model
-developers and users. The focused attention allows the graphical user interface
-to stay simple and intuitive.
-On the other hand, we are continually summarizing typical analysis
-workflows and assessing new needs to add members to the family.
+The QuickView family is a collection of interactive tools for visualizing and analyzing Earth system simulation data on the model’s native grid. Compared to diagnostic packages that generate hundreds of static figures for comprehensive model evaluation, our tools aim at facilitating the exploratory work often needed early in an investigation or during code debugging.
 
-![QuickView app icon](/guides/quickview/screenshots/QuickView_app_icon_with_text.png){ width="15%", align=right }
-![QuickCompare app icon](/guides/quickcompare/screenshots/QuickCompare_app_icon_with_text.png){ width="15%", align=right }
+Each tool in the QuickView family supports only a small set of tasks. This focus keeps the graphical interfaces simple and intuitive. Meanwhile, we are continuing to examine common analysis workflows and emerging needs and considering additions to the family.
 
-The first two members of the family are
+
+The first three members of the family are
+
+
 - [QuickView](/guides/quickview/index)
   for simultaneously presenting 2D contour plots of
   multiple physical quantities (variables) on 
-  global or regional maps, and
+  global or regional maps,
 - [QuickCompare](/guides/quickcompare/index)
-  for contrasting two or more simulations, also using 2D contour plots.
+  for contrasting two or more simulations, also using 2D contour plots, and
+- [SiteView](https://github.com/Kitware/SiteView)
+  for process-level analysis of an atmospheric column and its
+  regional environment.
 
-As for the computational mesh over the globe,
-the tools currently support only the E3SM Atmosphere Model's
-cubed-sphere `ne*pg2` grids, but extensions to other grids are planned.
+Currently, our tools only support the E3SM Atmosphere Model's cubed-sphere meshes,
+including both the `ne*np4` GLL grids and the `ne*pg2` "physics" grids.
+Extensions to other meshes are underway.
 
 ## Key Reminders
 
@@ -41,7 +35,7 @@ a *resume* mode (for resuming an analysis). Further details can be found on, e.g
 :::
 
 ::: info Connectivity files
-Since E3SM's cubed-sphere horizontal grids are unstructured meshes from ParaView's perspective,
+Since E3SM's cubed-sphere horizontal grids are unstructured meshes,
 the so-called connectivity files are needed in addition to the simulation data files
 for the visualization.
 Further information about connectivity files can be found on 
