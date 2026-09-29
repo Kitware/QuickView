@@ -164,6 +164,9 @@ class ViewManager(TrameComponent):
             view._build_ui()
 
     def update_background(self, color):
+        if not color:
+            return
+
         self._bg_color = color
         for view in self._var2view.values():
             view.update_background(color)

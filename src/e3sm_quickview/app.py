@@ -340,6 +340,10 @@ class EAMApp(TrameApp):
             "tools": self.state.active_tools,
             "help": not self.state.compact_drawer,
             "camera": self.view_manager.get_camera_state(),
+            "grid-interval": self.state.grid_interval,
+            "bg-color": self.view_manager._bg_color,
+            "map-center-lon": self.state.spherical_center_lon,
+            "map-center-lat": self.state.spherical_center_lat,
         }
         data_selection = {
             k: self.state[k]
@@ -473,6 +477,14 @@ class EAMApp(TrameApp):
         self.state.compact_drawer = not state_content["layout"]["help"]
         if "camera" in state_content["layout"]:
             self.view_manager.set_camera_state(state_content["layout"]["camera"])
+
+        # New extended layout properties
+        if "grid-interval" in state_content["layout"]:
+            # Add-on available
+            self.state.grid_interval = state_content["layout"]["grid-interval"]
+            self.state.spherical_center_lon = state_content["layout"]["map-center-lon"]
+            self.state.spherical_center_lat = state_content["layout"]["map-center-lat"]
+            self.view_manager.update_background(state_content["layout"]["bg-color"])
 
         # Update filebrowser state
         with self.state:
