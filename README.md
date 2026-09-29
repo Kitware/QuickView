@@ -5,6 +5,7 @@
 [![Package](https://github.com/Kitware/QuickView/actions/workflows/package.yml/badge.svg)](https://github.com/Kitware/QuickView/actions/workflows/package.yml)
 ![PyPI](https://img.shields.io/pypi/v/e3sm-quickview?label=pypi%20package)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/e3sm-quickview.svg)](https://anaconda.org/conda-forge/e3sm-quickview)
+[![](https://img.shields.io/badge/Conda%20Forge%20Repo-blue)](https://github.com/conda-forge/e3sm-quickview-feedstock)
 
 **QuickView** is an open-source, interactive visualization
 tool designed to help Earth system modelers take a quick look at
