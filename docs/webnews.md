@@ -1,51 +1,66 @@
 
 ## September 2026
 
-![NERSC logo](/logos/nersc.png){width="18%", align=right}
+
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
+
+2026-09-29: QuickView version 2.10.1 was released, adding support for the EAM dycore’s np4 GLL grids, expanding [plot background color options](/guides/quickview/map_related#plot-background-color), and allowing users to adjust the [map center](/guides/quickview/map_related#map-center) for all projections.
+
+
+![NERSC logo](/logos/nersc.png){width="10%", align=right}
 
 2026-09-17: Information was added to this website, explaining how to use our tools [at NERSC through VS Code](https://kitware.github.io/QuickView/nersc/login_vscode.html).
 
-![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="8%", align=right }
+
+![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="5%", align=right }
 
 2026-09-14: QuickCompare version 1.11.0 was released, adding [cursor probe](/guides/quickcompare/cursor_probe) and [spherical map projection](/guides/quickcompare/map_related) capabilities consistent with those available in QuickView.
 
-![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
 
-2026-09-02: QuickView version 2.9.4 was released, adding support for the [spherical map projection](/guides/quickview/map_related), with user-specified map center, latitude–longitude bounds, and grid-line spacing.
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
+
+2026-09-02: QuickView version 2.9.4 was released, adding support for the [spherical map projection](/guides/quickview/map_related) with user-specified map center, latitude–longitude bounds, and grid-line spacing.
+
 
 ## June 2026
 
-![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="8%", align=right }
+
+![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="5%", align=right }
 
 2026-06-28: QuickCompare version 1.8.4 was released, sharing most of the core functionalities with QuickView and offering quantitative comparisons
 [between two simulations](/guides/quickcompare/two-sim_comparison)
 and [across an ensemble of more simulations](/guides/quickcompare/multi-sim_comparison).
 
-![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
+
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
 
 2026-06-25: QuickView version 2.8.4 was released, providing a [cursor probe](/guides/quickview/cursor_probe) for inspecting data values at selected locations in the visualization.
 
-![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
+
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
 
 2026-06-05: QuickView version 2.7.8 was released with more comprehensive [colormap customization](guides/quickview/individual_views) capabilities.
 
 
 ## May 2026
 
-![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
+
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
 
 2026-05-20: QuickView version 2.7.7 was released with refined [viewport control](/guides/quickview/viewport_layout), a more compact [slice selection panel](/guides/quickview/slice_selection), and various other small improvments in the UI.
 
 
 ## April 2026
 
-![QuickView icon](/public/logos/quickview-icon-only.png){ width="8%", align=right }
+
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
 
 2026-04-28: QuickView version 2.6.1 was released, providing long-desired features like [image download](/guides/quickview/saving_images), [symmetric logarithmic scale](/guides/quickview/individual_views#linear-and-log-scales) for colorbars, generalized support for [arbitrarily dimensioned arrays](/guides/simulation_data#nd-vars), and substantially improved performance for [SCREAM output](/gallery/index#scream).
 
 
 ## March 2026
 
-![NERSC logo](/logos/nersc.png){width="18%", align=right}
+
+![NERSC logo](/logos/nersc.png){width="10%", align=right}
 
 QuickView and QuickCompare were deployed to [NERSC](https://www.nersc.gov/) through [JupyterHub](https://jupyter.nersc.gov/) for further development and testing.

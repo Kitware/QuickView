@@ -1,7 +1,7 @@
 {
   "origin": {
     "user": "huiwan",
-    "created": "2026-09-26 14:57:09.308787",
+    "created": "2026-09-30 09:32:17.469194",
     "comment": ""
   },
   "files": {
@@ -22,7 +22,7 @@
     ],
     "help": false,
     "camera": {
-      "zoom": 14159207.915110128,
+      "zoom": 14158179.562635928,
       "position": [
         0.0,
         0.0,
@@ -39,10 +39,18 @@
         0.0
       ],
       "clipping_range": [
-        71527829.89073946,
-        76551946.99790013
+        71527932.2118106,
+        76551818.19675279
       ]
-    }
+    },
+    "grid-interval": 30,
+    "bg-color": [
+      0.851,
+      0.851,
+      0.851
+    ],
+    "map-center-lon": -180,
+    "map-center-lat": 0
   },
   "data-selection": {
     "crop_longitude": [
