@@ -10,13 +10,15 @@
 **QuickView** is an open-source, interactive visualization
 tool designed to help Earth system modelers take a quick look at
 a collection of physical quantities in their simulation files.
-The physical quantities are presented in the form of global or regional maps.
-Currently, QuickView supports only the cubed-sphere "physics" grids,
-i.e., the ne\*pg2 meshes used by the atmosphere component of the
+The physical quantities are presented as contour plots on global or regional maps.
+
+Currently, QuickView only supports the cubed-sphere meshes
+used by the atmosphere component of the
 [Energy Exascale Earth System Model (E3SM)](https://e3sm.org),
-but extensions to other grids are underway.
-QuickView's Python- and
-[trame](https://www.kitware.com/trame/)-based User Interface (UI)
+i.e., the `ne*np4` GLL grids and the `ne*pg2` "physics" grids,
+but extensions to other meshes are underway.
+
+QuickView's Python- and [trame](https://www.kitware.com/trame/)-based User Interface (UI)
 provides intuitive access to [ParaView](https://www.paraview.org/)'s powerful
 analysis and visualization capabilities without requiring a steep learning curve.
 
@@ -30,11 +32,11 @@ analysis and visualization capabilities without requiring a steep learning curve
 - Persistent sessions—pick up where you left off.
 - Support for EAM v2, v3, and upcoming v4 output formats
   as well as the E3SM land model ELM's input and output files
-  on ne*pg2 grids.
+  on `ne*np4` and `ne*pg2` grids.
 
 ## Getting Started 
 
-See [documentation page](https://kitware.github.io/QuickView/guides/quickview/getting_started.html).
+See our [documentation page](https://kitware.github.io/QuickView/guides/quickview/getting_started.html).
 
 ## Project Background
 
