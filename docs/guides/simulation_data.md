@@ -1,18 +1,17 @@
 # Simulation Files 
 
-The QuickView family of tools has been developed using history output
-on the physics grids (`pg2` grids) of the E3SM Atmosphere Model, EAM,
-generated using EAMv2, v3, and intermediate versions towards v4
-(EAMxx). Some sample output files can be found on
+The QuickView family of tools has been developed using simulation files
+from the E3SM Atmosphere Model, EAM, and the land model ELM.
+A small collection of sample files can be found on
 [Zenodo](https://zenodo.org/records/16922607).
 
 ## The horizontal dimension 
 
 Starting from QuickView version 2 and QuickCompare version 1,
-the ParaView Reader used in the tool family
+the data reader used in the tool family
 has been generalized to handle all NetCDF
-variables on `ne*pg2` cubed-sphere meshes regardless of what name is used
-for the horizontal dimension (e.g., `ncol` in EAM files or
+variables on cubed-sphere meshes regardless of what name is used
+for the horizontal dimension (e.g., `ncol` and `ncol_d` in EAM files and
 `lndgrid` in ELM files).
 
 ## Multi-dimensional variables {#nd-vars}
@@ -29,6 +28,7 @@ Here are some examples of variable dimensions (array shapes) from EAM output fil
 - `(time,cosp_prs,cosp_tau,ncol)`
 - `(time,ncol,swband,lev)`
 - `(time,ncol,num_phys_constituents)`
+- `(time,ncol_d,lev)`
 
 And here are some examples of variable dimensions (array shapes) from ELM output files:
 

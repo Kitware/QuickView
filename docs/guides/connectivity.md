@@ -1,23 +1,26 @@
 # Connectivity files
 
-The horizontal grids used by E3SM's atmosphere component EAM, and sometimes the
-land component ELM as well, are cubed spheres. Since these are unstructured
-grids from ParaView's perspective, QuickView needs to know how to map data to the globe.
-Therefore, for each simulation data file, a "connectivity file" needs to be provided.
 
-In EAMv2, v3, and v4, most of the variables (physical quantities) are written
-out on a "physics grid" (also referred to as "physgrid", "FV grid", or "control
-volume mesh") described in [Hannah et al. (2021)](https://doi.org/10.1029/2020MS002419).
-The naming convention for such grids is `ne*pg2`, with `*` being a number, e.g., 4, 30,
-120, 256, 1024. Further details about EAM's cubed-sphere grids can be found in EAM's
-documentation, for example in
-[this overview](https://e3sm.atlassian.net/wiki/spaces/DOC/pages/34113147/SE+Atmosphere+Grid+Overview+EAM+CAM)
-and
-[this description](https://e3sm.atlassian.net/wiki/spaces/DOC/pages/872579110/Running+E3SM+on+New+Atmosphere+Grids).
+[[toc]]
 
-Future versions of QuickView will also support the cubed-sphere meshes used by
-EAM's dynamical core, i.e., the `ne*np4` grids (also referred to as "native
-grids" or "GLL grids").
+
+## Introduction
+
+The horizontal grids used by E3SM's atmosphere component EAM—and sometimes the
+land component ELM—are [cubed spheres](https://docs.e3sm.org/E3SM/EAM/tech-guide/atmosphere-grid-overview/).
+Since these are unstructured grids, our tools need to know how to map the data to the globe.
+Therefore, for each simulation data file, a "connectivity file" is needed for the visualization.
+
+In EAM version 1, both the dynamical core (dycore) and the physics parameterizations
+used the same grid consisting of Gauss-Lobatto-Legendre (GLL) nodes.
+From version 2 onwards, the default is to calculate the parameterizations on
+on a "physics grid" (also referred to as the "physgrid", "FV grid", or "control volume mesh").
+The naming convention is `ne*np4` for the dycore grids and `ne*pg2` for the physics grids,
+with `*` being numbers like 4, 30, 120, 256, 1024, etc.
+
+Starting in QuickView version 2.10.1, both grid types are supported.
+Variables on the dycore grids are handled as point data
+while those on the physics grids are handled as cell data.
 
 ## Connectivity file download
 
@@ -27,28 +30,28 @@ and [regionally refined meshes](https://doi.org/10.5281/zenodo.20707895).
 These collections are continually updated as more users inform us about the grids they use.
 
 
-## Generating connectivity files
+## Generating `pg2` grid files
 
-Users can generate connectivity files with
+Users can generate connectivity files for the physics grids through
 [`TempestRemap`](https://github.com/ClimateGlobalChange/tempestremap)
 ([Ullrich and Taylor, 2015](https://doi.org/10.1175/MWR-D-14-00343.1);
 [Ullrich et al., 2016](https://doi.org/10.1175/MWR-D-15-0301.1)) using
 [this script](https://github.com/mt5555/remap-ncl/blob/master/makeSE.sh) shared
 by Mark A. Taylor at Sandia National Laboratories.
 
-::: tip Paths in Mark's script
+::: tip Tip: Paths in Mark's script
 Before using Mark's script, please set `exepath` therein to where TempestRemap is installed
 and change `wdir` to the location where the newly generated connectivity files should be written to.
 :::
 
-::: tip TempestRemap
+::: tip Tip: TempestRemap
 `TempestRemap` is available
 as a part of the [`E3SM-Unified`](https://github.com/E3SM-Project/e3sm-unified)
 conda environment. It can also be installed following the instructions provided
 in its [repo](https://github.com/ClimateGlobalChange/tempestremap).
 :::
 
-### Quasi-uniform meshes
+### Quasi-uniform `pg2` grids
 
 Using Mark's script, the command
 
@@ -63,15 +66,19 @@ will generate several different files for the `ne30pg2` grid, including, e.g.,
 
 The QuickView family uses the **SCRIP** format.
 
-### Regionally refined meshes
+### Regionally refined `pg2` grids
 
-Each configuration of the [E3SM Regionally Refined Model (RRM, see, e.g., Tang et al., 2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html) has a corresponding grid file in the Exodus format (a `.g` file). The `.g` file can be used to generate the SCRIP-format connectivity file needed by the QuickView family.
+Each configuration of the [E3SM Regionally Refined Model (RRM, see, e.g., Tang et al., 2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html) has a corresponding grid file in the Exodus format (a `.g` file). The `.g` file can be used to generate the SCRIP-format `pg2` grid file needed by the QuickView family.
 
 
-For example, a connectivity file for the NARRM grid described in [Tang et al., 2023](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html) can be generated using Mark's script via the following command, assuming the paths in the script have been adapted as needed and the grid file `northamericax4v1.g` is available in the current directory:
+For example, a `pg2` grid file for the NARRM grid described in [Tang et al., 2023](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html) can be generated using Mark's script via the following command, assuming the paths in the script have been adapted as needed and the grid file `northamericax4v1.g` is available in the current directory:
 
 
 ```
 ./makeSE.sh northamericax4v1.g
 ```
 
+## Generating `np4` grid files
+
+These grids are generated by compiling and running `homme_tool` included in the E3SM source code.
+A sample script for Perlmutter at NERSC will be provided soon.

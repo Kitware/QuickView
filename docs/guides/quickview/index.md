@@ -6,8 +6,8 @@
 tool designed to help Earth system modelers take a quick look at
 a collection of physical quantities in their simulation files.
 The physical quantities are presented in the form of global or regional maps.
-Currently, QuickView supports only the cubed-sphere "physics" grids,
-i.e., the ne\*pg2 meshes used by the atmosphere component of the
+Currently, QuickView supports only cubed-sphere grids,
+i.e., the `ne*np4` and `ne*pg2` meshes used by the atmosphere component of the
 [Energy Exascale Earth System Model (E3SM)](https://e3sm.org),
 but extensions to other grids are underway.
 QuickView's Python- and
@@ -47,9 +47,8 @@ multivariate visualization and is currently focused on E3SM.
 - Intuitive, minimalist interface tailored for Earth system modeling.
 - Multi-variable visualization.
 - Persistent sessions—pick up where you left off.
-- Support for EAM v2, v3, and upcoming v4 output formats
-  as well as the E3SM land model ELM's input and output files
-  on ne*pg2 grids.
+- Support for EAM v1-v4 output formats as well as the E3SM land model ELM's
+  input and output files on cubed-sphere grids.
 
 ## Project Background
 
