@@ -1,4 +1,4 @@
 [codespell]
-skip = package-lock.json,CHANGELOG.md,**/*.js
+skip = package-lock.json,CHANGELOG.md,**/*.js,**/*.vtp
 ignore-words-list = hist,scrip,SCRIP
 ignore-regex = name="ba"

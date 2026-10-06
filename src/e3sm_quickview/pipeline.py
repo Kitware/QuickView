@@ -54,16 +54,10 @@ class ErrorObserver:
 class Continent:
     def __init__(self, projection="Mollweide"):
         self._projection = projection
-        input_file = Path(__file__).with_name("data") / "globe.vtk"
-        self.reader = simple.LegacyVTKReader(FileNames=[str(input_file.resolve())])
-        self.contour = simple.Contour(
-            Input=self.reader,
-            ContourBy=["POINTS", "cstar"],
-            Isosurfaces=[0.5],
-            PointMergeMethod="Uniform Binning",
-        )
+        input_file = Path(__file__).with_name("data") / "coastlines.vtp"
+        self.reader = simple.XMLPolyDataReader(FileName=[str(input_file.resolve())])
         self._crop = simple.EAMTransformAndExtract(
-            Input=self.contour,
+            Input=self.reader,
             LongitudeRange=[-180.0, 180.0],
             LatitudeRange=[-90.0, 90.0],
         )

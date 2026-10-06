@@ -15,10 +15,12 @@ repos:
       - id: debug-statements
       - id: end-of-file-fixer
       - id: mixed-line-ending
+        exclude: \.(vtk|vtp)$
       - id: name-tests-test
         args: ["--pytest-test-first"]
       - id: requirements-txt-fixer
       - id: trailing-whitespace
+        exclude: \.(vtk|vtp)$
 
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: "v3.4.2"
