@@ -2,6 +2,56 @@
 
 <!-- version list -->
 
+## v2.10.2 (2026-10-06)
+
+### Bug Fixes
+
+- **coastline**: More refined coast line
+  ([`185dd3a`](https://github.com/Kitware/QuickView/commit/185dd3a300cfd1147c49cc0f19e6666ced1dc22b))
+
+- **py3.14**: Add support for python 3.14
+  ([`46819c8`](https://github.com/Kitware/QuickView/commit/46819c854b1ab36c1e7fc6907bea42bd4b733cfe))
+
+### Continuous Integration
+
+- **osmesa**: Add osmesa to ubtuntu/windows package ci runners
+  ([`d0c19d7`](https://github.com/Kitware/QuickView/commit/d0c19d76bc3e7525100bcf41e8dd5e1151e5cc4b))
+
+### Documentation
+
+- Repair a broken link on homepage
+  ([`0a0f974`](https://github.com/Kitware/QuickView/commit/0a0f9741811a4e8ac3377b2f308fb673bf11ce42))
+
+- Update pages on connecitivity files, simulation files, and quickview intro to accommodate np4
+  grids
+  ([`8809ce2`](https://github.com/Kitware/QuickView/commit/8809ce2e1972b1897a0c4fb3c1fef5cbdea1c4cf))
+
+- Update README.md
+  ([`ec713af`](https://github.com/Kitware/QuickView/commit/ec713af115031b8f35435119d5b9409139939d25))
+
+- Update README.md
+  ([`3a7cd54`](https://github.com/Kitware/QuickView/commit/3a7cd549b66a975803d8f4a3da5ac5d706d6b9b9))
+
+- Update user guide intro page ([#145](https://github.com/Kitware/QuickView/pull/145),
+  [`da49db2`](https://github.com/Kitware/QuickView/commit/da49db2f9d6af8e9fc9a18642454422f7588823c))
+
+- **quickview**: Start to update website for np4 grids; more to come
+  ([#145](https://github.com/Kitware/QuickView/pull/145),
+  [`da49db2`](https://github.com/Kitware/QuickView/commit/da49db2f9d6af8e9fc9a18642454422f7588823c))
+
+- **quickview**: Update main README.md for np4 grids
+  ([#145](https://github.com/Kitware/QuickView/pull/145),
+  [`da49db2`](https://github.com/Kitware/QuickView/commit/da49db2f9d6af8e9fc9a18642454422f7588823c))
+
+- **quickview**: Update state files and screenshots for map center control; update webnews for
+  v2.10.1
+  ([`a32f4b6`](https://github.com/Kitware/QuickView/commit/a32f4b6e9c33ed9afdc816e7cc1432d40020c0d9))
+
+- **quickview**: Update website main page for np4 grids and Kitware URL
+  ([#145](https://github.com/Kitware/QuickView/pull/145),
+  [`da49db2`](https://github.com/Kitware/QuickView/commit/da49db2f9d6af8e9fc9a18642454422f7588823c))
+
+
 ## v2.10.1 (2026-09-29)
 
 ### Bug Fixes
