@@ -97,7 +97,12 @@ class ViewManager(TrameComponent):
         )
         self._render_window_interactor.SetRenderWindow(self._render_window)
 
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_event_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+
         self.layout_dirty = True
         self.pending_reset_camera = 1
         self.pending_render = False
