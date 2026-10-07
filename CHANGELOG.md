@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v2.10.3 (2026-10-07)
+
+### Bug Fixes
+
+- **continent**: Allow resolution toggle
+  ([`3091b27`](https://github.com/Kitware/QuickView/commit/3091b273563ca3f7b9d8e3f073fda10df7e0e429))
+
+- **crop**: Crop center work with spherical proj
+  ([`7469c46`](https://github.com/Kitware/QuickView/commit/7469c462cb51acb644c1850bd00a396c48e8f281))
+
+
 ## v2.10.2 (2026-10-06)
 
 ### Bug Fixes
