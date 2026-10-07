@@ -674,16 +674,14 @@ class EAMApp(TrameApp):
 
     @change("spherical_center_lat", "spherical_center_lon", "projection")
     def _on_center(self, spherical_center_lat, spherical_center_lon, projection, **_):
-        if projection == ["Spherical"]:
-            if self.state.longitude_origin != -180:
-                self.state.longitude_origin = -180
+        self.state.longitude_origin = (spherical_center_lon + 360) % 360 - 180
 
+        if projection == ["Spherical"]:
             self.source.Clip(self.view_manager._clip_plane)
             self.view_manager.center_camera(
                 float(spherical_center_lat), float(spherical_center_lon)
             )
         else:
-            self.state.longitude_origin = (spherical_center_lon + 360) % 360 - 180
             self.source.Clip()
             self.view_manager.camera_projection()
 
