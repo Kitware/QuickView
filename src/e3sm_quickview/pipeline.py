@@ -51,11 +51,16 @@ class ErrorObserver:
         self.error_occurred = False
 
 
+DATA_DIR = Path(__file__).with_name("data").resolve()
+CONTINENT_SMALL = str(DATA_DIR / "coastlines-low.vtp")
+CONTINENT_MEDIUM = str(DATA_DIR / "coastlines-med.vtp")
+CONTINENT_LARGE = str(DATA_DIR / "coastlines-high.vtp")
+
+
 class Continent:
     def __init__(self, projection="Mollweide"):
         self._projection = projection
-        input_file = Path(__file__).with_name("data") / "coastlines.vtp"
-        self.reader = simple.XMLPolyDataReader(FileName=[str(input_file.resolve())])
+        self.reader = simple.XMLPolyDataReader(FileName=[CONTINENT_SMALL])
         self._crop = simple.EAMTransformAndExtract(
             Input=self.reader,
             LongitudeRange=[-180.0, 180.0],
@@ -87,6 +92,12 @@ class Continent:
     @property
     def longitude_origin(self):
         return self._longitude_origin
+
+    def update_resolution(self, level=0):
+        level = max(min(int(level), 2), 0)
+        file = [CONTINENT_SMALL, CONTINENT_MEDIUM, CONTINENT_LARGE][level]
+        self.reader.FileName = (file,)
+        self.geometry.UpdatePipeline()
 
     @longitude_origin.setter
     def longitude_origin(self, origin):
