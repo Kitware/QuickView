@@ -691,6 +691,11 @@ class EAMApp(TrameApp):
         # self.view_manager.reset_camera()
         self.view_manager.render()
 
+    @change("continent_level")
+    def _on_continent_res(self, continent_level, **_):
+        self.source.continent.update_resolution(continent_level)
+        self.view_manager.render()
+
     def _on_slicing_change(self, var, ind_var, **_):
         with perf.timed(f"tick.{var}={self.state[ind_var]}.total"):
             with perf.timed("tick.pipeline"):

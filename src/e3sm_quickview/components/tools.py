@@ -3,6 +3,7 @@ from pathlib import Path
 from trame.app import asynchronous
 from trame.decorators import trigger
 from trame.widgets import vuetify3 as v3
+from trame.widgets import html
 
 from e3sm_quickview import __version__ as quickview_version
 from e3sm_quickview.assets import ASSETS
@@ -253,6 +254,7 @@ class MapProjection(v3.VTooltip):
                                     v_model=("grid_interval", 30),
                                     border=True,
                                     divided=True,
+                                    mandatory=True,
                                 ):
                                     v3.VBtn("1°", value=[1])
                                     v3.VBtn("2°", value=[2])
@@ -260,6 +262,21 @@ class MapProjection(v3.VTooltip):
                                     v3.VBtn("10°", value=[10])
                                     v3.VBtn("15°", value=[15])
                                     v3.VBtn("30°", value=[30])
+
+                            v3.VDivider(classes="mt-2")
+                            with v3.VListItem(title="Continent resolution"):
+                                with html.Div(classes="d-flex justify-center"):
+                                    with v3.VBtnToggle(
+                                        v_model=("continent_level", 0),
+                                        border=True,
+                                        divided=True,
+                                        mandatory=True,
+                                    ):
+                                        v3.VBtn("Low", value=[0], classes="text-none")
+                                        v3.VBtn(
+                                            "Medium", value=[1], classes="text-none"
+                                        )
+                                        v3.VBtn("Large", value=[2], classes="text-none")
 
     @property
     def options(self):
