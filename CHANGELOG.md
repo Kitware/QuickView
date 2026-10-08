@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.10.4 (2026-10-08)
+
+### Bug Fixes
+
+- **ui**: Very minor wording change
+  ([`e434ca8`](https://github.com/Kitware/QuickView/commit/e434ca898ac9250621d3bebd28db6b075f398623))
+
+
 ## v2.10.3 (2026-10-07)
 
 ### Bug Fixes
