@@ -264,7 +264,7 @@ class MapProjection(v3.VTooltip):
                                     v3.VBtn("30°", value=[30])
 
                             v3.VDivider(classes="mt-2")
-                            with v3.VListItem(title="Continent resolution"):
+                            with v3.VListItem(title="Coastline resolution"):
                                 with html.Div(classes="d-flex justify-center"):
                                     with v3.VBtnToggle(
                                         v_model=("continent_level", 0),
@@ -276,7 +276,7 @@ class MapProjection(v3.VTooltip):
                                         v3.VBtn(
                                             "Medium", value=[1], classes="text-none"
                                         )
-                                        v3.VBtn("Large", value=[2], classes="text-none")
+                                        v3.VBtn("High", value=[2], classes="text-none")
 
     @property
     def options(self):
