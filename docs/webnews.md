@@ -4,6 +4,11 @@
 
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
 
+2026-10-08: QuickView version 2.10.4 was released, providing more options for [coastline resolution](/guides/quickview/map_related#map-projections). We thank [Dr. Felicia Brisc](https://www.inf.uni-hamburg.de/en/inst/ab/hci/people/brisc.html) for her open [GitHub repo](https://github.com/FeliciaBrisc/Planar-Coastlines-0...360-for-ParaView) of coastline files.
+
+
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
+
 2026-09-29: QuickView version 2.10.1 was released, adding support for the EAM dycore’s np4 GLL grids, expanding [plot background color options](/guides/quickview/map_related#plot-background-color), and allowing users to adjust the [map center](/guides/quickview/map_related#map-center) for all projections.
 
 
