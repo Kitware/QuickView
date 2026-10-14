@@ -44,9 +44,11 @@ will check and validate the full application file tree.
 
 ## Conda installation {#conda}
 
-As our tools depend on [ParaView](https://www.paraview.org/) and
-require specific features in [Python](https://www.python.org/),
-we use conda to facilitate the setup.
+Our tools are built with [trame](https://www.kitware.com/trame/),
+and they rely on [ParaView](https://www.paraview.org/)
+or [VTK](https://vtk.org/)
+as well as specific features in [Python](https://www.python.org/).
+We use conda to facilitate the setup.
 
 ### Initial installation
 
@@ -69,8 +71,8 @@ then use the following commands, replacing the version numbers by what you need:
 
 ```sh
 conda activate quickview-env
-conda install conda-forge::"e3sm-quickview>=2.8.4"
-conda install conda-forge::"e3sm_compareview>=1.8.4"
+conda install conda-forge::"e3sm-quickview>=2.10.4"
+conda install conda-forge::"e3sm_compareview>=1.11.2"
 ```
 
 ### Launching a tool installed via conda

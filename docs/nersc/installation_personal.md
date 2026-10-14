@@ -9,7 +9,7 @@ expect that
 - the conda environment is named `quickview-env`,
   which we refer to as `${envName}` below.
 
-::: warning Note: Please use a login node for the installation.
+::: warning Note: Please use a login node for installation.
 After that, the tools can be used on login nodes or other types of nodes
 via the same commands/shortcuts.
 :::
@@ -118,12 +118,12 @@ you will need to
 pathRoot="/global/cfs/projectdirs/m4359/tools/"
 envName="quickview-env"
 
-quickview_version_new="2.1.1"
-quickcomp_version_new="1.3.4"
+quickview_version_new="2.10.4"
+quickcomp_version_new="1.11.2"
 
 module load conda
 conda activate ${pathRoot}/conda-envs/${envName}
 
-conda install   "e3sm-quickview>=${quickview_version_new}"
-conda install "e3sm_compareview>=${quickcomp_version_new}"
+conda install conda-forge::"e3sm-quickview>=${quickview_version_new}"
+conda install conda-forge::"e3sm_compareview>=${quickcomp_version_new}"
 ```

@@ -36,15 +36,15 @@ conda install conda-forge::e3sm_compareview
 Different members of the QuickView tool family are versioned separately.
 The current (newest) version numbers are summarized in the table at the beginning
 of [this page](/guides/install_and_launch).
-The following commands were used to update QuickView to version 2.1.2
-and QuickCompare to version 1.3.5.
+The following commands were used to update QuickView to version 2.10.4
+and QuickCompare to version 1.11.2.
 
 ```sh
 module load conda
 conda activate /global/common/software/m4359/conda-envs/quickview-family
 
-conda install "e3sm-quickview>=2.1.2"
-conda install "e3sm_compareview>=1.3.5"
+conda install conda-forge::"e3sm-quickview>=2.10.4"
+conda install conda-forge::"e3sm_compareview>=1.11.2"
 ```
 
 ## Shortcuts to the executables
