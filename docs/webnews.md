@@ -1,11 +1,12 @@
 
-## September 2026
 
+## October 2026
 
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
 
 2026-10-08: QuickView version 2.10.4 was released, providing more options for [coastline resolution](/guides/quickview/map_related#map-projections). We thank [Dr. Felicia Brisc](https://www.inf.uni-hamburg.de/en/inst/ab/hci/people/brisc.html) for her open [GitHub repo](https://github.com/FeliciaBrisc/Planar-Coastlines-0...360-for-ParaView) of coastline files.
 
+## September 2026
 
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="5%", align=right }
 
