@@ -28,31 +28,28 @@ Extensions to other meshes are underway.
 ## Key Reminders
 
 ::: warning Two modes of use
-QuickView can be used in two modes:
-a *new-vis* mode (for starting a new visualization) or
-a *resume* mode (for resuming an analysis). Further details can be found on, e.g.,
-[this page](/guides/quickview/file_selection.md).
+All tools in the family support two ways of usage:
+a *new-vis* mode for starting a new visualization and
+a *resume* mode for continuing an earlier, saved analysis.
+Further details can be found on, e.g., [this page](/guides/quickview/file_selection.md).
 :::
 
 ::: info Connectivity files
-Since E3SM's cubed-sphere horizontal grids are unstructured meshes,
-the so-called connectivity files are needed in addition to the simulation data files
-for the visualization.
-Further information about connectivity files can be found on 
-[this page](/guides/connectivity.md).
+Since E3SM's cubed spheres are unstructured horizontal meshes,
+connectivity files need to be provided to our tools alongside the simulation files.
+Please note that such connectivity files are, typically, *not* the mapping files
+used for interpolating data to regular late-lon grids.
+Further information can be found on [this page](/guides/connectivity.md).
 :::
 
 ::: tip Consistency between connecitivity and simulation files
 One of the often encountered causes of error when loading files in the QuickView family is
-that the grid described by the connecitivity file does not match the grid in the
-simulation data file. In such a case, after the user specified the two files
-and clicked `Load files` (see more detailed description [here](/guides/quickview/file_selection#new-analysis)),
+that the horizontal grid described by the connecitivity file does not match the grid in the
+simulation file. In such a case, after the user has specified those files
+and clicked the `Load files` button (see more detailed description [here](/guides/quickview/file_selection#new-analysis)),
 the file loading dialogue window will
 remain open and appear non-responsive, and the terminal window will display
-a message like the following:
-```
-Error occurred in UpdatePipeline. Please check if the data and connectivity files exist and are compatible
-```
+a message prompting the user to check if the simulation and connectivity files exist and are compatible.
 :::
 
 ::: warning The `Load ... Variables` button
@@ -72,17 +69,25 @@ Each tool in the QuickView family contains multiple control panels
 for setting properties of the visualization.
 These control panels can be shown/expanded for easy access or
 be hidden/folded to maximize the screen space for visualization
-The UIs provide both keyboard shortcuts and toggles in the toolbar
+The UIs provide both keyboard shortcuts and toggles in the main toolbar
 to show or hide these control panels.
 :::
 
 ::: tip Viewport layout
 All tools in the QuickView family are designed to simultaneously present multiple
-images and charts etc. to help the user identify relationships and distinctions.
-The sizes and the layout of the different images etc. can be easily adjusted. See, e.g., [this page](/guides/quickview/viewport_layout).
+images and/or charts to help the user identify relationships and distinctions.
+In QuickView,
+the size, sequence, and arrangment of the contour plots can be easily adjusted
+through the [viewport-layout control panel](/guides/quickview/viewport_layout) and
+[keyboard shortcuts](/guides/quickview/shortcuts).
+In QuickCompare, additional buttons and mini-menus are provided for
+configurating a comparison [between two simulations](/guides/quickcompare/two-sim_comparison.md)
+or [across an ensemble](/guides/quickcompare/multi-sim_comparison.md).
+
 
 Furthermore, if a user saves a state file after these
-adjustments, they can later resume their analysis with the customized
-arrangement. For example, the use of state files in QuickView
-can be found in [this section](/guides/quickview/file_selection#state-files).
+adjustments, they can later resume their analysis with the customized arrangement.
+The use of state files in [QuickView](/guides/quickview/file_selection#state-files)
+and [QuickCompare](/guides/quickcompare/file_selection#state-files)
+is explained in the linked pages.
 :::
