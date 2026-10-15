@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v2.10.5 (2026-10-15)
+
+### Bug Fixes
+
+- **coast**: Update coastlines
+  ([`0593f65`](https://github.com/Kitware/QuickView/commit/0593f65c6a8301f2858a18892fb8d0fad65b46f7))
+
+### Documentation
+
+- Revise out-dated contents on the overview page
+  ([`e06fd34`](https://github.com/Kitware/QuickView/commit/e06fd34d70dc6bb115911d0eccdcf57a66d0cec7))
+
+- Update installation-related contents
+  ([`928e73f`](https://github.com/Kitware/QuickView/commit/928e73f7a1de4964fc597af6d3d02d7eb5294e21))
+
+- Webnews - add october section
+  ([`d8d8034`](https://github.com/Kitware/QuickView/commit/d8d8034c6e9a409c566e5bada164cb5b678a9f75))
+
+- **quickview**: Update doc page and webnews for coastlines
+  ([`75e7ec4`](https://github.com/Kitware/QuickView/commit/75e7ec47e6305bcb657c4f24adcda5de4886afce))
+
+
 ## v2.10.4 (2026-10-08)
 
 ### Bug Fixes
