@@ -2,7 +2,7 @@
 
 ## Map projection {#map-projections}
 
-![Map projections and latitude–longitude grid-line spacing](./screenshots/map_projections_and_grid_line_spacing_quickcompare.png){ width="60%", align=right }
+![Map projections](./screenshots/map_projections_quickcompare.png){ width="60%", align=right }
 
 The map projection used for the contour plots can be changed through the mini-menu opened by clicking the Earth icon in the vertical toolbar. The projection can also be selected using the following keyboard shortcuts:
 
@@ -11,7 +11,7 @@ The map projection used for the contour plots can be changed through the mini-me
 - `M`: Mollweide;
 - `N`: spherical.
 
-The bottom section of the same mini-menu allows the user to adjust the spacing of the latitude–longitude grid lines shown on the map.
+The bottom portion of the same mini-menu allows the user to adjust the spacing of the latitude–longitude grid lines shown on the map as well as the resolution of the displayed coastlines.
 
 ## Geographical region {#geographical-region}
 
