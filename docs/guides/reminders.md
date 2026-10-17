@@ -17,7 +17,7 @@ The first three members of the family are
   global or regional maps,
 - [QuickCompare](/guides/quickcompare/index)
   for contrasting two or more simulations, also using 2D contour plots, and
-- [SiteView](https://github.com/Kitware/SiteView)
+- [SiteView](/guides/siteview/index)
   for process-level analysis of an atmospheric column and its
   regional environment.
 

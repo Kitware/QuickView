@@ -85,8 +85,21 @@ export default defineConfig({
           ],
         },
         {
-          text: "Tools In Development",
-          items: [{ text: "SiteView" }, { text: "CondiDiag Viewer" }],
+          text: "SiteView User's Guide",
+          collapsed: true,
+          items: [
+            { text: "What is SiteView?",     link: "/guides/siteview/index", },
+            { text: "Getting Started",       link: "/guides/siteview/getting_started" },
+            { text: "UI Overview",           link: "/guides/siteview/ui_overview" },
+            { text: "File Selection",        link: "/guides/siteview/file_selection", },
+            { text: "Site and Region",       link: "/guides/siteview/site_and_region", },
+            { text: "Variable Selection",    link: "/guides/siteview/variable_selection", },
+            { text: "3D View",               link: "/guides/siteview/3d_view", },
+            { text: "Time Evolution Plots",  link: "/guides/siteview/time_plots", },
+            { text: "Histograms",            link: "/guides/siteview/histograms", },
+            { text: "Conditional Sampling",  link: "/guides/siteview/conditional_sampling", },
+            { text: "Data Probes",           link: "/guides/siteview/probes" },
+          ],
         },
         {
           text: "For App Developers",
