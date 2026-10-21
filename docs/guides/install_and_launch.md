@@ -56,7 +56,7 @@ For example, to create a conda environment named `quickview-env`
 then install QuickView and QuickCompare, we can use the following commands:
 
 ```sh
-conda create --name quickview-env python=3.13
+conda create --name quickview-env python=3.14
 conda activate quickview-env
 pip install typing_extensions
 conda install conda-forge::e3sm-quickview
