@@ -14,11 +14,11 @@ export default defineConfig({
     },
     logo: "/icon-full.png",
     nav: [
-      { text: "Home", link: "/" },
-      { text: "News", link: "/webnews" },
-      { text: "Gallery", link: "/gallery/" },
-      { text: "User's Guide", link: "/guides/reminders" },
-      { text: "At NERSC", link: "/nersc/launching" },
+      { text: "Home",         link: "/" },
+      { text: "News",         link: "/webnews" },
+      { text: "Gallery",      link: "/gallery/" },
+      { text: "User's Guide", link: "/guides/reminders", activeMatch: "^/guides/", },
+      { text: "At NERSC",     link: "/nersc/launching",  activeMatch: "^/nersc/", },
     ],
 
     sidebar: {
