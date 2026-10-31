@@ -10,7 +10,7 @@ credit: Simulation performed by the EAMxx team; thanks to Chris Terai (LLNL) for
   created by Hui Wan (PNNL).
 images:
 - type: video
-  src: /gallery/QuickView2.5.0_SCREAM_TOMLWup.mp4
+  src: /gallery/examples/QuickView2.5.0_SCREAM_TOMLWup.mp4
   alt: SCREAM upward longwave flux screen recording
   caption: Unedited real-time screen recording of QuickView running on an exclusive GPU node at NERSC,
     showing the time evolution of top-of-model upward longwave flux.
@@ -35,7 +35,7 @@ Watch a real-time QuickView recording of top-of-model upward longwave flux.
 Unedited real-time screen recording of QuickView running on an exclusive GPU node at NERSC, showing the time evolution of top-of-model upward longwave flux.
 
 <script setup>
-import recordingUrl from '../QuickView2.5.0_SCREAM_TOMLWup.mp4'
+import recordingUrl from '../examples/QuickView2.5.0_SCREAM_TOMLWup.mp4'
 </script>
 
 <video controls playsinline preload="none" :src="recordingUrl" aria-label="SCREAM upward longwave flux screen recording" style="width: 100%">

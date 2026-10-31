@@ -7,7 +7,7 @@ models:
 - ELM
 mesh: ne30pg2 (~165 km)
 images:
-- src: /gallery/gallery_elmv2_ne30pg2.png
+- src: /gallery/examples/gallery_elmv2_ne30pg2.png
   alt: ELMv2 soil and lake variables displayed in QuickView
   caption: Soil and lake variables in ELMv2.
 tools:
@@ -31,6 +31,6 @@ Inspect several land-model variables together in QuickView.
 
 Soil and lake variables in ELMv2.
 
-![ELMv2 soil and lake variables displayed in QuickView](/gallery/gallery_elmv2_ne30pg2.png)
+![ELMv2 soil and lake variables displayed in QuickView](/gallery/examples/gallery_elmv2_ne30pg2.png)
 
 [Back to the gallery](/gallery/)
