@@ -13,10 +13,10 @@ gridConfigurations:
 mesh: ne30pg2 with 4× refinement in North America
 credit: Visualization created by Hui Wan (PNNL). Simulation data from Tang et al. (2023).
 images:
-- src: /gallery/gallery_narrm_eamv2.png
+- src: /gallery/examples/gallery_narrm_eamv2.png
   alt: EAMv2 output on the North America regionally refined mesh
   caption: Atmosphere-model output from the E3SMv2 Regionally Refined Model.
-- src: /gallery/gallery_narrm_elmv2.png
+- src: /gallery/examples/gallery_narrm_elmv2.png
   alt: ELMv2 output on the North America regionally refined mesh
   caption: Land-model output from the E3SMv2 Regionally Refined Model.
 tools:
@@ -39,10 +39,10 @@ Simulation data and mesh description: [Tang et al. (2023)](https://gmd.copernicu
 
 Atmosphere-model output from the E3SMv2 Regionally Refined Model.
 
-![EAMv2 output on the North America regionally refined mesh](/gallery/gallery_narrm_eamv2.png)
+![EAMv2 output on the North America regionally refined mesh](/gallery/examples/gallery_narrm_eamv2.png)
 
 Land-model output from the E3SMv2 Regionally Refined Model.
 
-![ELMv2 output on the North America regionally refined mesh](/gallery/gallery_narrm_elmv2.png)
+![ELMv2 output on the North America regionally refined mesh](/gallery/examples/gallery_narrm_elmv2.png)
 
 [Back to the gallery](/gallery/)

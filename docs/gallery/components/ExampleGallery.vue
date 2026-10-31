@@ -34,18 +34,34 @@ const filtered = computed(() => props.examples.filter(example => groups.every(({
 const activeCount = computed(() => Object.values(selected).flat().length)
 function clearFilters() { groups.forEach(({ key }) => { selected[key] = [] }) }
 
-// These files already live in docs/gallery. Let Vite emit their hashed URLs;
-// a raw /gallery/... URL alone would bypass Vite's asset handling.
-const assets = import.meta.glob('../*.{png,jpg,jpeg,webp,avif,gif,svg,mp4,webm}', {
-  eager: true, query: '?url', import: 'default',
-})
+const assets = import.meta.glob(
+  '../examples/*.{png,jpg,jpeg,webp,avif,gif,svg,mp4,webm}',
+  {
+    eager: true,
+    query: '?url',
+    import: 'default',
+  },
+)
+
 function assetUrl(path) {
   if (!path) return ''
-  if (path.startsWith('/gallery/')) {
-    return assets[`../${path.slice('/gallery/'.length)}`] || withBase(path)
+
+  if (path.startsWith('/gallery/examples/')) {
+    const filename = path.slice('/gallery/examples/'.length)
+    const key = `../examples/${filename}`
+    const url = assets[key]
+
+    if (!url) {
+      throw new Error(`Gallery asset not found: ${key}`)
+    }
+
+    return url
   }
+
   return /^(https?:)?\/\//.test(path) ? path : withBase(path)
 }
+
+
 const active = ref(null)
 const mediaIndex = ref(0)
 const media = computed(() => active.value?.images[mediaIndex.value])
