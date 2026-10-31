@@ -11,10 +11,23 @@ const groups = [
   { key: 'meshDesignations', label: 'Mesh designation' },
 ]
 const selected = reactive(Object.fromEntries(groups.map(({ key }) => [key, []])))
+
+const toolOrder = ['QuickView', 'QuickCompare', 'SiteView']
 const filters = computed(() => groups.map(group => ({
   ...group,
-  values: [...new Set(props.examples.flatMap(example => example[group.key]))].sort(),
+  values: [...new Set(props.examples.flatMap(example => example[group.key]))]
+    .sort((a, b) => {
+      if (group.key === 'tools') {
+        const rank = value => {
+          const index = toolOrder.indexOf(value)
+          return index === -1 ? toolOrder.length : index
+        }
+        return rank(a) - rank(b) || a.localeCompare(b)
+      }
+      return a < b ? -1 : a > b ? 1 : 0
+    }),
 })))
+
 const filtered = computed(() => props.examples.filter(example => groups.every(({ key }) =>
   !selected[key].length || selected[key].some(value => example[key].includes(value)),
 )))
