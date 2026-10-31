@@ -220,6 +220,29 @@ onBeforeUnmount(() => {
   .gallery-filters legend { float: none; width: auto; }
   .dialog-content { padding: .8rem; }
 }
+
+.media-navigation button {
+  background: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  color: white;
+}
+
+.media-navigation button:hover {
+  background: var(--vp-c-brand-2);
+  border-color: var(--vp-c-brand-2);
+}
+
+.gallery-dialog button[data-close] {
+  background: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  color: white;
+}
+
+.gallery-dialog button[data-close]:hover {
+  background: var(--vp-c-brand-2);
+  border-color: var(--vp-c-brand-2);
+}
+
 </style>
 
 <style>
