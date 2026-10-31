@@ -127,7 +127,8 @@ onBeforeUnmount(() => {
           <img v-if="example.thumbnail || example.images[0].poster || example.images[0].type !== 'video'"
             :src="assetUrl(example.thumbnail || example.images[0].poster || example.images[0].src)"
             :alt="example.images[0].alt" loading="lazy" decoding="async">
-          <span v-else class="video-preview"><span aria-hidden="true">▶</span> Watch recording</span>
+          <span v-if="example.images[0].type === 'video'" class="video-preview" >
+          <span aria-hidden="true">▶</span> Watch recording</span>
           <span class="preview-label">{{ example.images[0].type === 'video' ? 'Video' : example.images.length > 1 ? `${example.images.length} images · Enlarge` : 'Enlarge' }}</span>
         </button>
         <div class="card-content">
@@ -185,14 +186,31 @@ onBeforeUnmount(() => {
 .gallery-results button { padding: .15rem .5rem; border-radius: 12px; background: var(--vp-c-brand-1); border: 1px solid var(--vp-c-divider); color: white; font-size: .75rem; }
 .gallery-dialog button { border: 1px solid var(--vp-c-divider); border-radius: 6px; padding: .3rem .7rem; background: var(--vp-c-bg); color: var(--vp-c-text-1); cursor: pointer; font: inherit; }
 .gallery-results button:disabled { opacity: .45; cursor: default; }
-.gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.gallery-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
 .gallery-card { position: relative; border: 1px solid var(--vp-c-divider); border-radius: 12px; overflow: hidden; background: var(--vp-c-bg); scroll-margin-top: 5rem; }
 .legacy-anchor { position: absolute; top: 0; scroll-margin-top: 5rem; }
 .preview-button { position: relative; display: flex; width: 100%; align-items: center; justify-content: center; aspect-ratio: 16 / 10; padding: 0; overflow: hidden; border: 0; border-bottom: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-soft); cursor: zoom-in; }
 .preview-button img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .preview-label { position: absolute; right: .5rem; bottom: .5rem; padding: .15rem .5rem; border-radius: 12px; background: var(--vp-c-brand-1); border: 1px solid var(--vp-c-divider); color: white; font-size: .75rem; }
-.video-preview { display: flex; flex-direction: column; gap: .75rem; align-items: center; color: var(--vp-c-text-2); }
-.video-preview > span { font-size: 2rem; color: var(--vp-c-brand-1); }
+
+.video-preview {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  background: rgb(0 0 0 / .25);
+  color: white;
+  text-shadow: 0 1px 4px rgb(0 0 0 / .8);
+}
+
+.video-preview > span {
+  font-size: 2rem;
+  color: white;
+}
+
 .card-content { padding: 1rem 1.2rem 1.2rem; }
 .card-content h2 { margin: 0; padding: 0; border: 0; font-size: 1.1rem; line-height: 1.5; letter-spacing: normal; }
 .card-content h2 a { color: var(--vp-c-text-1); text-decoration: none; }
@@ -243,11 +261,4 @@ onBeforeUnmount(() => {
   border-color: var(--vp-c-brand-2);
 }
 
-</style>
-
-<style>
-/* Give this gallery room for readable scientific screenshots. */
-.gallery-page .VPDoc .content-container { max-width: 1120px !important; }
-.gallery-page .VPDoc.has-aside .content-container { max-width: 1120px !important; }
-.gallery-page .VPDoc .content { max-width: 1200px; }
 </style>

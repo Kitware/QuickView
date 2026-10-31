@@ -1,0 +1,47 @@
+/* ----------------------------------------------------------------- */
+/* Use the available width only on the news and gallery index pages. */
+/* ----------------------------------------------------------------- */
+.news-page .VPDoc .container,
+.gallery-page .VPDoc .container,
+.news-page .VPDoc .content,
+.gallery-page .VPDoc .content,
+.news-page .VPDoc .content-container,
+.gallery-page .VPDoc .content-container {
+  max-width: none !important;
+}
+
+/* --------------------------------------------------------------- */
+/* For the webnews page 
+/* --------------------------------------------------------------- */
+/* Start each news item's icons below any preceding floated icons. */
+.news-page .vp-doc p:has(img[align="right"]) {
+  clear: both;
+}
+
+/* Keep month headings below preceding icons too. */
+.news-page .vp-doc h2 {
+  clear: both;
+}
+
+/* --------------------------------------------------------------- */
+/* User guide page footer
+/* --------------------------------------------------------------- */
+.VPDocFooter .pager-link {
+  background: color-mix(in srgb, var(--vp-c-brand-1) 10%, transparent);
+}
+
+.VPDocFooter .pager-link:hover {
+  background: color-mix(in srgb, var(--vp-c-brand-1) 20%, transparent);
+  border-color: var(--vp-c-brand-1);
+}
+
+/* --------------------------------------------------------------- */
+/* Highlight active tab in top-right corner of webpage
+/* --------------------------------------------------------------- */
+.VPNavBar .VPNavBarMenuLink.active {
+  background: color-mix(in srgb, var(--vp-c-brand-1) 15%, transparent);
+  color: var(--vp-c-brand-1);
+  border-radius: 0px;
+  height: 12px;
+  align-self: center;
+}
