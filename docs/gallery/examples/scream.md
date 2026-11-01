@@ -22,8 +22,15 @@ images:
   src: /gallery/examples/QuickView2.5.0_SCREAM_TOMLWup.mp4
   poster: /gallery/examples/gallery_scream_preview.png
   alt: SCREAM upward longwave flux screen recording
-  caption: Unedited real-time screen recording of QuickView running on an exclusive GPU node at NERSC,
-    showing the time evolution of top-of-model upward longwave flux.
+  caption: The video clip is an unedited real-time screen recording of [QuickView](/guides/quickview/index)
+    running on an exclusive GPU node at NERSC,
+    showing the time evolution of the top-of-model upward longwave flux.
+    The simulation was performed by the EAMxx team.
+    The output data was provided by Chris Terai (LLNL).
+    The visualization was created by Hui Wan (PNNL).
+
+# The Markdown body will be shown on a separate webpage only when showDetails is set to true.
+#showDetails: true
 ---
 
 # Time evolution in a SCREAM simulation
