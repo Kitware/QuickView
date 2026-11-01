@@ -1,13 +1,22 @@
 ---
+# Identity and display order
 id: scream
-order: 50
+order: 100
 title: Time evolution in a SCREAM simulation
-summary: Watch a real-time QuickView recording of top-of-model upward longwave flux.
+
+# Filter values
+tools:
+- QuickView
 models:
 - SCREAM
-mesh: ne1024pg2 (~3.5 km)
-credit: Simulation performed by the EAMxx team; thanks to Chris Terai (LLNL) for providing the data. Visualization
-  created by Hui Wan (PNNL).
+gridConfigurations:
+- Uniform
+gridRepresentations:
+- FV
+meshDesignations:
+- pg2
+
+# Media
 images:
 - type: video
   src: /gallery/examples/QuickView2.5.0_SCREAM_TOMLWup.mp4
@@ -15,14 +24,6 @@ images:
   alt: SCREAM upward longwave flux screen recording
   caption: Unedited real-time screen recording of QuickView running on an exclusive GPU node at NERSC,
     showing the time evolution of top-of-model upward longwave flux.
-tools:
-- QuickView
-gridConfigurations:
-- Uniform
-gridRepresentations:
-- FV
-meshDesignations:
-- pg2
 ---
 
 # Time evolution in a SCREAM simulation
