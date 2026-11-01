@@ -1,30 +1,37 @@
 ---
+# Identity and display order
 id: narrm
 aliases:
 - atmosphere-and-land-model-output-from-the-e3smv2-regionally-refined-model-rrm
 order: 40
 title: Atmosphere and land output on a regionally refined mesh
-summary: Explore EAMv2 and ELMv2 output with refinement over North America.
+
+# Filter values
+tools:
+- QuickView
 models:
 - EAM
 - ELM
 gridConfigurations:
 - Regionally refined
-mesh: ne30pg2 with 4× refinement in North America
-credit: Visualization created by Hui Wan (PNNL). Simulation data from Tang et al. (2023).
-images:
-- src: /gallery/examples/gallery_narrm_eamv2.png
-  alt: EAMv2 output on the North America regionally refined mesh
-  caption: Atmosphere-model output from the E3SMv2 Regionally Refined Model.
-- src: /gallery/examples/gallery_narrm_elmv2.png
-  alt: ELMv2 output on the North America regionally refined mesh
-  caption: Land-model output from the E3SMv2 Regionally Refined Model.
-tools:
-- QuickView
 gridRepresentations:
 - FV
 meshDesignations:
 - pg2
+
+# Media
+images:
+- src: /gallery/examples/gallery_narrm_eamv2.png
+  alt: EAMv2 output on the North America regionally refined mesh
+  caption: Atmosphere-model output from the E3SMv2 Regionally Refined Model
+           ([Tang et al. (2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html)).
+- src: /gallery/examples/gallery_narrm_elmv2.png
+  alt: ELMv2 output on the North America regionally refined mesh
+  caption: Land-model output from the E3SMv2 Regionally Refined Model
+           ([Tang et al. (2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html)).
+
+# Optional detail-page link
+showDetails: true
 ---
 
 # Atmosphere and land output on a regionally refined mesh

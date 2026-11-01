@@ -1,8 +1,10 @@
-import { createContentLoader } from 'vitepress'
+import { resolve } from 'node:path'
+import { createContentLoader, createMarkdownRenderer } from 'vitepress'
 
 // Only metadata goes into the gallery bundle; explanations stay on example pages.
 export default createContentLoader('gallery/examples/*.md', {
-  transform(pages) {
+  async transform(pages) {
+    const markdown = await createMarkdownRenderer(resolve('docs'))
     const ids = new Set()
     return pages.map(({ url, frontmatter: example }) => {
       if (!example.id || ids.has(example.id)) {
@@ -19,7 +21,14 @@ export default createContentLoader('gallery/examples/*.md', {
           throw new Error(`Gallery media needs src, alt and caption: ${url}`)
         }
       }
-      return { ...example, url }
+      return {
+        ...example,
+        url,
+        images: example.images.map(media => ({
+          ...media,
+          captionHtml: markdown.renderInline(media.caption),
+        })),
+      }
     }).sort((a, b) => (a.order ?? 100) - (b.order ?? 100) || a.title.localeCompare(b.title))
   }
 })

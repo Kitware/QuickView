@@ -1,13 +1,22 @@
 ---
+# Identity and display order
 id: quickcompare-aerosols
-order: 20
+order: 30
 title: Aerosol sensitivity experiments
-summary: Compare aerosol number mixing ratios and differences across six EAMv2 simulations.
+
+# Filter values
 tools:
 - QuickCompare
 models:
 - EAM
-mesh: ne30pg2 (~165 km)
+gridConfigurations:
+- Uniform
+gridRepresentations:
+- FV
+meshDesignations:
+- pg2
+
+# Media
 images:
 - src: /gallery/examples/gallery_quickcompare_multi-sim_diff.png
   alt: Control simulation and differences from five aerosol sensitivity experiments
@@ -19,13 +28,6 @@ images:
   caption: Accumulation-mode aerosol number mixing ratio from six EAMv2 simulations. By default, QuickCompare
     displays all simulations using the same colormap and contour levels, enabling direct visual comparison
     of the values.
-gridConfigurations:
-- Uniform
-gridRepresentations:
-- FV
-meshDesignations:
-- pg2
-credit: Simulation performed and visualization created by Hui Wan (PNNL).
 ---
 
 # Aerosol sensitivity experiments

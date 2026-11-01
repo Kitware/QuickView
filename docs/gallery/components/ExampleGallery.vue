@@ -13,14 +13,16 @@ const groups = [
 const selected = reactive(Object.fromEntries(groups.map(({ key }) => [key, []])))
 
 const toolOrder = ['QuickView', 'QuickCompare', 'SiteView']
+const modelOrder = ['EAM', 'SCREAM', 'ELM', 'CAM-SE', 'MUSICA']
 const filters = computed(() => groups.map(group => ({
   ...group,
   values: [...new Set(props.examples.flatMap(example => example[group.key]))]
     .sort((a, b) => {
-      if (group.key === 'tools') {
+      const order = group.key === 'tools' ? toolOrder : group.key === 'models' ? modelOrder : null
+      if (order) {
         const rank = value => {
-          const index = toolOrder.indexOf(value)
-          return index === -1 ? toolOrder.length : index
+          const index = order.indexOf(value)
+          return index === -1 ? order.length : index
         }
         return rank(a) - rank(b) || a.localeCompare(b)
       }
@@ -132,13 +134,16 @@ onBeforeUnmount(() => {
           <span class="preview-label">{{ example.images[0].type === 'video' ? 'Video' : example.images.length > 1 ? `${example.images.length} images · Enlarge` : 'Enlarge' }}</span>
         </button>
         <div class="card-content">
-          <h2><a :href="withBase(example.url)">{{ example.title }}</a></h2>
-          <p>{{ example.summary }}</p>
+
+        <h2>
+          <button type="button" class="card-title-button" @click="openExample(example)" > {{ example.title }}
+          </button>
+        </h2>
+
           <ul class="gallery-tags" aria-label="Example tags">
             <li v-for="tag in [...example.tools, ...example.models, ...example.gridConfigurations, ...example.gridRepresentations, ...example.meshDesignations]" :key="tag">{{ tag }}</li>
           </ul>
-          <p class="mesh-label">{{ example.mesh }}</p>
-          <a class="details-link" :href="withBase(example.url)">Details and credits →</a>
+          <a v-if="example.showDetails" class="details-link" :href="withBase(example.url)" > Read more → </a>
         </div>
       </article>
     </div>
@@ -150,6 +155,17 @@ onBeforeUnmount(() => {
           <h2 id="gallery-dialog-title">{{ active.title }}</h2>
           <button type="button" data-close aria-label="Close enlarged preview" @click="closeDialog">Close ✕</button>
         </header>
+        <p class="media-caption" v-html="media.captionHtml"></p>
+        <ul
+          v-if="active.references?.length"
+          class="example-references"
+        >
+          <li v-for="reference in active.references" :key="reference.url">
+            <a :href="reference.url" target="_blank" rel="noopener">
+              {{ reference.text }} ↗
+            </a>
+          </li>
+        </ul>
         <div class="dialog-media" :key="media.src">
           <video v-if="media.type === 'video'" controls playsinline preload="metadata" :src="assetUrl(media.src)" :aria-label="media.alt" :poster="media.poster ? assetUrl(media.poster) : undefined">
             Your browser does not support embedded video. Use the original-file link below.
@@ -161,11 +177,9 @@ onBeforeUnmount(() => {
           <span role="status" aria-live="polite">{{ mediaIndex + 1 }} / {{ active.images.length }}</span>
           <button type="button" @click="changeMedia(1)">Next →</button>
         </nav>
-        <p class="media-caption">{{ media.caption }}</p>
-        <p class="media-credit">{{ active.credit }}</p>
         <footer>
           <a :href="assetUrl(media.src)" target="_blank" rel="noopener">Open original {{ media.type === 'video' ? 'recording' : 'image' }} ↗</a>
-          <a :href="withBase(active.url)">Details and credits →</a>
+          <a v-if="active.showDetails" :href="withBase(active.url)" > Read more → </a>
         </footer>
       </div>
     </dialog>
@@ -212,12 +226,11 @@ onBeforeUnmount(() => {
 }
 
 .card-content { padding: 1rem 1.2rem 1.2rem; }
-.card-content h2 { margin: 0; padding: 0; border: 0; font-size: 1.1rem; line-height: 1.5; letter-spacing: normal; }
+.card-content h2 { margin: 0; padding: 0; border: 0; font-size: 1rem; font-weight: 400; line-height: 1.5; letter-spacing: normal; }
 .card-content h2 a { color: var(--vp-c-text-1); text-decoration: none; }
 .card-content p { font-size: .9rem; line-height: 1.65; margin: .6rem 0; }
 .gallery-tags { display: flex; flex-wrap: wrap; gap: .35rem; list-style: none; margin: .85rem 0; padding: 0; }
 .gallery-tags li { margin: 0; padding: .1rem .45rem; border-radius: 4px; background: var(--vp-c-bg-soft); font-size: .75rem; color: var(--vp-c-text-2); }
-.card-content .mesh-label { color: var(--vp-c-text-2); font-size: .8rem; }
 .details-link { font-size: .85rem; }
 .gallery-empty { padding: 2rem 0; }
 .gallery-dialog { width: min(1280px, 95vw); max-width: 95vw; max-height: 92dvh; margin: auto; padding: 0; border: 1px solid var(--vp-c-divider); border-radius: 12px; color: var(--vp-c-text-1); background: var(--vp-c-bg); overflow: auto; }
@@ -230,8 +243,7 @@ onBeforeUnmount(() => {
 .dialog-media img, .dialog-media video { display: block; max-width: 100%; max-height: 62dvh; object-fit: contain; }
 .media-navigation { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: .75rem; font-size: .9rem; }
 .media-caption { margin: .9rem 0 .5rem; font-size: .95rem; line-height: 1.6; }
-.media-credit { color: var(--vp-c-text-2); font-size: .85rem; }
-.dialog-content footer { display: flex; flex-wrap: wrap; gap: .7rem 1.5rem; font-size: .9rem; }
+.dialog-content footer { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem 1.5rem; font-size: .9rem; }
 .example-gallery :focus-visible { outline: 3px solid var(--vp-c-brand-1); outline-offset: 3px; }
 @media (max-width: 639px) {
   .gallery-grid { grid-template-columns: 1fr; }
@@ -261,4 +273,17 @@ onBeforeUnmount(() => {
   border-color: var(--vp-c-brand-2);
 }
 
+.card-title-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.card-title-button:hover {
+  color: var(--vp-c-brand-1);
+}
 </style>
