@@ -42,7 +42,7 @@
   background: color-mix(in srgb, var(--vp-c-brand-1) 15%, transparent);
   color: var(--vp-c-brand-1);
   border-radius: 0px;
-  height: 12px;
+  height: 36px;
   align-self: center;
 }
 

@@ -2,6 +2,7 @@
 pageClass: news-page
 ---
 
+# News and Software Releases
 
 ## October 2026
 

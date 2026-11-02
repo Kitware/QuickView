@@ -1,0 +1,90 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-11-02 13:47:44.702874",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202610_CAM-SE_pg2_pg3/physgrid_190201_FKESSLER_ne30pg3_ne30pg3_mg17_pe1800_190204-v-physgrid_190201_FKESSLER_ne30pg2_ne30pg2_mg17_pe1800_190204.CLDLIQ.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202610_CAM-SE_pg2_pg3/connectivity_ne30pg3_TEMPEST.scrip.nc"
+  },
+  "variables-selection": [
+    "CLDLIQ1"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 50.852614765603704,
+      "position": [
+        120.08790874481201,
+        45.0202579498291,
+        367.93261231460536
+      ],
+      "focal_point": [
+        120.08790874481201,
+        45.0202579498291,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        358.69845102228174,
+        379.3133914987163
+      ]
+    },
+    "grid-interval": 10,
+    "bg-color": null,
+    "map-center-lon": 120,
+    "map-center-lat": 0
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -90,
+      90
+    ],
+    "crop_latitude": [
+      20,
+      70
+    ],
+    "projection": [
+      "Cyl. Equidistant"
+    ],
+    "animation_track": null
+  },
+  "views": [
+    {
+      "type": [
+        "ncol1"
+      ],
+      "name": "CLDLIQ1",
+      "config": {
+        "order": 1,
+        "size": 12,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "WhViBlGrYeOrRe",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          1e-05,
+          0.00035
+        ],
+        "color_value_min": "1e-5",
+        "color_value_max": "0.00035"
+      }
+    }
+  ]
+}
