@@ -1,0 +1,98 @@
+{
+  "origin": {
+    "user": "Hui.Wan",
+    "created": "2026-11-01 20:17:22.800270",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/Users/Hui.Wan/Downloads/vis/202610_MUSICAv0/f.e22.FCcotagsNudged.ne0CONUSne30x8.cesm220.2012-01.cam.h2.O3.20120101-20120131.nc",
+    "connectivity": "/Users/Hui.Wan/Downloads/vis/202610_MUSICAv0/connectivity_ne0np4CONUS.ne30x8np4_latlon_c20261030.nc"
+  },
+  "variables-selection": [
+    "O3"
+  ],
+  "layout": {
+    "aspect-ratio": 0.75,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 0.9255252129472982,
+      "position": [
+        -5.46095725253049,
+        4.02352106882484,
+        -0.4777703390268776
+      ],
+      "focal_point": [
+        8.940696716308594e-06,
+        0.18510504258945965,
+        2.294778823852539e-06
+      ],
+      "view_up": [
+        0.4455118127516046,
+        0.8944271909999159,
+        0.03897723308264962
+      ],
+      "clipping_range": [
+        3.717769937292036,
+        10.4522519787249
+      ]
+    },
+    "grid-interval": 10,
+    "bg-color": [
+      0.467,
+      0.467,
+      0.467
+    ],
+    "map-center-lon": -95,
+    "map-center-lat": 35
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -180,
+      180
+    ],
+    "crop_latitude": [
+      -90,
+      90
+    ],
+    "projection": [
+      "Spherical"
+    ],
+    "animation_track": "lev",
+    "lev_idx": 31,
+    "time_idx": 30
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "O3",
+      "config": {
+        "order": 1,
+        "size": 12,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "erdc_iceFire_H",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          0.0,
+          6e-08
+        ],
+        "color_value_min": "0",
+        "color_value_max": "6e-08"
+      }
+    }
+  ]
+}
