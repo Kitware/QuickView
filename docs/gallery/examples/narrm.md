@@ -27,16 +27,18 @@ images:
     ([Tang et al., 2023](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html))
     is displayed in [QuickView](/guides/quickview/index).
     The horizontal resolution is ne30 over most of the globe but with a 4x refinement in North America.
-    The simulation data was downloaded from the archive linked in
+    The simulation data was obtained from the archive linked in
     [Tang et al. (2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html).
+    The connectivity file used by QuickView was generated using [TempestRemap](https://github.com/climateglobalchange/tempestremap)
 - src: /gallery/examples/gallery_narrm_elmv2.png
   alt: ELMv2 output on the North America regionally refined mesh
   caption: A variable from the land component of the fully coupled E3SMv2 Regionally Refined Model
     ([Tang et al., 2023](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html))
     is displayed in [QuickView](/guides/quickview/index).
     The horizontal resolution is ne30 over most of the globe but with a 4x refinement in North America.
-    The simulation data was downloaded from the archive linked in
+    The simulation data was obtained from the archive linked in
     [Tang et al. (2023)](https://gmd.copernicus.org/articles/16/3953/2023/gmd-16-3953-2023.html).
+    The connectivity file used by QuickView was generated using [TempestRemap](https://github.com/climateglobalchange/tempestremap)
 
 # The Markdown body will be shown on a separate webpage only when showDetails is set to true.
 #showDetails: true

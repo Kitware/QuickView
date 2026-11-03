@@ -1,0 +1,188 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-11-02 14:49:10.132015",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202609_dycore_mesh/EAMv2_ne30pg2_ne30np4_h0.1985-01-01-00000.nc",
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202609_dycore_mesh/connectivity_ne30np4_latlon_c20260926.nc"
+  },
+  "variables-selection": [
+    "DYN_T",
+    "DYN_PNH",
+    "DYN_U",
+    "DYN_Q"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "grouped": false,
+    "active": "auto_layout",
+    "tools": [],
+    "help": false,
+    "camera": {
+      "zoom": 9529785.813878752,
+      "position": [
+        0.0,
+        0.0,
+        73673405.62958878
+      ],
+      "focal_point": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "view_up": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "clipping_range": [
+        71988457.38981196,
+        75972111.87972093
+      ]
+    },
+    "grid-interval": 30,
+    "bg-color": [
+      0.851,
+      0.851,
+      0.851
+    ],
+    "map-center-lon": 0,
+    "map-center-lat": 0
+  },
+  "data-selection": {
+    "crop_longitude": [
+      -180,
+      180
+    ],
+    "crop_latitude": [
+      -90,
+      90
+    ],
+    "projection": [
+      "Robinson"
+    ],
+    "animation_track": "lev",
+    "lev_idx": 41,
+    "time_idx": 24
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol_d"
+      ],
+      "name": "DYN_T",
+      "config": {
+        "order": 6,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Warm to Cool (Extended)",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          210.0,
+          255.0
+        ],
+        "color_value_min": "210",
+        "color_value_max": "255"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol_d"
+      ],
+      "name": "DYN_PNH",
+      "config": {
+        "order": 2,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Blue - Green - Orange",
+        "invert": true,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          25000.0,
+          40000.0
+        ],
+        "color_value_min": "2.5e4",
+        "color_value_max": "4e4"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol_d"
+      ],
+      "name": "DYN_U",
+      "config": {
+        "order": 3,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "berlin",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          -50.0,
+          50.0
+        ],
+        "color_value_min": "-50.0",
+        "color_value_max": "50.0"
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol_d"
+      ],
+      "name": "DYN_Q",
+      "config": {
+        "order": 4,
+        "size": 6,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "BuGnYl",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": true,
+        "color_range": [
+          0.0,
+          0.002
+        ],
+        "color_value_min": "0",
+        "color_value_max": "2e-3"
+      }
+    }
+  ]
+}

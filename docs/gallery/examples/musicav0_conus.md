@@ -29,8 +29,8 @@ images:
     The image below was generated using a `cam.h2` output file from  NCAR GDEX
     (Tilmes, S. 2021. Community MUSICAv0 CONUS Simulations. NSF National Center for Atmospheric Research.
     [https://doi.org/10.5065/tgbj-yv18](https://doi.org/10.5065/tgbj-yv18). Accessed Oct 30, 2026).
-    The connectivity file used by QuickView was generated using `homme_tool` released
-    as part of E3SMv3.
+    The connectivity file used by QuickView was generated using `homme_tool`,
+    a piece of software released as a part of E3SM.
 
 # The Markdown body will be shown on a separate webpage only when showDetails is set to true.
 #showDetails: true
