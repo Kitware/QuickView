@@ -1,15 +1,14 @@
 
 # The QuickView Family
 
-![app icons](/guides/QuickView_family_app_icons_with_text.png){ width="55%", align=right }
+![app icons](/guides/QuickView_family_app_icons_with_text.png){ width="50%", align=right }
 
-The QuickView family is a collection of interactive tools for visualizing and analyzing Earth system simulation data on the model’s native grid. Compared to diagnostic packages that generate hundreds of static figures for comprehensive model evaluation, our tools aim at facilitating the exploratory work often needed early in an investigation or during code debugging.
+The QuickView family is a collection of interactive tools for visualizing and analyzing Earth system simulation data on the model’s native grid. Compared with diagnostic packages that generate static figures for comprehensive model evaluation, these tools focus on the exploratory work often needed early in an investigation or during code debugging.
 
-Each tool in the QuickView family supports only a small set of tasks. This focus keeps the graphical interfaces simple and intuitive. Meanwhile, we are continuing to examine common analysis workflows and emerging needs and considering additions to the family.
+Each tool in the QuickView family focuses on a small set of tasks. This limited scope keeps the graphical interfaces simple and intuitive, speeds up initial development, and simplifies long-term maintenance. We envision supporting substantially different workflows and emerging needs by adding new members to the family.
 
 
 The first three members of the family are
-
 
 - [QuickView](/guides/quickview/index)
   for simultaneously presenting 2D contour plots of
@@ -21,25 +20,28 @@ The first three members of the family are
   for process-level analysis of an atmospheric column and its
   regional environment.
 
-Currently, our tools only support the E3SM Atmosphere Model's cubed-sphere meshes,
-including both the `ne*np4` GLL grids and the `ne*pg2` "physics" grids.
-Extensions to other meshes are underway.
+The tools currently support cubed-sphere horizontal meshes
+consisting of either Gauss-Lobatto-Legendre (GLL) nodes (i.e., the `ne*np4` grids)
+or finite-volume style grid cells (`ne*pg2`, `ne*pg3`, etc.).
+Sample visulizations showing
+simulation output from the EAM, ELM, and CAM-SE models
+can be found in the [gallery](/gallery/).
 
 ## Key Reminders
 
 ::: warning Two modes of use
 All tools in the family support two ways of usage:
-a *new-vis* mode for starting a new visualization and
+a *new-vis* mode for starting a new analysis and
 a *resume* mode for continuing an earlier, saved analysis.
-Further details can be found on, e.g., [this page](/guides/quickview/file_selection.md).
+Further details can be found on, e.g., [the linked page](/guides/quickview/file_selection.md).
 :::
 
 ::: info Connectivity files
-Since E3SM's cubed spheres are unstructured horizontal meshes,
-connectivity files need to be provided to our tools alongside the simulation files.
+Since cubed spheres are unstructured horizontal meshes,
+connectivity files need to be provided to the tools alongside the simulation files.
 Please note that such connectivity files are, typically, *not* the mapping files
 used for interpolating data to regular late-lon grids.
-Further information can be found on [this page](/guides/connectivity.md).
+Further information can be found on [the linked page](/guides/connectivity.md).
 :::
 
 ::: tip Consistency between connecitivity and simulation files
@@ -68,7 +70,7 @@ as images in the viewport.
 Each tool in the QuickView family contains multiple control panels
 for setting properties of the visualization.
 These control panels can be shown/expanded for easy access or
-be hidden/folded to maximize the screen space for visualization
+be hidden/folded to maximize the screen space for visualization.
 The UIs provide both keyboard shortcuts and toggles in the main toolbar
 to show or hide these control panels.
 :::

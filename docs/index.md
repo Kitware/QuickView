@@ -25,17 +25,17 @@ features:
       src: /logos/E3SM_Logo.png
       width: 120px
     details:
-      Currently supported are simulation input and output files   
-      of the Energy Exascale Earth System Model (E3SM)
-      on cubed-sphere grids.
+      Currently supported are data on cubed-sphere meshes
+      consisting of Gauss-Lobatto-Legendre (GLL) nodes
+      or finite-volume style grid cells.
     link: https://e3sm.org/
   - title: Engine and UI 
     icon:
-      src: /logos/paraview_trame_python.png
+      src: /logos/paraview_trame_vtk.png
       width: 180px
     details:
-      User Interfaces (UIs) based on Python and trame
-      provide intuitive access to ParaView's and VTK's
+      User Interfaces (UIs) based on the trame platform
+      provide customized and intuitive access to
       powerful analysis and visualization
       capabilities without requiring a steep learning curve.
     link: https://www.kitware.com/interactive-visualization-and-analytics/
