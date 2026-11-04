@@ -118,8 +118,8 @@ you will need to
 pathRoot="/global/cfs/projectdirs/m4359/tools/"
 envName="quickview-env"
 
-quickview_version_new="2.10.4"
-quickcomp_version_new="1.11.2"
+quickview_version_new="2.10.5"
+quickcomp_version_new="1.11.3"
 
 module load conda
 conda activate ${pathRoot}/conda-envs/${envName}

@@ -44,8 +44,9 @@ features:
       src: /logos/nersc.png
       width: 150px
     details:
-      The tools have been deployed to NERSC so that users can
-      directly access simulation data there.
+      The tools have been deployed to NERSC and other HPC systems
+      so that users can
+      directly access simulation data on those systems.
       No installation is required on the user's end,
       as the UI shows up in a browser window.
     link: /nersc/launching
