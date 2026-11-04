@@ -26,7 +26,7 @@ Starting in QuickView version 2.10.1 and QuickCompare version 1.11.1, both repre
 Variables on the GLL nodes are handled as point data,
 while those on the finite-volume grids are handled as cell data.
 
-## Connectivity file download
+## Connectivity file download {#connectivity-file-download}
 
 A few collections of connectivity files can be found on Zenodo.
 - [Quasi-uniform cubed spheres used by E3SM](https://doi.org/10.5281/zenodo.16908566)

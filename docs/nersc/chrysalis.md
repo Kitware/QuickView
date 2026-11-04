@@ -20,8 +20,21 @@ QuickView and QuickCompare are installed under the following `conda` environment
 /lcrc/group/e3sm/share/quickview/
 ```
 
-**If your typical login method does **not** include port forwarding,
-skip the rest of this section and jump to [One-step launchers](#one-step-launchers) below.**
+
+Some [connectivity](/guides/connectivity) files are available under `/lcrc/group/e3sm/share/connectivity/`,
+additional files can be downloaded from [Zenodo](/guides/connectivity#connectivity-file-download). 
+
+:::tip Tip: Manage connectivity files
+We recommend having a copy or softlink of the connectivity file you need
+in the folder of the simulation files, so as to minimize the number of
+clicks needed for [file selection](/guides/quickview/file_selection#new-analysis).
+:::
+
+:::warning Tip: SSH connection 
+
+If your typical login method does **not** include port forwarding,
+skip the rest of this section and jump to [One-step launchers](#one-step-launchers) below.
+:::
 
 If your typical login method already supports port forwarding,
 you can load the `conda` environment using
