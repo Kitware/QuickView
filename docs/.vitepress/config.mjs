@@ -18,7 +18,7 @@ export default defineConfig({
       { text: "News",         link: "/webnews" },
       { text: "Gallery",      link: "/gallery/" },
       { text: "User's Guide", link: "/guides/reminders", activeMatch: "^/guides/", },
-      { text: "At NERSC",     link: "/nersc/launching",  activeMatch: "^/nersc/", },
+      { text: "HPC Systems",  link: "/nersc/launching",  activeMatch: "^/nersc/", },
     ],
 
     sidebar: {
@@ -37,6 +37,12 @@ export default defineConfig({
             { text: "Overview",   link: "/nersc/launching" },
             { text: "VS Code",    link: "/nersc/login_vscode" },
             { text: "JupyterHub", link: "/nersc/login_jupyter" },
+          ],
+        },
+        {
+          text: "Other HPC Systems",
+          items: [
+            { text: "Chrysalis@ANL", link: "/nersc/chrysalis" },
           ],
         },
       ],

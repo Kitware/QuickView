@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "QuickView"
-  text: "for Earth system models"
+  text: "for Earth System Models"
   tagline:
     Efficient, intuitive, and interactive exploration of simulation data.
   image: /website_banner.png
@@ -16,7 +16,7 @@ hero:
       text: User's Guide 
       link: /guides/reminders
     - theme: brand 
-      text: Using it at NERSC
+      text: HPC Systems
       link: /nersc/launching
 
 features:

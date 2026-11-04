@@ -4,6 +4,13 @@ pageClass: news-page
 
 # News and Software Releases
 
+## November 2026
+
+![Chrysalis image from E3SM website](/public/logos/Chrysalis_w_name.jpg){ width="180", align=right }
+2026-11-03: Information was added to this website, explaining how to use our tools on E3SM's dedicated computer [Chrysalis](/nersc/chrysalis).
+
+2026-11-02: Our [visualization gallery](/gallery/index) was reorganized. Sample images of CAM-SE simulations and EAM dycore output were also added.
+
 ## October 2026
 
 ![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="36", align=right }
