@@ -42,23 +42,19 @@ Use URL below to connect to the application:
   => http://localhost:42757/
 ```
 
-## One-step launchers
+## One-step launcher
 
 Since tools in the QuickView family use browser-based user interfaces,
 information needs to be passed from the server port on Chrysalis
-to the local computer. The Python scripts linked below are one-step launchers
+to the local computer. The Python script linked below is a one-step launcher
 that each establishes an SSH connection to Chrysalis with port forwarding and,
-after QuickView or QuickCompare is launched on Chrysalis,
+after QuickView is launched on Chrysalis,
 open the UI in a browser on the local computer.
 
 - Click to download: <a :href="withBase('/downloads/launchers/launch_quickview_on_chrysalis.py')"    download>launch_quickview_on_chrysalis.py</a>
-- Click to download: <a :href="withBase('/downloads/launchers/launch_quickcompare_on_chrysalis.py')" download>launch_quickcompare_on_chrysalis.py</a>
 
-Execute the scripts on the local computer using the following commands, replacing `USERNAME` by your username.
+Execute the script on the local computer using the following command, replacing `USERNAME` by your username.
 ```
 python3 launch_quickview_on_chrysalis.py USERNAME@chrysalis.lcrc.anl.gov
-```
-```
-python3 launch_quickcompare_on_chrysalis.py USERNAME@chrysalis.lcrc.anl.gov
 ```
 Enter your authentication information when prompted to do so.
