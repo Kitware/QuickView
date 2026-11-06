@@ -60,7 +60,7 @@ multivariate visualization.
 - Multi-variable visualization.
 - Persistent sessions—pick up where you left off.
 - Currently supporting cubed-sphere grids in a variety of configurations
-  and representations. Examples can be found in the [visualization gallery](/gallery).
+  and representations. Examples can be found in the [visualization gallery](/gallery/index).
 
 ## Project Background
 
