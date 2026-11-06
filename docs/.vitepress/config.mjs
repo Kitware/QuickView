@@ -111,7 +111,7 @@ export default defineConfig({
           text: "For App Developers",
           items: [
             { text: "Setup", link: "/guides/dev/setup" },
-            { text: "Continuous Integration", link: "/guides/dev/ci" },
+            { text: "CI and Deployment", link: "/guides/dev/ci" },
           ],
         },
       ],
