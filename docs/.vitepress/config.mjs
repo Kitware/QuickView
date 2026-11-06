@@ -18,31 +18,31 @@ export default defineConfig({
       { text: "News",         link: "/webnews" },
       { text: "Gallery",      link: "/gallery/" },
       { text: "User's Guide", link: "/guides/reminders", activeMatch: "^/guides/", },
-      { text: "HPC Systems",  link: "/nersc/launching",  activeMatch: "^/nersc/", },
+      { text: "HPC Systems",  link: "/hpcsystems/nersc/launching",  activeMatch: "^/hpcsystems/", },
     ],
 
     sidebar: {
-      "/nersc/": [
+      "/hpcsystems/": [
         {
           text: "Installation at NERSC",
           items: [
-            { text: "Public installation",  link: "/nersc/installation_public" },
-            { text: "Personal installation",link: "/nersc/installation_personal" },
-            { text: "E3SM-Unified",         link: "/nersc/installation_E3SM-unified" },
+            { text: "Public installation",  link: "/hpcsystems/nersc/installation_public" },
+            { text: "Personal installation",link: "/hpcsystems/nersc/installation_personal" },
+            { text: "E3SM-Unified",         link: "/hpcsystems/nersc/installation_E3SM-unified" },
          ],
         },
         {
           text: "Launching at NERSC",
           items: [
-            { text: "Overview",   link: "/nersc/launching" },
-            { text: "VS Code",    link: "/nersc/login_vscode" },
-            { text: "JupyterHub", link: "/nersc/login_jupyter" },
+            { text: "Overview",   link: "/hpcsystems/nersc/launching" },
+            { text: "VS Code",    link: "/hpcsystems/nersc/login_vscode" },
+            { text: "JupyterHub", link: "/hpcsystems/nersc/login_jupyter" },
           ],
         },
         {
           text: "Other HPC Systems",
           items: [
-            { text: "Chrysalis@ANL", link: "/nersc/chrysalis" },
+            { text: "Chrysalis@ANL", link: "/hpcsystems/chrysalis/chrysalis" },
           ],
         },
       ],

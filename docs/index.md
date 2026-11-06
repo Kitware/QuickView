@@ -17,7 +17,7 @@ hero:
       link: /guides/reminders
     - theme: brand 
       text: HPC Systems
-      link: /nersc/launching
+      link: /hpcsystems/nersc/launching
 
 features:
   - title: Purpose
@@ -49,7 +49,7 @@ features:
       directly access simulation data on those systems.
       No installation is required on the user's end,
       as the UI shows up in a browser window.
-    link: /nersc/launching
+    link: /hpcsystems/nersc/launching
   - title: Funding Source 
     icon:
       src: /logos/SciDAC-logo.png

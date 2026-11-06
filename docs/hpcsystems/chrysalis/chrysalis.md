@@ -126,7 +126,7 @@ and the connectivity file from the same directory.
 
 You can also copy and paste full file paths into the tool's file loading dialog.
 Use full paths on Chrysalis.
-For example, in [QuickView](/guides/quickview/file_selection),
+For example, in [QuickView](/guides/quickview/file_selection#new-analysis),
 enter the paths in the “Simulation File” and “Connectivity File” text boxes.
 
 #### Tip 5. Use state files

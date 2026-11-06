@@ -7,7 +7,7 @@ pageClass: news-page
 ## November 2026
 
 ![Chrysalis image from E3SM website](/public/logos/Chrysalis_w_name.jpg){ width="180", align=right }
-2026-11-03: Information was added to this website, explaining how to use our tools on E3SM's dedicated computer [Chrysalis](/nersc/chrysalis).
+2026-11-03: Information was added to this website, explaining how to use our tools on E3SM's dedicated computer [Chrysalis](/hpcsystems/chrysalis/chrysalis).
 
 2026-11-02: Our [visualization gallery](/gallery/index) was reorganized. Sample images of CAM-SE simulations and EAM dycore output were also added.
 
@@ -27,7 +27,7 @@ pageClass: news-page
 
 ![NERSC logo](/logos/nersc.png){width="90", align=right}
 
-2026-09-17: Information was added to this website, explaining how to use our tools [at NERSC through VS Code](https://kitware.github.io/QuickView/nersc/login_vscode.html).
+2026-09-17: Information was added to this website, explaining how to use our tools [at NERSC through VS Code](/hpcsystems/nersc/login_vscode.html).
 
 
 ![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="36", align=right }
