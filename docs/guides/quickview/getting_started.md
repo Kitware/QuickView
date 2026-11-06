@@ -1,9 +1,13 @@
 # Getting Started
 
 
-- Install and launch the app [on a personal computer](../install_and_launch) 
-  or use it [at NERSC](/hpcsystems/nersc/launching).
-- Download connectivity files for EAM's cubed-sphere grids: [quasi-uniform meshes](https://doi.org/10.5281/zenodo.16908566) and [regionally refined meshes](https://doi.org/10.5281/zenodo.20707895).
+- Install and launch the app [on a personal computer](../install_and_launch).
+- Use the app [at NERSC](/hpcsystems/nersc/launching) or on the
+  E3SM-dedicated computer [Chrysalis](/hpcsystems/chrysalis/chrysalis).
+- Download connectivity files for E3SM's
+  [quasi-uniform cubed-sphere grids](https://doi.org/10.5281/zenodo.16908566) and
+  [regionally refined meshes](https://doi.org/10.5281/zenodo.20707895) or
+  [sample connectivity files for visualizing CESM output](https://zenodo.org/records/23934953).
 - *Optional*: download
   [sample simulation files](https://zenodo.org/records/16922607) to test the app.
 

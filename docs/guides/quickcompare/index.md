@@ -21,9 +21,8 @@ Useful resources: see [linked page](./getting_started).
 - Physical quantities displayed together with differences and/or relative differences between simulations.
 - Multi-variable visualization.
 - Persistent sessions—pick up where you left off.
-- Support for EAM v2, v3, and upcoming v4 output formats
-  as well as the E3SM land model ELM's input and output files
-  on ne*pg2 grids.
+- Currently supporting cubed-sphere grids in a variety of configurations
+  and representations. Examples can be found in the [visualization gallery](/gallery).
 
 ## Project Background
 
@@ -47,4 +46,4 @@ program.
 The development of QuickCompare used resources of the National Energy Research Scientific Computing Center
 ([NERSC](https://www.nersc.gov/)), a U.S. Department of Energy User Facility.
 
-![SciDAC, Kitware, and PNNL](/logos/SciDAC-Kitware-PNNL.png){ width="75%", align=center }
+![SciDAC, Kitware, and PNNL](/logos/SciDAC-Kitware-PNNL.png){ width="55%", align=center }

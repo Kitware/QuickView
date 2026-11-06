@@ -1,15 +1,28 @@
-# Continuous integration
+# Continuous Integration and Deployment
 
-QuickView has 4 workflows:
-- __website (automatic):__ Update website when code get pushed to the repository.
+The [QuickView repository on GitHub](https://github.com/Kitware/QuickView)
+has 4 workflows in its [Actions tab](https://github.com/Kitware/QuickView/actions):
+- __CI (automatic):__
+- __Deploy VitePress site to Pages (automatic):__ Update the [QuickView website](https://kitware.github.io/QuickView/) when a new commit in the repository updates `docs/`.
 - __test (automatic):__ Validate PR and code based on the current tests implemented.
-- __release (manual):__ Will look at git history to generate version bump with associated changelog. This  will publish a new version to PyPI. Then conda-forge will catchup the new version and will automatically publish it the next day or so.
-- __package (automatic):__ Will generate the desktop bundle and link them to the release entry inside Github.
+- __Release (manual):__ Check `git` history to generate a version bump with associated changelog.
+  This  will publish a new version to PyPI. Then conda-forge will catchup the new version and will
+  automatically publish it the next day or so.
+- __Package (automatic):__ Generate desktop bundles and link them to the release on GitHub.
 
-## WebSite
+## Web site
 
-The WebSite is using VitePress to present the various markdown files living under `./docs/**/*.md` into a website available at https://kitware.github.io/QuickView/.
+The [QuickView website](https://kitware.github.io/QuickView/) contains
+online documentation for the tool family.
+The site is generated using [VitePress](https://vitepress.dev)
+from Markdown files under `docs/`.
+
+While different tools in the family have separate GitHub repositories,
+the documentation source codes all live in the `docs/` folder
+in the [QuickView repository](https://github.com/Kitware/QuickView)
 
 ## Release
 
-This workflow needs to be [triggered manually on this page](https://github.com/Kitware/QuickView/actions/workflows/release.yml) by clicking on the __Run workflow__ button.
+This workflow needs to be triggered manually
+on [GitHub](https://github.com/Kitware/QuickView/actions/workflows/release.yml)
+by clicking on the green __Run workflow__ button.
