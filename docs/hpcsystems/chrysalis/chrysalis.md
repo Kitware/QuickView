@@ -94,7 +94,7 @@ Additional files can be downloaded from [Zenodo](/guides/connectivity#connectivi
 
 ## Tips for easier file selection
 
-On HPC systems such as Chrysalis, simulation files and connectivity files may be stored in deeply nested directories with long paths. The QuickView family of tools treats the directory from which they are launched as their “home” directory. The one-step launcher scripts provided above launch the tools from your default login directory, so navigating to these files through the file dialog may require many mouse clicks. The following tips can help you reach your files more quickly; they can be used individually or in combination.
+On HPC systems such as Chrysalis, simulation files and connectivity files may be stored in deeply nested directories with long paths. The QuickView family of tools treats the directory from which they are launched as their “home” directory. The one-step launcher scripts provided above launch the tools from your default login directory, so navigating to these files through the file selection dialog may require many mouse clicks. The following tips can help you reach your files more quickly; they can be used individually or in combination.
 
 #### Tip 1. Set the launch directory in the launcher script
 
@@ -104,7 +104,7 @@ In the `REMOTE_COMMAND` block, add a line like the following immediately after
 ```py
 " && cd /path/to/data/directory/ "
 ```
-The tool will then use the specified directory as its "home" directory.
+The tool will then use the specified directory as its home directory.
 
 #### Tip 2. Create symbolic links to frequently used directories
 
