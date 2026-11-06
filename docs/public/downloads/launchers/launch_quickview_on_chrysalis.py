@@ -55,8 +55,20 @@ def main():
             text=True, encoding="utf-8", errors="replace",
         )
         opened = False
+        suppress_application_url = False
         try:
             for line in process.stdout:
+                # The application advertises a remote URL; only show the local tunnel URL.
+                message = line.strip()
+                if message == "Use URL below to connect to the application:":
+                    suppress_application_url = True
+                    continue
+                if suppress_application_url:
+                    if not message:
+                        continue
+                    suppress_application_url = False
+                    if re.fullmatch(r"=>\s+https?://\S+", message):
+                        continue
                 print(line.rstrip("\r\n"), flush=True)
                 match = re.search(r"tauri-server-port=(\d+)", line)
                 if match and not opened:
