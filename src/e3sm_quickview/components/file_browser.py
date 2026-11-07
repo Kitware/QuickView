@@ -12,9 +12,9 @@ GROUP = dict(icon="mdi-file-document-multiple-outline", type="group")
 FILE = dict(icon="mdi-file-document-outline", type="file")
 
 HEADERS = [
-    {"title": "Name", "align": "start", "key": "name", "sortable": False},
-    {"title": "Size", "align": "end", "key": "size", "sortable": False},
-    {"title": "Date", "align": "end", "key": "modified", "sortable": False},
+    {"title": "Name", "align": "start", "key": "name", "sortable": True},
+    {"title": "Size", "align": "end", "key": "size", "sortable": True},
+    {"title": "Date modified", "align": "end", "key": "modified", "sortable": True},
 ]
 
 
@@ -132,7 +132,7 @@ class ParaViewFileBrowser(TrameComponent):
 
                 g_map[g_name]["size"] += stats.st_size
                 g_map[g_name]["files"].append(file_name)
-                # Many need to sort files???
+                # May need to sort files.
             else:
                 # File
                 files.append(
@@ -290,7 +290,7 @@ class ParaViewFileBrowser(TrameComponent):
         with v3.VCard(rounded="lg"):
             with v3.VCardTitle("File loading", classes="d-flex align-center px-3"):
                 v3.VSpacer()
-                with v3.VTooltip(text="Go to launched directory"):
+                with v3.VTooltip(text="Return to starting directory"):
                     with v3.Template(v_slot_activator="{ props }"):
                         v3.VBtn(
                             v_bind="props",
@@ -312,7 +312,7 @@ class ParaViewFileBrowser(TrameComponent):
                     v_model=self.name("filter"),
                     hide_details=True,
                     color="primary",
-                    placeholder="filter",
+                    placeholder="Filter by name",
                     density="compact",
                     variant="outlined",
                     classes="ml-2",
@@ -382,8 +382,7 @@ class ParaViewFileBrowser(TrameComponent):
                     v_model=(self.name("data_simulation"), ""),
                     density="compact",
                     variant="outlined",
-                    placeholder="Paste or browse for simulation file path",
-                    messages="EAM's history output on the physics grids (pg2 grids) written by EAMv2, v3, and an intermediate version towards v4 (EAMxx).",
+                    placeholder="Paste a full path including the filename",
                 )
                 html.Label(
                     "Connectivity File",
@@ -393,13 +392,12 @@ class ParaViewFileBrowser(TrameComponent):
                     v_model=(self.name("data_connectivity"), ""),
                     density="compact",
                     variant="outlined",
-                    placeholder="Paste or browse for connectivity file path",
-                    messages="The horizontal grids used by EAM are cubed spheres. Since these are unstructed grids, QuickView needs to know how to map data to the globe. Therefore, for each simulation data file, a 'connectivity file' needs to be provided.",
+                    placeholder="Paste a full path including the filename",
                 )
 
             v3.VDivider()
             with v3.VCardActions(classes="pa-3"):
-                with v3.VTooltip(text="Set selected file as simulation file"):
+                with v3.VTooltip(text="Use the selected file as the simulation file"):
                     with v3.Template(v_slot_activator="{ props }"):
                         v3.VBtn(
                             v_bind="props",
@@ -412,7 +410,7 @@ class ParaViewFileBrowser(TrameComponent):
                             ),
                             click=self.set_data_simulation,
                         )
-                with v3.VTooltip(text="Set selected file as connectivity file"):
+                with v3.VTooltip(text="Use the selected file as the connectivity file"):
                     with v3.Template(v_slot_activator="{ props }"):
                         v3.VBtn(
                             v_bind="props",
@@ -447,7 +445,7 @@ class ParaViewFileBrowser(TrameComponent):
                             variant="flat",
                             click=self.cancel,
                         )
-                with v3.VTooltip(text="Import previous state file"):
+                with v3.VTooltip(text="Import the selected state file"):
                     with v3.Template(v_slot_activator="{ props }"):
                         v3.VBtn(
                             v_bind="props",
