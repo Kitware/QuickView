@@ -13,9 +13,16 @@ When QuickView is launched using a shell command or the desktop bundle,
 or when the user clicks the "File Loading" icon on the toolbar,
 a dialogue window like the screenshot below is brought up.
 The user is expected to select a connectivity file and a simulation data file
-from the file browser in this window.
+using the file browser or the text boxes in this window.
 
 ![File loading window](./screenshots/file_loading_dialogue.png){ width="100%", align=center }
+
+### Selecting files using the file browser
+
+Click the **Name**, **Size**, or **Date modified** column heading to sort the entries
+by that column. Repeated clicks cycle through ascending order, descending order,
+and the original order (directories first, then file groups, then individual files,
+with each group sorted by name).
 
 The user can single-click a file name and then click the "simulation" or "connectivity"
 button in the bottom-left corner to clarify file type.
@@ -25,6 +32,14 @@ the user can **double-click** the file to have it automatically
 recognized as a connectivity file.
 Double-clicking a filename not starting with "connectivity" makes
 it recognized as a simulation file.
+
+### Selecting files by direct text input
+
+If the needed files are many directories away from the directory shown in the file browser,
+the user can avoid tedious navigation by pasting full paths, including filenames,
+into the **Simulation File** and **Connectivity File** text boxes below the browser.
+
+### Loading the selected files
 
 After both connectivity and simulation files are selected,
 the originally pale-blue `Load Files` button in the bottom-right corner
