@@ -189,14 +189,8 @@ class LandingPage(v3.VContainer):
                 tool designed to help Earth system modelers take a quick look at
                 a collection of physical quantities in their simulation files.
                 The physical quantities are presented in the form of global or regional maps.
-                Currently, QuickView supports only the cubed-sphere "physics" grids,
-                i.e., the ne*pg2 meshes used by the atmosphere component of the
-                {Link("Energy Exascale Earth System Model (E3SM)", "https://e3sm.org/")},
-                but extensions to other grids are underway.
-                QuickView's Python and {Link("trame", "https://www.kitware.com/trame/")}-based
-                graphical User Interface (UI) provides the users with intuitive access to
-                {Link("ParaView", "https://www.paraview.org/")}'s powerful analysis
-                and visualization capabilities without requiring a steep learning curve.
+                Sample visualizations can be found in the
+                {Link("online gallery", "https://kitware.github.io/QuickView/gallery/")}.
                 A detailed {Bold("User's Guide")} can be found through
                 {Link("this link", "https://kitware.github.io/QuickView/guides/quickview/")}.
                 {Bold("Bug reports")} and feature requests can be submitted on
@@ -314,7 +308,7 @@ class LandingPage(v3.VContainer):
                                 v3.VHotkey(keys="m", variant="contained", inline=True)
                         with v3.VListItem(subtitle="Spherical"):
                             with v3.Template(v_slot_append="True"):
-                                v3.VHotkey(keys="z", variant="contained", inline=True)
+                                v3.VHotkey(keys="n", variant="contained", inline=True)
 
                     v3.VDivider(classes="my-4")
 
@@ -354,7 +348,7 @@ class LandingPage(v3.VContainer):
                 through a partnership between
                 the {
                 Link(
-                    "Advanced Scientific Computing Reaserch (ASCR)",
+                    "Advanced Scientific Computing Research (ASCR)",
                     "https://www.energy.gov/science/ascr/advanced-scientific-computing-research",
                 )
             } program and
