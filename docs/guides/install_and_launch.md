@@ -1,6 +1,9 @@
 # Install and launch
 
-All tools of the **QuickView** family are available as
+(See [System Requirements](/guides/system_requirements.md) for the prerequisites
+for local installation and remote usage.)
+
+Tools of the QuickView family are available as
 **Conda** and **PyPI** packages as well as **pre-compiled desktop bundles**
 for various OS's including Mac, Windows, and Linux.
 The table below summarizes where the different packages
