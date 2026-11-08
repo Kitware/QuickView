@@ -40,6 +40,11 @@ QuickView supports local installation through desktop bundles or conda, as well 
 remote usage. See the [system requirements](https://kitware.github.io/QuickView/guides/system_requirements.html)
 and [installation instructions](https://kitware.github.io/QuickView/guides/install_and_launch.html).
 
+## Runtime dependencies
+
+QuickView's runtime dependencies are listed under `requirements.run` in the
+[conda-forge feedstock recipe](https://github.com/conda-forge/e3sm-quickview-feedstock/blob/main/recipe/recipe.yaml#L28).
+
 ## User's Guide
 
 See [documentation page](https://kitware.github.io/QuickView/guides/quickview/getting_started.html).
