@@ -34,9 +34,15 @@ analysis and visualization capabilities without requiring a steep learning curve
   as well as the E3SM land model ELM's input and output files
   on `ne*np4` and `ne*pg2` grids.
 
-## Getting Started 
+## Installation
 
-See our [documentation page](https://kitware.github.io/QuickView/guides/quickview/getting_started.html).
+QuickView supports local installation through desktop bundles or conda, as well as
+remote usage. See the [system requirements](https://kitware.github.io/QuickView/guides/system_requirements.html)
+and [installation instructions](https://kitware.github.io/QuickView/guides/install_and_launch.html).
+
+## User's Guide
+
+See [documentation page](https://kitware.github.io/QuickView/guides/quickview/getting_started.html).
 
 ## Project Background
 
