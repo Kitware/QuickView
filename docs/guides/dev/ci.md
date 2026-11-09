@@ -143,10 +143,3 @@ This workflow handles both building and deploying the website in two jobs:
 2. **deploy** waits for **build** to succeed (`needs: build`), then uses
    `actions/deploy-pages` to publish that artifact to GitHub Pages.
 
-The Actions tab also lists
-[pages-build-deployment](https://github.com/Kitware/QuickView/actions/workflows/pages/pages-build-deployment),
-a GitHub-managed workflow with no YAML file in this repository.
-As of November 2026, its latest recorded run was on March 9, 2026,
-while the VitePress workflow continues to build and deploy the site.
-The current `website.yml` does not trigger or depend on that separate entry;
-its own **deploy** job publishes the website.
