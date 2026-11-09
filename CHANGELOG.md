@@ -2,6 +2,114 @@
 
 <!-- version list -->
 
+## v2.10.6 (2026-11-09)
+
+### Bug Fixes
+
+- **quickview**: Update landing-page intro to remove mentioning of grid and model names
+  ([`0701c7a`](https://github.com/Kitware/QuickView/commit/0701c7a884785313716688a475e9c11dd50f8a8d))
+
+- **quickview**: Wording updates in file selection dialog; turn on sorting in file browser
+  ([`7159ab9`](https://github.com/Kitware/QuickView/commit/7159ab9c6ddffb9d4d3d5e6594e150978c00442f))
+
+### Chores
+
+- Remove .readthedocs.yaml. No longer used.
+  ([`f4b1da6`](https://github.com/Kitware/QuickView/commit/f4b1da6abeb01b1d1d6b04c871081303dea74665))
+
+- Update description in pyproject.toml
+  ([`9c9bc04`](https://github.com/Kitware/QuickView/commit/9c9bc04b5562620d15a3216c85b4743f86d7087e))
+
+### Documentation
+
+- Add 'runtime dependencies' section to README with link to conda recipe
+  ([`f631672`](https://github.com/Kitware/QuickView/commit/f631672120833c90536e42ed3ef43897ef377af3))
+
+- Add back QuickCompare launcher for Chrysalis; misc minor edits
+  ([`8e32725`](https://github.com/Kitware/QuickView/commit/8e327252de6d5207f652dc013d3e8c2dc1e122d4))
+
+- Add page on system requirements and link it to main README
+  ([`e33926f`](https://github.com/Kitware/QuickView/commit/e33926f64a17ed4721161ddfef4dcba99f24a5b4))
+
+- Correct dead links
+  ([`63f9eb6`](https://github.com/Kitware/QuickView/commit/63f9eb64aebc2823420091d4d09d2e6efd4cd321))
+
+- Ensure consistency between main READM.md and QuickView guide's index.md
+  ([`26f724c`](https://github.com/Kitware/QuickView/commit/26f724c6951c7557f7e95ede429f05589a7cf8d0))
+
+- For Chrysalis, add path to connectivity files
+  ([`cbb4956`](https://github.com/Kitware/QuickView/commit/cbb4956b0202f848a49a015128e22cb91f161a16))
+
+- Gallery examples: highlight some buttons
+  ([`ace6785`](https://github.com/Kitware/QuickView/commit/ace6785b520dc939f89997de785ba287f6dfc0bd))
+
+- Include instructions for using our tools on Chrysalis
+  ([`abfd822`](https://github.com/Kitware/QuickView/commit/abfd822739afc537d1d54cadaac73c7ff58042d9))
+
+- Installation guide: update python version to 3.14
+  ([`65fb0b5`](https://github.com/Kitware/QuickView/commit/65fb0b54864eac8e15a2c6f1129be40eb42d72e7))
+
+- Minor changes on the gallery main page
+  ([`2466d25`](https://github.com/Kitware/QuickView/commit/2466d2578ca29f976ecfc3789332dff838c81554))
+
+- Misc edits
+  ([`60e6b0a`](https://github.com/Kitware/QuickView/commit/60e6b0a3d0545f37986fb3fd903132669addafda))
+
+- Misc theme/style updates
+  ([`569c6ba`](https://github.com/Kitware/QuickView/commit/569c6ba2f201b3fe08ac87cf771eeee795a0bda3))
+
+- New draft doc on CI
+  ([`f93a6d0`](https://github.com/Kitware/QuickView/commit/f93a6d0089db30a33d45b2e94c3d483bb077bd58))
+
+- Organize files for gallery
+  ([`dcc71fe`](https://github.com/Kitware/QuickView/commit/dcc71feb84e3722ad135c2fa15c4e8b5418c80c1))
+
+- Remove QuickCompare launcher for Chrysalis for now. issue to be resolved.
+  ([`33246ed`](https://github.com/Kitware/QuickView/commit/33246ed424656160e041850714e78d566f8e365b))
+
+- Reorganize subfolders for pages on HPC systems
+  ([`0ac48e3`](https://github.com/Kitware/QuickView/commit/0ac48e3e7be1cefe9b0bd96425e1b44c550a7065))
+
+- Restructure gallery page using cards
+  ([`e67f43a`](https://github.com/Kitware/QuickView/commit/e67f43a3d86a2be3fc265195e812b3a4a58044aa))
+
+- Update Chrysalis page and scripts
+  ([`531ea2e`](https://github.com/Kitware/QuickView/commit/531ea2e4227f451d0500ca54d4fae2562b331289))
+
+- Update local install instructions for users
+  ([`f51c215`](https://github.com/Kitware/QuickView/commit/f51c2159cfbe5e59087b3b5838e811d91fe7e4b9))
+
+- Update mentions of grids to accommodate different models
+  ([`74033ca`](https://github.com/Kitware/QuickView/commit/74033ca8d72583384bf8da8552001899ba7d8562))
+
+- Update user guides and webnews for coasline-related new versions
+  ([`d14ad47`](https://github.com/Kitware/QuickView/commit/d14ad474b7d9687c01fe8000e146f94d57ff29de))
+
+- Very minor edits
+  ([`80572ac`](https://github.com/Kitware/QuickView/commit/80572acc032b6f6c6c3a143a20224d74fde7a1cb))
+
+- **gallery**: Add an EAM dycore example
+  ([`1201ca6`](https://github.com/Kitware/QuickView/commit/1201ca662c5fda53b0e72dd4d6a0185e8a262904))
+
+- **gallery**: Add an example for CAM-SE's pg2 and pg3 grids (Herrington et al., 2019)
+  ([`a38fa71`](https://github.com/Kitware/QuickView/commit/a38fa718640e92f46058f90a32f741636d2ecf48))
+
+- **gallery**: Add CESM MUSICAv0 example
+  ([`650865f`](https://github.com/Kitware/QuickView/commit/650865fea144f280ff3a8cfdb83586e618f2c2e2))
+
+- **gallery**: Start to simplify cards and enlarged views
+  ([`ca1788c`](https://github.com/Kitware/QuickView/commit/ca1788c5abec6308e890942bfbb6b2b98afeb898))
+
+- **gallery**: Update title and caption of each example
+  ([`6386940`](https://github.com/Kitware/QuickView/commit/6386940b8a098b576f2e9aae7f52d4f31260c953))
+
+- **quickview**: Update file loading screenshots
+  ([`933893b`](https://github.com/Kitware/QuickView/commit/933893b212379c3fc45f4b9d787c58709a93abbd))
+
+- **siteview**: Add a skeleton of SiteView user guide
+  ([`115090a`](https://github.com/Kitware/QuickView/commit/115090ab214878c957cd3963404a06f54b18142a))
+
+
 ## v2.10.5 (2026-10-15)
 
 ### Bug Fixes
