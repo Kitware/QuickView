@@ -272,6 +272,7 @@ class MapProjection(v3.VTooltip):
                                         divided=True,
                                         mandatory=True,
                                     ):
+                                        v3.VBtn("None", value=[-1], classes="text-none")
                                         v3.VBtn("Low", value=[0], classes="text-none")
                                         v3.VBtn(
                                             "Medium", value=[1], classes="text-none"
