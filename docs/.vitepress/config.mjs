@@ -109,9 +109,8 @@ export default defineConfig({
           ],
         },
         {
-          text: "For App Developers",
+          text: "Releases and Automation",
           items: [
-            { text: "Setup", link: "/guides/dev/setup" },
             { text: "CI and Deployment", link: "/guides/dev/ci" },
           ],
         },
