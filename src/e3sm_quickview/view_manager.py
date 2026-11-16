@@ -2,6 +2,7 @@ import asyncio
 import math
 import time
 
+import numpy as np
 from paraview.modules.vtkPVVTKExtensionsInteractionStyle import (
     vtkPVInteractorStyle,
     vtkPVTrackballPan,
@@ -264,16 +265,17 @@ class ViewManager(TrameComponent):
 
     def pan(self, dx, dy):
         cam = self._camera
-        scale = cam.GetParallelScale()
-        step = scale * 0.1
-        pos = list(cam.GetPosition())
-        foc = list(cam.GetFocalPoint())
-        pos[0] += dx * step
-        pos[1] += dy * step
-        foc[0] += dx * step
-        foc[1] += dy * step
-        cam.SetPosition(*pos)
-        cam.SetFocalPoint(*foc)
+        step = cam.GetParallelScale() * 0.1
+
+        # Move along the screen's right and up, not world x/y. The view
+        # matrix's first two rows are those directions in world space.
+        view = cam.GetViewTransformMatrix()
+        right = np.array([view.GetElement(0, i) for i in range(3)])
+        up = np.array([view.GetElement(1, i) for i in range(3)])
+        offset = step * (dx * right + dy * up)
+
+        cam.SetPosition(*np.add(cam.GetPosition(), offset))
+        cam.SetFocalPoint(*np.add(cam.GetFocalPoint(), offset))
         self.render()
 
     def get_camera_state(self):
