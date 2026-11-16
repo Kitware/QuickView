@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v2.11.0 (2026-11-16)
+
+### Bug Fixes
+
+- **ui**: Make camera zoom for sphereical mode consistent
+  ([`970c4f4`](https://github.com/Kitware/QuickView/commit/970c4f4847db4ec6ed2c076319c7040b201a7df3))
+
+- **ui**: Make pan work in screen space for spherical projection
+  ([`869eb9b`](https://github.com/Kitware/QuickView/commit/869eb9bd69a02e05c5dc56b57acc86d8bf0f4907))
+
+### Documentation
+
+- Cleanup dev informations
+  ([`c3de867`](https://github.com/Kitware/QuickView/commit/c3de867cdd6311c907d10a1f02bcb1dbaf7d22f9))
+
+- Update ci.md after GitHub workflow cleanup
+  ([`8f8d3c3`](https://github.com/Kitware/QuickView/commit/8f8d3c3b96ecef17d8f11dcfa6b98589ca079c58))
+
+### Features
+
+- **ui**: Add option to hide coastlines
+  ([`11d06d7`](https://github.com/Kitware/QuickView/commit/11d06d788944f49a1d92e63ccd91e408b85038a5))
+
+
 ## v2.10.6 (2026-11-09)
 
 ### Bug Fixes

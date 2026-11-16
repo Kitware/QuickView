@@ -1,6 +1,6 @@
 [project]
 name = "e3sm-quickview"
-version = "2.10.6"
+version = "2.11.0"
 description = "An application to explore/analyze Earth system simulation data"
 authors = [
     {name = "Kitware Inc."},
