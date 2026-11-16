@@ -83,7 +83,13 @@ class VariableView(TrameComponent):
             s[self._bounds_key] = v
 
     def reset_camera(self):
-        self.renderer.ResetCameraScreenSpace(0.9)
+        if self.source.projection == "Spherical":
+            self.renderer.ResetCamera(-1, 1, -1, 1, -1, 1)
+            width, height = self.renderer.GetSize()
+            aspect = width / height if height else 1
+            self._camera.SetParallelScale(1 / (0.9 * min(aspect, 1)))
+        else:
+            self.renderer.ResetCameraScreenSpace(0.9)
         self.renderer.ResetCameraClippingRange()
 
     def update_size(self, size):

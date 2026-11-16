@@ -191,9 +191,9 @@ class ViewManager(TrameComponent):
         self._camera.focal_point = (0, 0, 0)
         self._camera.position = (x, y, z)
         self._camera.view_up = (
-            -math.sin(lon * math.pi / 180),
-            2,
-            -math.cos(lon * math.pi / 180),
+            -y * math.sin(lon * math.pi / 180),
+            math.cos(lat * math.pi / 180),
+            -y * math.cos(lon * math.pi / 180),
         )
 
         self._clip_plane.origin = (0, 0, 0)
