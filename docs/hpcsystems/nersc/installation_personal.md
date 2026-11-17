@@ -24,7 +24,7 @@ mkdir -p ${pathRoot}/conda-envs
 Create an environment inside that directory:
 ```sh
 module load conda
-conda create --prefix ${pathRoot}/conda-envs/${envName} python=3.13
+conda create --prefix ${pathRoot}/conda-envs/${envName} python=3.14 typing_extensions
 ```
 
 ## Activate the environment and install our tools
@@ -118,8 +118,8 @@ you will need to
 pathRoot="/global/cfs/projectdirs/m4359/tools/"
 envName="quickview-env"
 
-quickview_version_new="2.10.5"
-quickcomp_version_new="1.11.3"
+quickview_version_new="2.11.0"
+quickcomp_version_new="1.11.5"
 
 module load conda
 conda activate ${pathRoot}/conda-envs/${envName}

@@ -23,12 +23,14 @@ features:
   - title: Purpose
     icon:
       src: /logos/E3SM_Logo.png
-      width: 120px
+      width: 110px
     details:
       Currently supported are data on cubed-sphere meshes
       consisting of Gauss-Lobatto-Legendre (GLL) nodes
-      or finite-volume style grid cells.
-    link: https://e3sm.org/
+      or finite-volume-style grid cells.
+      Sample visulizations from various models
+      can be found in our gallery.
+    link: https://kitware.github.io/QuickView/gallery/
   - title: Engine and UI 
     icon:
       src: /logos/paraview_trame_vtk.png
@@ -46,7 +48,7 @@ features:
     details:
       The tools have been deployed to NERSC and other HPC systems
       so that users can
-      directly access simulation data on those systems.
+      directly access simulation data there.
       No installation is required on the user's end,
       as the UI shows up in a browser window.
     link: /hpcsystems/nersc/launching
