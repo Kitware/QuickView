@@ -76,7 +76,7 @@ export default defineConfig({
           ],
         },
         {
-          text: "QuickCompare User's Guide",
+          text: "QuickCompare Guide",
           collapsed: true,
           items: [
             { text: "What is QuickCompare?", link: "/guides/quickcompare/index", },

@@ -53,7 +53,7 @@ to specify the **"map center"**:
 - With the **spherical projection**, QuickView rotates the globe so that the
   specified geographical location (longitude and latitude) faces the viewer
   and appears at the center of the visible globe. The UI therefore allows
-  both its longitude and latitude to be adjusted.
+  both the longitude and latitude of this center be adjusted.
 
   ![map center, spherical projection](./screenshots/map_center_spherical.png){ width="100%" }
 

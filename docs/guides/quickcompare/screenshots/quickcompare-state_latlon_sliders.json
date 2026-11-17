@@ -1,0 +1,213 @@
+{
+  "origin": {
+    "user": "huiwan",
+    "created": "2026-11-17 11:26:00.427716",
+    "comment": ""
+  },
+  "files": {
+    "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+    "simulations": [
+      "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+      "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc"
+    ],
+    "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
+  },
+  "comparisons": {
+    "control": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+    "target": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+    "mode": "two-sim",
+    "type": "diff",
+    "columns": [
+      "ctrl",
+      "diff"
+    ],
+    "simulations": [
+      {
+        "path": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_r8",
+        "include": true
+      },
+      {
+        "path": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_s10_prog.eam.h0.2010_2019.ANN.nc",
+        "label": "amicphys_s10",
+        "include": true
+      }
+    ]
+  },
+  "variables-selection": [
+    "num_a1",
+    "AODBC"
+  ],
+  "layout": {
+    "aspect-ratio": 0.5,
+    "active": "auto_layout",
+    "tools": [
+      "simulation-controls",
+      "adjust-databounds"
+    ],
+    "help": false,
+    "variable-order": [
+      "num_a1",
+      "AODBC"
+    ],
+    "map-center-lon": 0,
+    "map-center-lat": 0
+  },
+  "data-selection": {
+    "time_idx": 0,
+    "midpoint_idx": 0,
+    "interface_idx": 0,
+    "crop_longitude": [
+      0,
+      180
+    ],
+    "crop_latitude": [
+      10,
+      90
+    ],
+    "projection": [
+      "Robinson"
+    ],
+    "grid_interval": 10,
+    "crop_slider_edit": true,
+    "slice_slider_edit": true,
+    "animation_track": "lev",
+    "lev_idx": 53
+  },
+  "views": [
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__control",
+      "config": {
+        "order": 1,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          94868992.0,
+          1616646656.0
+        ],
+        "color_value_min": "94868992.0",
+        "color_value_max": "1616646656.0",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "lev",
+        "ncol"
+      ],
+      "name": "num_a1",
+      "array_name": "num_a1__diff__1",
+      "config": {
+        "order": 2,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -74403840.0,
+          74403840.0
+        ],
+        "color_value_min": "-74403840.0",
+        "color_value_max": "74403840.0",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "AODBC",
+      "array_name": "AODBC__control",
+      "config": {
+        "order": 3,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Rainbow Desaturated",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          0.0028783557936549187,
+          0.08960702270269394
+        ],
+        "color_value_min": "0.0028783557936549187",
+        "color_value_max": "0.08960702270269394",
+        "diverging": false,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    },
+    {
+      "type": [
+        "time",
+        "ncol"
+      ],
+      "name": "AODBC",
+      "array_name": "AODBC__diff__1",
+      "config": {
+        "order": 4,
+        "size": 4,
+        "offset": 0,
+        "break_row": false
+      },
+      "colormap": {
+        "preset": "Cool to Warm (Extended)",
+        "invert": false,
+        "color_blind": false,
+        "use_log_scale": "linear",
+        "discrete_log": false,
+        "n_discrete_colors": 4,
+        "override_range": false,
+        "color_range": [
+          -0.006002932786941528,
+          0.006002932786941528
+        ],
+        "color_value_min": "-0.006002932786941528",
+        "color_value_max": "0.006002932786941528",
+        "diverging": true,
+        "abs_max": "",
+        "epsilon": "0",
+        "cut_outside_range": false
+      }
+    }
+  ]
+}
