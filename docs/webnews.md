@@ -9,6 +9,11 @@ pageClass: news-page
 ![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="36", align=right }
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="36", align=right }
 
+2026-11-22: QuickView version 2.11.0 and QuickCompare 1.11.5 were included in the version 1.14.0 release of the [E3SM-Unified](https://github.com/E3SM-Project/e3sm-unified) Conda + Spack environment.
+
+![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="36", align=right }
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="36", align=right }
+
 2026-11-16: QuickView version 2.11.0 and QuickCompare 1.11.5 were released, addressing various small feature requests and bug reports and making the two tools consistent in their [map-related capabilities](/guides/quickcompare/map_related).
 
 ![Chrysalis image from E3SM website](/public/logos/Chrysalis_w_name.jpg){ width="180", align=right }

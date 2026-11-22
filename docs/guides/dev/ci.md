@@ -12,7 +12,7 @@ publishing the conda package.
 | --- | --- | --- | --- |
 | QuickView | [Kitware/QuickView](https://github.com/Kitware/QuickView) | [e3sm-quickview](https://pypi.org/project/e3sm-quickview/) | [e3sm-quickview-feedstock](https://github.com/conda-forge/e3sm-quickview-feedstock) |
 | QuickCompare | [Kitware/E3SMQuickCompare](https://github.com/Kitware/E3SMQuickCompare) | [e3sm-compareview](https://pypi.org/project/e3sm-compareview/) | [e3sm_compareview-feedstock](https://github.com/conda-forge/e3sm_compareview-feedstock) |
-| SiteView | [Kitware/SiteView](https://github.com/Kitware/SiteView) | [e3sm-siteview](https://pypi.org/project/e3sm-siteview/) | In progress as of November 2026 |
+| SiteView | [Kitware/SiteView](https://github.com/Kitware/SiteView) | [e3sm-siteview](https://pypi.org/project/e3sm-siteview/) | [e3sm-siteview-feedstock](https://github.com/conda-forge/e3sm-siteview-feedstock) |
 
 The [QuickView family website](https://kitware.github.io/QuickView/)
 contains **documentation** for all available tools in the family.
