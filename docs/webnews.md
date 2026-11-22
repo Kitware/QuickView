@@ -6,6 +6,11 @@ pageClass: news-page
 
 ## November 2026
 
+![QuickCompare icon](/public/logos/quickcompare-icon-only.png){ width="36", align=right }
+![QuickView icon](/public/logos/quickview-icon-only.png){ width="36", align=right }
+
+2026-11-16: QuickView version 2.11.0 and QuickCompare 1.11.5 were released, addressing various small feature requests and bug reports and making the two tools consistent in their [map-related capabilities](/guides/quickcompare/map_related).
+
 ![Chrysalis image from E3SM website](/public/logos/Chrysalis_w_name.jpg){ width="180", align=right }
 2026-11-03: Information was added to this website, explaining how to use our tools on E3SM's dedicated computer [Chrysalis](/hpcsystems/chrysalis/chrysalis).
 
