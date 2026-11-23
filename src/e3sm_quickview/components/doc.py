@@ -58,7 +58,7 @@ class ToolStateImportExport(Tool):
     def __init__(self):
         super().__init__(
             icon="mdi-folder-arrow-left-right-outline",
-            title="State export/import",
+            title="State Import/Export",
             description="Export and download the application state into a small text file (.json). The same file can then be uploaded and imported to restore that application state.",
         )
         with self, v3.Template(v_slot_append=True):
@@ -71,7 +71,7 @@ class ToolMapProjection(Tool):
         super().__init__(
             icon="mdi-earth",
             title="Map Projection",
-            description="Select projection to use for the visualizations: cylindrical equidistant, Robinson, Mollweide, Spherical.",
+            description="Select projection to use for the visualizations: cylindrical equidistant, Robinson, Mollweide, Spherical. Also sets the lat-lon grid line spacing and the coastline resolution.",
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="c", variant="contained", inline=True)
@@ -122,6 +122,24 @@ class ToolAnimation(Tool):
         )
         with self, v3.Template(v_slot_append=True):
             v3.VHotkey(keys="a", variant="contained", inline=True)
+
+
+class ToolCapture(Tool):
+    def __init__(self):
+        super().__init__(
+            icon="mdi-camera-outline",
+            title="Capture viewport as png",
+            description="Save the whole viewport, in its current layout, as a PNG image.",
+        )
+
+
+class ToolBackgroundColors(Tool):
+    def __init__(self):
+        super().__init__(
+            icon="mdi-format-color-fill",
+            title="Background Colors",
+            description="Select the background color of the visualizations.",
+        )
 
 
 # -----------------------------------------------------------------------------
@@ -210,6 +228,8 @@ class LandingPage(v3.VContainer):
                     ToolFieldSelection()
                     ToolMapProjection()
                     ToolResetCamera()
+                    ToolCapture()
+                    ToolBackgroundColors()
 
                 with v3.VCol(cols=6):
                     ToolLayoutManagement()
