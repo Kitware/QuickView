@@ -41,9 +41,9 @@ uv sync --all-extras --dev
 # Activate environment
 source .venv/bin/activate
 
-# Install commit analysis
+# Install git hooks: file checks (ruff, prettier, codespell...) on commit,
+# and Conventional Commits check on the commit message
 pre-commit install
-pre-commit install --hook-type commit-msg
 ```
 
 Then to run the application, you will need ParaView. The example below provide an example for macOS.
