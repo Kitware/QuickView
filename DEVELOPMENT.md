@@ -13,8 +13,12 @@ cd QuickView
 conda env create -f quickview-env.yml
 conda activate quickview
 
-# Install QuickView
-pip install -e .
+# Install QuickView with the development tools
+pip install -e ".[dev]"
+
+# Install git hooks: file checks (ruff, prettier, codespell...) on commit,
+# and Conventional Commits check on the commit message
+pre-commit install
 ```
 
 Then to run the application
