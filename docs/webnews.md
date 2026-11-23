@@ -75,7 +75,7 @@ and [across an ensemble of more simulations](/guides/quickcompare/multi-sim_comp
 
 ![QuickView icon](/public/logos/quickview-icon-only.png){ width="36", align=right }
 
-2026-05-20: QuickView version 2.7.7 was released with refined [viewport control](/guides/quickview/viewport_layout), a more compact [slice selection panel](/guides/quickview/slice_selection), and various other small improvments in the UI.
+2026-05-20: QuickView version 2.7.7 was released with refined [viewport control](/guides/quickview/viewport_layout), a more compact [slice selection panel](/guides/quickview/slice_selection), and various other small improvements in the UI.
 
 
 ## April 2026

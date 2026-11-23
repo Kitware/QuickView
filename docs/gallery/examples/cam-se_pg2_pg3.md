@@ -24,7 +24,7 @@ images:
   caption: The image below mimics the *upper* panel of Figure. 6 in
     [Herrington et al. (2019)](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2019MS001684).
     Cloud liquid mixing ratios simulated by CAM-SE-CSLAM with a `pg3`
-    physics grid are shown in [QuickView](/guides/quickview/indes) for
+    physics grid are shown in [QuickView](/guides/quickview/index) for
     an idealized baroclinic wave test case, using a data file in the
     [GitHub repository](https://github.com/adamrher/2017-physres/tree/master/data)
     associated with Herrington et al. (2019).
@@ -35,7 +35,7 @@ images:
   caption: The image below mimics the *lower* panel of Figure. 6 in
     [Herrington et al. (2019)](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2019MS001684).
     Cloud liquid mixing ratios simulated by CAM-SE-CSLAM with a `pg2`
-    physics grid are shown in [QuickView](/guides/quickview/indes) for
+    physics grid are shown in [QuickView](/guides/quickview/index) for
     an idealized baroclinic wave test case, using a data file in the
     [GitHub repository](https://github.com/adamrher/2017-physres/tree/master/data)
     associated with Herrington et al. (2019).
