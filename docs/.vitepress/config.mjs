@@ -27,6 +27,7 @@ export default defineConfig({
         link: "/hpcsystems/nersc/launching",
         activeMatch: "^/hpcsystems/",
       },
+      { text: "Resources", link: "/resources" },
     ],
 
     sidebar: {
@@ -192,8 +193,11 @@ export default defineConfig({
           ],
         },
         {
-          text: "Releases and Automation",
-          items: [{ text: "CI and Deployment", link: "/guides/dev/ci" }],
+          text: "Development",
+          items: [
+            { text: "CI and Deployment", link: "/guides/dev/ci" },
+            { text: "Where Things Are", link: "/guides/dev/what_is_where" },
+          ],
         },
       ],
     },
