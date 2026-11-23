@@ -98,12 +98,6 @@ class ViewManager(TrameComponent):
         )
         self._render_window_interactor.SetRenderWindow(self._render_window)
 
-        try:
-            self.loop = asyncio.get_event_loop()
-        except RuntimeError:
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-
         self.layout_dirty = True
         self.pending_reset_camera = 1
         self.pending_render = False
@@ -305,7 +299,12 @@ class ViewManager(TrameComponent):
     def on_size_update(self):
         if not self.layout_dirty or not self.pending_render:
             self.pending_render = True
-            self.loop.call_later(0.1, self.render)
+            try:
+                # Resolved per call: the server loop is not running yet when
+                # the ViewManager is created.
+                asyncio.get_running_loop().call_later(0.1, self.render)
+            except RuntimeError:  # no running loop, render right away
+                self.render()
         self.layout_dirty = True
 
     def render(self):
