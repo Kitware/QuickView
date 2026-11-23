@@ -112,7 +112,7 @@ class EAMApp(TrameApp):
             state_content = json.loads(Path(args.state).read_text())
 
             async def wait_for_import(**_):
-                await self.import_state(state_content)
+                await self._import_state(state_content)
 
             self.ctrl.on_server_ready.add_task(wait_for_import)
         elif args.data and args.conn:
