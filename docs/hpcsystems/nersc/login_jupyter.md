@@ -22,7 +22,7 @@ will be charged to your project's allocation.
 :::
 
 ::: tip Tip 2: The same executables work for all types of nodes.
-Regardless of which type of nodes a user choses in JupyterHub's control panel,
+Regardless of which type of nodes a user chooses in JupyterHub's control panel,
 the same commands (executables) are used to launch our tools in the QuickView family.
 :::
 
@@ -77,7 +77,7 @@ server (node) to stop the charging of hours to your project's allocation.
 This is explained at the end of
 [this video](https://docs.nersc.gov/beginner-guide/#keypad-entry-log-in-using-jupyter),
 and below is a recap of the steps (clicks):
-- go to the JupytherHub window/tab in your browser,
+- go to the JupyterHub window/tab in your browser,
 - click `File` in the top-left corner,
 - scroll down and choose `Hub Control Panel`,
 - in the Control Panel brought up in a new browser tab/window, click on the red "stop" button
