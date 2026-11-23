@@ -39,6 +39,8 @@ for QuickCompare and SiteView.
 The checks differ by tool.
 - QuickView and QuickCompare install the package and run the application's
  `--help` command as a basic startup check.
+- QuickView also runs its `pytest` suite under `tests/`, for example the state
+ file save/load round trip on a small generated dataset.
 - QuickView also runs all [pre-commit](https://pre-commit.com/) hooks
  (ruff, prettier, codespell, and others defined in `.pre-commit-config.yaml`)
  on the whole repository in a separate `pre-commit` job.

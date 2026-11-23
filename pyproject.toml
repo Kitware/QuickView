@@ -90,6 +90,10 @@ packages = [
 ]
 
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+
 [tool.ruff.lint.per-file-ignores]
 # Ignore star import issues in ParaView plugins
 "src/e3sm_quickview/plugins/*.py" = ["F403", "F405"]
