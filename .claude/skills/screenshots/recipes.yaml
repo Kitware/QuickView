@@ -1,0 +1,507 @@
+defaults:
+  viewport: [1400, 900]
+  scale: 2
+  settle: 2.0
+  max_width: 2400
+
+# Reusable fragments (YAML anchors); the runner ignores this key.
+anchors:
+  # Main toolbar, open toolbars and views: the app without empty space below
+  app_content: &app_content
+    selector:
+      - .qv-main-toolbar-buttons
+      - .qv-toolbar-layout
+      - .qv-toolbar-cropping
+      - .qv-toolbar-slices
+      - .qv-toolbar-animation
+      - ".v-card[data-field-name]"
+      - ".v-overlay--active .v-overlay__content"
+    from_left: true
+    from_top: true
+    pad: 8
+  auto_zoom: &auto_zoom
+    click: ".qv-main-toolbar-buttons .v-list-item:has(.mdi-fit-to-page-outline)"
+
+screenshots:
+  - name: map_projections.png
+    page: map_related.md
+    state: quickview-state_map_projections.json
+    steps:
+      - *auto_zoom
+      - click: ".qv-main-toolbar-buttons .v-list-item:has(.mdi-earth)"
+      - wait_for: ".v-overlay--active .v-overlay__content"
+    clip:
+      selector:
+        [".qv-main-toolbar-buttons", ".v-overlay--active .v-overlay__content"]
+      from_left: true
+      from_top: true
+      pad: 16
+    highlight: ".qv-main-toolbar-buttons .v-list-item:has(.mdi-earth)"
+
+  # --- Slice selection and animation (slice_selection.md) -------------------
+  - name: slice_selection_panel.png
+    page: slice_selection.md
+    state: quickview-state_slice_selection_panel.json
+    viewport: [1400, 760]
+    steps:
+      - set: { active_tools: ["select-slice-time"] }
+    clip: *app_content
+    highlight:
+      - .qv-toolbar-slices
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-tune-variant)"
+
+  - name: dimension_slider_expanded.png
+    page: slice_selection.md
+    state: quickview-state_slice_selection_panel.json
+    viewport: [1400, 800]
+    steps:
+      - set:
+          {
+            active_tools: ["select-slice-time"],
+            expanded_slice_track: "lwband",
+          }
+    clip: *app_content
+    highlight:
+      - .qv-toolbar-slices
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-tune-variant)"
+
+  - name: animation_control_panel_and_menu.png
+    page: slice_selection.md
+    state: quickview-state_slice_selection_panel.json
+    viewport: [1400, 800]
+    steps:
+      - set:
+          {
+            active_tools: ["select-slice-time", "animation-controls"],
+            animation_track: "lwband",
+          }
+      - click: ".qv-toolbar-animation .v-select"
+      - wait_for: ".v-overlay--active .v-list"
+    clip: *app_content
+    highlight:
+      - .qv-toolbar-animation
+      - ".v-overlay--active .v-list"
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-video)"
+
+  # --- Map-related features (map_related.md) --------------------------------
+  - name: latlon_range_sliders.png
+    page: map_related.md
+    state: quickview-state_latlon_range_sliders.json
+    viewport: [1300, 560]
+    clip: *app_content
+    highlight:
+      - ".qv-toolbar-cropping .v-range-slider >> nth=0"
+      - ".qv-toolbar-cropping .v-range-slider >> nth=1"
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-web)"
+
+  - name: map_center_spherical.png
+    page: map_related.md
+    state: quickview-state_map_center_spherical.json
+    viewport: [900, 640]
+    clip: *app_content
+    highlight: [".qv-toolbar-cropping .v-text-field"]
+    panels:
+      - steps:
+          - set: { spherical_center_lon: 0, spherical_center_lat: 0 }
+      - steps:
+          - set: { spherical_center_lon: 20, spherical_center_lat: 20 }
+
+  - name: map_center_Robinson.png
+    page: map_related.md
+    state: quickview-state_map_center_Robinson.json
+    viewport: [900, 640]
+    clip: *app_content
+    highlight: [".qv-toolbar-cropping .v-text-field"]
+    panels:
+      - steps:
+          - set: { spherical_center_lon: -180 }
+      - steps:
+          - set: { spherical_center_lon: 70 }
+
+  - name: plot_background_color.png
+    page: map_related.md
+    state: quickview-state_plot_background_color.json
+    viewport: [760, 720]
+    clip: *app_content
+    panels:
+      - steps:
+          - press: "1" # one column: a single large view
+      - steps:
+          - press: "1"
+          - click:
+              ".qv-main-toolbar-buttons .v-list-item:has(.mdi-format-color-fill)"
+          - wait_for: ".v-overlay--active .v-list"
+        highlight:
+          - ".v-overlay--active .v-list"
+          - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-format-color-fill)"
+
+  # --- Individual views (individual_views.md) -------------------------------
+  - name: single_view_pop-up_panel.png
+    page: individual_views.md
+    state: quickview-state_single_view_pop-up_panel.json
+    viewport: [1300, 680]
+    steps:
+      - set: { active_tools: [] }
+      - click: ".v-card[data-field-name='PBLH'] img"
+      - wait_for: ".v-overlay--active .v-card"
+    clip: viewport
+
+  - name: linear_log_icons.png
+    page: individual_views.md
+    icons: [mdi-stairs, mdi-math-log, mdi-sine-wave]
+
+  - name: delta_difference_mode.png
+    page: individual_views.md
+    state: quickview-state_delta_difference_mode.json # data not available locally
+    viewport: [1300, 620]
+    steps:
+      - click: ".v-card[data-field-name] img >> nth=0"
+      - wait_for: ".v-overlay--active .v-card"
+    clip: viewport
+
+  # --- Cursor probe (cursor_probe.md) ---------------------------------------
+  - name: cursor_probe_icons_in_viewport.png
+    page: cursor_probe.md
+    state: quickview-state_single_view_pop-up_panel.json
+    viewport: [760, 560]
+    steps:
+      - set: { active_tools: [] }
+    clip: *app_content
+    highlight:
+      - [
+          ".v-card[data-field-name='PBLH'] .mdi-cursor-default-click-outline",
+          ".v-card[data-field-name='PBLH'] .mdi-cursor-default-gesture-outline",
+        ]
+
+  - name: cursor_probe_information_panel.png
+    page: cursor_probe.md
+    state: quickview-state_single_view_pop-up_panel.json
+    viewport: [1200, 800]
+    steps:
+      - set: { active_tools: [], picking_mode: hover }
+      - mouse: { selector: ".v-card[data-field-name='PBLH']", x: 0.5, y: 0.45 }
+      - mouse: { selector: ".v-card[data-field-name='PBLH']", x: 0.52, y: 0.42 }
+      - wait_for: ".v-overlay--active table"
+    clip:
+      selector: ".v-overlay--active table"
+      pad: 0
+
+  # --- Saving images (saving_images.md) -------------------------------------
+  - name: image_download.png
+    page: saving_images.md
+    state: quickview-state_image_download.json
+    viewport: [1200, 700]
+    steps:
+      - set: { active_tools: [] }
+    clip:
+      selector:
+        - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-view-module)"
+        - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-format-color-fill)"
+        - ".v-card[data-field-name] .mdi-camera-outline >> nth=0"
+      from_left: true
+      pad: 12
+      extend: [0, 0, 140, 0]
+    highlight:
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-camera-outline)"
+      - ".v-card[data-field-name] .mdi-camera-outline >> nth=0"
+
+  - name: animation_download.png
+    page: saving_images.md
+    state: quickview-state_animation_download.json
+    viewport: [1400, 560]
+    steps:
+      - click: ".qv-toolbar-animation .mdi-download-multiple-outline"
+      - wait_for: ".v-overlay--active .v-list"
+    clip: *app_content
+    highlight:
+      - ".v-overlay--active .v-list"
+      - ".qv-toolbar-animation .mdi-download-multiple-outline"
+
+  - name: animation_scan_in_progress.png
+    page: saving_images.md
+    state: quickview-state_animation_download.json
+    viewport: [1400, 560]
+    steps:
+      # Show the in-progress button without starting a real export
+      - set: { animation_export: true }
+      - wait: 0.5
+    clip:
+      selector: ".qv-toolbar-animation .v-progress-circular"
+      pad: 10
+
+  # --- Variable selection (variable_selection.md) ---------------------------
+  - name: variable_list_none_selected.png
+    page: variable_selection.md
+    data:
+      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
+    viewport: [1000, 1000]
+    steps:
+      - set: { active_tools: ["select-fields"] }
+    clip:
+      selector: [".qv-main-toolbar", ".qv-variable-selection"]
+      pad: 0
+
+  - name: variable_list_all_selected.png
+    page: variable_selection.md
+    data:
+      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
+    viewport: [1000, 1000]
+    steps:
+      - set: { active_tools: ["select-fields"] }
+      - click: ".qv-variable-selection thead input[type=checkbox]"
+    clip:
+      selector: [".qv-main-toolbar", ".qv-variable-selection"]
+      pad: 0
+
+  - name: eye_icon_variations.png
+    page: variable_selection.md
+    data:
+      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
+    viewport: [1000, 700]
+    layout: vertical
+    gap: 6
+    clip:
+      selector:
+        - ".qv-variable-selection :is(.mdi-eye-outline, .mdi-eye-check-outline,
+          .mdi-eye-remove-outline)"
+        - ".qv-variable-selection .v-text-field .v-field"
+      pad: 6
+    panels:
+      - steps:
+          [
+            {
+              set:
+                {
+                  active_tools: ["select-fields"],
+                  visible_selection_icon_idx: 0,
+                },
+            },
+          ]
+      - steps:
+          [
+            {
+              set:
+                {
+                  active_tools: ["select-fields"],
+                  visible_selection_icon_idx: 1,
+                },
+            },
+          ]
+      - steps:
+          [
+            {
+              set:
+                {
+                  active_tools: ["select-fields"],
+                  visible_selection_icon_idx: 2,
+                },
+            },
+          ]
+
+  - name: filter_box_close.png
+    page: variable_selection.md
+    data:
+      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
+    viewport: [1000, 700]
+    steps:
+      - set: { active_tools: ["select-fields"], variables_filter: "h2so4" }
+      - hover: ".qv-variable-selection .v-text-field .v-field"
+    clip:
+      selector:
+        - ".qv-variable-selection .mdi-eye-outline"
+        - ".qv-variable-selection .v-text-field .v-field"
+      pad: 6
+
+  - name: filter_group.png
+    page: variable_selection.md
+    data:
+      simulation: EAMxx-MAM4xx_ne4pg2_202508.nc
+      connectivity: connectivity_ne4pg2_TEMPEST.scrip.nc
+    viewport: [1000, 700]
+    steps:
+      - set: { active_tools: ["select-fields"] }
+      # Select the first three variables of every dimension group
+      - eval: |
+          () => {
+            const seen = {};
+            const ids = trame.state.get('variables_listing')
+              .filter((v) => (seen[v.type] = (seen[v.type] || 0) + 1) <= 3)
+              .map((v) => v.id);
+            trame.state.set('variables_selected', ids);
+          }
+      - wait: 0.5
+      - click: ".qv-variable-selection .v-chip >> nth=2"
+    clip:
+      selector:
+        - ".qv-variable-selection .v-btn"
+        - ".qv-variable-selection .v-text-field .v-field"
+      pad: 8
+    highlight:
+      - ".qv-variable-selection .v-chip >> nth=2"
+      - ".qv-variable-selection .v-text-field .v-field"
+
+  # --- File selection (file_selection.md) -----------------------------------
+  - name: file-upload-outline.png
+    page: file_selection.md
+    icons: [mdi-file-upload-outline]
+    icon_size: 300
+
+  - name: file_loading_start_and_parent_dirs.png
+    page: file_selection.md
+    icons: [mdi-home, mdi-folder-upload-outline]
+
+  - name: file_loading_dialogue.png
+    page: file_selection.md
+    workdir: others
+    viewport: [1300, 900]
+    clip: viewport
+
+  - name: file_loaded.png
+    page: file_selection.md
+    data:
+      simulation: EAMv2_ne30pg2_small_cld.nc
+      connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
+    viewport: [1300, 960]
+    clip: viewport
+
+  - name: state_export_import.png
+    page: file_selection.md
+    state: quickview-state_state_import_export.json # data not available locally
+    viewport: [700, 500]
+    steps:
+      - click:
+          ".qv-main-toolbar-buttons
+          .v-list-item:has(.mdi-folder-arrow-left-right-outline)"
+      - wait_for: ".v-overlay--active .v-list"
+    clip:
+      selector: [".qv-main-toolbar-buttons", ".v-overlay--active .v-list"]
+      from_left: true
+      from_top: true
+      pad: 16
+    highlight:
+      - ".v-overlay--active .v-list"
+      - ".qv-main-toolbar-buttons
+        .v-list-item:has(.mdi-folder-arrow-left-right-outline)"
+
+  # --- UI overview and shortcuts (ui_overview.md, shortcuts.md) -------------
+  - name: quickview_ui.png
+    page: ui_overview.md
+    state: quickview-state_quickview_ui.json
+    viewport: [1800, 1020]
+    settle: 4.0
+    clip: viewport
+
+  - name: toolbar_compact_or_expanded.png
+    page: ui_overview.md
+    viewport: [1000, 700]
+    clip:
+      selector: ".qv-main-toolbar-buttons"
+      from_left: true
+      from_top: true
+      pad: 8
+    panels:
+      - steps: [{ set: { active_tools: [], compact_drawer: true } }]
+      - steps: [{ set: { active_tools: [], compact_drawer: false } }]
+
+  - name: shortcuts.png
+    page: shortcuts.md
+    viewport: [1500, 1400]
+    scale: 1
+    steps:
+      - set: { active_tools: [] }
+    clip: viewport
+
+  # --- Viewport layout (viewport_layout.md) ---------------------------------
+  - name: viewport_grouped_ungrouped.png
+    page: viewport_layout.md
+    icons: [mdi-focus-field, mdi-apps]
+
+  # The recipes below use data that is not available locally (v2_F20TR...);
+  # they are skipped until the data is found in a --data-dir.
+  - name: viewport_adjustment_toggles_central.png
+    page: viewport_layout.md
+    state: quickview-state_viewport_control.json
+    viewport: [1400, 720]
+    steps:
+      - set: { active_tools: ["adjust-layout"], layout_grouped: false }
+    clip: *app_content
+    highlight:
+      - [
+          ".qv-toolbar-layout .mdi-arrow-expand-vertical",
+          ".qv-toolbar-layout .mdi-fit-to-page-outline",
+        ]
+
+  - name: viewport_aspect_ratio.png
+    page: viewport_layout.md
+    state: quickview-state_viewport_control.json
+    viewport: [1400, 820]
+    steps:
+      - set:
+          {
+            active_tools: ["adjust-layout"],
+            show_aspect_ratio: true,
+            layout_grouped: false,
+          }
+    clip: *app_content
+    highlight:
+      - ".qv-toolbar-layout .v-sheet:has(.mdi-arrow-expand-vertical)"
+
+  - name: viewport_zoom_in_out_auto.png
+    page: viewport_layout.md
+    state: quickview-state_viewport_control.json
+    viewport: [1400, 820]
+    steps:
+      - set:
+          {
+            active_tools: ["adjust-layout"],
+            show_zoom_controls: true,
+            layout_grouped: false,
+          }
+    clip: *app_content
+    highlight:
+      - ".qv-toolbar-layout .v-sheet:has(.mdi-magnify-plus-cursor)"
+      - ".qv-toolbar-layout .mdi-fit-to-page-outline"
+
+  - name: viewport_pan.png
+    page: viewport_layout.md
+    state: quickview-state_viewport_control.json
+    viewport: [1400, 820]
+    steps:
+      - set:
+          {
+            active_tools: ["adjust-layout"],
+            show_pan_controls: true,
+            layout_grouped: false,
+          }
+    clip: *app_content
+    highlight:
+      - ".qv-toolbar-layout .v-sheet:has(.mdi-pan)"
+
+  - name: viewport_with_column_size_menu.png
+    page: viewport_layout.md
+    state: quickview-state_viewport_control.json
+    viewport: [1400, 820]
+    steps:
+      - set: { active_tools: ["adjust-layout", "select-fields"] }
+      - click: ".qv-toolbar-layout .mdi-view-column"
+      - wait_for: ".v-overlay--active .v-list"
+    clip: viewport
+    highlight:
+      - ".v-overlay--active .v-list"
+      - ".qv-toolbar-layout .mdi-view-column"
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-view-module)"
+
+  - name: variable_selection_in_viewport_when_ungrouped.png
+    page: viewport_layout.md
+    state: quickview-state_viewport_control.json
+    viewport: [1400, 720]
+    steps:
+      - set: { active_tools: [], layout_grouped: false }
+      - click: ".v-card[data-field-name] div.text-subtitle-2 >> nth=1"
+      - wait_for: ".v-overlay--active .v-list"
+    clip: *app_content
+    highlight: ".v-overlay--active .v-list"
