@@ -23,7 +23,7 @@ The first three members of the family are
 The tools currently support cubed-sphere horizontal meshes
 consisting of either Gauss-Lobatto-Legendre (GLL) nodes (i.e., the `ne*np4` grids)
 or finite-volume style grid cells (`ne*pg2`, `ne*pg3`, etc.).
-Sample visulizations showing
+Sample visualizations showing
 simulation output from the EAM, ELM, and CAM-SE models
 can be found in the [gallery](/gallery/).
 
@@ -79,11 +79,11 @@ to show or hide these control panels.
 All tools in the QuickView family are designed to simultaneously present multiple
 images and/or charts to help the user identify relationships and distinctions.
 In QuickView,
-the size, sequence, and arrangment of the contour plots can be easily adjusted
+the size, sequence, and arrangement of the contour plots can be easily adjusted
 through the [viewport-layout control panel](/guides/quickview/viewport_layout) and
 [keyboard shortcuts](/guides/quickview/shortcuts).
 In QuickCompare, additional buttons and mini-menus are provided for
-configurating a comparison [between two simulations](/guides/quickcompare/two-sim_comparison.md)
+configuring a comparison [between two simulations](/guides/quickcompare/two-sim_comparison.md)
 or [across an ensemble](/guides/quickcompare/multi-sim_comparison.md).
 
 
