@@ -20,6 +20,13 @@ The viewport is evenly divided into the selected number of columns.
 When the user changes the width of their browser window,
 the individual views are automatically readjusted.
 
+The same menu also offers two automatic arrangements:
+
+- **Auto** (key `0`): the number of columns is chosen based on the number of
+  views being displayed (per group when views are grouped).
+- **Auto flow** (key `=`): views are not given a fixed column width and
+  instead share the available width of each row equally.
+
 ![Viewport column size](./screenshots/viewport_with_column_size_menu.png){ width="100%", align=center }
 
 ## Grouped or ungrouped views
