@@ -70,7 +70,7 @@ so that fewer clicks are needed in the file search.
 
 ## Resume mode: picking up where you left off {#state-files}
 
-![State explort and import](./screenshots/state_export_import.png){ width="28%", align=right }
+![State export and import](./screenshots/state_export_import.png){ width="28%", align=right }
 
 The current state of the analysis session can be saved—and reloaded later to resume
 the analysis—using the `State Import/Export` button in the vertical toolbar
