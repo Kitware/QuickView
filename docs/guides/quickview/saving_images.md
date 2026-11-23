@@ -7,8 +7,10 @@ or animations for presentations and manuscripts, etc.:
 
 ![image download](./screenshots/image_download.png){ width="30%", align=right }
 
-- A click on the **camera icon** at the end of the vertical **toolbar** saves the entire
-  viewport—in its current layout—to the local computer as `Viewport.png`.
+- A click on the **camera icon** (**Capture viewport as png**) near the end of the vertical
+  **toolbar** saves the entire viewport—in its current layout—to the local computer as a `.png` file.
+  The file name starts with `Viewport`, followed by the names and indices of the loaded dimensions,
+  e.g., `Viewport-lev-71.png`.
 
 - A click on the **camera icon** next to the variable name **inside a view panel**
   saves that single view as a `.png` file. The file name starts with the variable name;
