@@ -44,9 +44,9 @@ used for interpolating data to regular late-lon grids.
 Further information can be found on [the linked page](/guides/connectivity.md).
 :::
 
-::: tip Consistency between connecitivity and simulation files
+::: tip Consistency between connectivity and simulation files
 One of the often encountered causes of error when loading files in the QuickView family is
-that the horizontal grid described by the connecitivity file does not match the grid in the
+that the horizontal grid described by the connectivity file does not match the grid in the
 simulation file. In such a case, after the user has specified those files
 and clicked the `Load files` button (see more detailed description [here](/guides/quickview/file_selection#new-analysis)),
 the file loading dialogue window will
