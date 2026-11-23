@@ -82,3 +82,76 @@ Apache Software License - see [LICENSE](LICENSE) file for details.
 Semantic release rely on
 [conventional commits](https://www.conventionalcommits.org/) to generate new
 releases and changelog.
+
+## Claude Code skills
+
+The repository ships [Claude Code](https://claude.com/claude-code) skills under
+[`.claude/skills/`](https://github.com/Kitware/QuickView/tree/master/.claude/skills)
+to automate recurring maintenance tasks. In a Claude Code session started at the
+root of the repository, invoke them with a slash command (or simply ask for the
+task, e.g. "validate my changes", and Claude picks the matching skill).
+
+### `/validate`: check code and documentation
+
+Runs the checks expected before a commit or pull request, then reviews
+documentation drift.
+
+```text
+/validate              # changes since the merge-base with origin/master, plus uncommitted files
+/validate all          # the whole repository
+/validate docs         # default scope, documentation-related review only
+/validate code         # default scope, code-related review only
+/validate HEAD~3       # changes since a given git ref
+```
+
+1. **Deterministic checks** (`.claude/skills/validate/scripts/check.py`):
+   pre-commit hooks with auto-fix (ruff, prettier, whitespace), codespell
+   (reported, never fixed without asking), version consistency across the
+   semantic-release files, JSON validity, Conventional Commit subjects,
+   `python -m e3sm_quickview.app --help`, and the VitePress docs build
+   (dead links).
+2. **Review** guided by a doc-to-code map
+   (`.claude/skills/validate/references/doc-code-map.md`): keyboard shortcuts,
+   CLI options, UI labels, state file contents, CI and developer docs, and
+   configuration paths are compared with the code.
+
+It ends with a report (auto-fixed files, blocking issues, should-fix items,
+nits, skipped checks). Formatter fixes are applied to the working tree; other
+findings are proposed and only applied once you agree, except unambiguous
+factual corrections (e.g., a wrong key letter or file path).
+
+Requirements: `pre-commit`, QuickView importable from the current Python or a
+`quickview` conda env (for the startup check; skipped otherwise), and `npm`
+for the docs build (dependencies are installed with `npm ci` when missing).
+
+### `/screenshots`: regenerate the documentation screenshots
+
+Recreates the images in `docs/guides/quickview/screenshots/` from the current
+code by replaying one recipe per image
+(`.claude/skills/screenshots/recipes.yaml`): the state file or data to load,
+the UI steps, the crop, and the red highlight boxes.
+
+```text
+/screenshots                                    # all images
+/screenshots map_projections.png quickview_ui.png   # only these
+```
+
+The skill can also be run directly:
+
+```sh
+uv run .claude/skills/screenshots/scripts/capture.py --out /tmp/qv-shots   # review first
+uv run .claude/skills/screenshots/scripts/capture.py                       # overwrite the docs images
+uv run .claude/skills/screenshots/scripts/capture.py --list                # list the recipes
+```
+
+Each capture starts a fresh QuickView server and drives the locally installed
+Google Chrome through Playwright. The run prints a work directory with a
+before/after `review.png`, which Claude checks image by image before keeping
+the result. Images whose data files cannot be found are skipped and keep their
+current version.
+
+Requirements: [`uv`](https://docs.astral.sh/uv/), Google Chrome, a Python
+environment with QuickView installed (the `quickview` conda env by default, or
+`--python` / `QUICKVIEW_PYTHON`), and the data files referenced by the
+screenshot state files, searched by file name under `../Data` next to the
+repository (or `--data-dir` / `QUICKVIEW_DATA`).
