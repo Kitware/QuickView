@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import time
+import warnings
 from functools import partial
 from pathlib import Path
 
@@ -24,8 +25,34 @@ from e3sm_quickview.view_manager import ViewManager
 v3.enable_lab()
 
 
+def ensure_event_loop():
+    """Make sure the current thread has an event loop before the server starts.
+
+    Widgets and components schedule tasks while the UI is being built, which
+    happens before the server loop is running. Python 3.12+ deprecates the
+    implicit loop creation of asyncio.get_event_loop() and 3.14 removes it, so
+    create and register the loop explicitly. This is also the loop that wslink
+    picks up when the server starts.
+    """
+    try:
+        return asyncio.get_running_loop()
+    except RuntimeError:
+        pass
+
+    try:
+        with warnings.catch_warnings():
+            # Python 3.12-3.13 warn when implicitly creating a loop
+            warnings.simplefilter("ignore", DeprecationWarning)
+            return asyncio.get_event_loop()
+    except RuntimeError:  # Python 3.14+: no implicit loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
+
 class EAMApp(TrameApp):
     def __init__(self, server=None):
+        ensure_event_loop()
         super().__init__(server)
 
         # Pre-load deferred widgets
