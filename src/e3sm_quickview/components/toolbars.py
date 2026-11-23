@@ -215,7 +215,7 @@ class Layout(v3.VToolbar):
                                         classes="ml-6 mt-n1",
                                     )
                             with v3.VListItem(
-                                title="Full Width",
+                                title="1 column",
                                 click=(
                                     apply_size,
                                     "[1]",
@@ -229,7 +229,7 @@ class Layout(v3.VToolbar):
                                         classes="ml-6 mt-n1",
                                     )
                             with v3.VListItem(
-                                title="2 Columns",
+                                title="2 columns",
                                 click=(
                                     apply_size,
                                     "[2]",
@@ -243,7 +243,7 @@ class Layout(v3.VToolbar):
                                         classes="ml-6 mt-n1",
                                     )
                             with v3.VListItem(
-                                title="3 Columns",
+                                title="3 columns",
                                 click=(
                                     apply_size,
                                     "[3]",
@@ -257,7 +257,7 @@ class Layout(v3.VToolbar):
                                         classes="ml-6 mt-n1",
                                     )
                             with v3.VListItem(
-                                title="4 Columns",
+                                title="4 columns",
                                 click=(
                                     apply_size,
                                     "[4]",
@@ -271,7 +271,7 @@ class Layout(v3.VToolbar):
                                         classes="ml-6 mt-n1",
                                     )
                             with v3.VListItem(
-                                title="6 Columns",
+                                title="6 columns",
                                 click=(
                                     apply_size,
                                     "[6]",
