@@ -1,11 +1,11 @@
-# Simulation Files 
+# Simulation Files
 
 The QuickView family of tools has been developed using simulation files
 from the E3SM Atmosphere Model, EAM, and the land model ELM.
 A small collection of sample files can be found on
 [Zenodo](https://zenodo.org/records/16922607).
 
-## The horizontal dimension 
+## The horizontal dimension
 
 Starting from QuickView version 2 and QuickCompare version 1,
 the data reader used in the tool family
@@ -51,4 +51,3 @@ calculated and displayed.
 When a variable has an attribute named `missing_value` or `_FillValue`, the value
 is converted to NaN and ignored in the calculation of global averages and for
 the visualization.
-

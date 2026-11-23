@@ -4,7 +4,7 @@
 
 SiteView is an open-source, interactive visualization
 tool designed for the atmosphere component, EAM, of the Earth system model [E3SM](https://e3sm.org).
-It uses 
+It uses
 [VTK](https://vtk.org/) as the analysis and visualization engine
 and leverages
 [trame](https://www.kitware.com/trame-architecture-and-capabilities/)

@@ -10,7 +10,7 @@
 - *Optional*: download
   [sample simulation files](https://portal.nersc.gov/project/m4359/huiwan/vis/202601_group_compare/) to test the app.
 
-- Concepts 
+- Concepts
   - [Connectivity files: what are they?](/guides/connectivity)
   - [Simulation files: what is supported?](/guides/simulation_data)
   - [State files: how to use them?](/guides/quickcompare/file_selection#state-files)
@@ -35,4 +35,3 @@
 
 - Visit the GitHub [repository](https://github.com/Kitware/E3SMQuickCompare)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/E3SMQuickCompare/issues)
-

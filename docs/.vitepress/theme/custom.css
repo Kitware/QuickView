@@ -11,7 +11,7 @@
 }
 
 /* --------------------------------------------------------------- */
-/* For the webnews page 
+/* For the webnews page
 /* --------------------------------------------------------------- */
 /* Start each news item's icons below any preceding floated icons. */
 .news-page .vp-doc p:has(img[align="right"]) {
@@ -47,10 +47,10 @@
 }
 
 /* --------------------------------------------------------------- */
-/* Gallery 
+/* Gallery
 /* --------------------------------------------------------------- */
 .example-references {
-  margin: .75rem 0;
+  margin: 0.75rem 0;
   padding-left: 1.25rem;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }

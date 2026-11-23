@@ -20,54 +20,26 @@
     "aspect-ratio": 0.5,
     "grouped": true,
     "active": "auto_layout",
-    "tools": [
-      "adjust-layout",
-      "select-fields"
-    ],
+    "tools": ["adjust-layout", "select-fields"],
     "help": false,
     "camera": {
       "zoom": 10018444.38132521,
-      "position": [
-        0.0,
-        0.0,
-        77928734.37784009
-      ],
-      "focal_point": [
-        0.0,
-        0.0,
-        0.5
-      ],
-      "view_up": [
-        0.0,
-        1.0,
-        0.0
-      ],
-      "clipping_range": [
-        77149445.54406169,
-        79097666.1385077
-      ]
+      "position": [0.0, 0.0, 77928734.37784009],
+      "focal_point": [0.0, 0.0, 0.5],
+      "view_up": [0.0, 1.0, 0.0],
+      "clipping_range": [77149445.54406169, 79097666.1385077]
     }
   },
   "data-selection": {
-    "crop_longitude": [
-      -180,
-      180
-    ],
-    "crop_latitude": [
-      -90,
-      90
-    ],
-    "projection": [
-      "Mollweide"
-    ],
+    "crop_longitude": [-180, 180],
+    "crop_latitude": [-90, 90],
+    "projection": ["Mollweide"],
     "animation_track": "ilev",
     "ilev_idx": 60
   },
   "views": [
     {
-      "type": [
-        "ncol"
-      ],
+      "type": ["ncol"],
       "name": "area",
       "config": {
         "preset": "BuGnYl",
@@ -81,20 +53,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          0.0004909351566060577,
-          0.0006852333184023954
-        ],
+        "color_range": [0.0004909351566060577, 0.0006852333184023954],
         "color_value_min": "0.0004909351566060577",
         "color_value_max": "0.0006852333184023954"
       }
     },
     {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
+      "type": ["time", "ilev", "ncol"],
       "name": "WP2_CLUBB",
       "config": {
         "preset": "BuGnYl",
@@ -108,20 +73,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": true,
-        "color_range": [
-          0.0,
-          0.4
-        ],
+        "color_range": [0.0, 0.4],
         "color_value_min": "0.",
         "color_value_max": "0.4"
       }
     },
     {
-      "type": [
-        "time",
-        "ilev",
-        "ncol"
-      ],
+      "type": ["time", "ilev", "ncol"],
       "name": "WP3_CLUBB",
       "config": {
         "preset": "BuGnYl",
@@ -135,19 +93,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": true,
-        "color_range": [
-          -0.01,
-          0.21146179735660553
-        ],
+        "color_range": [-0.01, 0.21146179735660553],
         "color_value_min": "-0.01",
         "color_value_max": "0.21146179735660553"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "AODALL",
       "config": {
         "preset": "BuGnYl",
@@ -161,19 +113,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          0.003976484294980764,
-          0.9792347550392151
-        ],
+        "color_range": [0.003976484294980764, 0.9792347550392151],
         "color_value_min": "0.003976484294980764",
         "color_value_max": "0.9792347550392151"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "AODDUST",
       "config": {
         "preset": "BuGnYl",
@@ -187,19 +133,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          0.00033132260432466865,
-          0.9041456580162048
-        ],
+        "color_range": [0.00033132260432466865, 0.9041456580162048],
         "color_value_min": "0.00033132260432466865",
         "color_value_max": "0.9041456580162048"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "AODBC",
       "config": {
         "preset": "BuGnYl",
@@ -213,10 +153,7 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          0.00016381885507144034,
-          0.1280982941389084
-        ],
+        "color_range": [0.00016381885507144034, 0.1280982941389084],
         "color_value_min": "0.00016381885507144034",
         "color_value_max": "0.1280982941389084"
       }

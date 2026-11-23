@@ -1,34 +1,46 @@
-import { resolve } from 'node:path'
-import { createContentLoader, createMarkdownRenderer } from 'vitepress'
+import { resolve } from "node:path";
+import { createContentLoader, createMarkdownRenderer } from "vitepress";
 
 // Only metadata goes into the gallery bundle; explanations stay on example pages.
-export default createContentLoader('gallery/examples/*.md', {
+export default createContentLoader("gallery/examples/*.md", {
   async transform(pages) {
-    const markdown = await createMarkdownRenderer(resolve('docs'))
-    const ids = new Set()
-    return pages.map(({ url, frontmatter: example }) => {
-      if (!example.id || ids.has(example.id)) {
-        throw new Error(`Gallery example needs a unique id: ${url}`)
-      }
-      ids.add(example.id)
-      for (const field of ['tools', 'models', 'gridConfigurations', 'gridRepresentations', 'meshDesignations', 'images']) {
-        if (!Array.isArray(example[field]) || !example[field].length) {
-          throw new Error(`Missing gallery field ${field}: ${url}`)
+    const markdown = await createMarkdownRenderer(resolve("docs"));
+    const ids = new Set();
+    return pages
+      .map(({ url, frontmatter: example }) => {
+        if (!example.id || ids.has(example.id)) {
+          throw new Error(`Gallery example needs a unique id: ${url}`);
         }
-      }
-      for (const media of example.images) {
-        if (!media.src || !media.alt || !media.caption) {
-          throw new Error(`Gallery media needs src, alt and caption: ${url}`)
+        ids.add(example.id);
+        for (const field of [
+          "tools",
+          "models",
+          "gridConfigurations",
+          "gridRepresentations",
+          "meshDesignations",
+          "images",
+        ]) {
+          if (!Array.isArray(example[field]) || !example[field].length) {
+            throw new Error(`Missing gallery field ${field}: ${url}`);
+          }
         }
-      }
-      return {
-        ...example,
-        url,
-        images: example.images.map(media => ({
-          ...media,
-          captionHtml: markdown.renderInline(media.caption),
-        })),
-      }
-    }).sort((a, b) => (a.order ?? 100) - (b.order ?? 100) || a.title.localeCompare(b.title))
-  }
-})
+        for (const media of example.images) {
+          if (!media.src || !media.alt || !media.caption) {
+            throw new Error(`Gallery media needs src, alt and caption: ${url}`);
+          }
+        }
+        return {
+          ...example,
+          url,
+          images: example.images.map((media) => ({
+            ...media,
+            captionHtml: markdown.renderInline(media.caption),
+          })),
+        };
+      })
+      .sort(
+        (a, b) =>
+          (a.order ?? 100) - (b.order ?? 100) || a.title.localeCompare(b.title),
+      );
+  },
+});

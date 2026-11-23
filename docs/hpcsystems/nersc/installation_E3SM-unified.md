@@ -12,7 +12,7 @@ are expected to take the following steps:
 2. Activate the E3SM-Unified environment using the following command (for login nodes and CPU nodes):
    ```
    source /global/common/software/e3sm/anaconda_envs/load_latest_e3sm_unified_pm-cpu.sh
-   ``` 
+   ```
 3. Launch QuickView or QuickCompare by running the command `quickview` or `quickcompare` in the terminal.
 4. Open the URL printed in the terminal to access the graphical interface in a web browser on the local computer.
 

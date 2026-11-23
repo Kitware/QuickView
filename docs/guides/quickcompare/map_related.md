@@ -44,4 +44,3 @@ to specify the **"map center"**:
 When the center longitude is changed, the full available range of the longitude
 slider automatically adjusts to span 180° west and east of the new center
 longitude. The latitude slider always spans from 90°S to 90°N.
-

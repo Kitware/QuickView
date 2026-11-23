@@ -28,7 +28,7 @@ To deliver pre-compiled standalone desktop applications,
 we use [PyInstaller](https://pyinstaller.org/en/stable/) and [Tauri](https://tauri.app/)
 to bundle each of our Python-based tools and their dependencies
 into a standalone graphical application.
-The creation of such a bundle is done by triggering a release using GitHub Actions. 
+The creation of such a bundle is done by triggering a release using GitHub Actions.
 Hence, the bundles are available from the corresponding GitHub repo's Releases page.
 The links are given in the summary table above.
 
@@ -65,7 +65,7 @@ conda install conda-forge::e3sm-quickview
 conda install conda-forge::e3sm_compareview
 ```
 
-### Updating to new versions 
+### Updating to new versions
 
 To update the tools to newer versions, first find the most recent version
 numbers using the links in the summary table above,
@@ -102,7 +102,7 @@ loaded various plugins, and then provide an URL similar to `http://localhost:503
 (your actual number will likely be different).
 **Enter the URL into a web browser** to access the graphical UL.
 
- 
+
 :::tip Tip: First execution on macOS
 On macOS, the first execution after installation via conda will also take a while
 (e.g., a minute or more),

@@ -8,64 +8,31 @@
     "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
     "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
   },
-  "variables-selection": [
-    "AODALL",
-    "AODBC",
-    "num_a1",
-    "num_a2"
-  ],
+  "variables-selection": ["AODALL", "AODBC", "num_a1", "num_a2"],
   "layout": {
     "aspect-ratio": 0.5,
     "grouped": false,
     "active": "auto_layout",
-    "tools": [
-      "animation-controls"
-    ],
+    "tools": ["animation-controls"],
     "help": false,
     "camera": {
       "zoom": 9561555.450027756,
-      "position": [
-        0.0,
-        0.0,
-        73673405.62958878
-      ],
-      "focal_point": [
-        0.0,
-        0.0,
-        0.5
-      ],
-      "view_up": [
-        0.0,
-        1.0,
-        0.0
-      ],
-      "clipping_range": [
-        72461319.21669145,
-        75376876.26347312
-      ]
+      "position": [0.0, 0.0, 73673405.62958878],
+      "focal_point": [0.0, 0.0, 0.5],
+      "view_up": [0.0, 1.0, 0.0],
+      "clipping_range": [72461319.21669145, 75376876.26347312]
     }
   },
   "data-selection": {
-    "crop_longitude": [
-      -180,
-      180
-    ],
-    "crop_latitude": [
-      -90,
-      90
-    ],
-    "projection": [
-      "Robinson"
-    ],
+    "crop_longitude": [-180, 180],
+    "crop_latitude": [-90, 90],
+    "projection": ["Robinson"],
     "animation_track": "lev",
     "lev_idx": 1
   },
   "views": [
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "AODALL",
       "config": {
         "preset": "BuGnYl",
@@ -79,19 +46,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          0.01264046598225832,
-          1.01161527633667
-        ],
+        "color_range": [0.01264046598225832, 1.01161527633667],
         "color_value_min": "0.01264046598225832",
         "color_value_max": "1.01161527633667"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "AODBC",
       "config": {
         "preset": "BuGnYl",
@@ -105,20 +66,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          0.0006716852076351643,
-          0.08890804648399353
-        ],
+        "color_range": [0.0006716852076351643, 0.08890804648399353],
         "color_value_min": "0.0006716852076351643",
         "color_value_max": "0.08890804648399353"
       }
     },
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a1",
       "config": {
         "preset": "BuGnYl",
@@ -132,20 +86,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          2050.944091796875,
-          30090.498046875
-        ],
+        "color_range": [2050.944091796875, 30090.498046875],
         "color_value_min": "2050.944091796875",
         "color_value_max": "30090.498046875"
       }
     },
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a2",
       "config": {
         "preset": "BuGnYl",
@@ -159,10 +106,7 @@
         "offset": 0,
         "break_row": false,
         "override_range": false,
-        "color_range": [
-          7832657.0,
-          9135130.0
-        ],
+        "color_range": [7832657.0, 9135130.0],
         "color_value_min": "7832657.0",
         "color_value_max": "9135130.0"
       }

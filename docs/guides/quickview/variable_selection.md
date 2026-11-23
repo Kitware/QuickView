@@ -39,7 +39,7 @@ we get the second screenshot shown here.
 Note that at this point, QuickView has *not* loaded all the variables into memory.
 It has finished a scan and *is ready to load* these variables.
 
-## Variable search 
+## Variable search
 
 Below the variable group tabs and above the list of variables,
 there is a text input box with a magnifying glass icon.

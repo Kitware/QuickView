@@ -25,9 +25,19 @@ def add_tunnel(host, control_socket, remote_port):
             sock.bind(("127.0.0.1", 0))
             local_port = sock.getsockname()[1]
         result = subprocess.run(
-            ["ssh", "-S", control_socket, "-O", "forward", "-L",
-             f"127.0.0.1:{local_port}:localhost:{remote_port}", host],
-            capture_output=True, text=True, timeout=15,
+            [
+                "ssh",
+                "-S",
+                control_socket,
+                "-O",
+                "forward",
+                "-L",
+                f"127.0.0.1:{local_port}:localhost:{remote_port}",
+                host,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
         )
         if result.returncode == 0:
             return local_port
@@ -37,8 +47,11 @@ def add_tunnel(host, control_socket, remote_port):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("host", help="username@chrysalis.lcrc.anl.gov or SSH alias")
-    parser.add_argument("--command", default=REMOTE_COMMAND,
-                        help="Override the remote setup and launch command")
+    parser.add_argument(
+        "--command",
+        default=REMOTE_COMMAND,
+        help="Override the remote setup and launch command",
+    )
     args = parser.parse_args()
     if args.host.startswith("-"):
         parser.error("The SSH destination cannot start with '-'.")
@@ -47,12 +60,29 @@ def main():
     with tempfile.TemporaryDirectory(prefix="qv-", dir="/tmp") as directory:
         control_socket = f"{directory}/ssh"
         process = subprocess.Popen(
-            ["ssh", "-tt", "-x", "-M", "-S", control_socket,
-             "-o", "ControlPersist=no", "-o", "ExitOnForwardFailure=yes",
-             "-o", "ServerAliveInterval=30", "-o", "ServerAliveCountMax=3",
-             args.host, remote_command],
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            text=True, encoding="utf-8", errors="replace",
+            [
+                "ssh",
+                "-tt",
+                "-x",
+                "-M",
+                "-S",
+                control_socket,
+                "-o",
+                "ControlPersist=no",
+                "-o",
+                "ExitOnForwardFailure=yes",
+                "-o",
+                "ServerAliveInterval=30",
+                "-o",
+                "ServerAliveCountMax=3",
+                args.host,
+                remote_command,
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         opened = False
         suppress_application_url = False
@@ -113,4 +143,3 @@ if __name__ == "__main__":
     except (OSError, RuntimeError, subprocess.SubprocessError) as error:
         print(f"\nError: {error}", file=sys.stderr)
         sys.exit(1)
-

@@ -14,7 +14,7 @@ This designation can be changed through the **Organize simulation collection** d
 - enter a custom label for each simulation, which is used in the plot titles;
 - exclude a loaded simulation from the viewport while keeping it loaded so that it can be re-enabled later;
 - designate a different simulation as the control simulation;
-- change the display order of the simulations. 
+- change the display order of the simulations.
 
 ![Multi-sim comparison: organize simulation collection](/guides/quickcompare/screenshots/multi-sim_organize_simulation_collection.png){ width="100%", align=center }
 
@@ -23,7 +23,7 @@ The simulation to be used as control can also be specified using the **Choose Ct
 ![Multi-sim comparison: choose ctrl drop-down](/guides/quickcompare/screenshots/multi-sim_choose_ctrl_drop-down.png){ width="100%", align=center }
 
 ## Comparison types
- 
+
 Four types of comparison are available:
 
 1. **Value**: the values of the physical quantities loaded from simulation files.
@@ -48,12 +48,12 @@ Let us assume the user has loaded `Ns` simulations and then
 [selects and loads](/guides/quickview/variable_selection) `Nv` variables,
 resulting in a viewport displaying `Ns × Nv` plots (views) grouped by variable.
 Each variable occupies a section consisting of `Ns` views, one for each simulation.
-Since `Ns` may be large, a section can span multiple rows. 
+Since `Ns` may be large, a section can span multiple rows.
 The number of views per row can be changed using the number keys `1`, `2`, `3`, `4`, or `6`.
 
 ## Variable sections {#sections}
 
-Each section in a viewport is identified by a vertical bar 
+Each section in a viewport is identified by a vertical bar
 in the color that matches the corresponding variable shape tab
 shown near the top of the
 [Variable Selection](/guides/quickview/variable_selection#variable-groups) control panel.
@@ -97,8 +97,8 @@ Any change to the display order is applied consistently to every variable sectio
 
 To facilitate quantitative comparisons between simulations, the multi-simulation
 mode in QuickCompare uses the following default color mapping choices:
-  
-- Within each variable section, all plots of the same comparison type 
+
+- Within each variable section, all plots of the same comparison type
   share the same colormap and contour levels, allowing values to be compared directly by color.
 - Difference and relative difference plots use diverging colormaps centered at zero.
 - Difference and relative difference plots use different colormaps to
@@ -109,4 +109,3 @@ functionality as QuickView. Each plot in the viewport can be customized
 individually through the dialogue window opened by clicking its colorbar, as
 described in the
 [QuickView user guide](/guides/quickview/individual_views).
-

@@ -16,35 +16,20 @@
     "aspect-ratio": 1.7,
     "grouped": true,
     "active": "auto_layout",
-    "tools": [
-      "select-slice-time",
-      "adjust-databounds",
-      "adjust-layout"
-    ],
+    "tools": ["select-slice-time", "adjust-databounds", "adjust-layout"],
     "help": false
   },
   "data-selection": {
     "time_idx": 50,
     "midpoint_idx": 0,
     "interface_idx": 0,
-    "crop_longitude": [
-      -180,
-      -60
-    ],
-    "crop_latitude": [
-      -30,
-      30
-    ],
-    "projection": [
-      "Mollweide"
-    ]
+    "crop_longitude": [-180, -60],
+    "crop_latitude": [-30, 30],
+    "projection": ["Mollweide"]
   },
   "views": [
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "LW_flux_up_at_model_top",
       "config": {
         "preset": "BuGnYl",
@@ -55,19 +40,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": true,
-        "color_range": [
-          30.0,
-          300.0
-        ],
+        "color_range": [30.0, 300.0],
         "color_value_min": "30",
         "color_value_max": "300"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "precip_total_surf_mass_flux",
       "config": {
         "preset": "erdc_iceFire_H",
@@ -78,10 +57,7 @@
         "offset": 0,
         "break_row": false,
         "override_range": true,
-        "color_range": [
-          1e-10,
-          1e-05
-        ],
+        "color_range": [1e-10, 1e-5],
         "color_value_min": "1e-10",
         "color_value_max": "1e-05"
       }

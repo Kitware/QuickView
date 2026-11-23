@@ -27,11 +27,11 @@ conda create --prefix /global/common/software/m4359/conda-envs/quickview-family 
 
 ```
 conda activate /global/common/software/m4359/conda-envs/quickview-family
-conda install conda-forge::e3sm-quickview 
-conda install conda-forge::e3sm_compareview 
+conda install conda-forge::e3sm-quickview
+conda install conda-forge::e3sm_compareview
 ```
 
-## Updating to newer versions 
+## Updating to newer versions
 
 Different members of the QuickView tool family are versioned separately.
 The current (newest) version numbers are summarized in the table at the beginning

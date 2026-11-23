@@ -1,25 +1,25 @@
 ---
 # Identity and display order
-id: musicav0_conus 
-order: 61 
+id: musicav0_conus
+order: 61
 title: MUSICAv0 CONUS simulations
 
 # Filter values
 tools:
 - QuickView
 models:
-- CAM-SE 
-- MUSICA 
+- CAM-SE
+- MUSICA
 gridConfigurations:
 - Regionally refined
 gridRepresentations:
 - GLL
 meshDesignations:
-- np4 
+- np4
 
 # Media
 images:
-- src: /gallery/examples/gallery_musicav0_conus_ozone.png 
+- src: /gallery/examples/gallery_musicav0_conus_ozone.png
   alt: Near-surface ozone concentrations from MUSICAv0 CONUS simulations
   caption: Near-surface ozone concentrations are shown in [QuickView](/guides/quickview/index)
     using data from the Community MUSICAv0 CONUS simulations

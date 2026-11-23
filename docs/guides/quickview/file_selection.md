@@ -60,7 +60,7 @@ the *start directory* is the directory in which the app is launched via a shell 
 After launch, the File Loading dialogue window
 shows the contents in that directory, and the user can double click
 the listed subdirectories to go in–or use the folder icon with an upward arrow
-to go to the parent directory. A click on the house icon brings the file browser 
+to go to the parent directory. A click on the house icon brings the file browser
 back to the start directory.
 Because of this concept of the start directory, we recommend that
 users launch QuickView in a directory close to their data
@@ -91,4 +91,3 @@ to a different simulation data file, then the file names and paths
 at the beginning of the state file need to be edited before the state
 file is loaded in the app.
 :::
-

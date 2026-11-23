@@ -29,7 +29,7 @@ QuickView's UI contains three main components.
   The toolbar is shown in a collapsed mode by default, but
   will change into an expanded mode if the user clicks on the
   colorful QuickView icon at the top of the toolbar or press the
-  `H` key on the keyboard. 
+  `H` key on the keyboard.
 
 
 <!-- ## Tooltips and visual cues -->

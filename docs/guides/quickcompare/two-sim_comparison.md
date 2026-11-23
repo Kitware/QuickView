@@ -87,5 +87,3 @@ functionality as QuickView. Each plot in the viewport can be customized
 individually through the dialogue window opened by clicking its colorbar, as
 described in the
 [QuickView user guide](/guides/quickview/individual_views).
-
-
