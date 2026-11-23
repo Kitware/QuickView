@@ -51,3 +51,23 @@ calculated and displayed.
 When a variable has an attribute named `missing_value` or `_FillValue`, the value
 is converted to NaN and ignored in the calculation of global averages and for
 the visualization.
+
+## Large files: rechunking for faster slicing {#chunking}
+
+For very large files, such as high-resolution output on `ne1024` grids,
+the time needed to read one slice depends strongly on how the file is chunked
+on disk. QuickView installs a `quickview-chunk` command that rewrites a file
+with a layout suited to slice-by-slice reading: each chunk holds about one
+million columns (about 4 MB at single precision) and a single index of every
+other dimension.
+
+```sh
+quickview-chunk --input monthly_ne1024.nc
+```
+
+The output is written next to the input file, with `.nc` replaced by
+`.chunked.nc`, unless a name is given with `--output`.
+An existing output file is overwritten. The output is not compressed,
+so it can be larger than the input file.
+Only variables with an `ncol` dimension are rechunked;
+the other variables are copied as they are.

@@ -105,6 +105,9 @@ In the `REMOTE_COMMAND` block, add a line like the following immediately after
 " && cd /path/to/data/directory/ "
 ```
 The tool will then use the specified directory as its home directory.
+For QuickView, the same can be achieved without `cd` by adding
+`--workdir /path/to/data/directory/` to the `quickview` command
+(see [Command-line options](/guides/install_and_launch#cli)).
 
 #### Tip 2. Create symbolic links to frequently used directories
 
