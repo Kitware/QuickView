@@ -27,10 +27,11 @@ the same commands (executables) are used to launch our tools in the QuickView fa
 :::
 
 ::: tip Tip 3: No need for manual `module load conda`.
-When the commands provided above are used to launch tools in the QuickView family,
+When the commands listed on the [launching page](launching) are used to start tools
+in the QuickView family from a JupyterHub terminal,
 there is no need to manually apply `module load conda` or activate the conda environment
-in which the tools are installed. This is because the commands mentioned earlier
-on this page are in fact scripts that have included those steps.
+in which the tools are installed. This is because those commands
+are in fact scripts that have included those steps.
 :::
 
 ::: warning ATTENTION: Shut down the server when you are done!
