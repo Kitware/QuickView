@@ -20,7 +20,7 @@ class Layout(v3.VToolbar):
             v_show=js.is_active("adjust-layout"),
             density="compact",
             color="white",
-            classes="border-b-thin",
+            classes="border-b-thin qv-toolbar-layout",
         )
 
         self.state.setdefault("show_zoom_controls", False)
@@ -292,7 +292,7 @@ class Cropping(v3.VToolbar):
             v_show=js.is_active("adjust-databounds"),
             density="default",
             color="white",
-            classes="border-b-thin",
+            classes="border-b-thin qv-toolbar-cropping",
         )
 
         with self:
@@ -514,7 +514,7 @@ class DataSelection(html.Div):
     def __init__(self):
         super().__init__(
             v_show=js.is_active("select-slice-time"),
-            classes="border-b-thin",
+            classes="border-b-thin qv-toolbar-slices",
             style="display: flex; align-items: center; background: rgb(var(--v-theme-surface));min-height:41px;",
         )
 
@@ -615,7 +615,7 @@ class Animation(v3.VToolbar):
             v_show=js.is_active("animation-controls"),
             density="compact",
             color="white",
-            classes="border-b-thin",
+            classes="border-b-thin qv-toolbar-animation",
         )
         with self:
             v3.VIcon(
