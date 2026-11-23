@@ -30,7 +30,7 @@ In the same example as discussed above, when *all* variables are selected
 using the first checkbox in the Variable Selection control panel,
 we get the second screenshot shown here.
 - The **wide blue button** at the top of the control panel indicates there is
-  a total of 1385 variables displayable in the file.
+  a total of 1227 variables displayable in the file.
 - The **colorful tabs** correspond to different variable groups with distinct shapes.
   Each group's shape (dimension combination), as well as the number
   of currently selected variables in the group, is shown inside the corresponding tab.
