@@ -57,3 +57,18 @@ With this setup, any commit will be automatically checked with the pre-commit ho
 ```sh
 pre-commit run --all-files
 ```
+
+## Tests
+
+Tests live under `tests/` and use `pytest` (part of the `dev` extra). They start
+the application headless on small generated data, so they need the same
+ParaView-enabled environment as the application itself.
+
+```sh
+# Conda environment
+pip install -e ".[dev]"
+python -m pytest
+
+# uv environment with a downloaded ParaView (macOS example)
+/Applications/ParaView-6.2.1.app/Contents/bin/pvpython --venv .venv -m pytest
+```

@@ -25,12 +25,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .  # Assumes installable via setup.py or pyproject.toml
+          pip install ".[dev]"
         shell: bash -l {0}
 
       - name: Run help command
         run: |
           python -m e3sm_quickview.app --help
+        shell: bash -l {0}
+
+      - name: Run tests
+        run: |
+          xvfb-run -a python -m pytest
         shell: bash -l {0}
 
   pre-commit:
