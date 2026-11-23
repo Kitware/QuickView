@@ -6,7 +6,7 @@ def configure_and_parse(parser):
         "-cf",
         "--conn",
         nargs="?",
-        help="the nc file with connnectivity information",
+        help="the nc file with connectivity information",
     )
     parser.add_argument(
         "-df",
