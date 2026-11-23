@@ -2,6 +2,156 @@
 
 <!-- version list -->
 
+## v2.11.1 (2026-11-23)
+
+### Bug Fixes
+
+- **cli**: Await the state import coroutine when using --state
+  ([`82bf972`](https://github.com/Kitware/QuickView/commit/82bf9723a69bfb1c1b2a37c0e2faab99484f0a81))
+
+- **cli**: Correct typo in --conn help text
+  ([`db80e54`](https://github.com/Kitware/QuickView/commit/db80e54ce6631c4bed5371f99ab60c1412dd1a03))
+
+- **help**: List every toolbar button in the help page
+  ([`195a58f`](https://github.com/Kitware/QuickView/commit/195a58fa213c2a55b3556e8008d16c49d52fcdfc))
+
+- **help**: List the pan and zoom shortcuts in the help page
+  ([`b05e377`](https://github.com/Kitware/QuickView/commit/b05e3774526ac37ecc1cb9241f3ec9eda50bf1bd))
+
+- **layout**: Name the column options like the help page and docs
+  ([`8bde990`](https://github.com/Kitware/QuickView/commit/8bde990cd0b74d66fde1c251886014f356e4f1fd))
+
+- **loop**: Set up the event loop explicitly instead of get_event_loop
+  ([`5736c8e`](https://github.com/Kitware/QuickView/commit/5736c8e0606cfa9149afebc98048c337a4985aa2))
+
+- **state**: Save and restore coastline resolution
+  ([`e79d874`](https://github.com/Kitware/QuickView/commit/e79d87476bcab65dd08127d088fd046d6653546f))
+
+- **state**: Save full colormap settings and reset probe mode on import
+  ([`d80f672`](https://github.com/Kitware/QuickView/commit/d80f672e5aa8057e33e619d964ea081c05ab2ab7))
+
+- **variables**: Apply the search syntax in all variable list modes
+  ([`a5b5d21`](https://github.com/Kitware/QuickView/commit/a5b5d21245fe74d741b232dce6beaad897902c45))
+
+### Build System
+
+- Enforce Conventional Commits with a commit-msg hook
+  ([`a63685f`](https://github.com/Kitware/QuickView/commit/a63685f7949933d86465f931d8a0b7cbd876459f))
+
+### Chores
+
+- Remove unused .codespell-ignore
+  ([`2309159`](https://github.com/Kitware/QuickView/commit/230915934c0aec7dbfceba97b86652fd5fc48432))
+
+- Remove unused Git LFS configuration
+  ([`b7664c3`](https://github.com/Kitware/QuickView/commit/b7664c3e6f7813fe2c344b255a3b33425a4cbffc))
+
+- **screenshots**: Add a skill to regenerate the documentation screenshots
+  ([`79db853`](https://github.com/Kitware/QuickView/commit/79db853d00427ba35cdfcd0fe2172fdb06c42924))
+
+- **ui**: Add stable qv-* classes to the toolbars and drawers
+  ([`90a3e52`](https://github.com/Kitware/QuickView/commit/90a3e52e093b23f71c80d681dc41ef5e63c04cb7))
+
+- **validate**: Add missing doc-code relationships to the map
+  ([`0e0853e`](https://github.com/Kitware/QuickView/commit/0e0853e5e72aba8f90e2254ecf0180eeaeba0bdb))
+
+- **validate**: Extend doc/code map
+  ([`1219a9f`](https://github.com/Kitware/QuickView/commit/1219a9f465c4da24bbb73466e1336b7193c280d1))
+
+### Code Style
+
+- Apply pre-commit fixes
+  ([`6883885`](https://github.com/Kitware/QuickView/commit/6883885eb2e494099a09cd04795b8d81e7c1cc7d))
+
+- Apply pre-commit fixes to quickcompare screenshot states
+  ([`075e825`](https://github.com/Kitware/QuickView/commit/075e825a3c9e78b072c261ee2ee06b7a8507e34e))
+
+### Continuous Integration
+
+- Help AI validate project
+  ([`cc014a5`](https://github.com/Kitware/QuickView/commit/cc014a52beab0269575867141795c5c8fb6ae051))
+
+- Run install, startup check and tests on Python 3.13 and 3.14
+  ([`1247394`](https://github.com/Kitware/QuickView/commit/12473940202de1467abca325f9c150ceb5fbd215))
+
+- Run pre-commit hooks in CI
+  ([`efe0e93`](https://github.com/Kitware/QuickView/commit/efe0e93c26f5d09d15db1d708e46f05200537752))
+
+### Documentation
+
+- Describe the Claude Code skills in the README
+  ([`50a20f4`](https://github.com/Kitware/QuickView/commit/50a20f47213f3fbe05b8daf056feec4155c8bf86))
+
+- Document command-line options and quickview-chunk
+  ([`0818113`](https://github.com/Kitware/QuickView/commit/0818113c78c3c749eb5546117afc645ac7493db3))
+
+- Document the JupyterLab launcher and fix NERSC JupyterHub tip
+  ([`b852a64`](https://github.com/Kitware/QuickView/commit/b852a64cd899ef312aec76f3cd813425900b4a27))
+
+- Fix spelling issues reported by codespell
+  ([`5840709`](https://github.com/Kitware/QuickView/commit/584070949275e5e84f0ea7d7dd50c18102b953f9))
+
+- Fix typos and connectivity file detection rule
+  ([`af9de2e`](https://github.com/Kitware/QuickView/commit/af9de2e2f76147d02f5d8b0fffb47306bbd75269))
+
+- Link the dev map and resources pages from the site navigation
+  ([`4e31fc6`](https://github.com/Kitware/QuickView/commit/4e31fc6e3deb781bafc8b8b3e13e3d0ee8256114))
+
+- Minor edits in install guides and on main page
+  ([`25623f9`](https://github.com/Kitware/QuickView/commit/25623f9edb0bd585c05b0c9fb4ca24077511b34c))
+
+- Update webpages for E3SM-Unified release and SiteView's conda-forge-feedstock
+  ([`c8b2c22`](https://github.com/Kitware/QuickView/commit/c8b2c22f6eed5e8ce3fa88e65324ae5a26dfc9d6))
+
+- Webnews for QuickView 2.11.0 and QuickCompare 1.11.5 releases; updated screenshots of idealized
+  simulations
+  ([`fdc6367`](https://github.com/Kitware/QuickView/commit/fdc6367f213373bdd6a579c7d62bd66fa9a7b4c7))
+
+- **dev**: Install dev extra and pre-commit hooks in conda setup
+  ([`c66ee84`](https://github.com/Kitware/QuickView/commit/c66ee84a498a771a3a0a8bc5b8fffb0521808010))
+
+- **quickcompare**: Update docs for map-related features
+  ([`e057a24`](https://github.com/Kitware/QuickView/commit/e057a24eb284e6455ea1d5417c3545c8aa1128dd))
+
+- **quickview**: Clarify variable search rules and group tab counts
+  ([`52c3b0e`](https://github.com/Kitware/QuickView/commit/52c3b0ead9d2e706800b44edc0eac2958cec3541))
+
+- **quickview**: Correct the viewport image file name
+  ([`92836b5`](https://github.com/Kitware/QuickView/commit/92836b5d12c2ac894ac9e56aa1ad95fbed3ffc28))
+
+- **quickview**: Describe every main toolbar button in the UI overview
+  ([`369741a`](https://github.com/Kitware/QuickView/commit/369741a7c6e3e23f89d65ecf9a9dd8a9601f469a))
+
+- **quickview**: Describe what a state file saves and restores
+  ([`0d8040f`](https://github.com/Kitware/QuickView/commit/0d8040f1b29c1d602538eb62187ef8fa81d53384))
+
+- **quickview**: Document Auto and Auto flow column layouts
+  ([`f971487`](https://github.com/Kitware/QuickView/commit/f97148716dc0b151c5f2bec4246a8ca3ceab9716))
+
+- **quickview**: Document file browser controls and state save/import options
+  ([`7cf7993`](https://github.com/Kitware/QuickView/commit/7cf7993155322b0af1802f52a5712f78944c63d0))
+
+- **quickview**: List all keyboard shortcuts as text and refresh the screenshot
+  ([`19ac18c`](https://github.com/Kitware/QuickView/commit/19ac18c1efd5763eae8d773d93201d804d1fbd88))
+
+- **quickview**: Match the variable count to the new screenshot
+  ([`2eafc14`](https://github.com/Kitware/QuickView/commit/2eafc1417c4d5058117778a8ab08081e1e8cb1b9))
+
+- **quickview**: Regenerate screenshots from the current UI
+  ([`79707b2`](https://github.com/Kitware/QuickView/commit/79707b2c5714fc6a0065abcb8a52e1cf1330b1d4))
+
+- **quickview**: Update screenshot for v2.11.0: 'no coastline' option
+  ([`e813a02`](https://github.com/Kitware/QuickView/commit/e813a0260dfc0669aa66900d4c565c43e7e3c7ce))
+
+- **reminders**: Fix connectivity spelling
+  ([`6e517ed`](https://github.com/Kitware/QuickView/commit/6e517ed12c0eb46578d6b7fd0e6b3b10ec18fad6))
+
+### Testing
+
+- **state**: Add state file save/load round-trip tests
+  ([`eaebfed`](https://github.com/Kitware/QuickView/commit/eaebfedd9e309ba048ebf2ac776d55f3e495d308))
+
+
 ## v2.11.0 (2026-11-16)
 
 ### Bug Fixes
