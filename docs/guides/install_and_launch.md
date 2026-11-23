@@ -103,6 +103,37 @@ loaded various plugins, and then provide an URL similar to `http://localhost:503
 **Enter the URL into a web browser** to access the graphical UI.
 
 
+### Command-line options {#cli}
+
+The `quickview` command accepts options to pre-load data and to choose
+where the file browser starts. Use `quickview --help` to list all of them.
+
+| Option | Description |
+| ------ | ----------- |
+| `-df`, `--data <file>` | Simulation file to open at startup (used together with `--conn`). |
+| `-cf`, `--conn <file>` | Connectivity file to open at startup (used together with `--data`). |
+| `-sf`, `--state <file>` | [State file](/guides/quickview/file_selection#state-files) to load at startup. The data files it refers to are opened, and the saved variables and settings are restored. When given, `--data` and `--conn` are ignored. |
+| `-wd`, `--workdir <dir>` | Start directory of the file browser. Defaults to the directory in which `quickview` was launched. |
+| `--user-home` | Start the file browser in the user's home directory instead of `--workdir`. |
+| `-p`, `--port <number>` | Port of the web server. By default, a free port is picked. |
+| `--host <name>` | Host name or IP address the web server listens on (default `localhost`). |
+| `--perf` | Print performance timings (`[PERF]` lines) in the terminal, to diagnose slow interactions. |
+
+For example, to open a pair of files directly:
+
+```sh
+quickview --data /path/to/simulation.nc --conn /path/to/connectivity.nc
+```
+
+When `--data` and `--conn` are used, the files are opened but no variable is
+selected yet; pick the variables to visualize as usual.
+
+To resume an earlier analysis:
+
+```sh
+quickview --state my-analysis.json
+```
+
 :::tip Tip: First execution on macOS
 On macOS, the first execution after installation via conda will also take a while
 (e.g., a minute or more),
