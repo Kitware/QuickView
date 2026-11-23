@@ -103,6 +103,21 @@ loaded various plugins, and then provide an URL similar to `http://localhost:503
 **Enter the URL into a web browser** to access the graphical UI.
 
 
+### Launching from JupyterLab {#jupyterlab}
+
+QuickView can also be started from the launcher of a JupyterLab session,
+with its UI shown in a JupyterLab tab. This requires installing QuickView
+with its `jupyter` extra in the **same environment as the JupyterLab server**:
+
+```sh
+pip install "e3sm-quickview[jupyter]"
+```
+
+After restarting JupyterLab, an **E3SM QuickView** tile appears in the "Other"
+section of the launcher. Clicking it starts QuickView on the server
+(through [jupyter-server-proxy](https://jupyter-server-proxy.readthedocs.io/))
+and opens it in a new JupyterLab tab.
+
 ### Command-line options {#cli}
 
 The `quickview` command accepts options to pre-load data and to choose
