@@ -292,6 +292,25 @@ class LandingPage(v3.VContainer):
                         v3.VSpacer()
                         v3.VHotkey(keys="esc", variant="contained", inline=True)
 
+                    v3.VDivider(classes="mb-4")
+
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Zoom in / out (zoom controls open)")
+                        v3.VSpacer()
+                        v3.VHotkey(
+                            keys="shift+arrowup shift+arrowdown",
+                            variant="contained",
+                            inline=True,
+                        )
+                    with v3.VRow(classes="ma-0 pb-4"):
+                        v3.VLabel("Pan (pan controls open)")
+                        v3.VSpacer()
+                        v3.VHotkey(
+                            keys="arrowleft arrowright arrowup arrowdown",
+                            variant="contained",
+                            inline=True,
+                        )
+
                 with v3.VCol(cols=6):
                     with v3.VRow(classes="ma-0 pb-2"):
                         v3.VLabel("Projections")
