@@ -1,0 +1,39 @@
+# Doc ↔ code map
+
+When a file on the left changes, re-read the docs on the right and check they
+still describe the code accurately. Extend this table when you discover a new
+link (and mention it in the report so the user can keep it).
+
+| Code (src/e3sm_quickview/…)                         | Docs to verify                                                                                                       | What to compare                                                                                  |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `app.py` (`mt.bind(...)`)                           | `docs/guides/quickview/shortcuts.md`, `components/doc.py`, `components/tools.py` (`keybinding=`)                     | Every bound key is documented with the right action, and no doc lists a key that is not bound    |
+| `utils/cli.py`, `app.py` argument parsing           | `docs/guides/install_and_launch.md`, `docs/hpcsystems/**/launching.md`, `README.md`, `docs/public/downloads/launchers/*.py` | Flag names, defaults, examples                                                                   |
+| `components/toolbars.py`, `components/tools.py`     | `docs/guides/quickview/ui_overview.md`, `viewport_layout.md`, `map_related.md`, `docs/guides/dev/what_is_where.md`   | Button labels, icons, tooltips, toolbar names                                                    |
+| `components/drawers.py`                             | `docs/guides/quickview/variable_selection.md`, `slice_selection.md`                                                  | Panel names, options, behavior                                                                   |
+| `components/file_browser.py`, `components/dialogs.py` | `docs/guides/quickview/file_selection.md`, `docs/guides/simulation_data.md`                                         | Dialog wording, supported file types, connectivity requirements                                  |
+| `components/doc.py`                                 | `docs/guides/quickview/getting_started.md`, `index.md`, `README.md`                                                  | Landing-page text and key hints                                                                  |
+| `view_manager.py`, `view_panel.py`                  | `docs/guides/quickview/individual_views.md`, `cursor_probe.md`, `saving_images.md`                                   | Per-view options, export behavior                                                                |
+| `plugins/eam_projection.py`, `plugins/eam_gridlines.py` | `docs/guides/quickview/map_related.md`                                                                          | Projection names, gridline/coastline options                                                     |
+| `app.py` state save/load                            | `docs/guides/quickview/screenshots/*.json`, `docs/gallery/examples/*.json`, `docs/public/*.json`                     | State keys still accepted by the app (renamed/removed keys break the gallery and screenshots)   |
+| `pipeline.py` (`Continent` coastlines, gridlines)   | `docs/guides/quickview/map_related.md`                                                                               | Coastline resolution options (incl. "None" hiding them), gridline behavior                       |
+| `docs/.vitepress/config.mjs` (nav, sidebar)         | Every page under `docs/`                                                                                             | Each internal `link:` resolves to a `.md` page, labels are spelled correctly, and no guide page is left out of navigation (except intentionally unlisted pages) |
+| `jupyter/`                                          | `docs/hpcsystems/nersc/login_jupyter.md`                                                                             | Entry points, proxy names                                                                        |
+| `pyproject.toml` (deps, scripts, python version)    | `docs/guides/system_requirements.md`, `docs/guides/install_and_launch.md`, `README.md`, `quickview-env.yml`          | Python version, dependency names, console script names                                           |
+| `.github/workflows/*.yml`                           | `docs/guides/dev/ci.md`                                                                                              | Workflow names, triggers, branches, what each job does                                           |
+| `.pre-commit-config.yaml`, `pyproject.toml` `[tool.*]` | `DEVELOPMENT.md`, `docs/guides/dev/*.md`                                                                         | Stale paths in excludes/includes (e.g. pre `src/` layout paths like `^quickview/`)               |
+| Any source move/rename                              | `docs/guides/dev/what_is_where.md`                                                                                   | File paths and "look for X" hints still valid                                                    |
+
+## Out of scope
+
+`docs/guides/quickcompare/**` and `docs/guides/siteview/**` describe tools
+whose code lives in sibling repositories (E3SMQuickCompare, SiteView). Those
+repositories have their own validation skill, which owns these pages.
+
+- **Never** open, read, or compare against the sibling repositories, even if
+  they are checked out next to this one.
+- Skip these pages in Phase 2 entirely: no drift, feature coverage, or
+  docs-quality review.
+- Phase 1 still covers them, because they are files in this repository and
+  part of this site's build. Report pre-commit, codespell, and docs build
+  failures in these pages as usual, and tag those findings `(sibling docs)` so
+  the user can tell them apart.

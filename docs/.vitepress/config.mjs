@@ -14,11 +14,19 @@ export default defineConfig({
     },
     logo: "/icon-full.png",
     nav: [
-      { text: "Home",         link: "/" },
-      { text: "News",         link: "/webnews" },
-      { text: "Gallery",      link: "/gallery/" },
-      { text: "User's Guide", link: "/guides/reminders", activeMatch: "^/guides/", },
-      { text: "HPC Systems",  link: "/hpcsystems/nersc/launching",  activeMatch: "^/hpcsystems/", },
+      { text: "Home", link: "/" },
+      { text: "News", link: "/webnews" },
+      { text: "Gallery", link: "/gallery/" },
+      {
+        text: "User's Guide",
+        link: "/guides/reminders",
+        activeMatch: "^/guides/",
+      },
+      {
+        text: "HPC Systems",
+        link: "/hpcsystems/nersc/launching",
+        activeMatch: "^/hpcsystems/",
+      },
     ],
 
     sidebar: {
@@ -26,16 +34,25 @@ export default defineConfig({
         {
           text: "Installation at NERSC",
           items: [
-            { text: "Public installation",  link: "/hpcsystems/nersc/installation_public" },
-            { text: "Personal installation",link: "/hpcsystems/nersc/installation_personal" },
-            { text: "E3SM-Unified",         link: "/hpcsystems/nersc/installation_E3SM-unified" },
-         ],
+            {
+              text: "Public installation",
+              link: "/hpcsystems/nersc/installation_public",
+            },
+            {
+              text: "Personal installation",
+              link: "/hpcsystems/nersc/installation_personal",
+            },
+            {
+              text: "E3SM-Unified",
+              link: "/hpcsystems/nersc/installation_E3SM-unified",
+            },
+          ],
         },
         {
           text: "Launching at NERSC",
           items: [
-            { text: "Overview",   link: "/hpcsystems/nersc/launching" },
-            { text: "VS Code",    link: "/hpcsystems/nersc/login_vscode" },
+            { text: "Overview", link: "/hpcsystems/nersc/launching" },
+            { text: "VS Code", link: "/hpcsystems/nersc/login_vscode" },
             { text: "JupyterHub", link: "/hpcsystems/nersc/login_jupyter" },
           ],
         },
@@ -51,10 +68,13 @@ export default defineConfig({
           text: "Introduction",
           items: [
             { text: "Overview", link: "/guides/reminders" },
-            { text: "Connecitiviy Files", link: "/guides/connectivity" },
+            { text: "Connectivity Files", link: "/guides/connectivity" },
             { text: "Simulation Files", link: "/guides/simulation_data" },
             { text: "Install and Launch", link: "/guides/install_and_launch" },
-            { text: "System Requirements", link: "/guides/system_requirements" },
+            {
+              text: "System Requirements",
+              link: "/guides/system_requirements",
+            },
           ],
         },
         {
@@ -62,57 +82,118 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: "What is QuickView?", link: "/guides/quickview/index" },
-            { text: "Getting Started",    link: "/guides/quickview/getting_started" },
-            { text: "UI Overview",        link: "/guides/quickview/ui_overview" },
+            {
+              text: "Getting Started",
+              link: "/guides/quickview/getting_started",
+            },
+            { text: "UI Overview", link: "/guides/quickview/ui_overview" },
             { text: "Keyboard Shortcuts", link: "/guides/quickview/shortcuts" },
-            { text: "File Selection",     link: "/guides/quickview/file_selection", },
-            { text: "Variable Selection", link: "/guides/quickview/variable_selection", },
-            { text: "Slice Selection",    link: "/guides/quickview/slice_selection", },
-            { text: "Viewport Layout",    link: "/guides/quickview/viewport_layout", },
-            { text: "Individual Views",   link: "/guides/quickview/individual_views", },
-            { text: "Map-related Features", link: "/guides/quickview/map_related" },
-            { text: "Cursor Probe",       link: "/guides/quickview/cursor_probe" },
-            { text: "Saving Images",      link: "/guides/quickview/saving_images" },
+            {
+              text: "File Selection",
+              link: "/guides/quickview/file_selection",
+            },
+            {
+              text: "Variable Selection",
+              link: "/guides/quickview/variable_selection",
+            },
+            {
+              text: "Slice Selection",
+              link: "/guides/quickview/slice_selection",
+            },
+            {
+              text: "Viewport Layout",
+              link: "/guides/quickview/viewport_layout",
+            },
+            {
+              text: "Individual Views",
+              link: "/guides/quickview/individual_views",
+            },
+            {
+              text: "Map-related Features",
+              link: "/guides/quickview/map_related",
+            },
+            { text: "Cursor Probe", link: "/guides/quickview/cursor_probe" },
+            { text: "Saving Images", link: "/guides/quickview/saving_images" },
           ],
         },
         {
           text: "QuickCompare Guide",
           collapsed: true,
           items: [
-            { text: "What is QuickCompare?", link: "/guides/quickcompare/index", },
-            { text: "Getting Started",       link: "/guides/quickcompare/getting_started" },
-            { text: "UI Overview",           link: "/guides/quickcompare/ui_overview_and_shortcuts" },
-            { text: "File Selection",        link: "/guides/quickcompare/file_selection", },
-            { text: "Variables and Slices",  link: "/guides/quickcompare/variable_and_slice_selection", },
-            { text: "Two-sim. Comparison",   link: "/guides/quickcompare/two-sim_comparison", },
-            { text: "Multi-sim. Comparison", link: "/guides/quickcompare/multi-sim_comparison", },
-            { text: "Map-related Features", link: "/guides/quickcompare/map_related" },
-            { text: "Cursor Probe",       link: "/guides/quickcompare/cursor_probe" },
-            { text: "Saving Images",      link: "/guides/quickcompare/saving_images" },
+            {
+              text: "What is QuickCompare?",
+              link: "/guides/quickcompare/index",
+            },
+            {
+              text: "Getting Started",
+              link: "/guides/quickcompare/getting_started",
+            },
+            {
+              text: "UI Overview",
+              link: "/guides/quickcompare/ui_overview_and_shortcuts",
+            },
+            {
+              text: "File Selection",
+              link: "/guides/quickcompare/file_selection",
+            },
+            {
+              text: "Variables and Slices",
+              link: "/guides/quickcompare/variable_and_slice_selection",
+            },
+            {
+              text: "Two-sim. Comparison",
+              link: "/guides/quickcompare/two-sim_comparison",
+            },
+            {
+              text: "Multi-sim. Comparison",
+              link: "/guides/quickcompare/multi-sim_comparison",
+            },
+            {
+              text: "Map-related Features",
+              link: "/guides/quickcompare/map_related",
+            },
+            { text: "Cursor Probe", link: "/guides/quickcompare/cursor_probe" },
+            {
+              text: "Saving Images",
+              link: "/guides/quickcompare/saving_images",
+            },
           ],
         },
         {
           text: "SiteView User's Guide",
           collapsed: true,
           items: [
-            { text: "What is SiteView?",     link: "/guides/siteview/index", },
-            { text: "Getting Started",       link: "/guides/siteview/getting_started" },
-            { text: "UI Overview",           link: "/guides/siteview/ui_overview" },
-            { text: "File Selection",        link: "/guides/siteview/file_selection", },
-            { text: "Site and Region",       link: "/guides/siteview/site_and_region", },
-            { text: "Variable Selection",    link: "/guides/siteview/variable_selection", },
-            { text: "3D View",               link: "/guides/siteview/3d_view", },
-            { text: "Time Evolution Plots",  link: "/guides/siteview/time_plots", },
-            { text: "Histograms",            link: "/guides/siteview/histograms", },
-            { text: "Conditional Sampling",  link: "/guides/siteview/conditional_sampling", },
-            { text: "Data Probes",           link: "/guides/siteview/probes" },
+            { text: "What is SiteView?", link: "/guides/siteview/index" },
+            {
+              text: "Getting Started",
+              link: "/guides/siteview/getting_started",
+            },
+            { text: "UI Overview", link: "/guides/siteview/ui_overview" },
+            { text: "File Selection", link: "/guides/siteview/file_selection" },
+            {
+              text: "Site and Region",
+              link: "/guides/siteview/site_and_region",
+            },
+            {
+              text: "Variable Selection",
+              link: "/guides/siteview/variable_selection",
+            },
+            { text: "3D View", link: "/guides/siteview/3d_view" },
+            {
+              text: "Time Evolution Plots",
+              link: "/guides/siteview/time_plots",
+            },
+            { text: "Histograms", link: "/guides/siteview/histograms" },
+            {
+              text: "Conditional Sampling",
+              link: "/guides/siteview/conditional_sampling",
+            },
+            { text: "Data Probes", link: "/guides/siteview/probes" },
           ],
         },
         {
           text: "Releases and Automation",
-          items: [
-            { text: "CI and Deployment", link: "/guides/dev/ci" },
-          ],
+          items: [{ text: "CI and Deployment", link: "/guides/dev/ci" }],
         },
       ],
     },

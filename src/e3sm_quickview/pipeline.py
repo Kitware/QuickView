@@ -95,7 +95,7 @@ class Continent:
 
     def update_resolution(self, level=0):
         level = int(level)
-        self.actor.visibility = (level >= 0)
+        self.actor.visibility = level >= 0
         if level < 0:
             return
 
