@@ -20,48 +20,22 @@
     "help": false,
     "camera": {
       "zoom": 3374338.862067296,
-      "position": [
-        -11769607.25,
-        337433.8862067296,
-        28027417.239626117
-      ],
-      "focal_point": [
-        -11769607.25,
-        337433.8862067296,
-        0.5
-      ],
-      "view_up": [
-        0.0,
-        1.0,
-        0.0
-      ],
-      "clipping_range": [
-        27225812.404588137,
-        29104075.2620484
-      ]
+      "position": [-11769607.25, 337433.8862067296, 28027417.239626117],
+      "focal_point": [-11769607.25, 337433.8862067296, 0.5],
+      "view_up": [0.0, 1.0, 0.0],
+      "clipping_range": [27225812.404588137, 29104075.2620484]
     }
   },
   "data-selection": {
-    "crop_longitude": [
-      -180,
-      -60
-    ],
-    "crop_latitude": [
-      -30,
-      30
-    ],
-    "projection": [
-      "Mollweide"
-    ],
+    "crop_longitude": [-180, -60],
+    "crop_latitude": [-30, 30],
+    "projection": ["Mollweide"],
     "animation_track": "time",
     "time_idx": 50
   },
   "views": [
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "LW_flux_up_at_model_top",
       "config": {
         "preset": "BuGnYl",
@@ -75,19 +49,13 @@
         "offset": 0,
         "break_row": false,
         "override_range": true,
-        "color_range": [
-          30.0,
-          300.0
-        ],
+        "color_range": [30.0, 300.0],
         "color_value_min": "30",
         "color_value_max": "300"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "precip_total_surf_mass_flux",
       "config": {
         "preset": "erdc_iceFire_H",
@@ -101,10 +69,7 @@
         "offset": 0,
         "break_row": false,
         "override_range": true,
-        "color_range": [
-          1e-10,
-          1e-05
-        ],
+        "color_range": [1e-10, 1e-5],
         "color_value_min": "1e-10",
         "color_value_max": "1e-05"
       }

@@ -11,7 +11,7 @@
 - *Optional*: download
   [sample simulation files](https://zenodo.org/records/16922607) to test the app.
 
-- Concepts 
+- Concepts
   - [Connectivity files: what are they?](../connectivity)
   - [Simulation files: what is supported?](../simulation_data)
   - [State files: how to use them?](./file_selection#state-files)
@@ -30,4 +30,3 @@
 
 - Visit the GitHub [repository](https://github.com/Kitware/QuickView)
 - Report bugs or request features using [GitHub Issues](https://github.com/Kitware/QuickView/issues)
-

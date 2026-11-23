@@ -9,13 +9,13 @@ hero:
     Efficient, intuitive, and interactive exploration of simulation data.
   image: /website_banner.png
   actions:
-    - theme: brand 
+    - theme: brand
       text: Installation
       link: /guides/install_and_launch
-    - theme: brand 
-      text: User's Guide 
+    - theme: brand
+      text: User's Guide
       link: /guides/reminders
-    - theme: brand 
+    - theme: brand
       text: HPC Systems
       link: /hpcsystems/nersc/launching
 
@@ -28,10 +28,10 @@ features:
       Currently supported are data on cubed-sphere meshes
       consisting of Gauss-Lobatto-Legendre (GLL) nodes
       or finite-volume-style grid cells.
-      Sample visulizations from various models
+      Sample visualizations from various models
       can be found in our gallery.
     link: https://kitware.github.io/QuickView/gallery/
-  - title: Engine and UI 
+  - title: Engine and UI
     icon:
       src: /logos/paraview_trame_vtk.png
       width: 180px
@@ -41,7 +41,7 @@ features:
       powerful analysis and visualization
       capabilities without requiring a steep learning curve.
     link: https://www.kitware.com/interactive-visualization-and-analytics/
-  - title: Remote Data 
+  - title: Remote Data
     icon:
       src: /logos/nersc.png
       width: 150px
@@ -52,7 +52,7 @@ features:
       No installation is required on the user's end,
       as the UI shows up in a browser window.
     link: /hpcsystems/nersc/launching
-  - title: Funding Source 
+  - title: Funding Source
     icon:
       src: /logos/SciDAC-logo.png
       width: 170px

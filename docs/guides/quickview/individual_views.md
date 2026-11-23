@@ -69,10 +69,10 @@ Additional notes:
 - The delta difference mode is disabled (grayed out) when a log scale is selected.
   In reverse, after a user turns on the delta difference mode when using a linear or symlog scale,
   the scale button will only toggle between linear and symlog scales.
-- In the delta difference mode, the colormap swatches displayed are limited to diverging-only. 
+- In the delta difference mode, the colormap swatches displayed are limited to diverging-only.
 
 
-## Color selection 
+## Color selection
 
 The following icon buttons are provided for selecting and adjusting colormaps:
 
@@ -90,5 +90,3 @@ The following icon buttons are provided for selecting and adjusting colormaps:
 ## Further reading
 
 The functionalities described above are made available in QuickView through the [trame-colormaps package](https://github.com/Kitware/trame-colormaps#). Further information about that package can be found in its separate [GitHub repo](https://github.com/Kitware/trame-colormaps#).
-
-

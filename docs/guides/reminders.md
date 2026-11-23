@@ -12,7 +12,7 @@ The first three members of the family are
 
 - [QuickView](/guides/quickview/index)
   for simultaneously presenting 2D contour plots of
-  multiple physical quantities (variables) on 
+  multiple physical quantities (variables) on
   global or regional maps,
 - [QuickCompare](/guides/quickcompare/index)
   for contrasting two or more simulations, also using 2D contour plots, and

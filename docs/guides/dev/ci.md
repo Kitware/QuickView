@@ -142,4 +142,3 @@ This workflow handles both building and deploying the website in two jobs:
    GitHub Pages artifact.
 2. **deploy** waits for **build** to succeed (`needs: build`), then uses
    `actions/deploy-pages` to publish that artifact to GitHub Pages.
-

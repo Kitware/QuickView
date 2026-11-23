@@ -18,7 +18,7 @@ QuickCompare provides three ways for the user to save the visualization as image
   dimension names and indices are appended when relevant.
 
 - A click on the **camera icon above each plot**
-  saves that single plot (view) as a `.png` file. 
+  saves that single plot (view) as a `.png` file.
 
 Given the large amount of views (plots) typically involved in a QuickCompare session
 resulting from loading multiple simulations and variables as well as the different

@@ -42,7 +42,7 @@ A click on the text activates a drop-down menu for the user to replace
 the current variable by a different one, resulting in the corresponding views
 to swap contents.
 
-- When the plots in the viewport are ungrouped, the drop-down menu 
+- When the plots in the viewport are ungrouped, the drop-down menu
   lists all the other variables that have been loaded. See example
   in the screenshot below.
 - When the plots in the viewport are grouped, the drop-down menu

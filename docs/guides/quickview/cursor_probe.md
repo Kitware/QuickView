@@ -15,7 +15,7 @@ The latitude and longitude of the cursor location are shown at the top,
 followed by the name and value of the variable in the current view, as well as
 the names and values of the other variables displayed in the viewport.
 If a variable has non-horizontal dimensions, the value shown in the Information Panel
-is the value at the cursor-selected lat-lon location in the currently data slice. 
+is the value at the cursor-selected lat-lon location in the currently data slice.
 
 ![cursor probe icons](./screenshots/cursor_probe_icons_in_viewport.png){ width="50%", align=right }
 
@@ -25,4 +25,3 @@ These icons are available in all views for convenient access.
 However, the probe's activate/inactive state applies to the entire viewport
 and is shared across all views. As a result, the Cursor Probe cannot be enabled
 for some views (variables) while remaining disabled for others.
-

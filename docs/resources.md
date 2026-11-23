@@ -19,5 +19,3 @@
 - Sample simulation files
   - [Miscellaneous simulations at different resolutions](https://zenodo.org/records/16922607)
   - [A group of sensitivity experiment at the `ne30` resolution](https://portal.nersc.gov/project/m4359/huiwan/vis/202601_group_compare/)
-
-

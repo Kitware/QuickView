@@ -65,7 +65,7 @@ pathRoot="/global/cfs/projectdirs/m4359/tools/"
 envName="quickview-env"
 
 module load conda
-conda activate ${pathRoot}/conda-envs/${envName} 
+conda activate ${pathRoot}/conda-envs/${envName}
 quickview
 ```
 and then, make the shortcut executable using
@@ -105,10 +105,10 @@ It is worth emphasizing again that the same commands can be used regardless of w
 window is connected to a login node, a shared CPU or GPU node, or a dedicated node.
 
 
-## Updating the installations 
+## Updating the installations
 
 In order to update the tools to the newest available versions on conda-forge
-you will need to 
+you will need to
 - identify the versions you want to update to (see links in the summary table
   on [this page](/guides/install_and_launch.md), and then
 - do something like the following after adapting the syntax to your shell and

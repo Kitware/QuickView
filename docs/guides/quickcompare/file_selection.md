@@ -31,7 +31,7 @@ from the file browser in this window.
   each tab contains a cross button for deselecting the file.
 
 When both connectivity and simulation files have been selected,
-the pale-blue `Load Files` button in the bottom-right corner of screenshot above 
+the pale-blue `Load Files` button in the bottom-right corner of screenshot above
 changes to bright blue; a single click starts file loading.
 If successful, the UI changes into a layout like
 the example below, with the [Variable Selection control panel](/guides/quickview/variable_selection)
@@ -84,4 +84,3 @@ to a different simulation data file, then the file names and paths
 at the beginning of the state file need to be edited before the state
 file is loaded in the app.
 :::
-

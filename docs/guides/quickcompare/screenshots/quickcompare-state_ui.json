@@ -21,12 +21,7 @@
     "target": "",
     "mode": "multi-sim",
     "type": "diff",
-    "columns": [
-      "ctrl",
-      "test",
-      "diff",
-      "comp1"
-    ],
+    "columns": ["ctrl", "test", "diff", "comp1"],
     "simulations": [
       {
         "path": "/Users/wanh895/Downloads/recent_files/Hui/viz/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
@@ -60,10 +55,7 @@
       }
     ]
   },
-  "variables-selection": [
-    "num_a1",
-    "BURDEN1"
-  ],
+  "variables-selection": ["num_a1", "BURDEN1"],
   "layout": {
     "aspect-ratio": 0.5,
     "active": "auto_layout",
@@ -76,26 +68,15 @@
       "animation-controls"
     ],
     "help": false,
-    "variable-order": [
-      "num_a1",
-      "BURDEN1"
-    ]
+    "variable-order": ["num_a1", "BURDEN1"]
   },
   "data-selection": {
     "time_idx": 0,
     "midpoint_idx": 0,
     "interface_idx": 0,
-    "crop_longitude": [
-      -180,
-      180
-    ],
-    "crop_latitude": [
-      -90,
-      90
-    ],
-    "projection": [
-      "Robinson"
-    ],
+    "crop_longitude": [-180, 180],
+    "crop_latitude": [-90, 90],
+    "projection": ["Robinson"],
     "crop_slider_edit": true,
     "slice_slider_edit": true,
     "animation_track": "lev",
@@ -103,11 +84,7 @@
   },
   "views": [
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a1",
       "array_name": "num_a1__control",
       "config": {
@@ -124,20 +101,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          70553744.0,
-          357089568.0
-        ],
+        "color_range": [70553744.0, 357089568.0],
         "color_value_min": "70553744.0",
         "color_value_max": "357089568.0"
       }
     },
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a1",
       "array_name": "num_a1__diff__1",
       "config": {
@@ -154,20 +124,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -106902840.0,
-          106902840.0
-        ],
+        "color_range": [-106902840.0, 106902840.0],
         "color_value_min": "-106902840.0",
         "color_value_max": "106902840.0"
       }
     },
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a1",
       "array_name": "num_a1__diff__2",
       "config": {
@@ -184,20 +147,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -106902840.0,
-          106902840.0
-        ],
+        "color_range": [-106902840.0, 106902840.0],
         "color_value_min": "-106902840.0",
         "color_value_max": "106902840.0"
       }
     },
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a1",
       "array_name": "num_a1__diff__3",
       "config": {
@@ -214,20 +170,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -106902840.0,
-          106902840.0
-        ],
+        "color_range": [-106902840.0, 106902840.0],
         "color_value_min": "-106902840.0",
         "color_value_max": "106902840.0"
       }
     },
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a1",
       "array_name": "num_a1__diff__4",
       "config": {
@@ -244,20 +193,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -106902840.0,
-          106902840.0
-        ],
+        "color_range": [-106902840.0, 106902840.0],
         "color_value_min": "-106902840.0",
         "color_value_max": "106902840.0"
       }
     },
     {
-      "type": [
-        "time",
-        "lev",
-        "ncol"
-      ],
+      "type": ["time", "lev", "ncol"],
       "name": "num_a1",
       "array_name": "num_a1__diff__5",
       "config": {
@@ -274,19 +216,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -106902840.0,
-          106902840.0
-        ],
+        "color_range": [-106902840.0, 106902840.0],
         "color_value_min": "-106902840.0",
         "color_value_max": "106902840.0"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "BURDEN1",
       "array_name": "BURDEN1__control",
       "config": {
@@ -303,19 +239,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          2.6628911200532457e-06,
-          0.00010036844469141215
-        ],
+        "color_range": [2.6628911200532457e-6, 0.00010036844469141215],
         "color_value_min": "2.6628911200532457e-06",
         "color_value_max": "0.00010036844469141215"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "BURDEN1",
       "array_name": "BURDEN1__diff__1",
       "config": {
@@ -332,19 +262,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -3.3805314160417765e-05,
-          3.3805314160417765e-05
-        ],
+        "color_range": [-3.3805314160417765e-5, 3.3805314160417765e-5],
         "color_value_min": "-3.3805314160417765e-05",
         "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "BURDEN1",
       "array_name": "BURDEN1__diff__2",
       "config": {
@@ -361,19 +285,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -3.3805314160417765e-05,
-          3.3805314160417765e-05
-        ],
+        "color_range": [-3.3805314160417765e-5, 3.3805314160417765e-5],
         "color_value_min": "-3.3805314160417765e-05",
         "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "BURDEN1",
       "array_name": "BURDEN1__diff__3",
       "config": {
@@ -390,19 +308,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -3.3805314160417765e-05,
-          3.3805314160417765e-05
-        ],
+        "color_range": [-3.3805314160417765e-5, 3.3805314160417765e-5],
         "color_value_min": "-3.3805314160417765e-05",
         "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "BURDEN1",
       "array_name": "BURDEN1__diff__4",
       "config": {
@@ -419,19 +331,13 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -3.3805314160417765e-05,
-          3.3805314160417765e-05
-        ],
+        "color_range": [-3.3805314160417765e-5, 3.3805314160417765e-5],
         "color_value_min": "-3.3805314160417765e-05",
         "color_value_max": "3.3805314160417765e-05"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "BURDEN1",
       "array_name": "BURDEN1__diff__5",
       "config": {
@@ -448,10 +354,7 @@
         "discrete_log": false,
         "n_discrete_colors": 4,
         "override_range": false,
-        "color_range": [
-          -3.3805314160417765e-05,
-          3.3805314160417765e-05
-        ],
+        "color_range": [-3.3805314160417765e-5, 3.3805314160417765e-5],
         "color_value_min": "-3.3805314160417765e-05",
         "color_value_max": "3.3805314160417765e-05"
       }

@@ -1,14 +1,14 @@
 ---
 # Identity and display order
-id: cam-se_pg2_pg3 
+id: cam-se_pg2_pg3
 order: 62
-title: CAM-SE-CSLAM output on physics grids 
+title: CAM-SE-CSLAM output on physics grids
 
 # Filter values
 tools:
 - QuickView
 models:
-- CAM-SE 
+- CAM-SE
 gridConfigurations:
 - Uniform
 gridRepresentations:

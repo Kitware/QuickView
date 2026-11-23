@@ -27,7 +27,7 @@ images:
     The horizontal mesh was ne30pg2 with approximately 165 km grid spacing.
 
 # The Markdown body will be shown on a separate webpage only when showDetails is set to true.
-#showDetails: true 
+#showDetails: true
 ---
 
 # Aerosol concentrations in EAMv2

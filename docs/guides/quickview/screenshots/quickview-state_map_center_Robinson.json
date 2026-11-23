@@ -8,70 +8,34 @@
     "simulation": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/amicphys_r8_prog.eam.h0.2010_2019.ANN.nc",
     "connectivity": "/global/cfs/cdirs/m4359/www/huiwan/vis/202601_group_compare/connectivity_ne30pg2_TEMPEST.scrip.nc"
   },
-  "variables-selection": [
-    "AODALL",
-    "AODBC"
-  ],
+  "variables-selection": ["AODALL", "AODBC"],
   "layout": {
     "aspect-ratio": 0.75,
     "grouped": false,
     "active": "auto_layout",
-    "tools": [
-      "adjust-layout",
-      "adjust-databounds"
-    ],
+    "tools": ["adjust-layout", "adjust-databounds"],
     "help": false,
     "camera": {
       "zoom": 14158179.562635928,
-      "position": [
-        0.0,
-        0.0,
-        73673405.62958878
-      ],
-      "focal_point": [
-        0.0,
-        0.0,
-        0.5
-      ],
-      "view_up": [
-        0.0,
-        1.0,
-        0.0
-      ],
-      "clipping_range": [
-        71527932.2118106,
-        76551818.19675279
-      ]
+      "position": [0.0, 0.0, 73673405.62958878],
+      "focal_point": [0.0, 0.0, 0.5],
+      "view_up": [0.0, 1.0, 0.0],
+      "clipping_range": [71527932.2118106, 76551818.19675279]
     },
     "grid-interval": 30,
-    "bg-color": [
-      0.851,
-      0.851,
-      0.851
-    ],
+    "bg-color": [0.851, 0.851, 0.851],
     "map-center-lon": -180,
     "map-center-lat": 0
   },
   "data-selection": {
-    "crop_longitude": [
-      -180,
-      180
-    ],
-    "crop_latitude": [
-      -90,
-      90
-    ],
-    "projection": [
-      "Robinson"
-    ],
+    "crop_longitude": [-180, 180],
+    "crop_latitude": [-90, 90],
+    "projection": ["Robinson"],
     "animation_track": "lev"
   },
   "views": [
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "AODALL",
       "config": {
         "order": 1,
@@ -87,19 +51,13 @@
         "discrete_log": false,
         "n_discrete_colors": 1,
         "override_range": false,
-        "color_range": [
-          0.01264046598225832,
-          1.01161527633667
-        ],
+        "color_range": [0.01264046598225832, 1.01161527633667],
         "color_value_min": "0.01264046598225832",
         "color_value_max": "1.01161527633667"
       }
     },
     {
-      "type": [
-        "time",
-        "ncol"
-      ],
+      "type": ["time", "ncol"],
       "name": "AODBC",
       "config": {
         "order": 2,
@@ -115,10 +73,7 @@
         "discrete_log": false,
         "n_discrete_colors": 1,
         "override_range": false,
-        "color_range": [
-          0.0006716852076351643,
-          0.08890804648399353
-        ],
+        "color_range": [0.0006716852076351643, 0.08890804648399353],
         "color_value_min": "0.0006716852076351643",
         "color_value_max": "0.08890804648399353"
       }
