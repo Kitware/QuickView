@@ -344,6 +344,7 @@ class EAMApp(TrameApp):
             "bg-color": self.view_manager._bg_color,
             "map-center-lon": self.state.spherical_center_lon,
             "map-center-lat": self.state.spherical_center_lat,
+            "continent-level": self.state.continent_level,
         }
         data_selection = {
             k: self.state[k]
@@ -478,13 +479,14 @@ class EAMApp(TrameApp):
         if "camera" in state_content["layout"]:
             self.view_manager.set_camera_state(state_content["layout"]["camera"])
 
-        # New extended layout properties
-        if "grid-interval" in state_content["layout"]:
-            # Add-on available
-            self.state.grid_interval = state_content["layout"]["grid-interval"]
-            self.state.spherical_center_lon = state_content["layout"]["map-center-lon"]
-            self.state.spherical_center_lat = state_content["layout"]["map-center-lat"]
-            self.view_manager.update_background(state_content["layout"]["bg-color"])
+        # Extended layout properties (missing from older state files,
+        # in which case the UI defaults apply)
+        layout = state_content["layout"]
+        self.state.grid_interval = layout.get("grid-interval", 30)
+        self.state.spherical_center_lon = layout.get("map-center-lon", 0)
+        self.state.spherical_center_lat = layout.get("map-center-lat", 0)
+        self.state.continent_level = layout.get("continent-level", 0)
+        self.view_manager.update_background(layout.get("bg-color"))
 
         # Update filebrowser state
         with self.state:
