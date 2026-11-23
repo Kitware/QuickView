@@ -217,6 +217,7 @@ class FieldSelection(v3.VNavigationDrawer):
                             classes="position-absolute show-scrollbar",
                             hover=True,
                             search=("variables_filter", ""),
+                            custom_filter=("utils.quickview.filter",),
                             items_per_page=-1,
                             hide_default_footer=True,
                         ):
@@ -252,6 +253,7 @@ class FieldSelection(v3.VNavigationDrawer):
                             classes="position-absolute show-scrollbar",
                             hover=True,
                             search=("variables_filter", ""),
+                            custom_filter=("utils.quickview.filter",),
                             items_per_page=-1,
                             hide_default_footer=True,
                         ):
