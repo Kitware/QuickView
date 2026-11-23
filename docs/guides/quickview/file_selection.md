@@ -85,6 +85,22 @@ the connectivity and data files being used as well as the settings
 the user has chosen for the visualization; the *contents* of the
 connectivity and simulation files are *not* included.
 
+The saved settings cover:
+
+- the selected variables and, for each view, its position and size in the viewport;
+- the viewport layout (aspect ratio, grouping, column arrangement), the open control panels, and the camera;
+- the slice selection, the animation dimension and its current step;
+- the map projection, the lat/lon cropping, the map center, the lat-lon grid line spacing,
+  the coastline resolution (including "None"), and the background color;
+- the full colormap configuration of each view: preset, inversion, color-blind filter,
+  scale and discrete bands, fixed or automatic range, number of ticks, NaN and out-of-range colors,
+  and diverging mode with its parameters.
+
+Interaction modes are not saved: loading a state file turns cursor probing off.
+State files saved by older versions of QuickView can still be loaded. If such a file has no
+grid line spacing, map center, or coastline resolution, those settings are reset to their defaults
+(30°, 0°/0°, and Low).
+
 If a state file is shared among multiple users or used across different
 file systems, or if a user wants to apply the same visualization settings
 to a different simulation data file, then the file names and paths
