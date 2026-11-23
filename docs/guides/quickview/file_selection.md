@@ -10,7 +10,7 @@ Both are explained below.
 ![File loading window](./screenshots/file-upload-outline.png){ width="5%", align=right }
 
 When QuickView is launched using a shell command or the desktop bundle,
-or when the user clicks the "File Loading" icon on the toolbar,
+or when the user clicks the "File loading" icon on the toolbar,
 a dialogue window like the screenshot below is brought up.
 The user is expected to select a connectivity file and a simulation data file
 using the file browser or the text boxes in this window.
@@ -24,8 +24,13 @@ by that column. Repeated clicks cycle through ascending order, descending order,
 and the original order (directories first, then file groups, then individual files,
 with each group sorted by name).
 
-The user can single-click a file name and then click the "simulation" or "connectivity"
+To narrow down a long listing, type part of a name in the **Filter by name** box
+next to the navigation buttons at the top of the window.
+The filter is cleared when moving to another directory.
+
+The user can single-click a file name and then click the **Simulation** or **Connectivity**
 button in the bottom-left corner to clarify file type.
+The **Reset** button next to them clears both selected files.
 
 Alternatively, if a filename contains "connectivity_" (case-insensitive), then
 the user can **double-click** the file to have it automatically
@@ -42,8 +47,9 @@ into the **Simulation File** and **Connectivity File** text boxes below the brow
 ### Loading the selected files
 
 After both connectivity and simulation files are selected,
-the originally pale-blue `Load Files` button in the bottom-right corner
+the originally pale-blue `Load files` button in the bottom-right corner
 changes to bright blue. A single click starts file loading.
+The `Cancel` button closes the window without loading anything.
 
 If the files are loaded correctly, the UI changes into a layout like
 the example below, with the [Variable Selection control panel](./variable_selection)
@@ -75,9 +81,28 @@ so that fewer clicks are needed in the file search.
 The current state of the analysis session can be saved—and reloaded later to resume
 the analysis—using the `State Import/Export` button in the vertical toolbar
 or using the shortcut `I` for import and `E` for export.
+The button opens a small menu with two entries:
+
+- **Save state file** (shortcut `E`) opens the **Save QuickView State file** dialog.
+  Enter a **Filename** (the default is `quickview-state.json`) and, optionally, a
+  **Comments** text that is stored in the file as a reminder of what the state captures.
+  Click **Save** (or press `Enter`) to save the file. Depending on the browser,
+  the file is either downloaded directly or a save dialog lets you choose where to put it.
+  This entry is available once variables have been loaded.
+- **Upload state file** (shortcut `I`; called **Load state file** in the desktop app)
+  opens a file picker to select a state file and restore it.
 
 Note that regardless of whether QuickView is executed on a local computer
-or on a remote system (e.g., at NERSC), the state files are saved to and uploaded from the local computer.
+or on a remote system (e.g., at NERSC), these two entries save state files to and upload them from
+the local computer, i.e., the computer running the web browser.
+
+A state file that is already stored on the system where QuickView runs
+(e.g., at NERSC) can be loaded without copying it to the local computer:
+open the [File loading](#new-analysis) window, single-click the `.json` file,
+then click the **Import state file** button at the bottom of the window.
+The button is only enabled when the selected file is a valid QuickView state file.
+A state file can also be loaded at startup with the
+[`--state` command-line option](/guides/install_and_launch#cli).
 
 ::: info Info: What's in a State File?
 A state file is a JSON file that contains the paths and names of
