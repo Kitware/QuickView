@@ -33,7 +33,7 @@ we get the second screenshot shown here.
   a total of 1385 variables displayable in the file.
 - The **colorful tabs** correspond to different variable groups with distinct shapes.
   Each group's shape (dimension combination), as well as the number
-  of displayable variables in the group, is shown inside the corresponding tab.
+  of currently selected variables in the group, is shown inside the corresponding tab.
   Each tab also has a "close" button that can be used to unselect the entire group.
 
 Note that at this point, QuickView has *not* loaded all the variables into memory.
@@ -57,11 +57,16 @@ can be used to search for variables by their names or dimensions.
   that start or end with `text`, respectively.
   Pattern search is also case-**in**sensitive.
 
-- **Strict search**
+- **Strict search**:
   A string enclosed in double quotation marks (e.g., `"text"`) can be used
-  to request exact matches of **variable names**,
+  to request exact matches of a **variable name** or of a full **dimension list**
+  (as shown in the group tabs, e.g., `"time, lev, ncol"`),
   with no preceding or succeeding characters.
   Exact search is **case-sensitive**.
+
+Several search terms separated by spaces can be combined;
+a variable is listed only if it matches all of them.
+The same search rules apply in all three display modes of the variable list described below.
 
 
 ## Variable lists
