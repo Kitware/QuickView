@@ -389,6 +389,21 @@ class EAMApp(TrameApp):
                             "color_range": cmap.color_range,
                             "color_value_min": cmap.color_value_min,
                             "color_value_max": cmap.color_value_max,
+                            "n_ticks": cmap.n_ticks,
+                            "selected_categories": cmap.selected_categories,
+                            "cut_outside_range": cmap.cut_outside_range,
+                            "nan_color": cmap.nan_color,
+                            "enable_independent_bands": cmap.enable_independent_bands,
+                            "independent_bands": cmap.independent_bands,
+                            "independent_band_bottom_color": (
+                                cmap.independent_band_bottom_color
+                            ),
+                            "independent_band_top_color": (
+                                cmap.independent_band_top_color
+                            ),
+                            "diverging": cmap.diverging,
+                            "epsilon": cmap.epsilon,
+                            "abs_max": cmap.abs_max,
                         },
                     }
                 )
@@ -438,6 +453,16 @@ class EAMApp(TrameApp):
             if "animation_track" in data_sel:
                 self.state.animation_track = data_sel["animation_track"]
 
+        # Changing the animation track resets the step to 0, so align the
+        # step with the restored index of that track afterward.
+        with self.state:
+            track = self.state.animation_track
+            if track and f"{track}_idx" in data_sel:
+                self.state.animation_step = data_sel[f"{track}_idx"]
+
+        # Cursor probing is a transient interaction mode, not part of the state
+        self.state.picking_mode = None
+
         # Update view states
         _COLORMAP_KEYS = {
             "preset",
@@ -468,7 +493,16 @@ class EAMApp(TrameApp):
             if "color_range" in cmap_cfg and isinstance(cmap_cfg["color_range"], list):
                 cmap_cfg["color_range"] = tuple(cmap_cfg["color_range"])
             if cmap_cfg:
+                # Entering diverging mode recomputes abs_max from the data
+                # asynchronously, so apply the saved diverging parameters once
+                # that has settled.
+                diverging_cfg = {
+                    k: cmap_cfg.pop(k) for k in ("epsilon", "abs_max") if k in cmap_cfg
+                }
                 view.colormap.update(**cmap_cfg)
+                if diverging_cfg:
+                    await view.colormap.completion()
+                    view.colormap.update(**diverging_cfg)
 
         # Update layout
         self.state.aspect_ratio = state_content["layout"]["aspect-ratio"]
