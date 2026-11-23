@@ -14,10 +14,11 @@ class Tools(v3.VNavigationDrawer):
             rail=("compact_drawer", True),
             width=253,
             style="transform: none;",
+            classes="qv-main-toolbar",
         )
 
         with self:
-            with html.Div(style=css.NAV_BAR_TOP):
+            with html.Div(style=css.NAV_BAR_TOP, classes="qv-main-toolbar-buttons"):
                 with v3.VList(
                     density="compact",
                     nav=True,
@@ -77,6 +78,7 @@ class FieldSelection(v3.VNavigationDrawer):
             width=500,
             permanent=True,
             style=(f"{js.is_active('select-fields')} ? 'transform: none;' : ''",),
+            classes="qv-variable-selection",
         )
 
         self._load_variables = load_variables
