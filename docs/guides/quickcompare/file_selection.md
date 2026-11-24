@@ -7,8 +7,6 @@ Both are explained below.
 
 ## New-vis mode: starting a new analysis {#new-analysis}
 
-![File loading icon](/guides/quickview/screenshots/file-upload-outline.png){ width="5%", align=right }
-
 When QuickCompare is launched using a shell command or the desktop bundle,
 or when the user clicks the "File Loading" icon on the toolbar,
 a dialog window like the screenshot below is brought up.

@@ -345,11 +345,6 @@ screenshots:
       - ".qv-variable-selection .v-text-field .v-field"
 
   # --- File selection (file_selection.md) -----------------------------------
-  - name: file-upload-outline.png
-    page: file_selection.md
-    icons: [mdi-file-upload-outline]
-    icon_size: 300
-
   - name: file_loading_start_and_parent_dirs.png
     page: file_selection.md
     icons: [mdi-home, mdi-folder-upload-outline]
@@ -358,15 +353,26 @@ screenshots:
     page: file_selection.md
     workdir: others
     viewport: [1300, 900]
+    steps:
+      - set: { active_tools: ["load-data"] }
+      - wait_for: '.v-overlay--active .v-card-title:has-text("File loading")'
+      - eval: "() => { document.documentElement.style.fontSize = '118.75%'; }"
     clip: viewport
+    frame: true
+    highlight:
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-file-upload-outline)"
 
   - name: file_loaded.png
     page: file_selection.md
     data:
       simulation: EAMv2_ne30pg2_small_cld.nc
       connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
-    viewport: [1300, 960]
+    viewport: [1300, 1210]
+    steps:
+      - wait_for: ".qv-variable-selection"
+      - eval: "() => { document.documentElement.style.fontSize = '118.75%'; }"
     clip: viewport
+    frame: true
 
   - name: state_export_import.png
     page: file_selection.md

@@ -12,10 +12,9 @@ Playwright through the locally installed Chrome, crops the result, draws red
 highlight boxes, and writes the PNG into `docs/guides/quickview/screenshots/`.
 
 Out of scope: `docs/guides/quickcompare/**` and `docs/guides/siteview/**`
-(their images come from the sibling tools). Three QuickView images are also
-embedded by QuickCompare pages (`file-upload-outline.png`,
-`file_loading_start_and_parent_dirs.png`, `state_export_import.png`); mention
-it when they change.
+(their images come from the sibling tools). QuickCompare pages also embed
+`file_loading_start_and_parent_dirs.png` and `state_export_import.png` from
+QuickView. Mention it when either image changes.
 
 ## Requirements
 
