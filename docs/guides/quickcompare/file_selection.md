@@ -11,7 +11,7 @@ Both are explained below.
 
 When QuickCompare is launched using a shell command or the desktop bundle,
 or when the user clicks the "File Loading" icon on the toolbar,
-a dialogue window like the screenshot below is brought up.
+a dialog window like the screenshot below is brought up.
 The user is expected to select a connectivity file and at least two simulation files
 from the file browser in this window.
 
@@ -49,7 +49,7 @@ or [multi-simulation (ensemble)](./multi-sim_comparison) comparison mode.
 ![Nav buttons](/guides/quickview/screenshots/file_loading_start_and_parent_dirs.png){ width="12%", align=right }
 For QuickCompare installed through conda,
 the *start directory* is the directory in which the app is launched via a shell command or script.
-After launch, the File Loading dialogue window
+After launch, the File Loading dialog window
 shows the contents in that directory, and the user can double click
 the listed subdirectories to go in–or use the folder icon with an upward arrow
 to go to the parent directory. A click on the house icon brings the file browser

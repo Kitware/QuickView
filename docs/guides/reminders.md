@@ -49,7 +49,7 @@ One of the often encountered causes of error when loading files in the QuickView
 that the horizontal grid described by the connectivity file does not match the grid in the
 simulation file. In such a case, after the user has specified those files
 and clicked the `Load files` button (see more detailed description [here](/guides/quickview/file_selection#new-analysis)),
-the file loading dialogue window will
+the file loading dialog window will
 remain open and appear non-responsive, and the terminal window will display
 a message prompting the user to check if the simulation and connectivity files exist and are compatible.
 :::

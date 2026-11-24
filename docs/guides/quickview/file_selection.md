@@ -11,11 +11,11 @@ Both are explained below.
 
 When QuickView is launched using a shell command or the desktop bundle,
 or when the user clicks the "File loading" icon on the toolbar,
-a dialogue window like the screenshot below is brought up.
+a dialog window like the screenshot below is brought up.
 The user is expected to select a connectivity file and a simulation data file
 using the file browser or the text boxes in this window.
 
-![File loading window](./screenshots/file_loading_dialogue.png){ width="100%", align=center }
+![File loading window](./screenshots/file_loading_dialog.png){ width="100%", align=center }
 
 ### Selecting files using the file browser
 
@@ -63,7 +63,7 @@ The user can now start to search for and load variables to inspect.
 ![Nav buttons](./screenshots/file_loading_start_and_parent_dirs.png){ width="12%", align=right }
 For QuickView installed through conda,
 the *start directory* is the directory in which the app is launched via a shell command or script.
-After launch, the File Loading dialogue window
+After launch, the File Loading dialog window
 shows the contents in that directory, and the user can double click
 the listed subdirectories to go in–or use the folder icon with an upward arrow
 to go to the parent directory. A click on the house icon brings the file browser

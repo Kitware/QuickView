@@ -7,9 +7,9 @@ For inspecting an ensemble of simulations, QuickCompare assumes that one simulat
 ## Control and test simulations
 
 By default, QuickCompare assumes the first simulation selected by the user
-via the [File Loading](./file_selection) dialogue is the control (ctrl) simulation, while
+via the [File Loading](./file_selection) dialog is the control (ctrl) simulation, while
 all other selected simulations are treated as test simulations.
-This designation can be changed through the **Organize simulation collection** dialogue, which allows the user to
+This designation can be changed through the **Organize simulation collection** dialog, which allows the user to
 
 - enter a custom label for each simulation, which is used in the plot titles;
 - exclude a loaded simulation from the viewport while keeping it loaded so that it can be re-enabled later;
@@ -77,7 +77,7 @@ The remaining views show either the values from the test simulations or their di
 (or relative differences) from the control simulation, depending on the selected comparison type.
 
 The **control simulation** can be changed either using the *Organize simulation collection*
-dialogue described above or through the *Choose ctrl* drop-down menu near the top of the viewport.
+dialog described above or through the *Choose ctrl* drop-down menu near the top of the viewport.
 Changing the control simulation does not alter the display order of the simulations.
 Instead, the views and their titles are updated to reflect the new control simulation,
 as demonstrated by the example screenshot below.
@@ -85,12 +85,12 @@ as demonstrated by the example screenshot below.
 ![Multi-sim comparison: change ctrl](/guides/quickcompare/screenshots/multi-sim_change_ctrl.png){ width="100%", align=center }
 
 The **display order of simulations within each section**
-can be changed either by using the up/down buttons in the *Organize simulation collection* dialogue
+can be changed either by using the up/down buttons in the *Organize simulation collection* dialog
 or by clicking a simulation label in any view.
 Clicking a label opens a drop-down menu from which a different simulation can be selected for that position.
 (A simulation appears in the drop-down menu only if it has been loaded through
-the [File Loading](./file_selection) dialogue *and* is currently included in the viewport,
-i.e., the corresponding *Include* box in the *Organize simulation collection* dialogue is checked.)
+the [File Loading](./file_selection) dialog *and* is currently included in the viewport,
+i.e., the corresponding *Include* box in the *Organize simulation collection* dialog is checked.)
 Any change to the display order is applied consistently to every variable section in the viewport.
 
 ![Multi-sim comparison: swap sims](/guides/quickcompare/screenshots/multi-sim_swap_sims.png){ width="100%", align=center }
@@ -106,6 +106,6 @@ mode in QuickCompare uses the following default color mapping choices:
 
 Beyond these defaults, QuickCompare provides the same color-mapping
 functionality as QuickView. Each plot in the viewport can be customized
-individually through the dialogue window opened by clicking its colorbar, as
+individually through the dialog window opened by clicking its colorbar, as
 described in the
 [QuickView user guide](/guides/quickview/individual_views).

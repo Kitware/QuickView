@@ -10,7 +10,7 @@ The screenshot below shows an example of the viewport in its default layout.
 
 ![Two-sim comparison: typical layout](/guides/quickcompare/screenshots/two-sim_typical_layout.png){ width="100%", align=center }
 
-When two simulations are loaded using the [File Loading](./file_selection.md) dialogue,
+When two simulations are loaded using the [File Loading](./file_selection.md) dialog,
 QuickCompare enters the two-simulation;
 when more than two simulations are loaded, the default is to enter the multi-simulation mode,
 but the user can manually switch to two-simulation mode by
@@ -84,6 +84,6 @@ mode in QuickCompare uses the following default color mapping choices:
 
 Beyond these defaults, QuickCompare provides the same color-mapping
 functionality as QuickView. Each plot in the viewport can be customized
-individually through the dialogue window opened by clicking its colorbar, as
+individually through the dialog window opened by clicking its colorbar, as
 described in the
 [QuickView user guide](/guides/quickview/individual_views).

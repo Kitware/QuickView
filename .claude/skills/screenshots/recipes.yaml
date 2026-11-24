@@ -354,7 +354,7 @@ screenshots:
     page: file_selection.md
     icons: [mdi-home, mdi-folder-upload-outline]
 
-  - name: file_loading_dialogue.png
+  - name: file_loading_dialog.png
     page: file_selection.md
     workdir: others
     viewport: [1300, 900]
