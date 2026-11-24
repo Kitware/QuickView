@@ -83,13 +83,25 @@ Semantic release rely on
 [conventional commits](https://www.conventionalcommits.org/) to generate new
 releases and changelog.
 
-## Claude Code skills
+## Maintenance skills
 
-The repository ships [Claude Code](https://claude.com/claude-code) skills under
-[`.claude/skills/`](https://github.com/Kitware/QuickView/tree/master/.claude/skills)
-to automate recurring maintenance tasks. In a Claude Code session started at the
-root of the repository, invoke them with a slash command (or simply ask for the
-task, e.g. "validate my changes", and Claude picks the matching skill).
+This repository contains two maintenance skills for
+[Claude Code](https://claude.com/claude-code) and [Codex](https://openai.com/codex/).
+The skill definitions, scripts, and recipes live under
+[`.claude/skills/`](.claude/skills/). The symbolic links under
+[`.agents/skills/`](.agents/skills/) let Codex discover the same skill folders.
+
+Open the QuickView repository in either tool and use the corresponding command.
+You can also ask for the task in plain language, such as "validate my changes."
+
+| Task | Claude Code | Codex |
+| --- | --- | --- |
+| Validate code and documentation | `/validate docs` | `$validate docs` |
+| Regenerate a documentation screenshot | `/screenshots map_projections.png` | `$screenshots map_projections.png` |
+
+The examples below use Claude Code's slash commands. In Codex, use `$validate`
+or `$screenshots` with the same arguments. Both tools use the same scripts and
+follow the same workflows.
 
 ### `/validate`: check code and documentation
 
