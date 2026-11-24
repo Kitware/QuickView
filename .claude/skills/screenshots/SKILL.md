@@ -106,9 +106,12 @@ page text, which means the page needs an update too).
   highlight:                       # red boxes; a nested list = one box around all
     - "<selector>"
     - ["<selector A>", "<selector B>"]
+  frame: true                      # optional border, rounded corners and shadow
   panels:                          # several captures combined side by side
-    - steps: [...]                 # each panel overrides recipe keys
+    - label: Collapsed              # optional title above the framed, shadowed capture
+      steps: [...]                  # each panel overrides recipe keys
     - steps: [...]
+  gap: 24                          # spacing between panels, scaled by defaults.scale
   layout: vertical                 # stack panels instead
   icons: [mdi-home, mdi-pan]       # instead of a capture: render MDI icons large
 ```

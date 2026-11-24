@@ -60,6 +60,6 @@ in the [viewport layout](./viewport_layout#plot-size-relative-to-view-frame) pan
 | `Shift` + `↑` / `Shift` + `↓` | Zoom in / out |
 | `←` `→` `↑` `↓` | Pan the plots inside their views |
 
-## In the app
+## Summary displayed in the app {#help-page}
 
 ![shortcuts](./screenshots/shortcuts.png){ width="100%" }

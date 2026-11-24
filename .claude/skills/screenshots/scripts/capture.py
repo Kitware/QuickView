@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["playwright>=1.40", "pillow>=10", "pyyaml>=6"]
+# dependencies = ["playwright>=1.40", "pillow>=10.1", "pyyaml>=6"]
 # ///
 """Regenerate the QuickView documentation screenshots from recipes.
 
@@ -33,7 +33,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 REPO = SKILL_DIR.parent.parent.parent
@@ -354,6 +354,9 @@ def capture_panel(browser, python, data, spec, defaults, tmp_dir) -> Image.Image
             outline=HIGHLIGHT_COLOR,
             width=line,
         )
+    label = spec.get("label")
+    if label or spec.get("frame"):
+        return frame_panel(image, scale, label=label)
     return image
 
 
@@ -408,11 +411,82 @@ def with_retry(fn, name, attempts=2):
             print(f"(retrying after: {str(e).splitlines()[0]}) ", end="", flush=True)
 
 
-def combine(images, gap=24, vertical=False, background="white"):
+def frame_panel(
+    image: Image.Image, scale: int, *, label: str | None = None
+) -> Image.Image:
+    """Frame a capture with a soft shadow and an optional label above it."""
+    inset = round((8 if label else 4) * scale)
+    label_height = label_width = 0
+    if label:
+        font = ImageFont.load_default(size=round(16 * scale))
+        lines = label.splitlines()
+        label_height = round((26 + 21 * (len(lines) - 1)) * scale)
+        label_width = max(round(font.getlength(line)) for line in lines)
+
+    border = max(1, round(scale))
+    width = max(image.width, label_width) + 2 * inset
+    frame_height = image.height + 2 * inset
+    radius = round(6 * scale)
+    margin = round(10 * scale)
+    offset = round(2 * scale)
+    frame_top = margin + (label_height + inset if label else 0)
+    size = (width + 2 * margin, frame_top + frame_height + margin)
+
+    shadow = Image.new("L", size)
+    ImageDraw.Draw(shadow).rounded_rectangle(
+        (
+            margin,
+            frame_top + offset,
+            margin + width - 1,
+            frame_top + frame_height + offset - 1,
+        ),
+        radius=radius,
+        fill=60,
+    )
+    out = Image.new("RGBA", size)
+    out.putalpha(shadow.filter(ImageFilter.GaussianBlur(3 * scale)))
+
+    card = Image.new("RGBA", (width, frame_height))
+    draw = ImageDraw.Draw(card)
+    draw.rounded_rectangle(
+        (0, 0, width - 1, frame_height - 1),
+        radius=radius,
+        fill="white",
+        outline="#b8c0c9",
+        width=border,
+    )
+    card.paste(image, ((width - image.width) // 2, inset))
+    out.alpha_composite(card, (margin, frame_top))
+
+    if not label:
+        return out
+
+    draw = ImageDraw.Draw(out)
+    draw.rounded_rectangle(
+        (margin, margin, margin + width - 1, margin + label_height - 1),
+        radius=radius,
+        fill="#eaf1f9",
+    )
+    draw.multiline_text(
+        (margin + width / 2, margin + label_height / 2),
+        label,
+        font=font,
+        fill="#244b73",
+        anchor="mm",
+        align="center",
+        spacing=round(4 * scale),
+    )
+    return out
+
+
+def combine(images, gap=24, vertical=False):
+    transparent = any(im.mode == "RGBA" for im in images)
+    mode = "RGBA" if transparent else "RGB"
+    background = (0, 0, 0, 0) if transparent else "white"
     if vertical:
         width = max(im.width for im in images)
         height = sum(im.height for im in images) + gap * (len(images) - 1)
-        out = Image.new("RGB", (width, height), background)
+        out = Image.new(mode, (width, height), background)
         y = 0
         for im in images:
             out.paste(im, (0, y))
@@ -420,7 +494,7 @@ def combine(images, gap=24, vertical=False, background="white"):
         return out
     height = max(im.height for im in images)
     width = sum(im.width for im in images) + gap * (len(images) - 1)
-    out = Image.new("RGB", (width, height), background)
+    out = Image.new(mode, (width, height), background)
     x = 0
     for im in images:
         out.paste(im, (x, (height - im.height) // 2))
@@ -448,8 +522,11 @@ def review_sheet(pairs, path: Path, width=700):
         cells = []
         for img_path in (before, after):
             if img_path and img_path.exists():
-                im = Image.open(img_path).convert("RGB")
+                im = Image.open(img_path).convert("RGBA")
                 im.thumbnail((width, width))
+                background = Image.new("RGB", im.size, "white")
+                background.paste(im, mask=im.getchannel("A"))
+                im = background
             else:
                 im = Image.new("RGB", (width, 80), "white")
             cells.append(im)

@@ -391,21 +391,32 @@ screenshots:
   - name: quickview_ui.png
     page: ui_overview.md
     state: quickview-state_quickview_ui.json
-    viewport: [1800, 1020]
+    viewport: [1800, 920]
     settle: 4.0
+    steps:
+      - wait_for: ".qv-toolbar-cropping"
+      - eval: "() => { document.documentElement.style.fontSize = '106.25%'; }"
     clip: viewport
+    frame: true
 
   - name: toolbar_compact_or_expanded.png
     page: ui_overview.md
     viewport: [1000, 700]
+    gap: 8
     clip:
       selector: ".qv-main-toolbar-buttons"
       from_left: true
       from_top: true
       pad: 8
     panels:
-      - steps: [{ set: { active_tools: [], compact_drawer: true } }]
-      - steps: [{ set: { active_tools: [], compact_drawer: false } }]
+      - label: |-
+          Main toolbar
+          Collapsed
+        steps: [{ set: { active_tools: [], compact_drawer: true } }]
+      - label: |-
+          Main toolbar
+          Expanded
+        steps: [{ set: { active_tools: [], compact_drawer: false } }]
 
   - name: shortcuts.png
     page: shortcuts.md

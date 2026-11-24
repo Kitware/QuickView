@@ -1,42 +1,42 @@
 # QuickView's Graphical UI
 
-![QuickView UI](./screenshots/quickview_ui.png){ width="100%" }
+![QuickView UI](./screenshots/quickview_ui.png){ width="100%" style="margin-top: 2.75rem" }
 
 
 ## UI components
 
 QuickView's UI contains three main components.
 
-- **Viewport**: The viewport displays contour plots on global or regional maps
+- **Viewport.** The viewport displays contour plots on global or regional maps
   for the user-selected physical quantities (variables in the NetCDF files).
   The sequence of the displayed variables and the size of the contour plots
   can be adjusted using the [viewport layout](./viewport_layout.md) control panel.
-  For each variable shown on a map, the colormap, value ranges etc. can be adjusted
-  individually using the [pop-up panel](./individual_views.md)
-  activated by a click on the colorbar.
+  For each variable shown on a map, click the colorbar to open the
+  [pop-up panel](./individual_views.md) and adjust the colormap, value range,
+  and other settings.
+  When no variables have been loaded from a simulation file,
+  the viewport shows a [help page](./shortcuts#help-page).
 
-![Toolbar compact or expanded](./screenshots/toolbar_compact_or_expanded.png){ width="50%" align=right}
+![Main toolbar in collapsed and expanded modes](./screenshots/toolbar_compact_or_expanded.png){ width="40%" align=right style="margin: 0.5rem 0 1rem 1.25rem" }
 
-- **Control panels**: QuickView includes various control panels for
+- **Main toolbar.** The vertical toolbar on the left of the UI starts collapsed.
+  Hover over an icon to see its short description.
+  Click the QuickView icon or press `H` to expand the toolbar and see
+  the short descriptions beside the icons.
+  Click the QuickView icon or press `H` again to collapse the toolbar.
+  The screenshot on the right shows both modes.
+
+- **Control panels.** QuickView includes various control panels for
   changing the properties of contour plots shown in the viewport.
   The control panels can be collapsed (hidden)
   or expanded (shown) by clicking on their corresponding icons in the
   toolbar or by using [keyboard shortcuts](./shortcuts).
+  See the [toolbar button table](#toolbar-buttons) for details.
 
-- **Main toolbar**: The vertical toolbar located on the left of the UI
-  contains various buttons that either activate pop-up menus on a single click
-  or serve as toggles for showing or hiding control panels.
-  The toolbar is shown in a collapsed mode by default, but
-  will change into an expanded mode if the user clicks on the
-  colorful QuickView icon at the top of the toolbar or press the
-  `H` key on the keyboard.
+## Buttons in the main toolbar {#toolbar-buttons}
 
-## Toolbar buttons {#toolbar-buttons}
-
-From top to bottom, the main toolbar contains the buttons listed below.
-In the collapsed toolbar, hovering over a button shows its name in a tooltip;
-in the expanded toolbar, the names are shown next to the icons.
-Buttons marked as toggles show or hide a control panel.
+The table below lists the toolbar buttons from top to bottom.
+Buttons marked as "(toggle)" show or hide a control panel.
 
 | Button | Shortcut | What it does |
 | ------ | -------- | ------------ |
@@ -45,8 +45,8 @@ Buttons marked as toggles show or hide a control panel.
 | **State Import/Export** | `E` / `I` | Menu to save the current state to a file or load a state file. See [Resume mode](./file_selection#state-files). |
 | **File loading** (toggle) | `F` | Opens the window for selecting the simulation and connectivity files. See [Selecting Files](./file_selection). |
 | **Variable selection** (toggle) | `V` | Panel for choosing the variables to visualize. See [Selecting Variables](./variable_selection). |
-| **Slice selection** (toggle) | `S` | Panel for choosing the slice (e.g., time step, vertical level) of multi-dimensional variables. See [Selecting Data Slices](./slice_selection). |
-| **Animation controls** (toggle) | `A` | Panel for stepping or playing through one dimension, and for exporting animations. See [Selecting Data Slices](./slice_selection). |
+| **Slice selection** (toggle) | `S` | Panel for choosing a slice, such as a time step or vertical level, of a multidimensional variable. See [Selecting Data Slices](./slice_selection). |
+| **Animation controls** (toggle) | `A` | Panel for stepping or playing through one dimension and for exporting animations. See [Selecting Data Slices](./slice_selection). |
 | **Viewport layout** (toggle) | `P` | Panel for the view sizes, grouping, and aspect ratio. See [Customizing Viewport Layout](./viewport_layout). |
 | **Map Projection** | `C` `R` `M` `N` | Menu to choose the projection, the lat-lon grid line spacing, and the coastline resolution. See [Map projection](./map_related#map-projections). |
 | **Lat/Lon cropping** (toggle) | `L` | Panel for restricting the plots to a longitude/latitude box and for moving the map center. See [Geographical region](./map_related#geographical-region). |
@@ -54,8 +54,6 @@ Buttons marked as toggles show or hide a control panel.
 | **Background Colors** | | Menu to choose the background color of the plots. See [Plot background color](./map_related#plot-background-color). |
 
 Pressing `Esc` closes all open control panels and collapses the toolbar.
-While no variable is selected, the viewport shows a help page that summarizes
-the toolbar buttons and the [keyboard shortcuts](./shortcuts).
 The version number of QuickView is shown at the bottom of the toolbar.
 
 ::: info Note for developers

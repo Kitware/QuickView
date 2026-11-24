@@ -10,16 +10,16 @@
   max-width: none !important;
 }
 
+/* Keep section dividers below floated images. */
+.vp-doc h2 {
+  clear: both;
+}
+
 /* --------------------------------------------------------------- */
 /* For the webnews page
 /* --------------------------------------------------------------- */
 /* Start each news item's icons below any preceding floated icons. */
 .news-page .vp-doc p:has(img[align="right"]) {
-  clear: both;
-}
-
-/* Keep month headings below preceding icons too. */
-.news-page .vp-doc h2 {
   clear: both;
 }
 
