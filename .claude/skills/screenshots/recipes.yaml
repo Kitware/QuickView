@@ -420,11 +420,19 @@ screenshots:
 
   - name: shortcuts.png
     page: shortcuts.md
-    viewport: [1500, 1400]
-    scale: 1
+    viewport: [1200, 1440]
     steps:
       - set: { active_tools: [] }
+      - wait_for: ".v-container.overflow-auto"
+      - eval: |
+          () => {
+            document.documentElement.style.fontSize = '106.25%';
+            const landingPage = document.querySelector('.v-container.overflow-auto');
+            landingPage.style.maxWidth = 'none';
+            landingPage.style.setProperty('padding-inline', '20px', 'important');
+          }
     clip: viewport
+    frame: true
 
   # --- Viewport layout (viewport_layout.md) ---------------------------------
   - name: viewport_grouped_ungrouped.png

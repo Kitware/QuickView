@@ -14,7 +14,7 @@ QuickView's UI contains three main components.
   For each variable shown on a map, click the colorbar to open the
   [pop-up panel](./individual_views.md) and adjust the colormap, value range,
   and other settings.
-  When no variables have been loaded from a simulation file,
+  When no variables have been loaded from the simulation file,
   the viewport shows a [help page](./shortcuts#help-page).
 
 ![Main toolbar in collapsed and expanded modes](./screenshots/toolbar_compact_or_expanded.png){ width="40%" align=right style="margin: 0.5rem 0 1rem 1.25rem" }

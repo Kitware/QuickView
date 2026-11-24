@@ -29,7 +29,7 @@ The same menu also offers two automatic arrangements:
 
 ![Viewport column size](./screenshots/viewport_with_column_size_menu.png){ width="100%", align=center }
 
-## Grouped or ungrouped views
+## Grouped or ungrouped views {#grouped-or-ungrouped}
 
 If the selected variables have different shapes, the contour plots are grouped by shape by default.
 Each group is identified by a vertical bar on the left side of the viewport,
@@ -58,7 +58,7 @@ to swap contents.
 
 ![Select variable for a view](./screenshots/variable_selection_in_viewport_when_ungrouped.png){ width="100%", align=center }
 
-## Additional adjustments
+## Additional adjustments {#additiona-adjustments}
 
 The viewport layout control panel has a few other toggles that, upon click,
 reveal additional sliders or buttons for simultaneously
@@ -77,7 +77,7 @@ This can be useful for controlling the blank spaces, especially for
 
 ![toggles](./screenshots/viewport_aspect_ratio.png){ width="100%", align=center }
 
-### Plot size relative to view frame
+### Plot size relative to view frame (zoom) {#zoom}
 
 A pair of zoom-in and zoom-out buttons are provided for changing the plot sizes
 with respect to the view frames. A click on the auto-zoom button resets the sizes to fit the frames.
@@ -87,7 +87,7 @@ When (and only when) the zoom-in/zoom-out button group is expanded, the keyboard
 
 ![toggles](./screenshots/viewport_zoom_in_out_auto.png){ width="100%", align=center }
 
-### Plot location inside view frame
+### Plot location inside view frame (pan) {#pan}
 
 A set of four buttons is provided for moving the plots left, right, up, or down
 with respect to the view frames, an operation commonly referred to as panning in graphical user interfaces.

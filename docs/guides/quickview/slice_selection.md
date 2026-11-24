@@ -6,6 +6,8 @@ The variables are shown on global or regional maps.
 If a variable has additional dimensions such as time, vertical level, etc.,
 QuickView is designed to display one global or regional map at a time for that variable.
 
+## Using the slice selection control panel {#slice-selection-control-panel}
+
 To choose the indices to inspect for the non-horizontal dimensions,
 the slice selection button in the vertical toolbar can be clicked
 to bring up the **slice selection control panel**, as shown in
@@ -15,7 +17,7 @@ In this example, the selected variables together have six non-horizontal dimensi
 with more than one data slice in the simulation file,
 corresponding to the six gray tabs highlighted in the red box.
 Inside each tab, the dimension name is shown in bold, and
-the current and total number of data slices are shown in parenthesis.
+the current and total number of data slices are shown in parentheses.
 When a dimension has an associated 1D dimension variable,
 its current value and unit are also displayed.
 
@@ -29,8 +31,11 @@ the tab back to a compact mode.
 
 ![](./screenshots/dimension_slider_expanded.png){ width="100%" }
 
-Alternatively, the **animation control panel** shown in the screenshot below
-can be used. This panel contains a drop-down menu for choosing a dimension to inspect,
+## Using the animation control panel {#animation-control-panel}
+
+The animation control panel shown in the screenshot below can be used
+to quickly scan through many data slices.
+It contains a drop-down menu for choosing which dimension to inspect,
 a slider and a set of forward and backward buttons for manually stepping through the selected dimension,
 as well as a two play/pause toggles for automatically stepping through the selected dimension
 in forward or backward order.
