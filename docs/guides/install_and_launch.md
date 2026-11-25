@@ -1,24 +1,25 @@
 # Install and launch
 
-(See [System Requirements](/guides/system_requirements.md) for the prerequisites
+(See [System requirements](/guides/system_requirements.md) for the prerequisites
 for local installation and remote usage.)
 
 Tools of the QuickView family are available as
-**Conda** and **PyPI** packages as well as **pre-compiled desktop bundles**
-for various OS's including Mac, Windows, and Linux.
+conda and PyPI packages as well as pre-compiled desktop bundles
+for various operating systems, including macOS, Windows, and Linux.
 The table below summarizes where the different packages
 and bundles can be found.
 
 | Tool name    | Desktop bundle | conda package name | Conda  | PyPI  |
 | ------------ | -------------- | ------------------ | ------ | ----- |
-| QuickView    | [Download page](https://github.com/Kitware/QuickView/releases) | e3sm-quickview   | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/e3sm-quickview.svg)](https://anaconda.org/conda-forge/e3sm-quickview)     | [![PyPI](https://img.shields.io/pypi/v/e3sm-quickview?label=pypi%20package)](https://pypi.org/project/e3sm-quickview/)      |
-| QuickCompare | [Download page](https://github.com/Kitware/E3SMQuickCompare/releases) | e3sm_compareview | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/e3sm_compareview.svg)](https://anaconda.org/conda-forge/e3sm_compareview) | [![PyPI](https://img.shields.io/pypi/v/e3sm-compareview?label=pypi%20package)](https://pypi.org/project/e3sm-compareview/)  |
+| QuickView    | [Download page](https://github.com/Kitware/QuickView/releases) | `e3sm-quickview`   | [![Conda version](https://img.shields.io/conda/vn/conda-forge/e3sm-quickview.svg)](https://anaconda.org/conda-forge/e3sm-quickview)     | [![PyPI](https://img.shields.io/pypi/v/e3sm-quickview?label=pypi%20package)](https://pypi.org/project/e3sm-quickview/)      |
+| QuickCompare | [Download page](https://github.com/Kitware/E3SMQuickCompare/releases) | `e3sm_compareview` | [![Conda version](https://img.shields.io/conda/vn/conda-forge/e3sm_compareview.svg)](https://anaconda.org/conda-forge/e3sm_compareview) | [![PyPI](https://img.shields.io/pypi/v/e3sm-compareview?label=pypi%20package)](https://pypi.org/project/e3sm-compareview/)  |
 
-:::tip Note: The contents below were written with desktop and laptop computers in mind.
+::: tip Desktop and laptop computers
+The instructions below are for desktop and laptop computers.
 
-Users who would like to **use** our tools installed at NERSC can find information in
+Users who would like to *use* our tools installed at NERSC can find information in
 [a quickstart guide](/hpcsystems/nersc/launching.md).
-Users who would like to **install** their own copy at NERSC
+Users who would like to *install* their own copy at NERSC
 can follow [this example](/hpcsystems/nersc/installation_personal.md).
 :::
 
@@ -29,10 +30,10 @@ we use [PyInstaller](https://pyinstaller.org/en/stable/) and [Tauri](https://tau
 to bundle each of our Python-based tools and their dependencies
 into a standalone graphical application.
 The creation of such a bundle is done by triggering a release using GitHub Actions.
-Hence, the bundles are available from the corresponding GitHub repo's Releases page.
+Hence, the bundles are available from the corresponding GitHub repository's **Releases** page.
 The links are given in the summary table above.
 
-:::warning ATTENTION Mac Users!!
+::: warning Running unsigned bundles on macOS
 The binaries compiled for Macs have not been signed using an Apple Developer ID.
 Hence, after downloading a binary for Mac, the user needs to use the following
 command to remove quarantine on the binary.
@@ -41,7 +42,7 @@ command to remove quarantine on the binary.
 xattr -d com.apple.quarantine <your_filename>.dmg
 ```
 
-Also note that the **first execution of the app will take a while** as macOS
+Also note that the *first execution of the app will take a while* as macOS
 will check and validate the full application file tree.
 :::
 
@@ -79,7 +80,7 @@ conda install conda-forge::"e3sm_compareview>=1.11.3"
 
 ### Launching a tool installed via conda
 
-To use the tools installed via conda, open a Terminal window and
+To use the tools installed via conda, open a terminal window and
 activate the conda environment using
 
 ```
@@ -97,23 +98,23 @@ quickview
 quickcompare
 ```
 
-After some seconds, the Terminal window should indicate that the app has
-loaded various plugins, and then provide an URL similar to `http://localhost:50329/`
+After some seconds, the terminal window should indicate that the app has
+loaded various plugins, and then provide a URL similar to `http://localhost:50329/`
 (your actual number will likely be different).
-**Enter the URL into a web browser** to access the graphical UI.
+Enter the URL into a web browser to access the graphical UI.
 
 
 ### Launching from JupyterLab {#jupyterlab}
 
 QuickView can also be started from the launcher of a JupyterLab session,
 with its UI shown in a JupyterLab tab. This requires installing QuickView
-with its `jupyter` extra in the **same environment as the JupyterLab server**:
+with its `jupyter` extra in the *same environment as the JupyterLab server*:
 
 ```sh
 pip install "e3sm-quickview[jupyter]"
 ```
 
-After restarting JupyterLab, an **E3SM QuickView** tile appears in the "Other"
+After restarting JupyterLab, an **E3SM QuickView** tile appears in the **Other**
 section of the launcher. Clicking it starts QuickView on the server
 (through [jupyter-server-proxy](https://jupyter-server-proxy.readthedocs.io/))
 and opens it in a new JupyterLab tab.
@@ -149,7 +150,7 @@ To resume an earlier analysis:
 quickview --state my-analysis.json
 ```
 
-:::tip Tip: First execution on macOS
+::: tip First execution on macOS
 On macOS, the first execution after installation via conda will also take a while
 (e.g., a minute or more),
 as the system will validate each Python file for security. But any following

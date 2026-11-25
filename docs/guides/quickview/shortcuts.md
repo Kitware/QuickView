@@ -1,4 +1,4 @@
-# Keyboard Shortcuts in QuickView
+# Keyboard shortcuts in QuickView
 
 Most QuickView shortcuts use a single key. To use them, make sure the browser
 tab or window showing QuickView is active.
@@ -30,18 +30,18 @@ are selected, including at startup.
 
 | Key | Projection |
 | --- | ---------- |
-| `C` | Cylindrical Equidistant |
-| `R` | Robinson |
-| `M` | Mollweide |
-| `N` | Spherical |
+| `C` | **Cylindrical Equidistant** |
+| `R` | **Robinson** |
+| `M` | **Mollweide** |
+| `N` | **Spherical** |
 
 ## Viewport layout
 
 | Key | Action |
 | --- | ------ |
 | `G` | Toggle between [grouped and ungrouped](./viewport_layout#grouped-or-ungrouped) views |
-| `=` | Use the Auto flow column layout |
-| `0` | Use the Auto column layout |
+| `=` | Use the **Auto flow** column layout |
+| `0` | Use the **Auto** column layout |
 | `1`, `2`, `3`, `4`, `6` | Set the number of columns to 1, 2, 3, 4, or 6 |
 
 You can also hold `Alt` while pressing any of the number keys above, including `0`.

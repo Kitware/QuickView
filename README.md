@@ -8,7 +8,7 @@
 [![](https://img.shields.io/badge/Conda%20Forge%20Repo-blue)](https://github.com/conda-forge/e3sm-quickview-feedstock)
 
 <!-- #region quickview-intro -->
-**QuickView** is an open-source, interactive visualization
+QuickView is an open-source, interactive visualization
 tool designed to help Earth system modelers take a quick look at
 a collection of physical quantities in their simulation files.
 The physical quantities are presented in the form of contour plots on global or regional maps.
@@ -19,7 +19,7 @@ or finite-volume grid cells (`ne*pg2`, `ne*pg3`, etc.).
 Under the hood, [ParaView](https://www.paraview.org/) and
 [VTK](https://vtk.org/) supply the data-processing and graphics capabilities,
 while [trame](https://www.kitware.com/trame/), a Python package,
-is used to build a browser-based graphical User Interface (UI)
+is used to build a browser-based graphical user interface (UI)
 to provide intuitive and task-focused controls of the visualization
 so that users do not need to operate ParaView or VTK themselves.
 <!-- #endregion quickview-intro -->
@@ -27,7 +27,7 @@ so that users do not need to operate ParaView or VTK themselves.
 ![QuickView UI](https://raw.githubusercontent.com/Kitware/QuickView/master/docs/public/website_banner.png)
 
 <!-- #region quickview-key-features -->
-## Key Features
+## Key features
 
 - Intuitive, minimalist interface tailored for Earth system modeling.
 - Multi-variable visualization.
@@ -53,7 +53,7 @@ See [documentation page](https://kitware.github.io/QuickView/guides/quickview/ge
 
 <!-- #region quickview-project -->
 
-## Project Background
+## Project background
 
 QuickView is developed by [Kitware, Inc.](https://www.kitware.com/) in
 collaboration with
@@ -66,10 +66,10 @@ programs via [SciDAC](https://www.scidac.gov/).
 The development of QuickView used resources of the National Energy Research Scientific Computing Center
 ([NERSC](https://www.nersc.gov/)), a U.S. Department of Energy User Facility.
 
-### Contributors
-
-- **Lead Developer**: Abhishek Yenpure (now at NVIDIA) for version 1; [Sebastien Jourdain](https://www.kitware.com/sebastien-jourdain/) ([Kitware, Inc.](https://www.kitware.com/)) from version 2 onwards.
-- **Key Contributors**: Berk Geveci, Patrick O'Leary, Dan Lipsa, Will Dunklin (Kitware, Inc.); Hui Wan, Kai Zhang (PNNL)
+- **Lead developers.** Abhishek Yenpure (now at NVIDIA) led development for version 1.
+  [Sebastien Jourdain](https://www.kitware.com/sebastien-jourdain/) ([Kitware, Inc.](https://www.kitware.com/)) has led development since version 2.
+- **Key contributors.** Berk Geveci, Patrick O'Leary, Dan Lipsa, and Will Dunklin
+  (Kitware, Inc.), and Hui Wan and Kai Zhang (PNNL).
 
 <!-- #endregion quickview-project -->
 

@@ -1,5 +1,5 @@
 
-# The QuickView Family
+# The QuickView family
 
 ![app icons](/guides/QuickView_family_app_icons_with_text.png){ width="50%", align=right }
 
@@ -27,51 +27,67 @@ Sample visualizations showing
 simulation output from the EAM, ELM, and CAM-SE models
 can be found in the [gallery](/gallery/).
 
-## Key Reminders
+## Documentation conventions
+
+We use the following conventions on this documentation site.
+
+- **Bold** marks labels on buttons, menus, and other controls in the apps,
+  matching each app’s capitalization. Some list items in this
+  documentation also use bold for short headings.
+- A fixed-width font marks keyboard keys such as `Esc` and
+  text to read or type exactly, such as the command-line option `--state`
+  or the filename `quickview-state.json`.
+- *Italics* indicate occasional emphasis.
+- Page titles and section headings use sentence case.
+  The left navigation uses title case.
+
+## Key reminders
 
 ::: warning Two modes of use
 All tools in the family support two ways of usage:
 a *new-vis* mode for starting a new analysis and
 a *resume* mode for continuing an earlier, saved analysis.
-Further details can be found on, e.g., [the linked page](/guides/quickview/file_selection.md).
+Further details can be found in, e.g.,
+the [QuickView user's guide](/guides/quickview/file_selection#state-files) and
+the [QuickCompare user's guide](/guides/quickcompare/file_selection#state-files).
 :::
 
 ::: info Connectivity files
 Since cubed spheres are unstructured horizontal meshes,
 connectivity files need to be provided to the tools alongside the simulation files.
 Please note that such connectivity files are, typically, *not* the mapping files
-used for interpolating data to regular late-lon grids.
-Further information can be found on [the linked page](/guides/connectivity.md).
+used for interpolating data to regular lat-lon grids.
+Further information can be found in the [introduction to connectivity files](/guides/connectivity).
 :::
 
 ::: tip Consistency between connectivity and simulation files
-One of the often encountered causes of error when loading files in the QuickView family is
-that the horizontal grid described by the connectivity file does not match the grid in the
-simulation file. In such a case, after the user has specified those files
-and clicked the `Load files` button (see more detailed description [here](/guides/quickview/file_selection#new-analysis)),
-the file loading dialog window will
-remain open and appear non-responsive, and the terminal window will display
-a message prompting the user to check if the simulation and connectivity files exist and are compatible.
+One of the often encountered causes of error when loading files is
+that the connectivity information does not match the
+horizontal dimension in the simulation file.
+In such a case, after the user clicks the **Load files** button (e.g., in
+[QuickView](/guides/quickview/file_selection#new-analysis) or
+[QuickCompare](/guides/quickcompare/file_selection#new-analysis)),
+the file loading window will remain open and appear non-responsive.
+If the app was launched from the command line,
+the terminal window will display a message prompting the user to check
+if the simulation and connectivity files exist and are compatible.
 :::
 
-::: warning The `Load ... Variables` button
-Most buttons, sliders, and selection boxes in the graphical User Interfaces (UIs)
-apply their effects
-immediately upon user interaction. An important exception is variable
-selection: After variables are chosen for the first time following file loading
-or after the selection is changed, the user **must** click the `Load ... Variables`
-button at the top of the [variable selection control panel](/guides/quickview/variable_selection)
-in order for the new selection to take effect,
-i.e., for the selected variables to be loaded into memory and shown
-as images in the viewport.
+::: warning Applying variable selections
+Most controls in our tools apply changes immediately.
+However, after variables are selected or deselected,
+the user *must* click the load button at the top of the
+[variable selection panel](/guides/quickview/variable_selection)
+in order for the updated list of variables to be loaded
+into memory and displayed in the viewport.
 :::
 
 ::: info Show/hide control panels
 Each tool in the QuickView family contains multiple control panels
 for setting properties of the visualization.
 These control panels can be shown/expanded for easy access or
-be hidden/folded to maximize the screen space for visualization.
-The UIs provide both keyboard shortcuts and toggles in the main toolbar
+be hidden/collapsed to maximize the screen space for visualization.
+The apps provide both keyboard shortcuts and toggles in the main toolbar
 to show or hide these control panels.
 :::
 
@@ -91,5 +107,5 @@ Furthermore, if a user saves a state file after these
 adjustments, they can later resume their analysis with the customized arrangement.
 The use of state files in [QuickView](/guides/quickview/file_selection#state-files)
 and [QuickCompare](/guides/quickcompare/file_selection#state-files)
-is explained in the linked pages.
+is explained on the linked pages.
 :::

@@ -1,4 +1,4 @@
-# Simulation Files
+# Simulation files
 
 The QuickView family of tools has been developed using simulation files
 from the E3SM Atmosphere Model, EAM, and the land model ELM.
@@ -14,7 +14,7 @@ variables on cubed-sphere meshes regardless of what name is used
 for the horizontal dimension (e.g., `ncol` and `ncol_d` in EAM files and
 `lndgrid` in ELM files).
 
-## Multi-dimensional variables {#nd-vars}
+## Multidimensional variables {#nd-vars}
 
 Starting from QuickView version 2 and QuickCompare version 1,
 the tool family has been generalized to visualize any variable

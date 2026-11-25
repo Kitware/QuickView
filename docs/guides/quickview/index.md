@@ -4,7 +4,8 @@
 
 <!--@include: ../../../README.md#quickview-intro-->
 
-Useful resources: see [linked page](./getting_started).
+See [Getting started](./getting_started) for installation instructions, sample
+data, and links to the user guide.
 
 ## Why QuickView?
 

@@ -1,7 +1,7 @@
-# System Requirements
+# System requirements
 
-This page describes the prerequisites for **local installation** and **remote usage**
-of tools in the QuickView family. See [Install and Launch](/guides/install_and_launch.md)
+This page describes the prerequisites for local installation and remote usage
+of tools in the QuickView family. See [Install and launch](/guides/install_and_launch.md)
 for available packages, desktop bundles, and installation instructions.
 
 ## Local installation using a desktop bundle

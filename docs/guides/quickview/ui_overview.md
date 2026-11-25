@@ -1,4 +1,4 @@
-# QuickView's Graphical UI
+# QuickView's graphical UI
 
 ![QuickView UI](./screenshots/quickview_ui.png){ width="100%" style="margin-top: 2.75rem" }
 
@@ -43,14 +43,14 @@ Buttons marked as "(toggle)" show or hide a control panel.
 | QuickView icon | `H` | Expands or collapses the toolbar, i.e., shows or hides the button names. |
 | **Auto zoom** | `Z` | Resets the zoom so that each plot fits its view. |
 | **State Import/Export** | `E` / `I` | Menu to save the current state to a file or load a state file. See [Resume mode](./file_selection#state-files). |
-| **File loading** (toggle) | `F` | Opens the window for selecting the simulation and connectivity files. See [Selecting Files](./file_selection). |
-| **Variable selection** (toggle) | `V` | Panel for choosing the variables to visualize. See [Selecting Variables](./variable_selection). |
-| **Slice selection** (toggle) | `S` | Panel for choosing a slice, such as a time step or vertical level, of a multidimensional variable. See [Selecting Data Slices](./slice_selection). |
-| **Animation controls** (toggle) | `A` | Panel for stepping or playing through one dimension and for exporting animations. See [Selecting Data Slices](./slice_selection). |
-| **Viewport layout** (toggle) | `P` | Panel for the view sizes, grouping, and aspect ratio. See [Customizing Viewport Layout](./viewport_layout). |
+| **File loading** (toggle) | `F` | Opens the window for selecting the simulation and connectivity files. See [Selecting files for analysis](./file_selection). |
+| **Variable selection** (toggle) | `V` | Panel for choosing the variables to visualize. See [Selecting variables to inspect](./variable_selection). |
+| **Slice selection** (toggle) | `S` | Panel for choosing a slice, such as a time step or vertical level, of a multidimensional variable. See [Selecting data slices](./slice_selection). |
+| **Animation controls** (toggle) | `A` | Panel for stepping or playing through one dimension and for exporting animations. See [Selecting data slices](./slice_selection). |
+| **Viewport layout** (toggle) | `P` | Panel for the view sizes, grouping, and aspect ratio. See [Customizing viewport layout](./viewport_layout). |
 | **Map Projection** | `C` `R` `M` `N` | Menu to choose the projection, the lat-lon grid line spacing, and the coastline resolution. See [Map projection](./map_related#map-projections). |
 | **Lat/Lon cropping** (toggle) | `L` | Panel for restricting the plots to a longitude/latitude box and for moving the map center. See [Geographical region](./map_related#geographical-region). |
-| **Capture viewport as png** | | Saves the whole viewport as a PNG image. See [Saving Images](./saving_images). |
+| **Capture viewport as png** | | Saves the whole viewport as a PNG image. See [Saving images](./saving_images). |
 | **Background Colors** | | Menu to choose the background color of the plots. See [Plot background color](./map_related#plot-background-color). |
 
 Pressing `Esc` closes all open control panels and collapses the toolbar.

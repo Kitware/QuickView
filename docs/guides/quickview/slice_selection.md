@@ -1,7 +1,7 @@
 # Selecting Data Slices to Inspect
 
 QuickView is designed to visualize variables in the simulation data files
-that have horizontal dimensions representing the globe.
+that have horizontal dimensions representing the globe or a part of it.
 The variables are shown on global or regional maps.
 If a variable has additional dimensions such as time, vertical level, etc.,
 QuickView is designed to display one global or regional map at a time for that variable.
