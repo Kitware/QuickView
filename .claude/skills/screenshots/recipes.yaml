@@ -233,42 +233,70 @@ screenshots:
   - name: variable_list_none_selected.png
     page: variable_selection.md
     data:
-      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      simulation: v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc
       connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
-    viewport: [1000, 1000]
+    viewport: [1000, 600]
     steps:
       - set: { active_tools: ["select-fields"] }
     clip:
       selector: [".qv-main-toolbar", ".qv-variable-selection"]
       pad: 0
+    highlight:
+      - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-list-status)"
+      - ".qv-variable-selection .v-btn:has(.mdi-database)"
+    frame: true
 
   - name: variable_list_all_selected.png
     page: variable_selection.md
     data:
-      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      simulation: v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc
       connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
-    viewport: [1000, 1000]
+    viewport: [1000, 600]
     steps:
       - set: { active_tools: ["select-fields"] }
       - click: ".qv-variable-selection thead input[type=checkbox]"
     clip:
       selector: [".qv-main-toolbar", ".qv-variable-selection"]
       pad: 0
+    frame: true
+
+  - name: variable_list_pattern_search.png
+    page: variable_selection.md
+    data:
+      simulation: v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc
+      connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
+    viewport: [1000, 630]
+    steps:
+      - set: { active_tools: ["select-fields"] }
+      - type:
+          selector: ".qv-variable-selection .v-text-field input"
+          text: "num_a4_*"
+      - wait_for: '.qv-variable-selection tbody [title="num_a4_sfgaex1"]'
+    clip:
+      selector: [".qv-main-toolbar", ".qv-variable-selection"]
+      pad: 0
+    highlight:
+      - ".qv-variable-selection .v-text-field .v-field"
+    frame: true
 
   - name: eye_icon_variations.png
     page: variable_selection.md
     data:
-      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      simulation: v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc
       connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
     viewport: [1000, 700]
     layout: vertical
     gap: 6
     clip:
       selector:
-        - ".qv-variable-selection :is(.mdi-eye-outline, .mdi-eye-check-outline,
+        - &variable_selection_eye ".qv-variable-selection :is(.mdi-eye-outline, .mdi-eye-check-outline,
           .mdi-eye-remove-outline)"
         - ".qv-variable-selection .v-text-field .v-field"
       pad: 6
+      extend: [2, 2, 0, 2]
+    highlight:
+      - *variable_selection_eye
+    highlight_pad: 5
     panels:
       - steps:
           [
@@ -304,7 +332,7 @@ screenshots:
   - name: filter_box_close.png
     page: variable_selection.md
     data:
-      simulation: amicphys_r8_prog.eam.h0.2010_2019.ANN.nc
+      simulation: v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc
       connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
     viewport: [1000, 700]
     steps:
@@ -315,25 +343,19 @@ screenshots:
         - ".qv-variable-selection .mdi-eye-outline"
         - ".qv-variable-selection .v-text-field .v-field"
       pad: 6
+    highlight:
+      - ".qv-variable-selection .v-field__clearable .v-icon"
+    highlight_pad: 5
 
   - name: filter_group.png
     page: variable_selection.md
     data:
-      simulation: EAMxx-MAM4xx_ne4pg2_202508.nc
-      connectivity: connectivity_ne4pg2_TEMPEST.scrip.nc
+      simulation: v2_F20TR_nc10_ndgAllLevs_pd.eam.h0.2008-01.nc
+      connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
     viewport: [1000, 700]
     steps:
       - set: { active_tools: ["select-fields"] }
-      # Select the first three variables of every dimension group
-      - eval: |
-          () => {
-            const seen = {};
-            const ids = trame.state.get('variables_listing')
-              .filter((v) => (seen[v.type] = (seen[v.type] || 0) + 1) <= 3)
-              .map((v) => v.id);
-            trame.state.set('variables_selected', ids);
-          }
-      - wait: 0.5
+      - click: ".qv-variable-selection thead input[type=checkbox]"
       - click: ".qv-variable-selection .v-chip >> nth=2"
     clip:
       selector:

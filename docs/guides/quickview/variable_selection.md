@@ -1,107 +1,80 @@
 # Selecting Variables to Inspect
 
-Starting in version 2, QuickView's variable search and selection capabilities
-are substantially enhanced.
-This was partly motivated by the generalization of
-the tool to handle arbitrarily-shaped arrays,
-and partly due to the intention to help users navigate through simulation
-files containing many (e.g., hundreds of) variables.
-
-![File loaded](./screenshots/variable_list_none_selected.png){ width="55%", align=right }
-Here, we use a simulation file with more than one thousand variables as an example
-to explain the search and selection capabilities.
+QuickView version 2 provides substantially improved variable search and selection
+capabilities to better support simulation files with many variables and arrays of different shapes.
+The examples on this page use a simulation file with more than 1,000 variables.
 
 ## Checkboxes
 
-The first screenshot here shows how the Variable Selection panel
-looks like after a simulation file has been loaded.
-- The checkboxes to the left of the variable names can be used
-  to select or unselect the corresponding variables.
-- The first checkbox, to the left of "Name" and below the eye icon,
-  can be used to select or unselect all variables on the list.
+![Variable list with the toolbar button and Load 0 variable button outlined in red](./screenshots/variable_list_none_selected.png){ width="50%", align=right style="margin: 0rem 0 2rem 1.5rem"}
+
+The screenshot shows the **Variable Selection** panel after QuickView opens a
+simulation file. Click the toolbar button outlined in red to close or reopen the panel.
+
+At this point, QuickView has finished scanning the simulation file for variables it can display.
+With no variables selected, the wide button outlined in red is pale blue and
+displays "Load 0 variable".
+
+- Use the checkbox next to a variable name to select or deselect that variable.
+- Use the header checkbox to the left of **Name** to select or deselect all
+  variables in the current list.
+
+When at least one variable is selected, the button turns solid blue, and its label
+shows the current selection count. Click it to load the selected variables into
+memory and display them in the viewport.
 
 ## Variable groups {#variable-groups}
 
-![File loaded](./screenshots/variable_list_all_selected.png){ width="55%", align=right }
-QuickView sorts variables into different groups according to their dimensions
-and, subsequently, allows the users to select, unselect, and inspect groups.
+![Variable list, all selected](./screenshots/variable_list_all_selected.png){ width="50%", align=right style="margin:  0rem 0 2rem 1.5rem"}
 
-In the same example as discussed above, when *all* variables are selected
-using the first checkbox in the Variable Selection control panel,
-we get the second screenshot shown here.
-- The **wide blue button** at the top of the control panel indicates there is
-  a total of 1227 variables displayable in the file.
-- The **colorful tabs** correspond to different variable groups with distinct shapes.
-  Each group's shape (dimension combination), as well as the number
-  of currently selected variables in the group, is shown inside the corresponding tab.
-  Each tab also has a "close" button that can be used to unselect the entire group.
-
-Note that at this point, QuickView has *not* loaded all the variables into memory.
-It has finished a scan and *is ready to load* these variables.
+QuickView groups variables by their shape, which is determined by their dimension
+combination. In the screenshot, all 1,385 variables in the sample file are selected,
+so QuickView displays every group as a colored tab. Each tab shows the group's
+dimensions and how many of its variables are selected. The counts update as you
+select or deselect variables.
+Click the cross on a tab to deselect the entire group.
 
 ## Variable search
 
-Below the variable group tabs and above the list of variables,
-there is a text input box with a magnifying glass icon.
-This box, also referred to as the filter box,
-can be used to search for variables by their names or dimensions.
+![Variable search](./screenshots/variable_list_pattern_search.png){ width="50%", align=right style="margin:  0rem 0 1rem 1.5rem"}
 
-- **Fuzzy search**:
-  As soon as the user enters text into the filter box, QuickView displays
-  a filtered list of variables whose **names or dimension names** contain
-  the entered string.
-  Fuzzy search is case-**in**sensitive.
+Use the **Filter** box above the variable list to search by name or dimensions.
+The list updates as you type.
 
-- **Pattern search**:
-  Patterns such as `text*` or `*text` can be used to match **variable names**
-  that start or end with `text`, respectively.
-  Pattern search is also case-**in**sensitive.
+- **Fuzzy search** matches variable names or dimension names that contain the
+  search term. It is case-insensitive.
+- **Pattern search** matches variable names that start with `text` (`text*`) or
+  end with `text` (`*text`). It is case-insensitive. In the screenshot,
+  `num_a4_*` matches eight variables whose names start with `num_a4_`.
+- **Strict search** uses double quotation marks to match a variable name exactly,
+  such as `"T"` or `"U"`, or a full dimension list, such as `"time, lev, ncol"`.
+  It is case-sensitive.
 
-- **Strict search**:
-  A string enclosed in double quotation marks (e.g., `"text"`) can be used
-  to request exact matches of a **variable name** or of a full **dimension list**
-  (as shown in the group tabs, e.g., `"time, lev, ncol"`),
-  with no preceding or succeeding characters.
-  Exact search is **case-sensitive**.
+Separate search terms with spaces to require a match for every term (logical AND).
+For example, `num lev` requires a match for both `num` and `lev`. Each term can
+match either the variable name or its dimensions. The search `num_a4_* lev` shows
+variables whose names start with `num_a4_` and that have `lev` in the name or dimension list.
 
-Several search terms separated by spaces can be combined;
-a variable is listed only if it matches all of them.
-The same search rules apply in all three display modes of the variable list described below.
+![Filter box with close button](./screenshots/filter_box_close.png){ width="50%", align=right style="margin: 1rem 0 1rem 2.5rem"}
 
+To clear the filter, hover over the **Filter** box and click the cross at its right end.
 
 ## Variable lists
 
-The eye icon to the left of the text input box (filter box)
-is a button for cycling through three display modes of the variable list.
-The icon changes to reflect the current mode:
+Click the eye icon to the left of the **Filter** box to cycle through three
+display modes. The icon shows which mode is active.
 
-![Eye icon variations](./screenshots/eye_icon_variations.png){ width="30%", align=right }
+![Eye icon variations](./screenshots/eye_icon_variations.png){ width="50%", align=right style="margin: 0rem 0 1rem 1.5rem"}
 
-- Eye only – shows the **full list** of variables, both selected and unselected.
-- With check mark – shows only the variables currently **selected** via the checkboxes.
-- With cross – shows the variables that are **not currently selected**.
+- **Eye only** shows both selected and unselected variables.
+- **Eye with a check mark** shows only selected variables.
+- **Eye with a cross** shows only unselected variables.
 
-When a search or filter is active, these modes apply to the filtered list rather than
-the full set of variables in the simulation data file.
-Also note that:
+When a filter is active, the display mode applies to the matching variables.
 
-![Filter box with close button](./screenshots/filter_box_close.png){ width="55%", align=right }
+## Load variables for visualization
 
-- If the user wants to return to the full list of variables in the data file,
-  the filter can be cleared
-  by first hovering the cursor over the filter box and then clicking the cross button
-  on the right end.
-
-![Filter group](./screenshots/filter_group.png){ width="55%", align=right }
-
-- Clicking a colored variable-group tab sets the filter to that group.
-  The three display modes then apply to the selection state within that group.
-  A second click on the group tab clears the filter.
-
-
-::: info Reminder: Do not forget the `Load ... variables` button
-After making your selection or adjusting it, the `Load ... variables`
-button at the top of the control panel needs to be clicked
-in order for the selected variables to be loaded into memory and
-shown in the viewport.
-:::
+After selecting the variables you want to inspect, click the wide blue button
+highlighted at the top of the Variable Selection panel in the
+[Checkboxes screenshot](#checkboxes).
+QuickView loads the selection and displays it in the viewport.

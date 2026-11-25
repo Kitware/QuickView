@@ -338,7 +338,7 @@ def capture_panel(browser, python, data, spec, defaults, tmp_dir) -> Image.Image
 
     image = Image.open(png).convert("RGB")
     draw = ImageDraw.Draw(image)
-    pad = 3
+    pad = spec.get("highlight_pad", 3)
     line = max(3, int(2.5 * scale))
     for hx0, hy0, hx1, hy1 in highlights:
         # Keep the whole outline inside the image (e.g., full-width toolbars)

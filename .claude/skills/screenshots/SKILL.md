@@ -105,6 +105,7 @@ page text, which means the page needs an update too).
   highlight:                       # red boxes; a nested list = one box around all
     - "<selector>"
     - ["<selector A>", "<selector B>"]
+  highlight_pad: 5                  # optional padding around red boxes in CSS px (default: 3)
   frame: true                      # optional border, rounded corners and shadow
   panels:                          # several captures combined side by side
     - label: Collapsed              # optional title above the framed, shadowed capture
