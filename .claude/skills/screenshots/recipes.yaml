@@ -289,8 +289,8 @@ screenshots:
     gap: 6
     clip:
       selector:
-        - &variable_selection_eye ".qv-variable-selection :is(.mdi-eye-outline, .mdi-eye-check-outline,
-          .mdi-eye-remove-outline)"
+        - &variable_selection_eye ".qv-variable-selection :is(.mdi-eye-outline,
+          .mdi-eye-check-outline, .mdi-eye-remove-outline)"
         - ".qv-variable-selection .v-text-field .v-field"
       pad: 6
       extend: [2, 2, 0, 2]
