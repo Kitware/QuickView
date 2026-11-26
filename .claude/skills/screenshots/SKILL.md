@@ -14,8 +14,7 @@ The capture runner centers icons inside compact toolbar buttons.
 
 Out of scope: `docs/guides/quickcompare/**` and `docs/guides/siteview/**`
 (their images come from the sibling tools). QuickCompare pages also embed
-`file_loading_start_and_parent_dirs.png` and `state_export_import.png` from
-QuickView. Mention it when either image changes.
+`state_export_import.png` from QuickView. Mention it when the image changes.
 
 ## Requirements
 

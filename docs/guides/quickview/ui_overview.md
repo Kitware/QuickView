@@ -1,5 +1,9 @@
 # QuickView's graphical UI
 
+<script setup>
+import MdiIcon from "../../.vitepress/theme/MdiIcon.vue";
+</script>
+
 ![QuickView UI](./screenshots/quickview_ui.png){ width="100%" style="margin-top: 2.75rem" }
 
 
@@ -15,15 +19,15 @@ QuickView's UI contains three main components.
   [pop-up panel](./individual_views.md) and adjust the colormap, value range,
   and other settings.
   When no variables have been loaded from the simulation file,
-  the viewport shows a [help page](./shortcuts#help-page).
+  the viewport shows a [help page](./shortcuts).
 
 ![Main toolbar in collapsed and expanded modes](./screenshots/toolbar_compact_or_expanded.png){ width="40%" align=right style="margin: 0.5rem 0 1rem 1.25rem" }
 
 - **Main toolbar.** The vertical toolbar on the left of the UI starts collapsed.
   Hover over an icon to see its short description.
-  Click the QuickView icon or press `H` to expand the toolbar and see
+  Click the QuickView logo or press `H` to expand the toolbar and see
   the short descriptions beside the icons.
-  Click the QuickView icon or press `H` again to collapse the toolbar.
+  Click the QuickView logo or press `H` again to collapse the toolbar.
   The screenshot on the right shows both modes.
 
 - **Control panels.** QuickView includes various control panels for
@@ -31,35 +35,34 @@ QuickView's UI contains three main components.
   The control panels can be collapsed (hidden)
   or expanded (shown) by clicking on their corresponding icons in the
   toolbar or by using [keyboard shortcuts](./shortcuts).
-  See the [toolbar button table](#toolbar-buttons) for details.
+  See the [toolbar button table](#toolbar-buttons) below for details.
+
+Pressing `Esc` closes all open control panels and collapses the toolbar.
 
 ## Buttons in the main toolbar {#toolbar-buttons}
 
 The table below lists the toolbar buttons from top to bottom.
-Buttons marked as "(toggle)" show or hide a control panel.
+The version number of QuickView is shown at the bottom of the toolbar
+and in the tooltip of the QuickView logo.
 
-| Button | Shortcut | What it does |
-| ------ | -------- | ------------ |
-| QuickView icon | `H` | Expands or collapses the toolbar, i.e., shows or hides the button names. |
-| **Auto zoom** | `Z` | Resets the zoom so that each plot fits its view. |
-| **State Import/Export** | `E` / `I` | Menu to save the current state to a file or load a state file. See [Resume mode](./file_selection#state-files). |
-| **File loading** (toggle) | `F` | Opens the window for selecting the simulation and connectivity files. See [Selecting files for analysis](./file_selection). |
-| **Variable selection** (toggle) | `V` | Panel for choosing the variables to visualize. See [Selecting variables to inspect](./variable_selection). |
-| **Slice selection** (toggle) | `S` | Panel for choosing a slice, such as a time step or vertical level, of a multidimensional variable. See [Selecting data slices](./slice_selection). |
-| **Animation controls** (toggle) | `A` | Panel for stepping or playing through one dimension and for exporting animations. See [Selecting data slices](./slice_selection). |
-| **Viewport layout** (toggle) | `P` | Panel for the view sizes, grouping, and aspect ratio. See [Customizing viewport layout](./viewport_layout). |
-| **Map Projection** | `C` `R` `M` `N` | Menu to choose the projection, the lat-lon grid line spacing, and the coastline resolution. See [Map projection](./map_related#map-projections). |
-| **Lat/Lon cropping** (toggle) | `L` | Panel for restricting the plots to a longitude/latitude box and for moving the map center. See [Geographical region](./map_related#geographical-region). |
-| **Capture viewport as png** | | Saves the whole viewport as a PNG image. See [Saving images](./saving_images). |
-| **Background Colors** | | Menu to choose the background color of the plots. See [Plot background color](./map_related#plot-background-color). |
+| Icon | Tooltip | Shortcut | What it does |
+| :--: | ------- | -------- | ------------ |
+| ![](/public/logos/quickview-icon-only.png){ width="24" height="24" style="display: inline-block; vertical-align: middle" } | **QuickView** | `H` | Expands or collapses the toolbar, i.e., shows or hides the button names. |
+| <MdiIcon name="mdi-fit-to-page-outline" /> | **Auto zoom** | `Z` | Resets the zoom so that each plot fits its view. |
+| <MdiIcon name="mdi-folder-arrow-left-right-outline" /> | **State Import/Export** | `E` / `I` | Menu to save the current state to a file or load a state file. See [Resume mode](./file_selection#state-files). |
+| <MdiIcon name="mdi-file-upload-outline" /> | **File loading** | `F` | Opens the window for selecting the simulation and connectivity files. See [Selecting files for analysis](./file_selection). |
+| <MdiIcon name="mdi-list-status" /> | **Variable selection** | `V` | Panel for choosing the variables to visualize. See [Selecting variables to inspect](./variable_selection). |
+| <MdiIcon name="mdi-tune-variant" /> | **Slice selection** | `S` | Panel for choosing a slice, such as a time step or vertical level, of a multidimensional variable. See [Selecting data slices](./slice_selection). |
+| <MdiIcon name="mdi-video" /> | **Animation controls** | `A` | Panel for stepping or playing through one dimension and for exporting animations. See [Selecting data slices](./slice_selection). |
+| <MdiIcon name="mdi-view-module" /> | **Viewport layout** | `P` | Panel for the view sizes, grouping, and aspect ratio. See [Customizing viewport layout](./viewport_layout). |
+| <MdiIcon name="mdi-earth" /> | **Map Projection** | `C` `R` `M` `N` | Menu to choose the projection, the lat-lon grid line spacing, and the coastline resolution. See [Map projection](./map_related#map-projections). |
+| <MdiIcon name="mdi-web" /> | **Lat/Lon cropping** | `L` | Panel for restricting the plots to a longitude/latitude box and for moving the map center. See [Geographical region](./map_related#geographical-region). |
+| <MdiIcon name="mdi-camera-outline" /> | **Capture viewport as png** | | Saves the whole viewport as a PNG image. See [Saving images](./saving_images). |
+| <MdiIcon name="mdi-format-color-fill" /> | **Background Colors** | | Menu to choose the background color of the plots. See [Plot background color](./map_related#plot-background-color). |
 
-Pressing `Esc` closes all open control panels and collapses the toolbar.
-The version number of QuickView is shown at the bottom of the toolbar.
 
-::: info Note for developers
-When QuickView is started with trame's `--hot-reload` option, an extra
-**Refresh UI** button appears at the end of the toolbar. It rebuilds the UI
-after a code change without restarting the application.
+::: info Note for app developers
+When QuickView is started with trame's `--hot-reload` option, an extra <MdiIcon name="mdi-database-refresh-outline" label="Refresh UI" /> button appears at the end of the toolbar. It rebuilds the UI after a code change without restarting the application.
 :::
 
 <!-- ## Tooltips and visual cues -->

@@ -1,30 +1,42 @@
 # Keyboard shortcuts in QuickView
 
-Most QuickView shortcuts use a single key. To use them, make sure the browser
-tab or window showing QuickView is active.
-The viewport displays an [in-app help page](#help-page) whenever no variables
-are selected, including at startup.
+<script setup>
+import MdiIcon from "../../.vitepress/theme/MdiIcon.vue";
+</script>
+
+![QuickView help page showing toolbar icons and keyboard shortcuts](./screenshots/shortcuts.png){ width="55%" align=right style="margin: 0.5rem 0 0rem 1.5rem" }
+
+Most of QuickView's shortcuts use a single key for convenience and to
+avoid conflict with the multi-key combinations used by the operating system or other applications.
+To use QuickView's shortcuts, *make sure the browser
+tab or window showing QuickView is active.*
+
+The viewport displays an in-app help page, shown in the screenshot,
+when no variables from the simulation file are loaded, including at startup.
+The remainder of this page summarizes the shortcuts and provides links
+to more detailed description pages.
+
 
 ## General
 
-| Key | Action |
-| --- | ------ |
-| `H` | Expand or collapse the main toolbar |
-| `Z` | Fit each plot to its view (auto zoom) |
-| `F` | Open the [file loading](./file_selection) dialog |
-| `E` | [Save (export) a state file](./file_selection#state-files) |
-| `I` | [Load (import) a state file](./file_selection#state-files) |
-| `Esc` | Close all control panels and collapse the main toolbar |
+| Key | Toolbar icon | Action |
+| --- | :----------: | ------ |
+| `H` | ![](/public/logos/quickview-icon-only.png){ width="24" height="24" style="display: inline-block; vertical-align: middle" } | Expand or collapse the main toolbar |
+| `Z` | <MdiIcon name="mdi-fit-to-page-outline" /> | **Auto zoom** fits each plot to its view |
+| `F` | <MdiIcon name="mdi-file-upload-outline" /> | Open the [**File loading**](./file_selection) dialog |
+| `E` | <MdiIcon name="mdi-folder-arrow-left-right-outline" /> | [**Save state file**](./file_selection#state-files) |
+| `I` | <MdiIcon name="mdi-folder-arrow-left-right-outline" /> | [**Upload state file**](./file_selection#state-files) (**Load state file** in the desktop app) |
+| `Esc` |  | Close all control panels and collapse the main toolbar |
 
 ## Control panels
 
-| Key | Action |
-| --- | ------ |
-| `V` | Show or hide the [variable selection](./variable_selection) panel |
-| `S` | Show or hide the [slice selection](./slice_selection#slice-selection-control-panel) panel |
-| `A` | Show or hide the [animation control](./slice_selection#animation-control-panel) panel |
-| `P` | Show or hide the [viewport layout](./viewport_layout) panel |
-| `L` | Show or hide the [lat/lon cropping](./map_related#geographical-region) panel |
+| Key | Toolbar icon | Action |
+| --- | :----------: | ------ |
+| `V` | <MdiIcon name="mdi-list-status" /> | Show or hide the [**Variable selection**](./variable_selection) panel |
+| `S` | <MdiIcon name="mdi-tune-variant" /> | Show or hide the [**Slice selection**](./slice_selection#slice-selection-control-panel) panel |
+| `A` | <MdiIcon name="mdi-video" /> | Show or hide the [**Animation controls**](./slice_selection#animation-control-panel) panel |
+| `P` | <MdiIcon name="mdi-view-module" /> | Show or hide the [**Viewport layout**](./viewport_layout) panel |
+| `L` | <MdiIcon name="mdi-web" /> | Show or hide the [**Lat/Lon cropping**](./map_related#geographical-region) panel |
 
 ## Map projections
 
@@ -57,7 +69,3 @@ in the viewport layout panel. Pan shortcuts require the
 | `Shift` + `↑` | Zoom in |
 | `Shift` + `↓` | Zoom out |
 | `←`, `→`, `↑`, `↓` | Pan the plots inside their views |
-
-## Help page in the app {#help-page}
-
-![QuickView help page showing toolbar icons and keyboard shortcuts](./screenshots/shortcuts.png){ width="100%" }

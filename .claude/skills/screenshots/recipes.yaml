@@ -384,9 +384,6 @@ screenshots:
       - ".qv-variable-selection .v-text-field .v-field"
 
   # --- File selection (file_selection.md) -----------------------------------
-  - name: file_loading_start_and_parent_dirs.png
-    page: file_selection.md
-    icons: [mdi-home, mdi-folder-upload-outline]
 
   - name: file_loading_dialog.png
     page: file_selection.md

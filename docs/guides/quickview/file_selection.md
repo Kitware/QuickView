@@ -1,15 +1,20 @@
 # Selecting files for analysis
 
+<script setup>
+import MdiIcon from "../../.vitepress/theme/MdiIcon.vue";
+</script>
+
 QuickView can be used in two modes:
-- a [new-vis mode](#new-analysis) for starting a new visualization or
-- a [resume mode](#state-files) for continuing an earlier analysis saved in a state file.
+a [new-vis mode](#new-analysis) for starting a new visualization or
+a [resume mode](#state-files) for continuing an earlier analysis saved in a state file.
 Both are explained below.
 
 ## New-vis mode: starting a new analysis {#new-analysis}
 
 The file loading dialog opens when you launch QuickView from a shell command
 or the desktop bundle. To reopen it at a later point during an analysis,
-click the **File loading** icon outlined in red below.
+press `F` or click <MdiIcon name="mdi-file-upload-outline" label="File loading" /> in the toolbar.
+The red outline in the screenshot below marks the button.
 The user is expected to select a connectivity file and a simulation data file
 using the file browser or the text boxes in this window.
 
@@ -17,12 +22,11 @@ using the file browser or the text boxes in this window.
 
 ### File system navigation
 
-![Home and parent directory buttons](./screenshots/file_loading_start_and_parent_dirs.png){ width="12%", align=right }
-
 By default, when QuickView runs from a conda environment, the file loading dialog
 shows the contents in the directory where QuickView was launched. Double-click
-a subdirectory to open it, click the folder icon with the upward arrow to go to
-the parent directory, or click the house icon to return to the start directory.
+a subdirectory to open it.
+Click <MdiIcon name="mdi-folder-upload-outline" label="Go up a directory" /> to open the parent directory,
+or <MdiIcon name="mdi-home" label="Return to starting directory" /> to go back to where you started.
 
 Launching QuickView from a directory close to your data can reduce the number of
 clicks. The [command-line options](/guides/install_and_launch#cli) `--workdir`
@@ -42,9 +46,7 @@ To narrow down a long listing, type part of a name in the **Filter by name** box
 next to the navigation buttons at the top of the window.
 The filter is cleared when moving to another directory.
 
-The user can single-click a file name and then click the **Simulation** or **Connectivity**
-button in the bottom-left corner to clarify file type.
-The **Reset** button next to them clears both selected files.
+The user can single-click a file name and then click the <MdiIcon name="mdi-database-plus" label="Simulation" icon-first /> or <MdiIcon name="mdi-vector-polyline-plus" label="Connectivity" icon-first /> button in the bottom-left corner to clarify file type. <MdiIcon name="mdi-close-octagon-outline" label="Reset" icon-first /> clears both selected files.
 
 Alternatively, if a filename contains `connectivity_` (case-insensitive), then
 the user can *double-click* the file to have it automatically
@@ -56,7 +58,7 @@ it recognized as a simulation file.
 
 If the needed files are many directories away from the directory shown in the file browser,
 the user can avoid tedious navigation by pasting full paths, including filenames,
-into the **Simulation File** and **Connectivity File** text boxes below the browser.
+into the **Simulation File** and **Connectivity File** text boxes in the **File loading** dialog.
 
 ### Loading the selected files
 
@@ -66,10 +68,15 @@ of the **File loading** dialog changes to bright blue. A single click starts fil
 The **Cancel** button closes the window without loading anything.
 
 If the files are loaded correctly, the UI changes into a layout like
-the example below, with the [variable selection panel](./variable_selection)
+the screenshot below, with the [variable selection panel](./variable_selection)
 on the left showing a list of parsed variables
 and the viewport on the right showing a brief introduction to QuickView.
 The user can now start to search for and load variables to inspect.
+
+If QuickView cannot load the selected files, the **File loading** dialog stays
+open and the **Load files** button becomes disabled. If you launched QuickView
+from the command line, check the terminal for an error message. Verify that both
+files exist and that the connectivity file matches the simulation grid.
 
 ![File loaded](./screenshots/file_loaded.png){ width="90%", align=center }
 
@@ -80,19 +87,17 @@ The user can now start to search for and load variables to inspect.
 ![State export and import](./screenshots/state_export_import.png){.state-menu-screenshot}
 
 The current state of the analysis session can be saved—and reloaded later to resume
-the analysis—using the **State Import/Export** button in the vertical toolbar
-or using the shortcut `I` for import and `E` for export.
+the analysis—using <MdiIcon name="mdi-folder-arrow-left-right-outline" label="State Import/Export" /> in the vertical toolbar.
 The button opens a small menu with two entries:
 
-- **Save state file** (shortcut `E`) is available once variables have been loaded.
+- <MdiIcon name="mdi-file-download-outline" label="Save state file" icon-first /> (shortcut `E` for "export") is available once variables have been loaded.
   In a web browser, it opens the **Save QuickView State file** dialog. Enter a
   **Filename** (the default is `quickview-state.json`) and, optionally, a
   **Comments** text that is stored in the file as a reminder of what the state captures.
   Click **Save** (or press `Enter`) to save the file. Depending on the browser,
   the file is either downloaded directly or a save dialog lets you choose where to put it.
   In the desktop app, **Save state file** opens the system save dialog directly.
-- **Upload state file** (shortcut `I`; called **Load state file** in the desktop app)
-  opens a file picker to select a state file and restore it.
+- <MdiIcon name="mdi-file-upload-outline" label="Upload state file" icon-first /> (shortcut `I` for "import", called **Load state file** in the desktop app) opens a file picker to select a state file and restore it.
 
 Note that regardless of whether QuickView is executed on a local computer
 or on a remote system (e.g., at NERSC), these two buttons and their corresponding shortcuts
@@ -100,7 +105,7 @@ save state files to and upload them from the *local computer*, i.e., the compute
 
 A state file that is stored on the system where QuickView runs
 (e.g., at NERSC) can be loaded from that system using the
-[**File loading**](#new-analysis) dialog discussed above for the new-vis mode.
+[**File loading**](#new-analysis) dialog discussed earlier on this page.
 In the file browser therein, single-click the state file (a `.json` file),
 then click the **Import state file** button at the bottom of that dialog,
 which is only enabled when the selected file is a valid QuickView state file.
