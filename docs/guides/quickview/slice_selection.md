@@ -1,45 +1,50 @@
-# Selecting Data Slices to Inspect
+# Selecting data slices to inspect
 
-QuickView is designed to visualize variables in the simulation data files
-that have horizontal dimensions representing the globe or a part of it.
-The variables are shown on global or regional maps.
-If a variable has additional dimensions such as time, vertical level, etc.,
-QuickView is designed to display one global or regional map at a time for that variable.
+<script setup>
+import MdiIcon from "../../.vitepress/theme/MdiIcon.vue";
+</script>
 
-## Using the slice selection control panel {#slice-selection-control-panel}
+QuickView displays simulation variables as contour plots on global or regional
+maps, with one plot per variable at a time. To choose such a horizontal slice,
+select one value or index along each non-horizontal dimension. For example, use
+the [slice selection control panel](#slice-selection-control-panel) to choose the
+second time step and the 500 hPa pressure level to show temperature at that time
+and level. To compare slices along a single dimension, use the
+[animation control panel](#animation-control-panel) to step through that
+dimension on the same map.
 
-To choose the indices to inspect for the non-horizontal dimensions,
-the slice selection button in the vertical toolbar can be clicked
-to bring up the **slice selection control panel**, as shown in
-the first screenshot below.
+## Slice selection panel {#slice-selection-control-panel}
 
-In this example, the selected variables together have six non-horizontal dimensions
-with more than one data slice in the simulation file,
-corresponding to the six gray tabs highlighted in the red box.
-Inside each tab, the dimension name is shown in bold, and
-the current and total number of data slices are shown in parentheses.
-When a dimension has an associated 1D dimension variable,
-its current value and unit are also displayed.
+Click <MdiIcon name="mdi-tune-variant" label="Slice selection" /> in the main
+toolbar on the left, or press `S` to open the panel.
 
-![](./screenshots/slice_selection_panel.png){ width="100%" }
+In the screenshot below, the red box across the top marks the slice
+selection panel. The six gray tabs inside it are controls for non-horizontal
+dimensions with more than one slice. Each tab shows the dimension name and the
+current slice number out of the total, counting from 1. For example, `lwband`
+shows `10/16` for the tenth of 16 slices. If the dimension has coordinate values
+with units, the tab also shows the value and units for the current slice.
 
-A click on a gray tab changes it into an expanded mode,
-revealing a textbox, a pair of up and down buttons, as well as
-a slider for changing the slice along that dimension.
-A click on the dimension name in an expanded tab changes
-the tab back to a compact mode.
+![Slice selection panel with six gray dimension tabs and its toolbar button outlined in red](./screenshots/slice_selection_panel.png){ width="100%" align=center style="padding-bottom: 1.25rem" }
 
-![](./screenshots/dimension_slider_expanded.png){ width="100%" }
+Click a dimension's tab to reveal a number field and a slider. To change the
+slice, enter a slice number or drag the slider. In Chrome, hover over the
+number field to reveal the up and down arrows, which change the slice one step
+at a time. Click the dimension name again to collapse the tab.
 
-## Using the animation control panel {#animation-control-panel}
+![Slice selection panel with the lwband tab expanded to show the slice number and slider](./screenshots/dimension_slider_expanded.png){ width="100%" align=center style="padding-bottom: 1.25rem" }
 
-The animation control panel shown in the screenshot below can be used
-to quickly scan through many data slices.
-It contains a drop-down menu for choosing which dimension to inspect,
-a slider and a set of forward and backward buttons for manually stepping through the selected dimension,
-as well as a two play/pause toggles for automatically stepping through the selected dimension
-in forward or backward order.
-The rightmost button in the panel, showing a downward arrow above two horizontal lines,
-is for exporting animations and is explained on [a separate page](./saving_images)
+## Animation control panel {#animation-control-panel}
 
-![](./screenshots/animation_control_panel_and_menu.png){ width="100%" }
+Click <MdiIcon name="mdi-video" label="Animation controls" /> in the main
+toolbar, or press `A` to open the panel.
+Choose a dimension name from the drop-down menu at the left end of the panel.
+
+![Animation controls with the dimension menu open and the panel and toolbar button outlined in red](./screenshots/animation_control_panel_and_menu.png){ width="100%" align=center style="padding-bottom: 1.25rem" }
+
+- **Move through slices.** Drag the slider or use the four arrow buttons
+  immediately to its right. From left to right, they are <MdiIcon name="mdi-page-first" label="First step" />, <MdiIcon name="mdi-chevron-left" label="Previous step" />, <MdiIcon name="mdi-chevron-right" label="Next step" />, and <MdiIcon name="mdi-page-last" label="Last step" />.
+- **Play through slices.** Use <MdiIcon name="mdi-play" label="Play reverse" reverse /> or <MdiIcon name="mdi-play" label="Play forward" />.
+  When the play icon changes to a square, click the <MdiIcon name="mdi-stop" label="stop button" /> to stop playback.
+- **Export an animation.** Click <MdiIcon name="mdi-download-multiple-outline" label="Export animation (ZIP)" /> at the right end of the panel to open the export menu.
+  See [Saving images](./saving_images#save-vis) for details.

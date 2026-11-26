@@ -21,6 +21,11 @@ anchors:
     pad: 8
   auto_zoom: &auto_zoom
     click: ".qv-main-toolbar-buttons .v-list-item:has(.mdi-fit-to-page-outline)"
+  slice_screenshot_style: &slice_screenshot_style
+    frame: raised
+    max_width: 3072
+    highlight_pad: 6
+    clip: *app_content
 
 screenshots:
   - name: map_projections.png
@@ -40,44 +45,54 @@ screenshots:
 
   # --- Slice selection and animation (slice_selection.md) -------------------
   - name: slice_selection_panel.png
+    <<: *slice_screenshot_style
     page: slice_selection.md
     state: quickview-state_slice_selection_panel.json
     viewport: [1400, 760]
     steps:
+      - &slice_wait_for_views
+        wait_for:
+          ".all-variables > .v-row .v-card[data-field-name='aero_tau_lw']"
+      - &slice_capture_font
+        eval: "() => { document.documentElement.style.fontSize = '130%'; }"
       - set: { active_tools: ["select-slice-time"] }
-    clip: *app_content
     highlight:
       - .qv-toolbar-slices
       - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-tune-variant)"
 
   - name: dimension_slider_expanded.png
+    <<: *slice_screenshot_style
     page: slice_selection.md
     state: quickview-state_slice_selection_panel.json
     viewport: [1400, 800]
     steps:
+      - *slice_wait_for_views
+      - *slice_capture_font
       - set:
           {
             active_tools: ["select-slice-time"],
             expanded_slice_track: "lwband",
           }
-    clip: *app_content
+      - wait_for: '.qv-toolbar-slices input[type="number"]'
     highlight:
       - .qv-toolbar-slices
       - ".qv-main-toolbar-buttons .v-list-item:has(.mdi-tune-variant)"
 
   - name: animation_control_panel_and_menu.png
+    <<: *slice_screenshot_style
     page: slice_selection.md
     state: quickview-state_slice_selection_panel.json
     viewport: [1400, 800]
     steps:
+      - *slice_wait_for_views
+      - *slice_capture_font
       - set:
           {
             active_tools: ["select-slice-time", "animation-controls"],
             animation_track: "lwband",
           }
       - click: ".qv-toolbar-animation .v-select"
-      - wait_for: ".v-overlay--active .v-list"
-    clip: *app_content
+      - wait_for: '.v-overlay--active .v-list-item:has-text("lwband")'
     highlight:
       - .qv-toolbar-animation
       - ".v-overlay--active .v-list"
@@ -297,6 +312,7 @@ screenshots:
     highlight:
       - *variable_selection_eye
     highlight_pad: 5
+    highlight_width: 2.5
     panels:
       - steps:
           [
@@ -346,6 +362,7 @@ screenshots:
     highlight:
       - ".qv-variable-selection .v-field__clearable .v-icon"
     highlight_pad: 5
+    highlight_width: 2.5
 
   - name: filter_group.png
     page: variable_selection.md
@@ -373,7 +390,7 @@ screenshots:
 
   - name: file_loading_dialog.png
     page: file_selection.md
-    workdir: others
+    workdir: 202510_QuickView2_test_data
     viewport: [1300, 900]
     steps:
       - set: { active_tools: ["load-data"] }
@@ -387,7 +404,7 @@ screenshots:
   - name: file_loaded.png
     page: file_selection.md
     data:
-      simulation: EAMv2_ne30pg2_small_cld.nc
+      simulation: EAMv2_ne30pg2_F2010_nc00_inst_6hr.eam.h0.2010-02-28-00000.nc
       connectivity: connectivity_ne30pg2_TEMPEST.scrip.nc
     viewport: [1300, 1210]
     steps:
@@ -398,18 +415,23 @@ screenshots:
 
   - name: state_export_import.png
     page: file_selection.md
-    state: quickview-state_state_import_export.json # data not available locally
+    state: quickview-state_slice_selection_panel.json
     viewport: [700, 500]
     steps:
+      - set: { active_tools: [] }
       - click:
           ".qv-main-toolbar-buttons
           .v-list-item:has(.mdi-folder-arrow-left-right-outline)"
       - wait_for: ".v-overlay--active .v-list"
     clip:
-      selector: [".qv-main-toolbar-buttons", ".v-overlay--active .v-list"]
+      selector:
+        - ".v-overlay--active .v-list"
+        - ".qv-main-toolbar-buttons
+          .v-list-item:has(.mdi-folder-arrow-left-right-outline)"
       from_left: true
       from_top: true
-      pad: 16
+      pad: 8
+      extend: [0, 0, 0, 35]
     highlight:
       - ".v-overlay--active .v-list"
       - ".qv-main-toolbar-buttons

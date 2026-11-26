@@ -10,6 +10,7 @@ Images are produced from **recipes** in `recipes.yaml` (next to this file) by
 server (with `--state` when the recipe has a state file), drives it with
 Playwright through the locally installed Chrome, crops the result, draws red
 highlight boxes, and writes the PNG into `docs/guides/quickview/screenshots/`.
+The capture runner centers icons inside compact toolbar buttons.
 
 Out of scope: `docs/guides/quickcompare/**` and `docs/guides/siteview/**`
 (their images come from the sibling tools). QuickCompare pages also embed
@@ -106,7 +107,9 @@ page text, which means the page needs an update too).
     - "<selector>"
     - ["<selector A>", "<selector B>"]
   highlight_pad: 5                  # optional padding around red boxes in CSS px (default: 3)
-  frame: true                      # optional border, rounded corners and shadow
+  highlight_width: 6               # optional outline width in CSS px (default: 5)
+  highlight_color: "#dc2626"       # optional outline color (default: "#ff350f")
+  frame: true                      # optional raised frame with rounded corners and a deeper shadow
   panels:                          # several captures combined side by side
     - label: Collapsed              # optional title above the framed, shadowed capture
       steps: [...]                  # each panel overrides recipe keys

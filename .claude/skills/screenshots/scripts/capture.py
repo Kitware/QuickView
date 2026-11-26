@@ -33,14 +33,32 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 REPO = SKILL_DIR.parent.parent.parent
 SCREENSHOTS = REPO / "docs" / "guides" / "quickview" / "screenshots"
 RECIPES = SKILL_DIR / "recipes.yaml"
 
-HIGHLIGHT_COLOR = (220, 38, 38)
+HIGHLIGHT_COLOR = "#ff350f"
+HIGHLIGHT_WIDTH = 5  # CSS pixels
+COMPACT_TOOLBAR_STYLE = """
+.qv-main-toolbar.v-navigation-drawer--rail
+.qv-main-toolbar-buttons .v-list-item__prepend:has(> .v-icon) {
+    position: absolute;
+    inset: 0;
+    grid-area: auto;
+    justify-content: center;
+    pointer-events: none;
+}
+.qv-main-toolbar.v-navigation-drawer--rail
+.qv-main-toolbar-buttons .v-list-item__prepend:has(> .v-icon) > .v-list-item__spacer,
+.qv-main-toolbar.v-navigation-drawer--rail
+.qv-main-toolbar-buttons .v-list-item:has(.v-list-item__prepend > .v-icon)
+> .v-list-item__append {
+    display: none;
+}
+"""
 
 
 class Skip(Exception):
@@ -304,6 +322,7 @@ def capture_panel(browser, python, data, spec, defaults, tmp_dir) -> Image.Image
         )
         try:
             page.goto(url)
+            page.add_style_tag(content=COMPACT_TOOLBAR_STYLE)
             try:
                 wait_ready(
                     page, needs_data=bool(state), wait_files=bool(spec.get("data"))
@@ -337,26 +356,34 @@ def capture_panel(browser, python, data, spec, defaults, tmp_dir) -> Image.Image
             page.close()
 
     image = Image.open(png).convert("RGB")
-    draw = ImageDraw.Draw(image)
     pad = spec.get("highlight_pad", 3)
-    line = max(3, int(2.5 * scale))
+    line = max(3, int(spec.get("highlight_width", HIGHLIGHT_WIDTH) * scale))
+    # Keep the extra clearance for strokes wider than the original 2.5 CSS px.
+    baseline_line = max(3, int(2.5 * scale))
+    bleed = max(0, line - baseline_line) * 2 if highlights else 0
+    if bleed:
+        image = ImageOps.expand(image, border=bleed, fill="white")
+    draw = ImageDraw.Draw(image)
     for hx0, hy0, hx1, hy1 in highlights:
         # Keep the whole outline inside the image (e.g., full-width toolbars)
         box = [
-            max(line / 2, (hx0 - pad) * scale),
-            max(line / 2, (hy0 - pad) * scale),
-            min(image.width - 1 - line / 2, (hx1 + pad) * scale),
-            min(image.height - 1 - line / 2, (hy1 + pad) * scale),
+            max(line / 2, (hx0 - pad) * scale + bleed),
+            max(line / 2, (hy0 - pad) * scale + bleed),
+            min(image.width - 1 - line / 2, (hx1 + pad) * scale + bleed),
+            min(image.height - 1 - line / 2, (hy1 + pad) * scale + bleed),
         ]
         draw.rounded_rectangle(
             box,
             radius=3 * scale,
-            outline=HIGHLIGHT_COLOR,
+            outline=spec.get("highlight_color", HIGHLIGHT_COLOR),
             width=line,
         )
     label = spec.get("label")
-    if label or spec.get("frame"):
-        return frame_panel(image, scale, label=label)
+    frame = spec.get("frame")
+    if label or frame:
+        return frame_panel(
+            image, scale, label=label, raised=frame is True or frame == "raised"
+        )
     return image
 
 
@@ -412,10 +439,10 @@ def with_retry(fn, name, attempts=2):
 
 
 def frame_panel(
-    image: Image.Image, scale: int, *, label: str | None = None
+    image: Image.Image, scale: int, *, label: str | None = None, raised: bool = False
 ) -> Image.Image:
     """Frame a capture with a soft shadow and an optional label above it."""
-    inset = round((8 if label else 4) * scale)
+    inset = round((8 if label or raised else 4) * scale)
     label_height = label_width = 0
     if label:
         font = ImageFont.load_default(size=round(16 * scale))
@@ -426,9 +453,10 @@ def frame_panel(
     border = max(1, round(scale))
     width = max(image.width, label_width) + 2 * inset
     frame_height = image.height + 2 * inset
-    radius = round(6 * scale)
-    margin = round(10 * scale)
-    offset = round(2 * scale)
+    radius = round((18 if raised else 6) * scale)
+    margin = round((48 if raised else 10) * scale)
+    offset = round((17 if raised else 2) * scale)
+    blur = (13 if raised else 3) * scale
     frame_top = margin + (label_height + inset if label else 0)
     size = (width + 2 * margin, frame_top + frame_height + margin)
 
@@ -441,10 +469,10 @@ def frame_panel(
             frame_top + frame_height + offset - 1,
         ),
         radius=radius,
-        fill=60,
+        fill=180 if raised else 60,
     )
     out = Image.new("RGBA", size)
-    out.putalpha(shadow.filter(ImageFilter.GaussianBlur(3 * scale)))
+    out.putalpha(shadow.filter(ImageFilter.GaussianBlur(blur)))
 
     card = Image.new("RGBA", (width, frame_height))
     draw = ImageDraw.Draw(card)
